@@ -832,11 +832,12 @@ on Android.
 
 The dialog names the file and asks one thing: **Into** which folder — the
 one the page is in, when it is in the library, otherwise the top of the
-library; any other can be picked. The note is named after the page's title
-— the article's own, without the site's name a `<title>` often adds; with
-no article, the `<title>`, else the page's `og:title`, else its first
-heading, else the file's name — and numbered like any new note when that
-name is taken.
+library; any other can be picked — and, for a page that is a
+[book](#a-page-that-is-a-book), how to cut it. The note is named after
+the page's title — the article's own, without the site's name a `<title>`
+often adds; with no article, the `<title>`, else the page's `og:title`,
+else its first heading, else the file's name — and numbered like any new
+note when that name is taken.
 
 What the note holds:
 
@@ -876,6 +877,81 @@ was; a shared page's copy is deleted.
 
 The limits on pictures are the web capture's: at most 60 downloaded for a
 page, each under 15 MB; the ones past it keep their web address.
+
+### A page that is a book
+
+A long page that is a book — a fanfiction downloaded from the Archive of
+Our Own, a novel saved from another site — becomes a folder of notes, as
+an [EPUB](#converting-a-book-into-notes) does. Niman reads the page before
+it asks, and for a book the dialog names it, its authors and the chapters
+it found, and asks:
+
+- **One note per chapter** (the default for a book of several) or **one
+  note** of the whole book;
+- **Into** which folder, as for any page.
+
+A page is a book when it is an **AO3 download**, which Niman knows by its
+shape (the preface, the chapters and the link to the work on the
+Archive), or when **its headings say so**: the shallowest heading level
+that occurs at least three times sets off the chapters, the page has at
+least 20,000 characters of text, and the chapters are long — the median
+one at least 2,000 characters — so that a long article with a few short
+sections stays an article. Any other page is converted as a page, as
+above. The page is taken whole, not reduced to its article: the preface
+with the work's details would not survive it. A line ended by a `<br>` is a
+paragraph of its own, as an AO3 download writes them.
+
+**One note per chapter** makes a folder named after the book (`The Cure`,
+or `The Cure 2` when that is taken):
+
+- **The chapters.** One note a chapter, in reading order, numbered:
+  `01 Chapter 1.md`. A chapter whose heading has a title of its own after
+  the number is named after it — `Chapter 3: The Storm` is
+  `03 The Storm.md` — and its note starts with the heading whole. What
+  comes before the first chapter (other than an AO3 work's preface) is
+  `00 Front matter.md`. A chapter's sections stay headings inside it.
+- **`index.md`.** The book's details as frontmatter, the title, the
+  authors, and the contents as links to the notes. A page with no
+  profile says its title, author, language and the address it was saved
+  from (`source`), and `imported`, the day of the conversion. The
+  frontmatter uses the keys a folder's [EPUB export](export.md) reads
+  (`title`, `author`, `language`, `published`, `series`, `series_index`,
+  `description`, `tags`), so the folder exports back to a book.
+- **Pictures** beside the page, on the web or written into it are kept as
+  for a page, in the book folder's attachments folder (`assets`), and the
+  notes point at them there.
+- **Links within the book** point at the note they land in, at the
+  nearest heading above where they land; links to the web stay.
+
+**One note** is the whole book in a single note beside the folder's
+others, its details in its frontmatter and its chapters under their own
+`##` headings, its pictures in the library's attachments folder.
+
+**An AO3 work** says all about itself, and the notes keep it:
+
+- The frontmatter of `index.md` (and of the one note) has `title`;
+  `author`, a list; `language`; `published`; `series` and `series_index`
+  when the work is in one; `description`, the summary as plain text;
+  `tags`, the Additional Tags; `source`, the work's address;
+  `imported`; the lists `fandom`, `rating`, `warnings`, `category`,
+  `relationships` and `characters`; and, when they are given,
+  `completed` and `words`. A work in progress gets new chapters:
+  `imported` says whether to download it again.
+- The body of `index.md` is the summary and the work's notes, quoted, and
+  the works related to it, then the contents.
+- A chapter's own notes are quoted at the top of its note, its end notes
+  at the bottom, and the line "See the end of the chapter for notes" is
+  dropped: the notes are where it points. The work's end notes close the
+  last chapter.
+- A work of one chapter has no chapter heading: its folder holds one note,
+  and **One note** is the default.
+- Left out: the "Preface" and "Afterword" headings the Archive adds, the
+  link to the work and the invitation to comment, the list of tags (it is
+  the frontmatter), and an empty list of works inspired by this one.
+
+A drop or a share of several pages at once converts each as a page, and
+asks nothing about books: convert a book on its own to cut it into
+chapters.
 
 ## Importing a Notion export
 
