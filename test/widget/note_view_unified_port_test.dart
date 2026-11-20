@@ -14,7 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/note_column.dart';
-import 'package:niman/src/links/mentions.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
@@ -26,6 +25,7 @@ import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 import '../fakes/fake_link_source.dart';
@@ -51,6 +51,7 @@ NoteView _note({
   String? libraryRoot,
   FakeLinkSource? links,
   List<String>? opened,
+  ValueChanged<DockPane>? onShowRelated,
   String? initialAnchor,
   int anchorRequests = 0,
   int? initialCaret,
@@ -76,6 +77,7 @@ NoteView _note({
   ),
   toolbarTop: toolbarTop,
   reloadToken: reloadToken,
+  onShowRelated: onShowRelated,
   services: NoteServices(
     unsavedTracker: tracker,
     libraryRoot: libraryRoot,
@@ -624,15 +626,11 @@ void main() {
     expect(_surface(tester).selection, const SelectionModel.at(13));
   });
 
-  testWidgets('the note carries a "Links to this note" section under it, '
-      'opened onto the notes that link here (#842)', (tester) async {
+  testWidgets('on the wide layout the status row counts the notes that link '
+      'here, and a tap asks for the pane (#842, #1296)', (tester) async {
     final links = FakeLinkSource(notes: <String>['Notes/Current.md', 'a.md']);
     links.referrers['Notes/Current.md'] = <String>['a.md'];
-    links.mentions['a.md -> Notes/Current.md'] = const Mention(
-      context: 'a points at [[Current]]',
-      embed: false,
-    );
-    final opened = <String>[];
+    final shown = <DockPane>[];
     await tester.pumpWidget(
       _app(
         _note(
@@ -640,30 +638,52 @@ void main() {
           path: '/lib/Notes/Current.md',
           libraryRoot: '/lib',
           links: links,
-          opened: opened,
+          onShowRelated: shown.add,
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('links-to-note-section')), findsOne);
     expect(
       tester.widget<Text>(find.byKey(const Key('links-to-note-count'))).data,
       '1',
     );
-    await tester.tap(find.byKey(const Key('links-to-note-header')));
-    await tester.pumpAndSettle();
-    expect(find.text('a points at [[Current]]'), findsOne);
+    expect(find.byIcon(Icons.link_outlined), findsOne);
+    // The header that used to sit under the note is gone.
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+    expect(find.byKey(const Key('links-to-note-header')), findsNothing);
 
-    await tester.tap(find.byKey(const Key('links-to-note-row-a.md')));
-    await tester.pumpAndSettle();
-    expect(opened, <String>['a.md|null']);
+    await tester.tap(find.byKey(const Key('links-to-note-count')));
+    await tester.pump();
+    expect(shown, <DockPane>[DockPane.links]);
   });
 
-  testWidgets('a note outside the library root has no such section either', (
+  testWidgets('a phone has no counter and no header for the links', (
     tester,
   ) async {
-    // The section asks the index for a library-relative path; a note from
+    final links = FakeLinkSource(notes: <String>['Notes/Current.md', 'a.md']);
+    links.referrers['Notes/Current.md'] = <String>['a.md'];
+    await tester.pumpWidget(
+      _app(
+        _note(
+          text: 'the note\n',
+          path: '/lib/Notes/Current.md',
+          libraryRoot: '/lib',
+          links: links,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('links-to-note-count')), findsNothing);
+    expect(find.byIcon(Icons.link_outlined), findsNothing);
+    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+    expect(find.text('Links to this note'), findsNothing);
+  });
+
+  testWidgets('a note outside the library root has no counter either', (
+    tester,
+  ) async {
+    // The counter asks the index for a library-relative path; a note from
     // elsewhere has none, and its absolute path is not one.
     final links = FakeLinkSource(notes: <String>['loose.md']);
     await tester.pumpWidget(
@@ -673,21 +693,28 @@ void main() {
           path: '/elsewhere/loose.md',
           libraryRoot: '/lib',
           links: links,
+          onShowRelated: (_) {},
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+    expect(find.byKey(const Key('links-to-note-count')), findsNothing);
+    expect(find.byIcon(Icons.link_outlined), findsNothing);
   });
 
-  testWidgets('a note opened without a library has no such section', (
-    tester,
-  ) async {
+  testWidgets('a note opened without a library has no counter', (tester) async {
     await tester.pumpWidget(
-      _app(_note(text: 'loose\n', path: '/elsewhere/loose.md')),
+      _app(
+        _note(
+          text: 'loose\n',
+          path: '/elsewhere/loose.md',
+          onShowRelated: (_) {},
+        ),
+      ),
     );
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('links-to-note-section')), findsNothing);
+    expect(find.byKey(const Key('links-to-note-count')), findsNothing);
+    expect(find.byIcon(Icons.link_outlined), findsNothing);
   });
 
   // #846: hovering a link shows what it points at. In the editor the opening

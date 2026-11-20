@@ -18,6 +18,7 @@ import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/ocr/ocr_file_actions.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/workspace/note_memento.dart';
+import 'package:niman/src/workspace/workspace.dart';
 import 'package:path/path.dart' as p;
 
 /// Right-hand pane: the note editor, or the launcher while no note shows.
@@ -47,7 +48,7 @@ final class ShellDetailPane extends StatelessWidget {
     this.zen = false,
     this.outlineInDock = false,
     this.spellCheckInDock = false,
-    this.relatedInDock = false,
+    this.onShowRelated,
     this.onToggleTypewriter,
     this.onMemento,
     this.onLoaded,
@@ -140,8 +141,8 @@ final class ShellDetailPane extends StatelessWidget {
   /// too, so the row leaves its spelling button out.
   final bool spellCheckInDock;
 
-  /// See [NoteView.relatedInDock].
-  final bool relatedInDock;
+  /// See [NoteView.onShowRelated].
+  final ValueChanged<DockPane>? onShowRelated;
 
   /// Reports the loaded note's kind.
   final void Function(String? type) onNoteKindChanged;
@@ -295,7 +296,7 @@ final class ShellDetailPane extends StatelessWidget {
     kindMode: kindMode,
     outlineInDock: outlineInDock,
     spellCheckInDock: spellCheckInDock,
-    relatedInDock: relatedInDock,
+    onShowRelated: onShowRelated,
     // Only the note showing in the focused pane tells the shell what
     // kind it is.
     onNoteKindChanged: (kind) {

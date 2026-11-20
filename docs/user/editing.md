@@ -194,7 +194,10 @@ edited. The panel's button in the note's row, its **×**, or
 `Ctrl+Shift+B` shows and hides it. Whether it is open, and which of the
 panes it shows, is remembered with the tabs. The note's **⋮** menu has
 Outline, Tags, Links to this note and Tasks for this note too: they open the
-panel where it docks, and a sheet on a phone. Wherever the wide layout can show the
+panel where it docks, and a sheet on a phone. On a wide window the status
+row also counts the notes and the open tasks that link the note — two small
+icons with a number each, before the word count — and a click on one opens
+its pane. Wherever the wide layout can show the
 panel — beside the note, or over it on a narrower window — the note's
 outline and its spelling review live there, and the row under the note
 leaves both their buttons out; a phone keeps them, and there they open

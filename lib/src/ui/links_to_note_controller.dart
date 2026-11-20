@@ -5,7 +5,7 @@ import 'package:niman/src/links/mention_reader.dart';
 import 'package:niman/src/links/mentions.dart';
 
 /// The notes that link to one note (#842), kept current for the surfaces that
-/// list them — the note view's section, the dock's pane, the phone's sheet.
+/// show them — the status row's counter, the dock's pane, the phone's sheet.
 ///
 /// One indexed lookup of a page ([MentionSource.referrersOf]) when the note
 /// or the library changes, and again a pause after the library's index moves

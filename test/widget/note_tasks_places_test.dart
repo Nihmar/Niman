@@ -1,8 +1,8 @@
 // #1152: "Tasks for this note" in the places "Links to this note" lives in --
-// the header under the note (a count, always there while the Todo feature is
-// on, gone with it off), the side panel's Tasks pane (after Links, before
-// History, following the note beside it) and the ⋮ menu's entry that a phone
-// opens as a sheet.
+// the status row's counter on the wide layout (always there while the Todo
+// feature is on, gone with it off, #1296), the side panel's Tasks pane (after
+// Links, before History, following the note beside it) and the ⋮ menu's entry
+// that a phone opens as a sheet.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/features.dart';
@@ -13,7 +13,6 @@ import 'package:niman/src/ui/note_editor_options.dart';
 import 'package:niman/src/ui/note_menu.dart';
 import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_tasks_host.dart';
-import 'package:niman/src/ui/note_tasks_section.dart';
 import 'package:niman/src/ui/note_view.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/workspace/workspace.dart';
@@ -58,15 +57,17 @@ void main() {
     addTearDown(fixture.dispose);
   }
 
-  group('the section under the note', () {
-    Future<void> pumpNote(
+  group("the status row's counters (wide layout)", () {
+    Future<List<DockPane>> pumpNote(
       WidgetTester tester, {
       Features features = const Features(),
       NoteTasksHost? tasks,
       String path = '/fake/House/Repairs.md',
       String? libraryRoot = '/fake',
       bool linked = false,
+      bool wide = true,
     }) async {
+      final shown = <DockPane>[];
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -76,6 +77,7 @@ void main() {
                 showLineNumbers: false,
                 autofocusEditor: false,
               ),
+              onShowRelated: wide ? shown.add : null,
               services: NoteServices(
                 libraryRoot: libraryRoot,
                 linkSource: linked ? fixture.links : null,
@@ -90,101 +92,95 @@ void main() {
       );
       await tester.pumpAndSettle();
       await fixture.settle(tester);
+      return shown;
     }
 
-    testWidgets('is a header with the open count, closed until asked', (
-      tester,
-    ) async {
+    String? count(WidgetTester tester) =>
+        tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data;
+
+    testWidgets('count the open tasks that link the note', (tester) async {
       await open(tester, done: ['x 2026-09-01 Finished [[House/Repairs]]']);
       await pumpNote(tester);
-      expect(find.text('Tasks for this note'), findsOneWidget);
-      expect(
-        tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data,
-        '2',
+      expect(count(tester), '2');
+      final counter = find.ancestor(
+        of: find.byKey(const Key('tasks-for-note-count')),
+        matching: find.byType(Tooltip),
       );
-      expect(find.byKey(const Key('tasks-for-note')), findsNothing);
+      expect(
+        tester.widget<Tooltip>(counter.first).message,
+        'Tasks for this note',
+      );
+      expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
     });
 
-    testWidgets('opens onto the list and shuts again', (tester) async {
+    testWidgets('a tap asks for the Tasks pane', (tester) async {
       await open(tester);
-      await pumpNote(tester);
-      await tester.tap(find.byKey(const Key('tasks-for-note-header')));
-      await tester.pumpAndSettle();
-      expect(find.text('Call the plumber'), findsOneWidget);
-      expect(find.text('Pay the electrician'), findsOneWidget);
-      expect(find.text('Elsewhere'), findsNothing);
-      expect(find.byKey(const Key('tasks-for-note-add')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('tasks-for-note-header')));
-      await tester.pumpAndSettle();
-      expect(find.text('Call the plumber'), findsNothing);
+      final shown = await pumpNote(tester);
+      await tester.tap(find.byKey(const Key('tasks-for-note-count')));
+      await tester.pump();
+      expect(shown, [DockPane.tasks]);
     });
 
-    testWidgets('sits below "Links to this note", which keeps its place', (
+    testWidgets('sit after the links counter, before the word count', (
       tester,
     ) async {
       await open(tester);
       await pumpNote(tester, linked: true);
       final links = tester.getTopLeft(
-        find.byKey(const Key('links-to-note-header')),
+        find.byKey(const Key('links-to-note-count')),
       );
       final tasks = tester.getTopLeft(
-        find.byKey(const Key('tasks-for-note-header')),
+        find.byKey(const Key('tasks-for-note-count')),
       );
-      expect(tasks.dy, greaterThan(links.dy));
-      expect(tasks.dx, links.dx);
+      final words = tester.getTopLeft(find.textContaining('word'));
+      expect(tasks.dx, greaterThan(links.dx));
+      expect(words.dx, greaterThan(tasks.dx));
     });
 
-    testWidgets('a note with no task counts zero and says so when opened', (
-      tester,
-    ) async {
+    testWidgets('a note with no task counts zero', (tester) async {
       await open(tester, todo: ['Elsewhere [[Ideas]]']);
       await pumpNote(tester);
-      expect(
-        tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data,
-        '0',
-      );
-      await tester.tap(find.byKey(const Key('tasks-for-note-header')));
-      await tester.pumpAndSettle();
-      expect(find.text('No task links to this note'), findsOneWidget);
+      expect(count(tester), '0');
     });
 
-    testWidgets('is gone while the Todo feature is off', (tester) async {
+    testWidgets('are gone on a phone: no counters, no header either', (
+      tester,
+    ) async {
       await open(tester);
-      await pumpNote(tester, features: _off(LibraryFeature.todo));
-      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      await pumpNote(tester, linked: true, wide: false);
+      expect(find.byKey(const Key('tasks-for-note-count')), findsNothing);
+      expect(find.byKey(const Key('links-to-note-count')), findsNothing);
+      expect(find.byIcon(Icons.check_box_outlined), findsNothing);
+      expect(find.byIcon(Icons.link_outlined), findsNothing);
       expect(find.text('Tasks for this note'), findsNothing);
+      expect(find.text('Links to this note'), findsNothing);
     });
 
-    testWidgets('is absent for a note outside the library', (tester) async {
+    testWidgets('the tasks one is gone while the Todo feature is off', (
+      tester,
+    ) async {
+      await open(tester);
+      await pumpNote(tester, features: _off(LibraryFeature.todo), linked: true);
+      expect(find.byKey(const Key('tasks-for-note-count')), findsNothing);
+      expect(find.byIcon(Icons.check_box_outlined), findsNothing);
+      expect(find.byIcon(Icons.link_outlined), findsOneWidget);
+    });
+
+    testWidgets('are absent for a note outside the library', (tester) async {
       await open(tester);
       await pumpNote(tester, path: '/elsewhere/loose.md');
-      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      expect(find.byKey(const Key('tasks-for-note-count')), findsNothing);
+      expect(find.byIcon(Icons.link_outlined), findsNothing);
     });
 
-    testWidgets('counts follow the tasks as they change', (tester) async {
+    testWidgets('follow the tasks as they change', (tester) async {
       await open(tester);
       await pumpNote(tester);
       await tester.runAsync(
         () => fixture.controller.add('A third [[Repairs]]'),
       );
       await fixture.settle(tester);
-      expect(
-        tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data,
-        '3',
-      );
-    });
-
-    testWidgets('the section alone draws nothing without a host', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: NoteTasksSection(host: null, path: 'House/Repairs.md'),
-          ),
-        ),
-      );
-      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      expect(count(tester), '3');
     });
   });
 

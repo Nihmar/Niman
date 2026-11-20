@@ -1,5 +1,5 @@
 // #1152: the whole shell with "Tasks for this note" in its three places -- the
-// side panel's Tasks pane, the header under the note, the sheet of the phone's
+// side panel's Tasks pane, the status row's counter, the sheet of the phone's
 // ⋮ menu -- and Add task / New task opening the task dialog with the note's
 // link already in the description (and the text selected in the editor before
 // it).
@@ -131,28 +131,31 @@ void main() {
       expect(field.controller.selection.baseOffset, 0);
     });
 
-    testWidgets('the header under the note counts the open tasks', (
-      tester,
-    ) async {
+    testWidgets('the status row counts the open tasks, and a tap opens the '
+        'pane', (tester) async {
       await pumpAt(tester, const Size(1400, 900));
-      // The open panel has the tasks: the note leaves its header out until
-      // the panel is closed.
+      // The counter is in its place with the panel open as well as shut.
       expect(find.byKey(const Key('right-dock')), findsOneWidget);
-      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
-      await tester.tap(find.byKey(const Key('dock-toggle')));
-      await settle(tester);
-      expect(find.byKey(const Key('right-dock')), findsNothing);
-      expect(find.byKey(const Key('tasks-for-note-section')), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('tasks-for-note-count'))).data,
         '2',
       );
-      await tester.tap(find.byKey(const Key('tasks-for-note-header')));
+      await tester.tap(find.byKey(const Key('dock-toggle')));
       await settle(tester);
+      expect(find.byKey(const Key('right-dock')), findsNothing);
+      expect(find.byKey(const Key('tasks-for-note-count')), findsOneWidget);
+      // The header under the note is gone for good.
+      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      expect(find.byKey(const Key('tasks-for-note-header')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('tasks-for-note-count')));
+      await settle(tester);
+      expect(find.byKey(const Key('right-dock')), findsOneWidget);
+      expect(controller.workspace.dockPane, DockPane.tasks);
       expect(find.text('Call the plumber'), findsOneWidget);
     });
 
-    testWidgets('with the Todo feature off there is no header and no tab', (
+    testWidgets('with the Todo feature off there is no counter and no tab', (
       tester,
     ) async {
       await pumpAt(tester, const Size(1400, 900));
@@ -160,7 +163,7 @@ void main() {
         controller.features.value.withSwitch(LibraryFeature.todo, on: false),
       );
       await settle(tester);
-      expect(find.byKey(const Key('tasks-for-note-section')), findsNothing);
+      expect(find.byKey(const Key('tasks-for-note-count')), findsNothing);
       expect(find.byKey(const Key('dock-pane-tasks')), findsNothing);
     });
   });
@@ -173,6 +176,10 @@ void main() {
 
     testWidgets('the note’s ⋮ offers the tasks as a sheet', (tester) async {
       await pumpAt(tester, const Size(400, 800));
+      // The phone's status row has no counters, and no header under the note.
+      expect(find.byKey(const Key('tasks-for-note-count')), findsNothing);
+      expect(find.byKey(const Key('links-to-note-count')), findsNothing);
+      expect(find.byKey(const Key('tasks-for-note-header')), findsNothing);
       await openMenu(tester);
       expect(find.byKey(const Key('note-menu-tasks')), findsOneWidget);
       expect(find.byKey(const Key('note-menu-newTask')), findsOneWidget);

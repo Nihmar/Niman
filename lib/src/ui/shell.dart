@@ -901,7 +901,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     ocrQueue: widget.ocrQueue,
     shellFocus: _shellFocus,
     dockToggle: _dockToggle,
-    dockShown: () => _dockShown,
     createFlow: _createFlow,
     templateFlow: _templateFlow,
     palette: _palette,
@@ -1869,9 +1868,6 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
   /// Whether the window has room for the right dock beside a note (#175):
   /// a desktop, a tablet, a phone in landscape — on the same rule.
   bool get _dockRoom => _dock.room;
-
-  /// Whether the dock shows: there is room, and it was not closed.
-  bool get _dockShown => _dock.shown;
 
   /// The dock's button: on the note row under a title bar of the app's
   /// own, at the end of the panes' tab row without one (#1134).

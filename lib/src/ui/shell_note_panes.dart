@@ -87,7 +87,6 @@ final class ShellNotePanes {
     required this.ocrQueue,
     required this.shellFocus,
     required this.dockToggle,
-    required this.dockShown,
     required this.createFlow,
     required this.templateFlow,
     required this.palette,
@@ -179,9 +178,6 @@ final class ShellNotePanes {
 
   /// The dock's button, at the end of the note's row.
   final Widget Function() dockToggle;
-
-  /// Whether the dock shows.
-  final bool Function() dockShown;
 
   /// New notes, from an empty pane's launcher.
   final ShellCreateFlow createFlow;
@@ -438,7 +434,12 @@ final class ShellNotePanes {
                     // their sheets.
                     outlineInDock: wide() && !immersive.inZen,
                     spellCheckInDock: wide() && !immersive.inZen,
-                    relatedInDock: wide() && !immersive.inZen && dockShown(),
+                    // The wide layout counts the notes and tasks that link
+                    // the note in its status row, and a tap opens the pane
+                    // (#1296); the phone has the ⋮ menu's sheets.
+                    onShowRelated: wide() && !immersive.inZen
+                        ? (pane) => unawaited(noteActions.showPanel(pane))
+                        : null,
                     options: settings.editor.noteOptions,
                     onToggleTypewriter: settings.toggleTypewriter,
                     onLoaded: workspace.noteLoaded,
