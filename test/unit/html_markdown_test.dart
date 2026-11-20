@@ -251,6 +251,55 @@ void main() {
       expect(chapter.anchors, {'deep': 6});
     });
 
+    test('a code block names its language, however the page tags it', () {
+      expect(
+        markdown('<pre><code class="language-dart">var a;</code></pre>'),
+        '```dart\nvar a;\n```',
+      );
+      expect(
+        markdown('<pre><code class="x lang-c++">a</code></pre>'),
+        '```c++\na\n```',
+      );
+      expect(
+        markdown('<pre class="language-sh"><code>a</code></pre>'),
+        '```sh\na\n```',
+      );
+      expect(markdown('<pre data-lang="py">a</pre>'), '```py\na\n```');
+      expect(
+        markdown(
+          '<div class="sourceCode"><pre class="sourceCode python">'
+          '<code class="sourceCode python">a</code></pre></div>',
+        ),
+        '```python\na\n```',
+      );
+    });
+
+    test('a code block with no usable language is a plain fence', () {
+      expect(
+        markdown('<pre><code class="language-none">a</code></pre>'),
+        '```\na\n```',
+      );
+      expect(markdown('<pre><code class="hljs">a</code></pre>'), '```\na\n```');
+      expect(
+        markdown('<pre><code class="language-a b">a</code></pre>'),
+        '```a\na\n```',
+      );
+    });
+
+    test('the fences of a note exported by Niman come back tagged', () {
+      final body = NoteHtml(
+        const NoteHtmlSource(
+          text: '```dart\nvar a = 1; // *x*\n```\n\n```\nplain\n```\n',
+          title: 't',
+        ),
+      ).body();
+      expect(body, contains('language-dart'));
+      expect(
+        markdown(body),
+        '```dart\nvar a = 1; // *x*\n```\n\n```\nplain\n```',
+      );
+    });
+
     test('a rule', () {
       expect(markdown('<p>a</p><hr/><p>b</p>'), 'a\n\n---\n\nb');
     });

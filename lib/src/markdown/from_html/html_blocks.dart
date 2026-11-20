@@ -4,6 +4,7 @@ library;
 
 import 'package:html/dom.dart';
 import 'package:niman/src/markdown/from_html/block_context.dart';
+import 'package:niman/src/markdown/from_html/html_code_language.dart';
 import 'package:niman/src/markdown/from_html/html_inline.dart';
 import 'package:niman/src/markdown/from_html/html_table.dart';
 import 'package:niman/src/markdown/from_html/markdown_blocks.dart';
@@ -65,7 +66,8 @@ final class HtmlBlocks {
         _anchorsWithin(element, out);
         final code = element.text.replaceAll('\r\n', '\n');
         final fence = code.contains('```') ? '~~~~' : '```';
-        out.add(context.wrap('$fence\n${code.trimRight()}\n$fence'));
+        final language = HtmlCodeLanguage.of(element);
+        out.add(context.wrap('$fence$language\n${code.trimRight()}\n$fence'));
       case 'div' when element.attributes.containsKey('data-mermaid'):
         // A diagram Niman exported: its fence, not its drawing (#530).
         final source = element.attributes['data-mermaid']!.trimRight();
