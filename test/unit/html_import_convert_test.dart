@@ -70,6 +70,8 @@ void main() {
     linkType: linkType,
     extent: HtmlExtent.article,
     importedOn: DateTime(2026, 11, 20),
+    book: null,
+    words: defaultBookWords,
   );
 
   String read(String relative) =>

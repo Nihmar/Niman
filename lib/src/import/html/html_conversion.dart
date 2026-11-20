@@ -12,14 +12,24 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/import/book/book_plan.dart' show BookWords;
+import 'package:niman/src/import/html/book/html_book_preview.dart';
 import 'package:niman/src/import/html/html_convert_failures.dart';
 import 'package:niman/src/import/html/html_convert_job.dart';
 import 'package:niman/src/import/html/html_page.dart';
 import 'package:path/path.dart' as p;
 
+export 'package:niman/src/import/html/book/html_book_preview.dart'
+    show HtmlBookPreview;
 export 'package:niman/src/import/html/html_convert_failures.dart';
-export 'package:niman/src/import/html/html_convert_job.dart'
-    show HtmlConvertProgress, HtmlConverted, htmlDisplayName, htmlMaxBytes;
+export 'package:niman/src/import/html/html_convert_types.dart'
+    show
+        HtmlBookSplit,
+        HtmlConvertProgress,
+        HtmlConverted,
+        defaultBookWords,
+        htmlDisplayName,
+        htmlMaxBytes;
 export 'package:niman/src/import/html/html_page.dart' show HtmlExtent;
 
 /// One conversion running.
@@ -30,7 +40,8 @@ final class HtmlConversion {
   /// into a note of the folder [parent] (library-relative) of
   /// [libraryRoot]. [name] is what the page is called when its file is not
   /// called that (a share's copy); [extent] says how much of the page
-  /// becomes the note.
+  /// becomes the note. A page that is a book (#1294) is converted as one
+  /// when [book] says how it is cut, written with [words].
   static Future<HtmlConversion> start({
     required String source,
     required String libraryRoot,
@@ -38,6 +49,8 @@ final class HtmlConversion {
     required String attachments,
     required LinkType linkType,
     HtmlExtent extent = HtmlExtent.article,
+    HtmlBookSplit? book,
+    BookWords words = defaultBookWords,
     String? name,
     DateTime? importedOn,
   }) async {
@@ -58,6 +71,8 @@ final class HtmlConversion {
       linkType: linkType,
       extent: extent,
       importedOn: importedOn,
+      book: book,
+      words: words,
     );
     await Isolate.spawn(convertHtmlEntry, (
       request,
@@ -192,3 +207,15 @@ final class HtmlConversion {
     }
   }
 }
+
+/// What the page at [source] would make if it is a book, read on an
+/// isolate; null when it is not one (or cannot be read: the conversion says
+/// why).
+Future<HtmlBookPreview?> previewHtmlOnIsolate(
+  String source,
+  BookWords words, {
+  String? name,
+}) => IsolateGauge.run(
+  () => previewHtmlBook(source, words, name: name),
+  'preview "${p.basename(source)}"',
+);

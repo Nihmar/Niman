@@ -55,6 +55,9 @@ const Map<String, String> _offTheUiIsolate = {
       "moves and deletes, from NoteHistory's isolates",
   'history/history_pins.dart': "pins, from NoteHistory's isolates",
   'home/note_preview.dart': 'the preview read, in Isolate.run',
+  'import/book/book_move_in.dart':
+      "the moving in, from a book conversion's spawned isolate",
+  'import/html/book/html_book_job.dart': "the conversion's spawned isolate",
   'import/html/html_convert_job.dart': "the conversion's spawned isolate",
   'import/html/html_picture_store.dart':
       "the pictures' keeping, in the conversion's isolate",

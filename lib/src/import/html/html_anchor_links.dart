@@ -19,7 +19,9 @@ String anchorTarget(String id) => '$_scheme${Uri.encodeComponent(id)}';
 
 const String _scheme = 'niman-anchor:';
 
-final RegExp _placeholder = RegExp('\\(<$_scheme([^>]*)>\\)');
+/// A link written under [anchorTarget]: `(<niman-anchor:id>)`, the id
+/// percent-encoded in group 1.
+final RegExp anchorPlaceholder = RegExp('\\(<$_scheme([^>]*)>\\)');
 final RegExp _heading = RegExp(r'^#{1,6}[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$');
 final RegExp _fence = RegExp(r'^\s*(```|~~~)');
 
@@ -32,21 +34,23 @@ String resolveAnchorLinks(
   required String title,
 }) {
   if (!markdown.contains(_scheme)) return markdown;
-  final headings = _headings(markdown);
-  return markdown.replaceAllMapped(_placeholder, (match) {
+  final headings = markdownHeadings(markdown.split('\n'));
+  return markdown.replaceAllMapped(anchorPlaceholder, (match) {
     final id = percentDecoded(match[1]!);
     final line = anchors[id];
     if (line == null) return '(#${_encoded(id)})';
-    return '(#${_encoded(_headingAt(headings, line) ?? title)})';
+    return '(#${_encoded(headingAtOrBefore(headings, line) ?? title)})';
   });
 }
 
-/// The headings of [markdown] with their lines, in order, those inside a
-/// code fence left out.
-List<({int line, String text})> _headings(String markdown) {
-  final found = <({int line, String text})>[];
+/// A heading of a text: the line it is on and its words.
+typedef MarkdownHeading = ({int line, String text});
+
+/// The headings of [lines] with their lines, in order, those inside a code
+/// fence left out.
+List<MarkdownHeading> markdownHeadings(List<String> lines) {
+  final found = <MarkdownHeading>[];
   var fenced = false;
-  final lines = markdown.split('\n');
   for (var i = 0; i < lines.length; i++) {
     final line = lines[i];
     if (_fence.hasMatch(line)) {
@@ -59,8 +63,12 @@ List<({int line, String text})> _headings(String markdown) {
   return found;
 }
 
-/// The text of the last heading at or before [line], or null.
-String? _headingAt(List<({int line, String text})> headings, int line) {
+/// The text of the last of [headings] at or before [line], or null.
+String? headingAtOrBefore(List<MarkdownHeading> headings, int line) =>
+    headingBefore(headings, line)?.text;
+
+/// The last of [headings] at or before [line], or null.
+MarkdownHeading? headingBefore(List<MarkdownHeading> headings, int line) {
   var low = 0;
   var high = headings.length;
   while (low < high) {
@@ -71,7 +79,7 @@ String? _headingAt(List<({int line, String text})> headings, int line) {
       high = middle;
     }
   }
-  return low == 0 ? null : headings[low - 1].text;
+  return low == 0 ? null : headings[low - 1];
 }
 
 /// [text] as a destination: everything but letters, digits and `-_.!~*'`

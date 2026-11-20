@@ -17,6 +17,9 @@ enum HtmlRefusal {
   /// Written in a charset the app does not decode (anything but UTF-8,
   /// UTF-16, ASCII, Latin-1 and Windows-1252).
   unsupportedCharset,
+
+  /// Asked to be converted as a book (#1294), it is not one.
+  notABook,
 }
 
 /// A page the conversion refuses, and why. A [FormatException], as the

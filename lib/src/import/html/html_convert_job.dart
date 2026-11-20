@@ -13,11 +13,11 @@ library;
 
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:niman/src/core/files.dart';
-import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
+import 'package:niman/src/import/html/book/html_book_job.dart';
 import 'package:niman/src/import/html/html_convert_failures.dart';
+import 'package:niman/src/import/html/html_convert_types.dart';
 import 'package:niman/src/import/html/html_note.dart';
 import 'package:niman/src/import/html/html_page.dart';
 import 'package:niman/src/import/html/html_picture_pool.dart';
@@ -26,49 +26,7 @@ import 'package:niman/src/import/html/html_picture_store.dart';
 import 'package:niman/src/library/note_writer.dart' show swapFileIn;
 import 'package:path/path.dart' as p;
 
-/// The most bytes a page may have: what the EPUB conversion allows a text
-/// file.
-const int htmlMaxBytes = 32 << 20;
-
-/// What a conversion is asked to do.
-typedef HtmlConvertRequest = ({
-  /// The `.html`, `.htm` or `.xhtml`, absolute.
-  String source,
-
-  /// What the page is called when its file is not called that: a share is
-  /// copied into the cache under a name of its own. Null for a file named
-  /// as it is.
-  String? name,
-
-  /// The library, absolute.
-  String libraryRoot,
-
-  /// The folder the note goes in, library-relative ('' for the top).
-  String parent,
-
-  /// The hidden folder it is written in first, absolute.
-  String staging,
-
-  /// The library's attachments folder's name.
-  String attachments,
-
-  /// How the library embeds a picture.
-  LinkType linkType,
-
-  /// How much of the page becomes the note.
-  HtmlExtent extent,
-
-  /// The day written as `imported:`; null for today.
-  DateTime? importedOn,
-});
-
-/// What a conversion wrote: the note (`made`, library-relative), the note
-/// to open (the same one), and how many notes (one) and pictures.
-typedef HtmlConverted = ({String made, String open, int notes, int pictures});
-
-/// Where a conversion has got to: `done` of `total` steps (pictures, then
-/// the note), and the name of the one being written.
-typedef HtmlConvertProgress = ({int done, int total, String what});
+export 'package:niman/src/import/html/html_convert_types.dart';
 
 /// Converts the page [request] names, telling [progress] how far it has
 /// got. [fetch] brings the web pictures; null downloads them as a capture
@@ -99,7 +57,7 @@ Future<HtmlConverted> convertHtml(
   HttpClient? client;
   try {
     await step();
-    final bytes = await _read(request.source);
+    final bytes = await readHtmlSource(request.source);
     await step();
     final page = readHtmlPage(
       bytes,
@@ -156,33 +114,6 @@ Future<HtmlConverted> convertHtml(
   }
 }
 
-/// What the page at [source] is called to a person: [name] when it is given
-/// (a share's own, whatever its copy in the cache is called), else its
-/// file's name.
-String htmlDisplayName(String source, String? name) =>
-    name == null || name.trim().isEmpty ? p.basename(source) : p.basename(name);
-
-/// The bytes of the file at [source]; throws [HtmlRefused] when it is not a
-/// file, is too large, or cannot be read.
-Future<Uint8List> _read(String source) async {
-  final file = File(source);
-  try {
-    if (FileSystemEntity.typeSync(source) != FileSystemEntityType.file) {
-      throw HtmlRefused(HtmlRefusal.notAFile, '"$source" is not a file');
-    }
-    final length = await file.length();
-    if (length > htmlMaxBytes) {
-      throw HtmlRefused(
-        HtmlRefusal.tooLarge,
-        '$length bytes, over $htmlMaxBytes',
-      );
-    }
-    return await file.readAsBytes();
-  } on FileSystemException catch (error) {
-    throw HtmlRefused(HtmlRefusal.unreadable, error.message);
-  }
-}
-
 /// The staged pictures moved into the library's attachments folder, then
 /// [note] into its folder under a name free there; answers what was made.
 Future<HtmlConverted> _moveIn(
@@ -228,7 +159,8 @@ Future<void> convertHtmlEntry(
     });
   events.send(('ready', control.sendPort));
   try {
-    final converted = await convertHtml(
+    final convert = request.book == null ? convertHtml : convertHtmlBook;
+    final converted = await convert(
       request,
       stopped: () => stop,
       progress: (progress) => events.send((
