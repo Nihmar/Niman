@@ -672,6 +672,25 @@ void main() {
       );
     });
 
+    test('a data: picture reaches the caller whole, to keep or to drop', () {
+      const src = 'data:image/png;base64,iVBORw0KGgo=';
+      expect(
+        markdown('<p><img src="$src" alt="Dot"/></p>'),
+        '![Dot](pic:$src)',
+      );
+      expect(
+        markdown('<p><svg><image xlink:href="$src"/></svg></p>'),
+        '![](pic:$src)',
+      );
+      expect(pictures, [src, src]);
+      // A caller that leaves them out, as a capture does, has none.
+      final leaving = HtmlMarkdown(
+        picture: (src) => src.startsWith('data:') ? null : src,
+        link: (href) => href,
+      );
+      expect(leaving.convert('<p>a<img src="$src"/></p>').markdown, 'a');
+    });
+
     test('a picture the book does not have is left out', () {
       expect(markdown('<p>a<img src="missing.png"/></p>'), 'a');
     });
