@@ -1,5 +1,6 @@
-/// One note as an EPUB (#303): a book of one chapter, its pictures inside
-/// the container.
+/// One note as an EPUB (#303): a book of its chapters — one, or as many as
+/// its headings say (`epub_note_chapters.dart`) — its pictures inside the
+/// container.
 ///
 /// The page is the exported page the other formats use — `NoteHtml` for
 /// the body, `MathSvg` for the formulas — wrapped in the XHTML an EPUB
@@ -8,9 +9,11 @@
 library;
 
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/epub_book.dart';
+import 'package:niman/src/export/epub_note_chapters.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/note_html_source.dart';
@@ -20,8 +23,8 @@ import 'package:path/path.dart' as p;
 
 const AppLogger _log = AppLogger(name: 'export');
 
-/// Where the book's one chapter sits in the container.
-const String _chapterHref = 'OEBPS/text/note.xhtml';
+/// The folder the book's chapters sit in, in the container.
+const String _chapterDir = 'OEBPS/text';
 
 /// The user stopped a note's EPUB export: no file is written.
 final class EpubExportCancelled implements Exception {
@@ -86,10 +89,7 @@ Future<ExportPayload> exportNoteEpub({
       final images = <String, String>{};
       for (final entry in paths.entries) {
         if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
-        final href = await book.imageHref(
-          p.posix.dirname(_chapterHref),
-          entry.value,
-        );
+        final href = await book.imageHref(_chapterDir, entry.value);
         if (href != null) images[entry.key] = href;
       }
       final source = NoteHtmlSource(
@@ -107,14 +107,16 @@ Future<ExportPayload> exportNoteEpub({
         'epub "$title": ${_count(chapter.body, '<svg')} formulas drawn, '
         '${_count(chapter.body, 'class="math-source"')} left as source',
       );
-      book.addChapter(
-        href: _chapterHref,
-        title: title,
-        body: chapter.body,
-        fontFaces: chapter.fontFaces,
-        hasSvg: chapter.hasSvg,
-        hasBoard: chapter.hasBoard,
-      );
+      for (final part in await _chaptersOf(chapter.body, title)) {
+        book.addChapter(
+          href: '$_chapterDir/${part.file}',
+          title: part.title,
+          body: part.body,
+          fontFaces: chapter.fontFaces,
+          hasSvg: chapter.hasSvg && part.body.contains('<svg'),
+          hasBoard: chapter.hasBoard,
+        );
+      }
     } finally {
       await book.close();
     }
@@ -135,6 +137,12 @@ Future<ExportPayload> exportNoteEpub({
     }
   }
 }
+
+/// The chapters of [body], cut off the UI isolate: a novel's page is a
+/// long one to read through. A function of its own, so the closure the
+/// isolate is sent holds the two strings and nothing of the export's.
+Future<List<EpubNoteChapter>> _chaptersOf(String body, String title) =>
+    Isolate.run(() => splitEpubNoteChapters(body, title: title));
 
 /// How many times [needle] appears in [text]; a diagnostic count, not a
 /// parser.
