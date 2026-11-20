@@ -31,8 +31,7 @@ String tidy(String source, {Set<LintRule>? rules}) {
 void kept(String note) => expect(tidy(note), note);
 
 /// Every rule but this one.
-final Set<LintRule> _off = {..._joining}
-  ..remove(LintRule.joinParagraphLines);
+final Set<LintRule> _off = {..._joining}..remove(LintRule.joinParagraphLines);
 
 void main() {
   test("a paragraph's lines are joined, its links byte for byte", () {

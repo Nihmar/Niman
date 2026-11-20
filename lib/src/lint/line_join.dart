@@ -61,7 +61,8 @@ String joinWrappedLines(
           walk(children, inItem: inItem, inQuote: inQuote);
         case LeafNode(:final kind, :final lines, :final definition):
           if (kind != BlockKind.paragraph || definition) continue;
-          if (!(inItem ? inItems : inQuote ? quotes : outside)) continue;
+          final joined = inItem ? inItems : (inQuote ? quotes : outside);
+          if (!joined) continue;
           for (final span in lines) {
             starts[span.line] = span.start;
             joins[span.line] = span.start;
