@@ -58,6 +58,33 @@ void main() {
       );
     });
 
+    test("highlight, super- and subscript are the app's own syntax", () {
+      expect(
+        markdown('<p>a <mark>b</mark> H<sub>2</sub>O x<sup>2</sup></p>'),
+        'a ==b== H<sub>2</sub>O x<sup>2</sup>',
+      );
+      final nodes = InlineParser(
+        markdown('<p><mark>b</mark> H<sub>2</sub>O x<sup>2</sup></p>'),
+      ).parse();
+      expect(nodes.whereType<HighlightNode>(), hasLength(1));
+      expect(nodes.whereType<StyledNode>().map((node) => node.tag), [
+        'sub',
+        'sup',
+      ]);
+    });
+
+    test('their words are escaped, and their ends are blank outside', () {
+      expect(
+        markdown('<p>a<mark> *b* </mark>c<sup> 2 </sup>d<sub> </sub>e</p>'),
+        r'a ==\*b\*== c <sup>2</sup> d e',
+      );
+      expect(markdown('<p><mark><strong>b</strong></mark></p>'), '==**b**==');
+    });
+
+    test('underline and insertion stay plain text', () {
+      expect(markdown('<p><u>a</u> <ins>b</ins></p>'), 'a b');
+    });
+
     test('a code span holding a backtick is fenced with two', () {
       expect(markdown('<p><code>a`b</code></p>'), '`` a`b ``');
     });

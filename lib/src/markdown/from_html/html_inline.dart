@@ -67,6 +67,14 @@ final class HtmlInline {
         _wrapped(out, inner(), '**');
       case 's' || 'del' || 'strike':
         _wrapped(out, inner(), '~~');
+      // The app's own extensions: highlight, and the tags it reads for
+      // super- and subscript. `u` and `ins` stay plain: Markdown has none.
+      case 'mark':
+        _wrapped(out, inner(), '==');
+      case 'sup':
+        _wrapped(out, inner(), '<sup>', '</sup>');
+      case 'sub':
+        _wrapped(out, inner(), '<sub>', '</sub>');
       case 'code' || 'kbd' || 'samp' || 'tt':
         final code = _collapse(node.text);
         if (code.trim().isEmpty) return;
@@ -106,25 +114,36 @@ final class HtmlInline {
     }
   }
 
-  /// [text] between [marker]s, the blank space at its ends kept outside:
-  /// `* word*` is no emphasis. A break that cuts the text in paragraphs
-  /// cuts the emphasis with it, each piece wrapped.
-  static void _wrapped(StringBuffer out, String text, String marker) {
+  /// [text] between [open] and [close] — the same marker when there is no
+  /// [close] — the blank space at its ends kept outside: `* word*` is no
+  /// emphasis. A break that cuts the text in paragraphs cuts the emphasis
+  /// with it, each piece wrapped.
+  static void _wrapped(
+    StringBuffer out,
+    String text,
+    String open, [
+    String? close,
+  ]) {
     final pieces = text.split(_split);
     for (var i = 0; i < pieces.length; i++) {
       if (i > 0) out.write(_split);
-      _wrapPiece(out, pieces[i], marker);
+      _wrapPiece(out, pieces[i], open, close ?? open);
     }
   }
 
-  static void _wrapPiece(StringBuffer out, String text, String marker) {
+  static void _wrapPiece(
+    StringBuffer out,
+    String text,
+    String open,
+    String close,
+  ) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) {
       out.write(text);
       return;
     }
     if (text.startsWith(' ')) out.write(' ');
-    out.write('$marker$trimmed$marker');
+    out.write('$open$trimmed$close');
     if (text.endsWith(' ')) out.write(' ');
   }
 
