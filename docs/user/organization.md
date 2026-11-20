@@ -833,8 +833,10 @@ on Android.
 The dialog names the file and asks one thing: **Into** which folder — the
 one the page is in, when it is in the library, otherwise the top of the
 library; any other can be picked. The note is named after the page's title
-(the `<title>`, else the page's `og:title`, else its first heading), and
-numbered like any new note when that name is taken.
+— the article's own, without the site's name a `<title>` often adds; with
+no article, the `<title>`, else the page's `og:title`, else its first
+heading, else the file's name — and numbered like any new note when that
+name is taken.
 
 What the note holds:
 
