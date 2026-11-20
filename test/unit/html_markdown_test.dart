@@ -111,6 +111,26 @@ void main() {
       expect(markdown('<pre>```x```</pre>'), '~~~~\n```x```\n~~~~');
     });
 
+    test('a list of terms: the term bold, its definitions after it', () {
+      expect(
+        markdown(
+          '<dl><dt>Rating:</dt><dd>General Audiences</dd>'
+          '<dt><strong>Tags</strong></dt><dt>More</dt>'
+          '<dd>one</dd><dd>two</dd></dl>',
+        ),
+        '**Rating:**\n\nGeneral Audiences\n\n**Tags**\n\n**More**\n\n'
+        'one\n\ntwo',
+      );
+    });
+
+    test('a term keeps its own emphasis and its id', () {
+      final chapter = convert(
+        '<dl><dt id="t">a <em>b</em></dt><dd>c</dd></dl>',
+      );
+      expect(chapter.markdown, '**a *b***\n\nc');
+      expect(chapter.anchors, {'t': 0});
+    });
+
     test('a rule', () {
       expect(markdown('<p>a</p><hr/><p>b</p>'), 'a\n\n---\n\nb');
     });

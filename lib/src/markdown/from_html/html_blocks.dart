@@ -71,6 +71,12 @@ final class HtmlBlocks {
         final source = element.attributes['data-mermaid']!.trimRight();
         final fence = source.contains('```') ? '~~~~' : '```';
         out.add(context.wrap('${fence}mermaid\n$source\n$fence'));
+      case 'dt':
+        // The app has no list of terms: a term is a bold paragraph, and its
+        // `dd`s, blocks like any, come after it.
+        _anchorsWithin(element, out);
+        final text = inline.of(element.nodes).trim();
+        if (text.isNotEmpty) out.add(context.wrap(_bold(element, text)));
       case 'hr':
         out.add(context.wrap('---'));
       case 'table':
@@ -81,6 +87,16 @@ final class HtmlBlocks {
         // A container — section, div, figure, article, aside…: its blocks.
         walk(element.nodes, out, context);
     }
+  }
+
+  /// [text], [element]'s words, in bold, unless they are already.
+  static String _bold(Element element, String text) {
+    final only = element.children.length == 1 ? element.children.first : null;
+    final strong =
+        only != null &&
+        (only.localName == 'strong' || only.localName == 'b') &&
+        only.text.trim() == element.text.trim();
+    return strong ? text : '**$text**';
   }
 
   /// The paragraphs of the inline content [nodes].
