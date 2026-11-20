@@ -22,14 +22,13 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
-import 'package:niman/src/core/files.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_convert_failures.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:niman/src/epub/epub_convert_render.dart';
 import 'package:niman/src/epub/epub_picture_type.dart';
-import 'package:niman/src/library/markdown_import.dart' show freeFolderName;
+import 'package:niman/src/import/book/book_move_in.dart';
 import 'package:path/path.dart' as p;
 
 /// What a conversion is asked to do.
@@ -214,14 +213,12 @@ EpubConverted _moveFolderIn(
   int notes,
   int pictures,
 ) {
-  final parent = p.joinAll([request.libraryRoot, ...request.parent.split('/')]);
-  Directory(parent).createSync(recursive: true);
-  final name = freeFolderName(
-    parent,
-    sanitizeName(title, fallback: defaultFolderName),
+  final made = moveFolderIn(
+    libraryRoot: request.libraryRoot,
+    parent: request.parent,
+    staging: request.staging,
+    title: title,
   );
-  Directory(request.staging).renameSync(p.join(parent, name));
-  final made = request.parent.isEmpty ? name : '${request.parent}/$name';
   return (made: made, open: '$made/index.md', notes: notes, pictures: pictures);
 }
 
@@ -232,24 +229,13 @@ Future<EpubConverted> _moveNoteIn(
   EpubPlannedNote note,
   int pictures,
 ) async {
-  final assets = Directory(p.join(request.staging, request.attachments));
-  if (assets.existsSync()) {
-    final into = Directory(p.join(request.libraryRoot, request.attachments))
-      ..createSync(recursive: true);
-    for (final picture in assets.listSync().whereType<File>()) {
-      final target = File(p.join(into.path, p.basename(picture.path)));
-      // Named by its content: one already there is this one.
-      if (!target.existsSync()) picture.renameSync(target.path);
-    }
-  }
-  final parent = Directory(
-    p.joinAll([request.libraryRoot, ...request.parent.split('/')]),
-  )..createSync(recursive: true);
-  final stem = p.posix.basenameWithoutExtension(note.path);
-  final name = await uniqueFileName(parent, stem, '.md');
-  File(p.join(request.staging, note.path))
-      .renameSync(p.join(parent.path, name));
-  final made = request.parent.isEmpty ? name : '${request.parent}/$name';
+  final made = await moveNoteIn(
+    libraryRoot: request.libraryRoot,
+    parent: request.parent,
+    staging: request.staging,
+    attachments: request.attachments,
+    note: note.path,
+  );
   return (made: made, open: made, notes: 1, pictures: pictures);
 }
 
