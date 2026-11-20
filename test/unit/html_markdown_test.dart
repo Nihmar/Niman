@@ -66,6 +66,19 @@ void main() {
       expect(markdown('<p>one<br/>two</p>'), 'one\\\ntwo');
     });
 
+    test('a hard break takes the blank space around it with it', () {
+      // The source's newline and indent after a `<br>` are one space once
+      // collapsed, and a line may not open with it.
+      expect(markdown('<p>a<br />\n    b</p>'), 'a\\\nb');
+      expect(markdown('<p>a <br/> b</p>'), 'a\\\nb');
+      expect(markdown('<p><em>a<br/>\n  b</em></p>'), '*a\\\nb*');
+      expect(markdown('<p>a<br/><br/>b</p>'), 'a\\\n\\\nb');
+    });
+
+    test('a backslash before a hard break stays a backslash', () {
+      expect(markdown(r'<p>a\<br/> b</p>'), 'a\\\\\\\nb');
+    });
+
     test('lists, nested, numbered from their start', () {
       expect(
         markdown(

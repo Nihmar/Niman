@@ -24,8 +24,15 @@ final class HtmlInline {
     for (final node in nodes) {
       _write(node, out);
     }
-    return out.toString().replaceAll(RegExp(r'[ \t]+'), ' ');
+    return out
+        .toString()
+        .replaceAll(RegExp(r'[ \t]+'), ' ')
+        .replaceAll(_hardBreak, '\\\n');
   }
+
+  /// A hard break with the blank space around it: the next line does not
+  /// open with the source's newline and indent, collapsed to a space.
+  static final RegExp _hardBreak = RegExp(r' ?\\\n ?');
 
   void _write(Node node, StringBuffer out) {
     if (node is Text) {
