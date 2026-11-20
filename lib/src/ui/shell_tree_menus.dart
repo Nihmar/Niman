@@ -176,30 +176,38 @@ final class ShellTreeMenus {
     }
   }
 
-  /// Runs the create flow behind a tree-footer menu entry.
-  void newItem(BuildContext context, NewShellItem item) {
+  /// Runs the create flow behind a New menu entry of the Files view — the
+  /// phone's Files FAB, the tree footer's menu and the touch rail's
+  /// **New**, which is that menu on a tablet: what it makes goes in
+  /// the library root, not beside the note open or selected at the time.
+  /// The view shows the whole library, so its New starts at the top of
+  /// it; a folder's own **Create … here** is the way into a folder. The
+  /// kinds with a folder of their own (the journal, a list note, a
+  /// capture) keep it.
+  void newItemInFiles(BuildContext context, NewShellItem item) {
+    const root = '';
     final creates = rows.creates;
     switch (item) {
       case NewShellItem.journal:
         unawaited(journal.openToday(context));
       case NewShellItem.note:
-        unawaited(creates.createNote(context));
+        unawaited(creates.createNote(context, parent: root));
       case NewShellItem.listNote:
         unawaited(creates.createListNote(context));
       case NewShellItem.audioNote:
-        unawaited(creates.createAudioNote(context));
+        unawaited(creates.createAudioNote(context, parent: root));
       case NewShellItem.slides:
-        unawaited(creates.createSlidesNote(context));
+        unawaited(creates.createSlidesNote(context, parent: root));
       case NewShellItem.flashcards:
-        unawaited(creates.createFlashcards(context));
+        unawaited(creates.createFlashcards(context, parent: root));
       case NewShellItem.kanban:
-        unawaited(creates.createKanban(context));
+        unawaited(creates.createKanban(context, parent: root));
       case NewShellItem.template:
-        unawaited(rows.templates.createFromTemplate(context));
+        unawaited(rows.templates.createFromTemplate(context, parent: root));
       case NewShellItem.captureWebPage:
         unawaited(capture.capture(context));
       case NewShellItem.folder:
-        unawaited(creates.createFolder(context));
+        unawaited(creates.createFolder(context, parent: root));
     }
   }
 }

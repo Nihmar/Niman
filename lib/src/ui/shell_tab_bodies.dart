@@ -418,7 +418,7 @@ final class ShellTabBodies {
       id: TourTargets.create,
       child: TreeFooterBar(
         controller: controller,
-        onNewItem: (item) => treeMenus.newItem(context(), item),
+        onNewItem: (item) => treeMenus.newItemInFiles(context(), item),
         syncButton: syncActions.button(context(), controller),
         viewToggle: TreeViewToggle(
           view: settings.editor.treeView,

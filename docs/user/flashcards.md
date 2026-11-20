@@ -31,7 +31,8 @@ The past of *to tread* is ==trod==.
   the tree, or the command palette: a note with `type: flashcard`, an
   empty `deck:` and a two-column table ready for the first card. The
   **New flashcards here** entry of a folder's right-click menu makes it
-  in that folder; otherwise it is made where the library's setting for
+  in that folder; the Files FAB and the **New** menu make it in the
+  library root, and the command palette where the library's setting for
   new notes puts it (see
   [organization](organization.md#where-new-notes-and-folders-go)).
 - **Make flashcards…** — in the ⋮ of any note of no `type`, and in the

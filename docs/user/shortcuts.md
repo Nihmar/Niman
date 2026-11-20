@@ -258,7 +258,9 @@ published at startup; on iOS they are the icon's quick actions):
 - **New voice note** — the Files FAB's "New voice note" flow (likewise)
 
 Each shortcut runs the same flow as its in-app button, so the two can
-never drift.
+never drift. Only the folder differs: the FAB makes its note in the
+library root, a shortcut where the library's setting for
+[new notes](organization.md#where-new-notes-and-folders-go) puts it.
 
 ## CLI launch flags (desktop)
 

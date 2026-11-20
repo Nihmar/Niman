@@ -380,7 +380,7 @@ void main() {
     expect(find.byType(NoteTree), findsNothing);
   });
 
-  testWidgets('FAB creates by the library rule, not in the selected folder; '
+  testWidgets('FAB creates at the library root, not in the selected folder; '
       'menu offers all actions (T-UI-05, #850)', (tester) async {
     setSurfaceSize(tester, const Size(390, 844));
     await tester.pumpWidget(buildApp());
@@ -390,8 +390,7 @@ void main() {
     await controller.createFolder(parentPath: '', name: 'Docs');
     await settle(tester);
 
-    // Select the folder: no note is open, so the rule (the open note's
-    // folder, by default) puts the new note at the root.
+    // Select the folder: the Files view's New makes the note at the root.
     await tester.tap(noteRow('Docs'));
     await settle(tester);
     await tester.tap(find.byKey(const Key('new-note-fab')));
@@ -450,6 +449,53 @@ void main() {
     await tester.tap(delete);
     await settle(tester);
     expect(await controller.ops!.find('Renamed.md'), isNull);
+  });
+
+  // The Files view shows the whole library, so its New starts at the top
+  // of it: the note selected in the tree — on a phone, the open note to
+  // the library's rule — does not pull the new one into its folder. Its
+  // own row menu still makes one beside it.
+  testWidgets('FAB creates at the root even with a note in a folder '
+      'selected; the row menu creates beside it', (tester) async {
+    setSurfaceSize(tester, const Size(390, 844));
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await openLibrary(tester, filePicker);
+
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await controller.createNote(parentPath: 'Docs', name: 'Plan');
+    await settle(tester);
+
+    await tester.tap(noteRow('Docs')); // select + expand
+    await settle(tester);
+    await tester.tap(noteRow('Plan.md'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+
+    await tester.tap(find.byKey(const Key('new-note-fab')));
+    await settle(tester);
+    await tester.tap(find.byKey(const Key('new-note-action')));
+    await settle(tester);
+    await tester.enterText(dialogField(), 'At root');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(await controller.ops!.find('At root.md'), isNotNull);
+    expect(await controller.ops!.find('Docs/At root.md'), isNull);
+
+    await tester.tap(find.byTooltip('Back'));
+    await settle(tester);
+    await tester.longPress(noteRow('Plan.md'));
+    await settle(tester);
+    final here = find.byKey(const Key('menu-new-note'));
+    await tester.ensureVisible(here);
+    await settle(tester);
+    await tester.tap(here);
+    await settle(tester);
+    await tester.enterText(dialogField(), 'Beside');
+    await tester.tap(find.text('OK'));
+    await settle(tester);
+    expect(await controller.ops!.find('Docs/Beside.md'), isNotNull);
   });
 
   testWidgets('search tab shows the search screen (M3)', (tester) async {

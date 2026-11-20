@@ -332,9 +332,9 @@ or folder is made when nothing else names the place:
   one selected in the tree; a folder selected instead counts as none.
 
 It is the same rule for **New note**, **New folder**, **New slides** and
-**New voice note** (the Files FAB, the tree's footer menu, the command
-palette, the tray and the keyboard shortcuts), the quick note's **create**
-button, a note from a [template](templates.md), the note a dead
+**New voice note** (the command palette, the tray and the keyboard
+shortcuts), the quick note's **create** button, a note from a
+[template](templates.md), the note a dead
 [link](links.md) creates, a text file shared into Niman and imported as a
 note (with no note open, which is how a share usually arrives, it lands
 at the root), and a Home [action](home.md#actions) that names no folder.
@@ -342,6 +342,13 @@ Changing the setting moves all of them at once.
 
 What does not ask the rule, because it already says where:
 
+- The Files view's own **New** — the Files FAB on a phone, the tree
+  footer's menu on the desktop, the rail's **New** on a tablet: what it
+  makes (a note, a folder, a voice note, slides, flashcards, a kanban
+  board, a note from a template) goes in the **library root**, whatever
+  note is open or selected in the tree.
+  The view shows the whole library, so its New starts at the top of it;
+  to make something inside a folder, use that folder's menu (below).
 - **Create … here** in a folder's context menu, and the tree's and the
   grid's right-click menus on empty space: the note or folder goes in that
   folder (the library root, for the empty space of the tree). The same
