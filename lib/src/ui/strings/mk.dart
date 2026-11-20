@@ -1967,14 +1967,14 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubConvertReading => 'Се чита книгата…';
   @override
-  String get epubConvertPerChapter => 'Една белешка по поглавје';
+  String get convertPerChapter => 'Една белешка по поглавје';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Белешки: $notes · папки: $folders';
   @override
-  String get epubConvertOneNote => 'Една белешка';
+  String get convertOneNote => 'Една белешка';
   @override
-  String get epubConvertOneNoteDetail => 'Целата книга во една белешка';
+  String get convertOneNoteDetail => 'Целата книга во една белешка';
   @override
   String get convertInto => 'Во';
   @override
@@ -1997,11 +1997,11 @@ final class MacedonianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Отворете библиотека за да претворите книга во белешки';
   @override
-  String get epubConvertChapterName => 'Поглавје {n}';
+  String get convertChapterName => 'Поглавје {n}';
   @override
-  String get epubConvertOpening => 'Воведни страници';
+  String get convertOpening => 'Воведни страници';
   @override
-  String get epubConvertContents => 'Содржина';
+  String get convertContents => 'Содржина';
   @override
   String get epubConvertPickTitle => 'Изберете EPUB за претворање';
   @override

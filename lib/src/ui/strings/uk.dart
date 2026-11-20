@@ -1955,14 +1955,14 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubConvertReading => 'Читання книги…';
   @override
-  String get epubConvertPerChapter => 'Одна нотатка на розділ';
+  String get convertPerChapter => 'Одна нотатка на розділ';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Нотатки: $notes · теки: $folders';
   @override
-  String get epubConvertOneNote => 'Одна нотатка';
+  String get convertOneNote => 'Одна нотатка';
   @override
-  String get epubConvertOneNoteDetail => 'Уся книга в одній нотатці';
+  String get convertOneNoteDetail => 'Уся книга в одній нотатці';
   @override
   String get convertInto => 'До';
   @override
@@ -1985,11 +1985,11 @@ final class UkrainianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Відкрийте бібліотеку, щоб перетворити книгу на нотатки';
   @override
-  String get epubConvertChapterName => 'Розділ {n}';
+  String get convertChapterName => 'Розділ {n}';
   @override
-  String get epubConvertOpening => 'Початкові сторінки';
+  String get convertOpening => 'Початкові сторінки';
   @override
-  String get epubConvertContents => 'Зміст';
+  String get convertContents => 'Зміст';
   @override
   String get epubConvertPickTitle => 'Виберіть EPUB для перетворення';
   @override

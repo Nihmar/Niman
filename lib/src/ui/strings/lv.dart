@@ -1946,14 +1946,14 @@ final class LatvianStrings extends Strings {
   @override
   String get epubConvertReading => 'Notiek grāmatas lasīšana…';
   @override
-  String get epubConvertPerChapter => 'Viena piezīme katrai nodaļai';
+  String get convertPerChapter => 'Viena piezīme katrai nodaļai';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Piezīmes: $notes · mapes: $folders';
   @override
-  String get epubConvertOneNote => 'Viena piezīme';
+  String get convertOneNote => 'Viena piezīme';
   @override
-  String get epubConvertOneNoteDetail => 'Visa grāmata vienā piezīmē';
+  String get convertOneNoteDetail => 'Visa grāmata vienā piezīmē';
   @override
   String get convertInto => 'Uz';
   @override
@@ -1977,11 +1977,11 @@ final class LatvianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Atveriet bibliotēku, lai pārvērstu grāmatu piezīmēs';
   @override
-  String get epubConvertChapterName => '{n}. nodaļa';
+  String get convertChapterName => '{n}. nodaļa';
   @override
-  String get epubConvertOpening => 'Ievada lapas';
+  String get convertOpening => 'Ievada lapas';
   @override
-  String get epubConvertContents => 'Saturs';
+  String get convertContents => 'Saturs';
   @override
   String get epubConvertPickTitle => 'Izvēlieties pārvēršamo EPUB';
   @override

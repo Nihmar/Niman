@@ -1947,14 +1947,14 @@ final class SlovenianStrings extends Strings {
   @override
   String get epubConvertReading => 'Branje knjige…';
   @override
-  String get epubConvertPerChapter => 'En zapisek na poglavje';
+  String get convertPerChapter => 'En zapisek na poglavje';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Zapiski: $notes · mape: $folders';
   @override
-  String get epubConvertOneNote => 'En zapisek';
+  String get convertOneNote => 'En zapisek';
   @override
-  String get epubConvertOneNoteDetail => 'Vsa knjiga v enem zapisku';
+  String get convertOneNoteDetail => 'Vsa knjiga v enem zapisku';
   @override
   String get convertInto => 'V';
   @override
@@ -1977,11 +1977,11 @@ final class SlovenianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Odprite knjižnico, da knjigo pretvorite v zapiske';
   @override
-  String get epubConvertChapterName => 'Poglavje {n}';
+  String get convertChapterName => 'Poglavje {n}';
   @override
-  String get epubConvertOpening => 'Uvodne strani';
+  String get convertOpening => 'Uvodne strani';
   @override
-  String get epubConvertContents => 'Kazalo';
+  String get convertContents => 'Kazalo';
   @override
   String get epubConvertPickTitle => 'Izberite EPUB za pretvorbo';
   @override

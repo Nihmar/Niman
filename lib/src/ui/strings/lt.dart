@@ -1950,14 +1950,14 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubConvertReading => 'Skaitoma knyga…';
   @override
-  String get epubConvertPerChapter => 'Viena pastaba skyriui';
+  String get convertPerChapter => 'Viena pastaba skyriui';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Pastabos: $notes · aplankai: $folders';
   @override
-  String get epubConvertOneNote => 'Viena pastaba';
+  String get convertOneNote => 'Viena pastaba';
   @override
-  String get epubConvertOneNoteDetail => 'Visa knyga vienoje pastaboje';
+  String get convertOneNoteDetail => 'Visa knyga vienoje pastaboje';
   @override
   String get convertInto => 'Į';
   @override
@@ -1980,11 +1980,11 @@ final class LithuanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Atidarykite biblioteką, kad knygą konvertuotumėte į pastabas';
   @override
-  String get epubConvertChapterName => '{n} skyrius';
+  String get convertChapterName => '{n} skyrius';
   @override
-  String get epubConvertOpening => 'Įžanginiai puslapiai';
+  String get convertOpening => 'Įžanginiai puslapiai';
   @override
-  String get epubConvertContents => 'Turinys';
+  String get convertContents => 'Turinys';
   @override
   String get epubConvertPickTitle => 'Pasirinkite EPUB konvertuoti';
   @override

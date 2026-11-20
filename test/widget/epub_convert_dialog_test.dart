@@ -67,7 +67,7 @@ void main() {
           expect(find.text('Dune'), findsOneWidget);
           expect(find.text('Frank Herbert'), findsOneWidget);
           expect(
-            find.text(AppStrings.epubConvertPerChapterDetail(12, 3)),
+            find.text(AppStrings.convertPerChapterDetail(12, 3)),
             findsOneWidget,
           );
           expect(find.text('Books'), findsOneWidget);

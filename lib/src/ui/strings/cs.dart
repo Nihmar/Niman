@@ -1942,14 +1942,14 @@ final class CzechStrings extends Strings {
   @override
   String get epubConvertReading => 'Čtení knihy…';
   @override
-  String get epubConvertPerChapter => 'Jedna poznámka na kapitolu';
+  String get convertPerChapter => 'Jedna poznámka na kapitolu';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Poznámky: $notes · složky: $folders';
   @override
-  String get epubConvertOneNote => 'Jedna poznámka';
+  String get convertOneNote => 'Jedna poznámka';
   @override
-  String get epubConvertOneNoteDetail => 'Celá kniha v jedné poznámce';
+  String get convertOneNoteDetail => 'Celá kniha v jedné poznámce';
   @override
   String get convertInto => 'Do';
   @override
@@ -1972,11 +1972,11 @@ final class CzechStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Otevřete knihovnu, abyste mohli převést knihu na poznámky';
   @override
-  String get epubConvertChapterName => 'Kapitola {n}';
+  String get convertChapterName => 'Kapitola {n}';
   @override
-  String get epubConvertOpening => 'Úvodní strany';
+  String get convertOpening => 'Úvodní strany';
   @override
-  String get epubConvertContents => 'Obsah';
+  String get convertContents => 'Obsah';
   @override
   String get epubConvertPickTitle => 'Vyberte EPUB k převodu';
   @override

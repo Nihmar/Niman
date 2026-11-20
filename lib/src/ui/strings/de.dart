@@ -1984,14 +1984,14 @@ final class GermanStrings extends Strings {
   @override
   String get epubConvertReading => 'Buch wird gelesen…';
   @override
-  String get epubConvertPerChapter => 'Eine Notiz pro Kapitel';
+  String get convertPerChapter => 'Eine Notiz pro Kapitel';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notizen: $notes · Ordner: $folders';
   @override
-  String get epubConvertOneNote => 'Eine Notiz';
+  String get convertOneNote => 'Eine Notiz';
   @override
-  String get epubConvertOneNoteDetail => 'Das ganze Buch in einer Notiz';
+  String get convertOneNoteDetail => 'Das ganze Buch in einer Notiz';
   @override
   String get convertInto => 'Nach';
   @override
@@ -2015,11 +2015,11 @@ final class GermanStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Öffne eine Bibliothek, um ein Buch in Notizen umzuwandeln';
   @override
-  String get epubConvertChapterName => 'Kapitel {n}';
+  String get convertChapterName => 'Kapitel {n}';
   @override
-  String get epubConvertOpening => 'Titelei';
+  String get convertOpening => 'Titelei';
   @override
-  String get epubConvertContents => 'Inhalt';
+  String get convertContents => 'Inhalt';
   @override
   String get epubConvertPickTitle => 'EPUB zum Umwandeln wählen';
   @override

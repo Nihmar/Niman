@@ -1941,14 +1941,14 @@ final class NorwegianStrings extends Strings {
   @override
   String get epubConvertReading => 'Leser boken…';
   @override
-  String get epubConvertPerChapter => 'Ett notat per kapittel';
+  String get convertPerChapter => 'Ett notat per kapittel';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notater: $notes · mapper: $folders';
   @override
-  String get epubConvertOneNote => 'Ett notat';
+  String get convertOneNote => 'Ett notat';
   @override
-  String get epubConvertOneNoteDetail => 'Hele boken i ett notat';
+  String get convertOneNoteDetail => 'Hele boken i ett notat';
   @override
   String get convertInto => 'Til';
   @override
@@ -1971,11 +1971,11 @@ final class NorwegianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Åpne et bibliotek for å konvertere en bok til notater';
   @override
-  String get epubConvertChapterName => 'Kapittel {n}';
+  String get convertChapterName => 'Kapittel {n}';
   @override
-  String get epubConvertOpening => 'Innledende sider';
+  String get convertOpening => 'Innledende sider';
   @override
-  String get epubConvertContents => 'Innhold';
+  String get convertContents => 'Innhold';
   @override
   String get epubConvertPickTitle => 'Velg en EPUB å konvertere';
   @override

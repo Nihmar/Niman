@@ -1966,14 +1966,14 @@ final class HungarianStrings extends Strings {
   @override
   String get epubConvertReading => 'A könyv olvasása…';
   @override
-  String get epubConvertPerChapter => 'Fejezetenként egy jegyzet';
+  String get convertPerChapter => 'Fejezetenként egy jegyzet';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Jegyzetek: $notes · mappák: $folders';
   @override
-  String get epubConvertOneNote => 'Egyetlen jegyzet';
+  String get convertOneNote => 'Egyetlen jegyzet';
   @override
-  String get epubConvertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
+  String get convertOneNoteDetail => 'Az egész könyv egyetlen jegyzetben';
   @override
   String get convertInto => 'Ide';
   @override
@@ -1996,11 +1996,11 @@ final class HungarianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Nyiss meg egy könyvtárat, hogy a könyvet jegyzetekké alakíthasd';
   @override
-  String get epubConvertChapterName => '{n}. fejezet';
+  String get convertChapterName => '{n}. fejezet';
   @override
-  String get epubConvertOpening => 'Előzéklapok';
+  String get convertOpening => 'Előzéklapok';
   @override
-  String get epubConvertContents => 'Tartalom';
+  String get convertContents => 'Tartalom';
   @override
   String get epubConvertPickTitle => 'Válassz egy átalakítandó EPUB-ot';
   @override

@@ -1835,14 +1835,14 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertReading => '本を読み込んでいます…';
   @override
-  String get epubConvertPerChapter => '章ごとに1つのノート';
+  String get convertPerChapter => '章ごとに1つのノート';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'ノート：$notes · フォルダー：$folders';
   @override
-  String get epubConvertOneNote => '1つのノート';
+  String get convertOneNote => '1つのノート';
   @override
-  String get epubConvertOneNoteDetail => '本全体を1つのノートに';
+  String get convertOneNoteDetail => '本全体を1つのノートに';
   @override
   String get convertInto => '保存先';
   @override
@@ -1863,11 +1863,11 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertNeedsLibrary => '本をノートに変換するにはライブラリを開いてください';
   @override
-  String get epubConvertChapterName => '第{n}章';
+  String get convertChapterName => '第{n}章';
   @override
-  String get epubConvertOpening => '前付け';
+  String get convertOpening => '前付け';
   @override
-  String get epubConvertContents => '目次';
+  String get convertContents => '目次';
   @override
   String get epubConvertPickTitle => '変換する EPUB を選択';
   @override

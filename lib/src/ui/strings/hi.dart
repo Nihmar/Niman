@@ -1921,14 +1921,14 @@ final class HindiStrings extends Strings {
   @override
   String get epubConvertReading => 'किताब पढ़ी जा रही है…';
   @override
-  String get epubConvertPerChapter => 'हर अध्याय के लिए एक नोट';
+  String get convertPerChapter => 'हर अध्याय के लिए एक नोट';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'नोट: $notes · फ़ोल्डर: $folders';
   @override
-  String get epubConvertOneNote => 'एक नोट';
+  String get convertOneNote => 'एक नोट';
   @override
-  String get epubConvertOneNoteDetail => 'पूरी किताब एक ही नोट में';
+  String get convertOneNoteDetail => 'पूरी किताब एक ही नोट में';
   @override
   String get convertInto => 'यहाँ';
   @override
@@ -1952,11 +1952,11 @@ final class HindiStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'किताब को नोट्स में बदलने के लिए कोई लाइब्रेरी खोलें';
   @override
-  String get epubConvertChapterName => 'अध्याय {n}';
+  String get convertChapterName => 'अध्याय {n}';
   @override
-  String get epubConvertOpening => 'प्रारंभिक पृष्ठ';
+  String get convertOpening => 'प्रारंभिक पृष्ठ';
   @override
-  String get epubConvertContents => 'विषय-सूची';
+  String get convertContents => 'विषय-सूची';
   @override
   String get epubConvertPickTitle => 'बदलने के लिए कोई EPUB चुनें';
   @override

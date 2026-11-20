@@ -1965,14 +1965,14 @@ final class GalicianStrings extends Strings {
   @override
   String get epubConvertReading => 'Lendo o libro…';
   @override
-  String get epubConvertPerChapter => 'Unha nota por capítulo';
+  String get convertPerChapter => 'Unha nota por capítulo';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notas: $notes · cartafoles: $folders';
   @override
-  String get epubConvertOneNote => 'Unha nota';
+  String get convertOneNote => 'Unha nota';
   @override
-  String get epubConvertOneNoteDetail => 'O libro enteiro nunha soa nota';
+  String get convertOneNoteDetail => 'O libro enteiro nunha soa nota';
   @override
   String get convertInto => 'En';
   @override
@@ -1996,11 +1996,11 @@ final class GalicianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Abre unha biblioteca para converter un libro en notas';
   @override
-  String get epubConvertChapterName => 'Capítulo {n}';
+  String get convertChapterName => 'Capítulo {n}';
   @override
-  String get epubConvertOpening => 'Páxinas preliminares';
+  String get convertOpening => 'Páxinas preliminares';
   @override
-  String get epubConvertContents => 'Índice';
+  String get convertContents => 'Índice';
   @override
   String get epubConvertPickTitle => 'Escolle un EPUB para converter';
   @override

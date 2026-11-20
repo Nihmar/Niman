@@ -1965,15 +1965,14 @@ final class AlbanianStrings extends Strings {
   @override
   String get epubConvertReading => 'Po lexohet libri…';
   @override
-  String get epubConvertPerChapter => 'Një shënim për çdo kapitull';
+  String get convertPerChapter => 'Një shënim për çdo kapitull';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Shënime: $notes · dosje: $folders';
   @override
-  String get epubConvertOneNote => 'Një shënim';
+  String get convertOneNote => 'Një shënim';
   @override
-  String get epubConvertOneNoteDetail =>
-      'I gjithë libri në një shënim të vetëm';
+  String get convertOneNoteDetail => 'I gjithë libri në një shënim të vetëm';
   @override
   String get convertInto => 'Në';
   @override
@@ -1998,11 +1997,11 @@ final class AlbanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Hapni një bibliotekë për ta shndërruar një libër në shënime';
   @override
-  String get epubConvertChapterName => 'Kapitulli {n}';
+  String get convertChapterName => 'Kapitulli {n}';
   @override
-  String get epubConvertOpening => 'Faqet hyrëse';
+  String get convertOpening => 'Faqet hyrëse';
   @override
-  String get epubConvertContents => 'Përmbajtja';
+  String get convertContents => 'Përmbajtja';
   @override
   String get epubConvertPickTitle => 'Zgjidhni një EPUB për ta shndërruar';
   @override

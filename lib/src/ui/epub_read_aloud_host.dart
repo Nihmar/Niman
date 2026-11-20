@@ -97,7 +97,7 @@ final class EpubReadAloudHost extends ChangeNotifier {
         : document.chapters[chapter].line;
     final entry = document.entryAt(line);
     return entry == -1
-        ? AppStrings.epubConvertChapterName.replaceAll('{n}', '${chapter + 1}')
+        ? AppStrings.convertChapterName.replaceAll('{n}', '${chapter + 1}')
         : document.contents[entry].title;
   }
 

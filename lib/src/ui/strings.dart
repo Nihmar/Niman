@@ -1247,11 +1247,11 @@ final class AppStrings {
   static String get epubConvertSettingsTitle => _s.epubConvertSettingsTitle;
   static String get convertTitle => _s.convertTitle;
   static String get epubConvertReading => _s.epubConvertReading;
-  static String get epubConvertPerChapter => _s.epubConvertPerChapter;
-  static String epubConvertPerChapterDetail(int notes, int folders) =>
-      _s.epubConvertPerChapterDetail(notes, folders);
-  static String get epubConvertOneNote => _s.epubConvertOneNote;
-  static String get epubConvertOneNoteDetail => _s.epubConvertOneNoteDetail;
+  static String get convertPerChapter => _s.convertPerChapter;
+  static String convertPerChapterDetail(int notes, int folders) =>
+      _s.convertPerChapterDetail(notes, folders);
+  static String get convertOneNote => _s.convertOneNote;
+  static String get convertOneNoteDetail => _s.convertOneNoteDetail;
   static String get convertInto => _s.convertInto;
   static String get convertStart => _s.convertStart;
   static String convertProgress(int done, int total) =>
@@ -1264,9 +1264,9 @@ final class AppStrings {
   static String get epubConvertTooLarge => _s.epubConvertTooLarge;
   static String get epubConvertFailed => _s.epubConvertFailed;
   static String get epubConvertNeedsLibrary => _s.epubConvertNeedsLibrary;
-  static String get epubConvertChapterName => _s.epubConvertChapterName;
-  static String get epubConvertOpening => _s.epubConvertOpening;
-  static String get epubConvertContents => _s.epubConvertContents;
+  static String get convertChapterName => _s.convertChapterName;
+  static String get convertOpening => _s.convertOpening;
+  static String get convertContents => _s.convertContents;
   static String get epubConvertPickTitle => _s.epubConvertPickTitle;
   static String get htmlConvertCommand => _s.htmlConvertCommand;
   static String get htmlConvertSettingsTitle => _s.htmlConvertSettingsTitle;

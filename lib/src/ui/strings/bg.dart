@@ -1967,14 +1967,14 @@ final class BulgarianStrings extends Strings {
   @override
   String get epubConvertReading => 'Четене на книгата…';
   @override
-  String get epubConvertPerChapter => 'Една бележка на глава';
+  String get convertPerChapter => 'Една бележка на глава';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Бележки: $notes · папки: $folders';
   @override
-  String get epubConvertOneNote => 'Една бележка';
+  String get convertOneNote => 'Една бележка';
   @override
-  String get epubConvertOneNoteDetail => 'Цялата книга в една бележка';
+  String get convertOneNoteDetail => 'Цялата книга в една бележка';
   @override
   String get convertInto => 'В';
   @override
@@ -1998,11 +1998,11 @@ final class BulgarianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Отворете библиотека, за да преобразувате книга в бележки';
   @override
-  String get epubConvertChapterName => 'Глава {n}';
+  String get convertChapterName => 'Глава {n}';
   @override
-  String get epubConvertOpening => 'Начални страници';
+  String get convertOpening => 'Начални страници';
   @override
-  String get epubConvertContents => 'Съдържание';
+  String get convertContents => 'Съдържание';
   @override
   String get epubConvertPickTitle => 'Изберете EPUB за преобразуване';
   @override

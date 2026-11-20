@@ -1935,14 +1935,14 @@ final class TurkishStrings extends Strings {
   @override
   String get epubConvertReading => 'Kitap okunuyor…';
   @override
-  String get epubConvertPerChapter => 'Bölüm başına bir not';
+  String get convertPerChapter => 'Bölüm başına bir not';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notlar: $notes · klasörler: $folders';
   @override
-  String get epubConvertOneNote => 'Tek not';
+  String get convertOneNote => 'Tek not';
   @override
-  String get epubConvertOneNoteDetail => 'Kitabın tamamı tek bir notta';
+  String get convertOneNoteDetail => 'Kitabın tamamı tek bir notta';
   @override
   String get convertInto => 'Hedef';
   @override
@@ -1966,11 +1966,11 @@ final class TurkishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Bir kitabı notlara dönüştürmek için bir kitaplık açın';
   @override
-  String get epubConvertChapterName => 'Bölüm {n}';
+  String get convertChapterName => 'Bölüm {n}';
   @override
-  String get epubConvertOpening => 'Ön sayfalar';
+  String get convertOpening => 'Ön sayfalar';
   @override
-  String get epubConvertContents => 'İçindekiler';
+  String get convertContents => 'İçindekiler';
   @override
   String get epubConvertPickTitle => 'Dönüştürülecek bir EPUB seçin';
   @override

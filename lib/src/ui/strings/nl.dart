@@ -1973,14 +1973,14 @@ final class DutchStrings extends Strings {
   @override
   String get epubConvertReading => 'Boek wordt gelezen…';
   @override
-  String get epubConvertPerChapter => 'Eén notitie per hoofdstuk';
+  String get convertPerChapter => 'Eén notitie per hoofdstuk';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notities: $notes · mappen: $folders';
   @override
-  String get epubConvertOneNote => 'Eén notitie';
+  String get convertOneNote => 'Eén notitie';
   @override
-  String get epubConvertOneNoteDetail => 'Het hele boek in één notitie';
+  String get convertOneNoteDetail => 'Het hele boek in één notitie';
   @override
   String get convertInto => 'Naar';
   @override
@@ -2003,11 +2003,11 @@ final class DutchStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Open een bibliotheek om een boek naar notities om te zetten';
   @override
-  String get epubConvertChapterName => 'Hoofdstuk {n}';
+  String get convertChapterName => 'Hoofdstuk {n}';
   @override
-  String get epubConvertOpening => 'Voorwerk';
+  String get convertOpening => 'Voorwerk';
   @override
-  String get epubConvertContents => 'Inhoud';
+  String get convertContents => 'Inhoud';
   @override
   String get epubConvertPickTitle => 'Kies een EPUB om om te zetten';
   @override

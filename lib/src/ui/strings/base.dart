@@ -1045,10 +1045,10 @@ abstract base class Strings {
   String get epubConvertSettingsTitle;
   String get convertTitle;
   String get epubConvertReading;
-  String get epubConvertPerChapter;
-  String epubConvertPerChapterDetail(int notes, int folders);
-  String get epubConvertOneNote;
-  String get epubConvertOneNoteDetail;
+  String get convertPerChapter;
+  String convertPerChapterDetail(int notes, int folders);
+  String get convertOneNote;
+  String get convertOneNoteDetail;
   String get convertInto;
   String get convertStart;
   String convertProgress(int done, int total);
@@ -1058,9 +1058,9 @@ abstract base class Strings {
   String get epubConvertTooLarge;
   String get epubConvertFailed;
   String get epubConvertNeedsLibrary;
-  String get epubConvertChapterName;
-  String get epubConvertOpening;
-  String get epubConvertContents;
+  String get convertChapterName;
+  String get convertOpening;
+  String get convertContents;
   String get epubConvertPickTitle;
   String get htmlConvertCommand;
   String get htmlConvertSettingsTitle;

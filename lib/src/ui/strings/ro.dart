@@ -1971,14 +1971,14 @@ final class RomanianStrings extends Strings {
   @override
   String get epubConvertReading => 'Se citește cartea…';
   @override
-  String get epubConvertPerChapter => 'O notă pe capitol';
+  String get convertPerChapter => 'O notă pe capitol';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Note: $notes · dosare: $folders';
   @override
-  String get epubConvertOneNote => 'O singură notă';
+  String get convertOneNote => 'O singură notă';
   @override
-  String get epubConvertOneNoteDetail => 'Toată cartea într-o singură notă';
+  String get convertOneNoteDetail => 'Toată cartea într-o singură notă';
   @override
   String get convertInto => 'În';
   @override
@@ -2002,11 +2002,11 @@ final class RomanianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Deschide o bibliotecă pentru a converti o carte în note';
   @override
-  String get epubConvertChapterName => 'Capitolul {n}';
+  String get convertChapterName => 'Capitolul {n}';
   @override
-  String get epubConvertOpening => 'Pagini preliminare';
+  String get convertOpening => 'Pagini preliminare';
   @override
-  String get epubConvertContents => 'Cuprins';
+  String get convertContents => 'Cuprins';
   @override
   String get epubConvertPickTitle => 'Alege un EPUB de convertit';
   @override

@@ -1987,14 +1987,14 @@ final class CatalanStrings extends Strings {
   @override
   String get epubConvertReading => 'S’està llegint el llibre…';
   @override
-  String get epubConvertPerChapter => 'Una nota per capítol';
+  String get convertPerChapter => 'Una nota per capítol';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notes: $notes · carpetes: $folders';
   @override
-  String get epubConvertOneNote => 'Una nota';
+  String get convertOneNote => 'Una nota';
   @override
-  String get epubConvertOneNoteDetail => 'Tot el llibre en una sola nota';
+  String get convertOneNoteDetail => 'Tot el llibre en una sola nota';
   @override
   String get convertInto => 'A';
   @override
@@ -2019,11 +2019,11 @@ final class CatalanStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Obriu una biblioteca per convertir un llibre en notes';
   @override
-  String get epubConvertChapterName => 'Capítol {n}';
+  String get convertChapterName => 'Capítol {n}';
   @override
-  String get epubConvertOpening => 'Pàgines preliminars';
+  String get convertOpening => 'Pàgines preliminars';
   @override
-  String get epubConvertContents => 'Índex';
+  String get convertContents => 'Índex';
   @override
   String get epubConvertPickTitle => 'Trieu un EPUB per convertir';
   @override

@@ -1794,14 +1794,14 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertReading => '正在读取图书…';
   @override
-  String get epubConvertPerChapter => '每章一个笔记';
+  String get convertPerChapter => '每章一个笔记';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       '笔记：$notes · 文件夹：$folders';
   @override
-  String get epubConvertOneNote => '一个笔记';
+  String get convertOneNote => '一个笔记';
   @override
-  String get epubConvertOneNoteDetail => '整本书放在一个笔记中';
+  String get convertOneNoteDetail => '整本书放在一个笔记中';
   @override
   String get convertInto => '保存到';
   @override
@@ -1822,11 +1822,11 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertNeedsLibrary => '请打开一个资料库，以便将图书转换为笔记';
   @override
-  String get epubConvertChapterName => '第 {n} 章';
+  String get convertChapterName => '第 {n} 章';
   @override
-  String get epubConvertOpening => '前置页';
+  String get convertOpening => '前置页';
   @override
-  String get epubConvertContents => '目录';
+  String get convertContents => '目录';
   @override
   String get epubConvertPickTitle => '选择要转换的 EPUB';
   @override

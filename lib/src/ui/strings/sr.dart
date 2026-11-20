@@ -1955,14 +1955,14 @@ final class SerbianStrings extends Strings {
   @override
   String get epubConvertReading => 'Читање књиге…';
   @override
-  String get epubConvertPerChapter => 'Једна белешка по поглављу';
+  String get convertPerChapter => 'Једна белешка по поглављу';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Белешке: $notes · фасцикле: $folders';
   @override
-  String get epubConvertOneNote => 'Једна белешка';
+  String get convertOneNote => 'Једна белешка';
   @override
-  String get epubConvertOneNoteDetail => 'Цела књига у једној белешци';
+  String get convertOneNoteDetail => 'Цела књига у једној белешци';
   @override
   String get convertInto => 'У';
   @override
@@ -1985,11 +1985,11 @@ final class SerbianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Отворите библиотеку да бисте књигу претворили у белешке';
   @override
-  String get epubConvertChapterName => 'Поглавље {n}';
+  String get convertChapterName => 'Поглавље {n}';
   @override
-  String get epubConvertOpening => 'Уводне странице';
+  String get convertOpening => 'Уводне странице';
   @override
-  String get epubConvertContents => 'Садржај';
+  String get convertContents => 'Садржај';
   @override
   String get epubConvertPickTitle => 'Изаберите EPUB за претварање';
   @override

@@ -2015,14 +2015,14 @@ final class GreekStrings extends Strings {
   @override
   String get epubConvertReading => 'Ανάγνωση του βιβλίου…';
   @override
-  String get epubConvertPerChapter => 'Μία σημείωση ανά κεφάλαιο';
+  String get convertPerChapter => 'Μία σημείωση ανά κεφάλαιο';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Σημειώσεις: $notes · φάκελοι: $folders';
   @override
-  String get epubConvertOneNote => 'Μία σημείωση';
+  String get convertOneNote => 'Μία σημείωση';
   @override
-  String get epubConvertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
+  String get convertOneNoteDetail => 'Όλο το βιβλίο σε μία σημείωση';
   @override
   String get convertInto => 'Σε';
   @override
@@ -2048,11 +2048,11 @@ final class GreekStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Ανοίξτε μια βιβλιοθήκη για να μετατρέψετε ένα βιβλίο σε σημειώσεις';
   @override
-  String get epubConvertChapterName => 'Κεφάλαιο {n}';
+  String get convertChapterName => 'Κεφάλαιο {n}';
   @override
-  String get epubConvertOpening => 'Προλογικές σελίδες';
+  String get convertOpening => 'Προλογικές σελίδες';
   @override
-  String get epubConvertContents => 'Περιεχόμενα';
+  String get convertContents => 'Περιεχόμενα';
   @override
   String get epubConvertPickTitle => 'Επιλέξτε ένα EPUB για μετατροπή';
   @override

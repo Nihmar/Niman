@@ -1932,14 +1932,14 @@ final class EnglishStrings extends Strings {
   @override
   String get epubConvertReading => 'Reading the book…';
   @override
-  String get epubConvertPerChapter => 'One note per chapter';
+  String get convertPerChapter => 'One note per chapter';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notes: $notes · folders: $folders';
   @override
-  String get epubConvertOneNote => 'One note';
+  String get convertOneNote => 'One note';
   @override
-  String get epubConvertOneNoteDetail => 'The whole book in a single note';
+  String get convertOneNoteDetail => 'The whole book in a single note';
   @override
   String get convertInto => 'Into';
   @override
@@ -1963,11 +1963,11 @@ final class EnglishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Open a library to convert a book into notes';
   @override
-  String get epubConvertChapterName => 'Chapter {n}';
+  String get convertChapterName => 'Chapter {n}';
   @override
-  String get epubConvertOpening => 'Front matter';
+  String get convertOpening => 'Front matter';
   @override
-  String get epubConvertContents => 'Contents';
+  String get convertContents => 'Contents';
   @override
   String get epubConvertPickTitle => 'Choose an EPUB to convert';
   @override

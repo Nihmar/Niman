@@ -1951,14 +1951,14 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubConvertReading => 'Чытанне кнігі…';
   @override
-  String get epubConvertPerChapter => 'Адна нататка на раздзел';
+  String get convertPerChapter => 'Адна нататка на раздзел';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Нататкі: $notes · папкі: $folders';
   @override
-  String get epubConvertOneNote => 'Адна нататка';
+  String get convertOneNote => 'Адна нататка';
   @override
-  String get epubConvertOneNoteDetail => 'Уся кніга ў адной нататцы';
+  String get convertOneNoteDetail => 'Уся кніга ў адной нататцы';
   @override
   String get convertInto => 'У';
   @override
@@ -1982,11 +1982,11 @@ final class BelarusianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Адкрыйце бібліятэку, каб пераўтварыць кнігу ў нататкі';
   @override
-  String get epubConvertChapterName => 'Раздзел {n}';
+  String get convertChapterName => 'Раздзел {n}';
   @override
-  String get epubConvertOpening => 'Пачатковыя старонкі';
+  String get convertOpening => 'Пачатковыя старонкі';
   @override
-  String get epubConvertContents => 'Змест';
+  String get convertContents => 'Змест';
   @override
   String get epubConvertPickTitle => 'Выберыце EPUB для пераўтварэння';
   @override

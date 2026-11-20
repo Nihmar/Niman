@@ -1972,14 +1972,14 @@ final class PolishStrings extends Strings {
   @override
   String get epubConvertReading => 'Czytanie książki…';
   @override
-  String get epubConvertPerChapter => 'Jedna notatka na rozdział';
+  String get convertPerChapter => 'Jedna notatka na rozdział';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Notatki: $notes · foldery: $folders';
   @override
-  String get epubConvertOneNote => 'Jedna notatka';
+  String get convertOneNote => 'Jedna notatka';
   @override
-  String get epubConvertOneNoteDetail => 'Cała książka w jednej notatce';
+  String get convertOneNoteDetail => 'Cała książka w jednej notatce';
   @override
   String get convertInto => 'Do';
   @override
@@ -2003,11 +2003,11 @@ final class PolishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Otwórz bibliotekę, aby skonwertować książkę na notatki';
   @override
-  String get epubConvertChapterName => 'Rozdział {n}';
+  String get convertChapterName => 'Rozdział {n}';
   @override
-  String get epubConvertOpening => 'Strony tytułowe';
+  String get convertOpening => 'Strony tytułowe';
   @override
-  String get epubConvertContents => 'Spis treści';
+  String get convertContents => 'Spis treści';
   @override
   String get epubConvertPickTitle => 'Wybierz EPUB do konwersji';
   @override

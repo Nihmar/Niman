@@ -1951,14 +1951,14 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubConvertReading => 'Les bókina…';
   @override
-  String get epubConvertPerChapter => 'Ein glósa á kafla';
+  String get convertPerChapter => 'Ein glósa á kafla';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Glósur: $notes · möppur: $folders';
   @override
-  String get epubConvertOneNote => 'Ein glósa';
+  String get convertOneNote => 'Ein glósa';
   @override
-  String get epubConvertOneNoteDetail => 'Öll bókin í einni glósu';
+  String get convertOneNoteDetail => 'Öll bókin í einni glósu';
   @override
   String get convertInto => 'Í';
   @override
@@ -1982,11 +1982,11 @@ final class IcelandicStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Opnaðu safn til að umbreyta bók í glósur';
   @override
-  String get epubConvertChapterName => 'Kafli {n}';
+  String get convertChapterName => 'Kafli {n}';
   @override
-  String get epubConvertOpening => 'Forsíður';
+  String get convertOpening => 'Forsíður';
   @override
-  String get epubConvertContents => 'Efnisyfirlit';
+  String get convertContents => 'Efnisyfirlit';
   @override
   String get epubConvertPickTitle => 'Veldu EPUB til að umbreyta';
   @override

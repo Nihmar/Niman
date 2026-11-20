@@ -1969,14 +1969,14 @@ final class FinnishStrings extends Strings {
   @override
   String get epubConvertReading => 'Luetaan kirjaa…';
   @override
-  String get epubConvertPerChapter => 'Yksi muistiinpano lukua kohden';
+  String get convertPerChapter => 'Yksi muistiinpano lukua kohden';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Muistiinpanoja: $notes · kansioita: $folders';
   @override
-  String get epubConvertOneNote => 'Yksi muistiinpano';
+  String get convertOneNote => 'Yksi muistiinpano';
   @override
-  String get epubConvertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
+  String get convertOneNoteDetail => 'Koko kirja yhdessä muistiinpanossa';
   @override
   String get convertInto => 'Kohteeseen';
   @override
@@ -1999,11 +1999,11 @@ final class FinnishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Avaa kirjasto muuntaaksesi kirjan muistiinpanoiksi';
   @override
-  String get epubConvertChapterName => 'Luku {n}';
+  String get convertChapterName => 'Luku {n}';
   @override
-  String get epubConvertOpening => 'Alkusivut';
+  String get convertOpening => 'Alkusivut';
   @override
-  String get epubConvertContents => 'Sisällys';
+  String get convertContents => 'Sisällys';
   @override
   String get epubConvertPickTitle => 'Valitse muunnettava EPUB';
   @override

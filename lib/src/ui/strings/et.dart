@@ -1931,14 +1931,14 @@ final class EstonianStrings extends Strings {
   @override
   String get epubConvertReading => 'Raamatut loetakse…';
   @override
-  String get epubConvertPerChapter => 'Üks märge peatüki kohta';
+  String get convertPerChapter => 'Üks märge peatüki kohta';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Märkmeid: $notes · kaustu: $folders';
   @override
-  String get epubConvertOneNote => 'Üks märge';
+  String get convertOneNote => 'Üks märge';
   @override
-  String get epubConvertOneNoteDetail => 'Kogu raamat ühes märkmes';
+  String get convertOneNoteDetail => 'Kogu raamat ühes märkmes';
   @override
   String get convertInto => 'Kausta';
   @override
@@ -1961,11 +1961,11 @@ final class EstonianStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Raamatu märkmeteks teisendamiseks ava kogu';
   @override
-  String get epubConvertChapterName => 'Peatükk {n}';
+  String get convertChapterName => 'Peatükk {n}';
   @override
-  String get epubConvertOpening => 'Eessõnalehed';
+  String get convertOpening => 'Eessõnalehed';
   @override
-  String get epubConvertContents => 'Sisukord';
+  String get convertContents => 'Sisukord';
   @override
   String get epubConvertPickTitle => 'Vali teisendatav EPUB';
   @override

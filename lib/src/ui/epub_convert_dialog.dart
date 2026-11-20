@@ -29,9 +29,9 @@ typedef EpubPreviewer = Future<EpubConvertPreview> Function(
 
 /// The words a conversion writes, in the interface's language.
 EpubConvertWords epubConvertWords() => (
-  chapter: AppStrings.epubConvertChapterName,
-  opening: AppStrings.epubConvertOpening,
-  contents: AppStrings.epubConvertContents,
+  chapter: AppStrings.convertChapterName,
+  opening: AppStrings.convertOpening,
+  contents: AppStrings.convertContents,
 );
 
 /// Asks how to convert the book at [source] and where to; null when the
@@ -196,9 +196,9 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 key: const Key('epub-convert-per-chapter'),
                 value: false,
                 contentPadding: EdgeInsets.zero,
-                title: Text(AppStrings.epubConvertPerChapter),
+                title: Text(AppStrings.convertPerChapter),
                 subtitle: Text(
-                  AppStrings.epubConvertPerChapterDetail(
+                  AppStrings.convertPerChapterDetail(
                     preview.notes,
                     preview.folders,
                   ),
@@ -208,8 +208,8 @@ final class _EpubConvertDialogState extends State<EpubConvertDialog> {
                 key: const Key('epub-convert-one-note'),
                 value: true,
                 contentPadding: EdgeInsets.zero,
-                title: Text(AppStrings.epubConvertOneNote),
-                subtitle: Text(AppStrings.epubConvertOneNoteDetail),
+                title: Text(AppStrings.convertOneNote),
+                subtitle: Text(AppStrings.convertOneNoteDetail),
               ),
             ],
           ),

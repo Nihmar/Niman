@@ -1967,14 +1967,14 @@ final class BasqueStrings extends Strings {
   @override
   String get epubConvertReading => 'Liburua irakurtzen…';
   @override
-  String get epubConvertPerChapter => 'Ohar bat kapituluko';
+  String get convertPerChapter => 'Ohar bat kapituluko';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Oharrak: $notes · karpetak: $folders';
   @override
-  String get epubConvertOneNote => 'Ohar bakarra';
+  String get convertOneNote => 'Ohar bakarra';
   @override
-  String get epubConvertOneNoteDetail => 'Liburu osoa ohar bakar batean';
+  String get convertOneNoteDetail => 'Liburu osoa ohar bakar batean';
   @override
   String get convertInto => 'Hona';
   @override
@@ -1998,11 +1998,11 @@ final class BasqueStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Ireki liburutegi bat liburu bat ohar bihurtzeko';
   @override
-  String get epubConvertChapterName => '{n}. kapitulua';
+  String get convertChapterName => '{n}. kapitulua';
   @override
-  String get epubConvertOpening => 'Hasierako orriak';
+  String get convertOpening => 'Hasierako orriak';
   @override
-  String get epubConvertContents => 'Aurkibidea';
+  String get convertContents => 'Aurkibidea';
   @override
   String get epubConvertPickTitle => 'Aukeratu bihurtzeko EPUB bat';
   @override

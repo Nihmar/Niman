@@ -1960,14 +1960,14 @@ final class SwedishStrings extends Strings {
   @override
   String get epubConvertReading => 'Läser boken…';
   @override
-  String get epubConvertPerChapter => 'En anteckning per kapitel';
+  String get convertPerChapter => 'En anteckning per kapitel';
   @override
-  String epubConvertPerChapterDetail(int notes, int folders) =>
+  String convertPerChapterDetail(int notes, int folders) =>
       'Anteckningar: $notes · mappar: $folders';
   @override
-  String get epubConvertOneNote => 'En anteckning';
+  String get convertOneNote => 'En anteckning';
   @override
-  String get epubConvertOneNoteDetail => 'Hela boken i en enda anteckning';
+  String get convertOneNoteDetail => 'Hela boken i en enda anteckning';
   @override
   String get convertInto => 'Till';
   @override
@@ -1991,11 +1991,11 @@ final class SwedishStrings extends Strings {
   String get epubConvertNeedsLibrary =>
       'Öppna ett bibliotek för att konvertera en bok till anteckningar';
   @override
-  String get epubConvertChapterName => 'Kapitel {n}';
+  String get convertChapterName => 'Kapitel {n}';
   @override
-  String get epubConvertOpening => 'Försättsblad';
+  String get convertOpening => 'Försättsblad';
   @override
-  String get epubConvertContents => 'Innehåll';
+  String get convertContents => 'Innehåll';
   @override
   String get epubConvertPickTitle => 'Välj en EPUB att konvertera';
   @override
