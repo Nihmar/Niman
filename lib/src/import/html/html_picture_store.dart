@@ -49,9 +49,14 @@ final class HtmlPictureStore {
   final PictureFetcher fetch;
 
   int _downloads = 0;
+  bool _closed = false;
 
   /// The pictures that landed in the store, by their paths.
   final Set<String> _kept = {};
+
+  /// Ends the store's writing: a picture still on its way is dropped when
+  /// it arrives, so nothing lands in a folder that is being deleted.
+  void close() => _closed = true;
 
   /// How many pictures the store holds.
   int get length => _kept.length;
@@ -72,7 +77,7 @@ final class HtmlPictureStore {
       // Left out: the note keeps a web picture's address, and drops the rest.
       return null;
     }
-    if (picture == null) return null;
+    if (picture == null || _closed) return null;
     final name = '${sha256.convert(picture.bytes)}${picture.extension}';
     final file = File(p.join(staging, attachments, name));
     if (!file.existsSync()) {

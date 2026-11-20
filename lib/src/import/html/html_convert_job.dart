@@ -20,6 +20,7 @@ import 'package:niman/src/core/settings/library_settings.dart' show LinkType;
 import 'package:niman/src/import/html/html_convert_failures.dart';
 import 'package:niman/src/import/html/html_note.dart';
 import 'package:niman/src/import/html/html_page.dart';
+import 'package:niman/src/import/html/html_picture_pool.dart';
 import 'package:niman/src/import/html/html_picture_source.dart';
 import 'package:niman/src/import/html/html_picture_store.dart';
 import 'package:niman/src/library/note_writer.dart' show swapFileIn;
@@ -123,16 +124,16 @@ Future<HtmlConverted> convertHtml(
       fetch: fetch ?? httpPictureFetcher(client = pictureHttpClient()),
     );
     final total = sources.length + 1;
-    var done = 0;
-    final kept = <String, String>{};
-    for (final source in sources.values) {
-      await step();
-      progress?.call((done: done++, total: total, what: source.label));
-      final path = await store.keep(source);
-      if (path != null) kept[source.address] = path;
-    }
+    final kept = await keepPictures(
+      store,
+      sources.values.toList(),
+      step: step,
+      stopped: stopped,
+      progress: (done, what) =>
+          progress?.call((done: done, total: total, what: what)),
+    );
     await step();
-    progress?.call((done: done, total: total, what: page.title));
+    progress?.call((done: sources.length, total: total, what: page.title));
     final text = htmlNote(
       page,
       imported: request.importedOn ?? DateTime.now(),

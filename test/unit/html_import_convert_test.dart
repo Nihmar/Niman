@@ -173,7 +173,9 @@ void main() {
       expect(progress.last.total, 7);
       expect(progress.last.done, 6);
       expect(progress.last.what, 'Dune review');
-      expect([for (final step in progress) step.done], [0, 1, 2, 3, 4, 5, 6]);
+      final counts = [for (final step in progress) step.done];
+      expect(counts, orderedEquals([...counts]..sort()));
+      expect(counts.toSet(), {0, 1, 2, 3, 4, 5, 6});
     });
 
     test('is written with Markdown links in a Markdown library', () async {
@@ -237,6 +239,41 @@ void main() {
     });
   });
 
+  group('the pictures from the web', () {
+    test('come four at a time', () async {
+      var running = 0;
+      var most = 0;
+      final urls = [for (var i = 0; i < 10; i++) 'https://example.org/$i.png'];
+      final progress = <HtmlConvertProgress>[];
+      final converted = await convertHtml(
+        request(
+          page(
+            'p.html',
+            '<title>T</title>${[for (final url in urls) '<img src="$url">'].join()}',
+          ),
+        ),
+        fetch: (url) async {
+          most = ++running > most ? running : most;
+          await Future<void>.delayed(const Duration(milliseconds: 30));
+          running--;
+          // Each one its own bytes: ten pictures.
+          return (
+            bytes: Uint8List.fromList([..._png, urls.indexOf(url)]),
+            extension: '.png',
+          );
+        },
+        progress: progress.add,
+      );
+      expect(most, parallelPictureDownloads);
+      expect(converted.pictures, 10);
+      // Counted as they finish: every count is reached, none goes back.
+      final counts = [for (final step in progress) step.done];
+      expect(counts, orderedEquals([...counts]..sort()));
+      expect(counts.toSet(), {for (var i = 0; i <= 10; i++) i});
+      expect(progress.last.total, 11);
+    });
+  });
+
   group('a file it refuses', () {
     Matcher refusedFor(HtmlRefusal reason) => throwsA(
       isA<HtmlRefused>().having((error) => error.reason, 'reason', reason),
@@ -297,22 +334,54 @@ void main() {
         '<title>T</title><p><img src="a.png"><img src="b.png">'
             '<img src="c.png"></p>',
       );
-      var seen = 0;
       var stop = false;
       await expectLater(
         convertHtml(
           request(source),
           fetch: noFetch,
           progress: (step) {
-            // Two pictures are in the staging folder when it is told.
-            if (++seen == 3) stop = true;
+            // Told when the first picture is in the staging folder.
+            if (step.done == 1) stop = true;
           },
           stopped: () => stop,
         ),
         throwsA(isA<HtmlConvertStopped>()),
       );
-      expect(seen, 3);
       expect(tree(), isEmpty);
+    });
+
+    test('stopped while pictures download, nothing lands', () async {
+      final gates = <Completer<FetchedPicture?>>[];
+      final started = Completer<void>();
+      var stop = false;
+      final source = page(
+        'p.html',
+        '<title>T</title>${[for (var i = 0; i < 6; i++) '<img src="https://example.org/$i.png">'].join()}',
+      );
+      final run = convertHtml(
+        request(source),
+        fetch: (url) {
+          final gate = Completer<FetchedPicture?>();
+          gates.add(gate);
+          if (gates.length == 4 && !started.isCompleted) started.complete();
+          return gate.future;
+        },
+        stopped: () => stop,
+      );
+      await started.future;
+      stop = true;
+      // Ends with every download still on its way.
+      await expectLater(
+        run.timeout(const Duration(seconds: 5)),
+        throwsA(isA<HtmlConvertStopped>()),
+      );
+      // The downloads that arrive late write nothing.
+      for (final gate in gates) {
+        gate.complete((bytes: Uint8List.fromList(_png), extension: '.png'));
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(tree(), isEmpty);
+      expect(gates, hasLength(4));
     });
 
     test('told not to finish, moves nothing in', () async {
@@ -367,7 +436,7 @@ void main() {
         read('Web/Run.md'),
         contains('![[assets/${_name(_png, '.png')}]]'),
       );
-      expect(seen, [0, 1]);
+      expect(seen, [0, 1, 1]);
       expect(conversion.cancellable, isFalse);
       expect(tree(), [
         'Web',
