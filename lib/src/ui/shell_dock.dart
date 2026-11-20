@@ -246,6 +246,10 @@ final class ShellDock {
       context: context,
       showDragHandle: true,
       builder: (sheet) => SizedBox(
+        // The sheet shrinks to its child's width: a pane that holds only a
+        // line of text (the links pane with nothing to list) would leave a
+        // narrow column in the middle of the screen (#1296).
+        width: double.infinity,
         height: MediaQuery.sizeOf(sheet).height * 0.5,
         child: _paneBody(
           sheet,

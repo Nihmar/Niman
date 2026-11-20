@@ -138,4 +138,21 @@ void main() {
     expect(find.text('Other'), findsNothing);
     expect(find.byKey(const Key('tasks-for-note-add')), findsOneWidget);
   });
+
+  testWidgets('a pane that holds only a line of text still spans the sheet', (
+    tester,
+  ) async {
+    // #1296: nothing links to the note, so the links pane is one short
+    // text; the sheet used to shrink to it.
+    await session.open('/fake', create: false);
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await show(tester, DockPane.links);
+    expect(find.byType(LinksDockPane), findsOneWidget);
+    final sheet = tester.getSize(find.byType(BottomSheet));
+    // Material 3 caps a sheet at 640 logical pixels: a phone gets all of it.
+    expect(sheet.width, 400);
+    expect(tester.getSize(find.byType(LinksDockPane)).width, 400);
+  });
 }
