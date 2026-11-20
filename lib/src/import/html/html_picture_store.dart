@@ -37,7 +37,12 @@ HttpClient pictureHttpClient() => HttpClient()
 /// The staging folder's pictures.
 final class HtmlPictureStore {
   /// A store writing into `<staging>/<attachments>/`.
-  new({required this.staging, required this.attachments, required this.fetch});
+  new({
+    required this.staging,
+    required this.attachments,
+    required this.fetch,
+    this.maxDownloads = maxCapturedPictures,
+  });
 
   /// The hidden folder everything is written in first, absolute.
   final String staging;
@@ -47,6 +52,10 @@ final class HtmlPictureStore {
 
   /// How a web picture comes.
   final PictureFetcher fetch;
+
+  /// The most web pictures the store downloads: a page's is the capture's
+  /// own limit, a folder of pages' (#1295) is its own.
+  final int maxDownloads;
 
   int _downloads = 0;
   bool _closed = false;
@@ -100,7 +109,7 @@ final class HtmlPictureStore {
   }
 
   Future<FetchedPicture?> _web(String url) {
-    if (_downloads >= maxCapturedPictures) return Future.value();
+    if (_downloads >= maxDownloads) return Future.value();
     _downloads++;
     return fetch(url);
   }

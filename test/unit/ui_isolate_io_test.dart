@@ -57,13 +57,15 @@ const Map<String, String> _offTheUiIsolate = {
   'home/note_preview.dart': 'the preview read, in Isolate.run',
   'import/book/book_move_in.dart':
       "the moving in, from a book conversion's spawned isolate",
+  'import/folder/folder_job.dart': "the import's spawned isolate",
+  'import/folder/folder_scan.dart': 'the walk, in IsolateGauge.run',
   'import/html/book/html_book_job.dart': "the conversion's spawned isolate",
   'import/html/html_convert_job.dart': "the conversion's spawned isolate",
   'import/html/html_picture_store.dart':
       "the pictures' keeping, in the conversion's isolate",
   'library/attachment_store.dart': 'the copy its Isolate.run calls',
   'library/audio_import.dart': 'the copy and the rename, in Isolate.run',
-  'library/markdown_import.dart': 'the import, in IsolateGauge.run',
+  'library/markdown_import.dart': "the folder's name, in the import's isolate",
   'library/note_ops_blocking.dart':
       'the listing, the outline and the preview reads, in isolates',
   'library/note_tidy.dart': 'the tidy read, in Isolate.run',

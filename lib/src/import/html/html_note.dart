@@ -48,6 +48,34 @@ String htmlNote(
   Map<String, String> pictures = const {},
   LinkType linkType = LinkType.wikilink,
   String folder = '',
+}) => htmlNoteMade(
+  page,
+  imported: imported,
+  file: file,
+  pictures: pictures,
+  linkType: linkType,
+  folder: folder,
+).text;
+
+/// A note made of a page: its text, and the heading each `id` of the page
+/// lands in, for the links of other pages that point at it.
+typedef HtmlNoteMade = ({String text, Map<String, String> headings});
+
+/// [htmlNote] with what the other pages of a folder (#1295) need of it: the
+/// heading of every `id` (the heading on its line, else the last one before
+/// it, else the note's own title), as the note's text writes it.
+///
+/// [pageLink] is asked for each link that is not into the page itself, and
+/// answers the destination to write, or null to write the link as it was in
+/// the page.
+HtmlNoteMade htmlNoteMade(
+  HtmlPage page, {
+  required DateTime imported,
+  required Uri file,
+  Map<String, String> pictures = const {},
+  LinkType linkType = LinkType.wikilink,
+  String folder = '',
+  String? Function(String href)? pageLink,
 }) {
   final base = page.baseUrl ?? file;
   // The note's own name is not known yet (it is the title's), but its
@@ -75,15 +103,29 @@ String htmlNote(
         ? null
         : href.startsWith('#') && href.length > 1
         ? anchorTarget(href.substring(1))
-        : href,
+        : pageLink?.call(href) ?? href,
   ).convert(page.html);
-  final body = withoutTitleHeading(
-    resolveAnchorLinks(converted.markdown, converted.anchors, title: title),
-    title,
+  final markdown = resolveAnchorLinks(
+    converted.markdown,
+    converted.anchors,
+    title: title,
   );
+  // Only a note in a folder is pointed into by other pages.
+  final headings = pageLink == null
+      ? const <MarkdownHeading>[]
+      : markdownHeadings(converted.markdown.split('\n'));
+  final body = withoutTitleHeading(markdown, title);
   final out = StringBuffer(_frontmatter(page, imported))..write('\n# $title\n');
   if (body.isNotEmpty) out.write('\n$body\n');
-  return out.toString();
+  return (
+    text: out.toString(),
+    headings: pageLink == null
+        ? const {}
+        : {
+            for (final anchor in converted.anchors.entries)
+              anchor.key: headingAtOrBefore(headings, anchor.value) ?? title,
+          },
+  );
 }
 
 String _frontmatter(HtmlPage page, DateTime imported) {
