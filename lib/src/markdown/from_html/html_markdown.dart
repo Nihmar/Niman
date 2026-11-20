@@ -12,6 +12,7 @@ library;
 import 'package:html/parser.dart' as html;
 import 'package:niman/src/markdown/from_html/block_context.dart';
 import 'package:niman/src/markdown/from_html/html_blocks.dart';
+import 'package:niman/src/markdown/from_html/html_footnotes.dart';
 import 'package:niman/src/markdown/from_html/html_inline.dart';
 import 'package:niman/src/markdown/from_html/html_pictures.dart';
 import 'package:niman/src/markdown/from_html/markdown_blocks.dart';
@@ -63,14 +64,19 @@ final class HtmlMarkdown {
     final body = document.body ?? document.documentElement;
     final out = MarkdownBlocks();
     if (body != null) {
-      final inline = HtmlInline(
-        pictures: HtmlPictures(picture: picture, embed: embed),
-        link: link,
-      );
+      final footnotes = HtmlFootnotes(body);
       HtmlBlocks(
-        inline,
-        breaksAsParagraphs: breaksAsParagraphs,
-      ).walk(body.nodes, out, const BlockContext());
+          HtmlInline(
+            pictures: HtmlPictures(picture: picture, embed: embed),
+            link: link,
+            footnotes: footnotes,
+          ),
+          footnotes,
+          breaksAsParagraphs: breaksAsParagraphs,
+        )
+        ..walk(body.nodes, out, const BlockContext())
+        // The notes come after the page, once it has cited them.
+        ..writeFootnotes(out);
     }
     return (markdown: out.text, anchors: out.anchors);
   }

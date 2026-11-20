@@ -400,6 +400,148 @@ void main() {
     });
   });
 
+  group('footnotes', () {
+    // Pandoc's shape.
+    const pandoc =
+        '<p>Text<a href="#fn1" class="footnote-ref" id="fnref1" '
+        'role="doc-noteref"><sup>1</sup></a> and more'
+        '<a href="#fn2" class="footnote-ref" id="fnref2" '
+        'role="doc-noteref"><sup>2</sup></a>.</p>'
+        '<section id="footnotes" class="footnotes footnote-section" '
+        'role="doc-endnotes"><hr /><ol>'
+        '<li id="fn1"><p>First <em>note</em>. '
+        '<a href="#fnref1" class="footnote-back" role="doc-backlink">'
+        '↩︎</a></p></li>'
+        '<li id="fn2"><p>Second.'
+        '<a href="#fnref2" class="footnote-back" role="doc-backlink">'
+        '↩︎</a></p></li></ol></section>';
+
+    test('a reference is [^n], the notes written at the end', () {
+      final chapter = convert('$pandoc<p>After.</p>');
+      expect(
+        chapter.markdown,
+        'Text[^1] and more[^2].\n\nAfter.\n\n'
+        '[^1]: First *note*.\n\n[^2]: Second.',
+      );
+      // The list of notes is not where the page left it, nor its ids.
+      expect(chapter.anchors.keys, isNot(contains('footnotes')));
+      expect(chapter.anchors.keys, isNot(contains('fn1')));
+      expect(links, isEmpty);
+    });
+
+    test('notes are numbered in the order the text cites them', () {
+      expect(
+        markdown(
+          '<p>a<a href="#b"><sup>2</sup></a> b<a href="#a"><sup>1</sup></a> '
+          'c<a href="#b"><sup>2</sup></a></p>'
+          '<div class="footnotes"><ol><li id="a">A</li><li id="b">B</li></ol>'
+          '</div>',
+        ),
+        'a[^1] b[^2] c[^1]\n\n[^1]: B\n\n[^2]: A',
+      );
+    });
+
+    test('the sup may wrap the link, or the link stand alone', () {
+      expect(
+        markdown(
+          '<p>a<sup id="r1"><a href="#n1">1</a></sup>'
+          'b<a href="#n2">[2]</a>c<sup>3</sup></p>'
+          '<section class="footnotes"><ol><li id="n1">One</li>'
+          '<li id="n2">Two</li></ol></section>',
+        ),
+        'a[^1]b[^2]c<sup>3</sup>\n\n[^1]: One\n\n[^2]: Two',
+      );
+    });
+
+    test('a link that does not lead to a note stays a link', () {
+      expect(
+        markdown(
+          '<p>a<sup><a href="#sec">1</a></sup> <a href="#gone">b</a></p>'
+          '<h2 id="sec">S</h2>'
+          '<section class="footnotes"><ol><li id="n1">One</li></ol></section>',
+        ),
+        'a<sup>[1](<link:#sec>)</sup> [b](<link:#gone>)\n\n## S\n\n'
+        '[^1]: One',
+      );
+    });
+
+    test('a page with notes it never links keeps them, after the rest', () {
+      expect(
+        markdown(
+          '<p>x<a href="#n2">2</a></p>'
+          '<div class="footnotes"><ol><li id="n1">One</li>'
+          '<li id="n2">Two</li></ol></div>',
+        ),
+        'x[^1]\n\n[^1]: Two\n\n[^2]: One',
+      );
+    });
+
+    test('a note of its own element: an aside with a role or an epub:type', () {
+      expect(
+        markdown(
+          '<p>a<a epub:type="noteref" href="#n1">1</a>'
+          'b<a href="#n2">2</a></p>'
+          '<aside epub:type="footnote" id="n1"><p>One.</p></aside>'
+          '<aside role="doc-footnote" id="n2"><p>Two <b>x</b></p></aside>'
+          '<p>end</p>',
+        ),
+        'a[^1]b[^2]\n\nend\n\n[^1]: One.\n\n[^2]: Two **x**',
+      );
+    });
+
+    test('the paragraphs of a note are one line, a note may cite a note', () {
+      expect(
+        markdown(
+          '<p>a<a href="#n1">1</a></p>'
+          '<div class="footnotes"><ol>'
+          '<li id="n1"><p>One</p><p>and <a href="#n2">2</a> '
+          '<a class="footnote-backref" href="#r">↩</a></p></li>'
+          '<li id="n2">Two</li></ol></div>',
+        ),
+        'a[^1]\n\n[^1]: One and [^2]\n\n[^2]: Two',
+      );
+    });
+
+    test('a note with no words is its label', () {
+      expect(
+        markdown(
+          '<p>a<a href="#n">1</a></p><div class="footnotes"><ol>'
+          '<li id="n"><a role="doc-backlink" href="#x">↩</a></li>'
+          '</ol></div>',
+        ),
+        'a[^1]\n\n[^1]:',
+      );
+    });
+
+    test('a page with no notes is not touched by the search for them', () {
+      expect(
+        markdown('<p><a href="#a">x</a><sup>1</sup></p>'),
+        '[x](<link:#a>)<sup>1</sup>',
+      );
+    });
+
+    test("a note Niman's export wrote reads back, cited twice too", () {
+      const note =
+          'Hi[^b] there[^a] and again[^b].\n\n'
+          '[^a]: Alpha *x*\n\n[^b]: Beta\n';
+      final body = NoteHtml(const NoteHtmlSource(text: note, title: 't'))
+          .body();
+      expect(body, contains('footnote-backref'));
+      final text = markdown(body);
+      expect(
+        text,
+        'Hi[^1] there[^2] and again[^1].\n\n'
+        '[^1]: Beta\n\n[^2]: Alpha *x*',
+      );
+      // And the app reads the references as the footnotes they are.
+      final nodes = InlineParser(
+        text.split('\n\n').first,
+        footnotes: {'1', '2'},
+      ).parse();
+      expect(nodes.whereType<FootnoteRefNode>(), hasLength(3));
+    });
+  });
+
   group('escaping', () {
     test("a book's #word is not a tag", () {
       expect(markdown('<p>see #chapter</p>'), r'see \#chapter');

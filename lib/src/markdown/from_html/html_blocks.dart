@@ -5,6 +5,7 @@ library;
 import 'package:html/dom.dart';
 import 'package:niman/src/markdown/from_html/block_context.dart';
 import 'package:niman/src/markdown/from_html/html_code_language.dart';
+import 'package:niman/src/markdown/from_html/html_footnotes.dart';
 import 'package:niman/src/markdown/from_html/html_inline.dart';
 import 'package:niman/src/markdown/from_html/html_table.dart';
 import 'package:niman/src/markdown/from_html/markdown_blocks.dart';
@@ -15,10 +16,13 @@ final class HtmlBlocks {
   /// A block writer that sets inline content with [inline]; with
   /// [breaksAsParagraphs] the lines of a paragraph, cut at its `<br>`s, are
   /// paragraphs of their own.
-  const new(this.inline, {this.breaksAsParagraphs = false});
+  const new(this.inline, this.footnotes, {this.breaksAsParagraphs = false});
 
   /// The writer of inline content.
   final HtmlInline inline;
+
+  /// The page's footnotes: not written where they stand.
+  final HtmlFootnotes footnotes;
 
   /// Whether a `<br>` between two lines of a paragraph ends the paragraph.
   final bool breaksAsParagraphs;
@@ -45,6 +49,7 @@ final class HtmlBlocks {
   }
 
   void _block(Element element, MarkdownBlocks out, BlockContext context) {
+    if (footnotes.isNote(element)) return;
     final id = element.id;
     if (id.isNotEmpty) out.anchor(id);
     final tag = element.localName ?? '';
@@ -109,15 +114,16 @@ final class HtmlBlocks {
     final summary = element.children
         .where((child) => child.localName == 'summary')
         .firstOrNull;
+    // The title is read first: a footnote it cites comes before the body's.
+    final title = summary == null
+        ? 'Details'
+        : inline.of(summary.nodes).replaceAll('\\\n', ' ').trim();
     final body = MarkdownBlocks();
     walk(
       element.nodes.where((node) => node != summary),
       body,
       const BlockContext(),
     );
-    final title = summary == null
-        ? 'Details'
-        : inline.of(summary.nodes).replaceAll('\\\n', ' ').trim();
     if (title.isEmpty && body.text.isEmpty) return;
     // Niman's own export names the callout's type on its `<details>`.
     final written = element.attributes['data-callout'] ?? '';
@@ -136,6 +142,14 @@ final class HtmlBlocks {
   }
 
   static final RegExp _calloutType = RegExp(r'^[A-Za-z][\w-]*$');
+
+  /// The notes the page cites and the ones it does not, each as a block of
+  /// its own: `[^n]: text`, the paragraphs of a note run into one line.
+  void writeFootnotes(MarkdownBlocks out) {
+    footnotes
+        .definitions((note) => inline.of(_flatten(note.nodes)).trim())
+        .forEach(out.add);
+  }
 
   /// The paragraphs of the inline content [nodes].
   void _paragraphs(List<Node> nodes, MarkdownBlocks out, BlockContext context) {
@@ -163,7 +177,7 @@ final class HtmlBlocks {
   }) {
     var number = int.tryParse(list.attributes['start'] ?? '') ?? 1;
     for (final item in list.children) {
-      if (item.localName != 'li') continue;
+      if (item.localName != 'li' || footnotes.isNote(item)) continue;
       if (item.id.isNotEmpty) out.anchor(item.id);
       _anchorsWithin(item, out);
       final marker = ordered ? '${number++}. ' : '- ';

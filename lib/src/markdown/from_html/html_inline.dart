@@ -3,20 +3,28 @@
 library;
 
 import 'package:html/dom.dart';
+import 'package:niman/src/markdown/from_html/html_footnotes.dart';
 import 'package:niman/src/markdown/from_html/html_pictures.dart';
 import 'package:niman/src/markdown/text_escape.dart';
 
 /// Writes the inline content of a page as Markdown.
 final class HtmlInline {
   /// An inline writer that names pictures with [pictures] and links with
-  /// [link].
-  const new({required this.pictures, required this.link});
+  /// [link], and cites the page's notes as [footnotes] numbers them.
+  const new({
+    required this.pictures,
+    required this.link,
+    required this.footnotes,
+  });
 
   /// The page's pictures.
   final HtmlPictures pictures;
 
   /// The target a link's `href` is written under.
   final String Function(String href) link;
+
+  /// The page's footnotes.
+  final HtmlFootnotes footnotes;
 
   /// The inline Markdown of [nodes].
   String of(List<Node> nodes) => _run(nodes, paragraphs: false);
@@ -72,7 +80,17 @@ final class HtmlInline {
       case 'mark':
         _wrapped(out, inner(), '==');
       case 'sup':
-        _wrapped(out, inner(), '<sup>', '</sup>');
+        // A note's number, raised, is the note: its link says so.
+        final links = node.querySelectorAll('a');
+        final cited =
+            links.length == 1 && node.text.trim() == links[0].text.trim()
+            ? footnotes.cite(links[0])
+            : null;
+        if (cited != null) {
+          out.write('[^$cited]');
+        } else {
+          _wrapped(out, inner(), '<sup>', '</sup>');
+        }
       case 'sub':
         _wrapped(out, inner(), '<sub>', '</sub>');
       case 'code' || 'kbd' || 'samp' || 'tt':
@@ -83,6 +101,12 @@ final class HtmlInline {
       case 'br':
         out.write(paragraphs ? _split : '\\\n');
       case 'a':
+        if (footnotes.isBacklink(node)) return;
+        final cited = footnotes.cite(node);
+        if (cited != null) {
+          out.write('[^$cited]');
+          return;
+        }
         final text = inner();
         final href = node.attributes['href'];
         if (href == null || href.isEmpty || text.trim().isEmpty) {
