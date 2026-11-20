@@ -600,6 +600,25 @@ is not taken. A link dropped on a
 desktop window is a [web capture](web-capture.md); on a phone, the
 browser's Share does it.
 
+**Importing a folder** (see
+[organization](organization.md#importing-a-folder)) is *Settings →
+Maintenance → Import a folder* on every platform, and a drop on the
+window on Linux, Windows and macOS. What the picker gives depends on the
+platform:
+
+- On **Linux, Windows and macOS** it is the system's folder dialog.
+- On **Android** it is the system's folder picker, read by path as a
+  library is, so it needs the same *all files access*; Niman says so when
+  it is missing. A folder dragged from another app is not taken (a
+  drag there carries files, not folders): use the row in Settings.
+- On **iOS and iPadOS** the picker lists the folders in Niman's own folder
+  (*On My iPhone › Niman* in Files), as opening a library there does: put
+  the folder there with Files first. iOS gives the app no access to a
+  folder picked anywhere else — iCloud Drive, another app's storage — so it
+  cannot be imported from where it is. This is a decision, not an omission.
+  The library itself is in that list; picking it shows it, importing
+  nothing.
+
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is
 Linux and Windows only for now: Android's picker hands over a copy of

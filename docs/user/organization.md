@@ -715,12 +715,11 @@ drop lands without it, for the reason
   several and each opens, in a tab of its own.
 - **A folder of the open library** is shown in the tree, with the
   folders above it opened on the way.
-- **A folder from anywhere else** is offered for import. Its Markdown
-  files are copied into a new folder of the library named after it
-  (`Drafts`, or `Drafts 2` when that is taken), with their layout kept.
-  Nothing else comes along: not images, not hidden folders such as
-  `.git` or `.obsidian`. The folder you dropped is left exactly as it
-  was.
+- **A folder from anywhere else** is offered for import, and the offer
+  says what it will make: its Markdown files copied and, when it has web
+  pages, those converted into notes. See
+  [Importing a folder](#importing-a-folder). The folder you dropped is
+  left exactly as it was.
 - **A Notion export** (the `.zip` of *Export → Markdown & CSV*) is
   imported: see [Importing a Notion export](#importing-a-notion-export).
 - **A book** (`.epub`) is offered for conversion into notes: see
@@ -858,7 +857,9 @@ What the note holds:
   any attachment. A picture that cannot be had keeps its web address; a
   local one that is missing is left out.
 - **Links.** A link to the web stays as it is. A link to another local
-  file stays as it was written. A link inside the page (`#section`)
+  file stays as it was written — unless the page is converted as part of a
+  [folder](#importing-a-folder), where a link to another page of the folder
+  points at the note it became. A link inside the page (`#section`)
   points at the heading it lands in. A `javascript:` link, and the like,
   is text, not a link.
 
@@ -952,6 +953,67 @@ others, its details in its frontmatter and its chapters under their own
 A drop or a share of several pages at once converts each as a page, and
 asks nothing about books: convert a book on its own to cut it into
 chapters.
+
+## Importing a folder
+
+A folder outside the library — a site saved for offline reading, another
+app's HTML export, a pile of Markdown — becomes a folder of notes. It starts
+from a **drop on the window** (Linux, Windows and macOS; see
+[Dropping files on the window](#dropping-files-on-the-window)) and from
+*Settings → Maintenance → Import a folder*, which picks the folder on every
+platform ([platforms](platforms.md#importing-a-folder) says how on Android
+and iOS). The offer names the folder and says what it will make — "its
+Markdown files (12) are copied and its web pages (30) converted into
+notes" — and nothing is touched until you accept. The folder you chose is
+left exactly as it was.
+
+What comes in lands in a new folder of the library named after the one
+chosen (`Site`, or `Site 2` when that is taken), with the layout it had:
+
+- **Markdown files** (`.md`, `.markdown`) are copied as they are, but for
+  their links to a page (next but one).
+- **Web pages** (`.html`, `.htm`, `.xhtml`) are each converted into a note,
+  as [a page converted on its own](#converting-a-web-page-into-a-note) is:
+  the article, else the whole body; its frontmatter, its pictures and its
+  links as described there. The note is named after the page's **file**, not
+  its title — `site/a/b.html` is `a/b.md` — so the links between pages map
+  one to one and two pages never take one name. A page whose note would
+  take a name already taken in its folder (`b.html` beside `b.md`, or beside
+  `b.htm`) is numbered, `b_2.md`; the Markdown file keeps its own. A page
+  that is a book is converted as a page here, not cut into chapters.
+- **Links between the files** are rewritten to the notes they became: from a
+  page or from a Markdown file, a relative link to another page of the
+  folder — `../x.html`, `x.html#section`, `./x.html`, written with
+  `%20` or a backslash, with a query, or to a folder whose `index.html` it
+  is — points at the note, relative to the note it is in, and at its
+  **heading** when it ends in `#id` (the heading the `id` is under; a link
+  to an `id` the page does not have goes to the note). They are Markdown
+  links whatever the library's link type, which decides only how a picture
+  is embedded. A link to the web, and a link to a file that is not imported
+  (a PDF, a picture, a stylesheet), stays as it was written. A link inside
+  a Markdown file to another Markdown file is already right and is left
+  alone.
+- **Pictures.** The pictures a page shows — those beside it (a browser's
+  `<Page>_files` folder), written into it (`data:`) and on the web — are
+  kept as for a single page, in the library's attachments folder, each once
+  by what it is, whichever pages show it. Web pictures are downloaded under
+  the web capture's limits (each under 15 MB, at most 60 for a page) and
+  500 for the whole import; the ones past them keep their web address. A
+  picture a Markdown file shows is not copied.
+- **Not imported:** the browser's `<Page>_files` folders (a page's own
+  files: its frames and its ads are not notes), stylesheets, scripts and
+  every other file, and hidden folders such as `.git` or `.obsidian`.
+
+The import runs in the background with a progress dialog (files done of the
+total) and **Cancel**, which leaves the library as it was: everything is
+written aside and moved in at the end. When it is done, the tree shows the
+new folder. A page that cannot be read or converted — a text encoding Niman
+does not read, a file over 32 MiB — is left out, and the message says how
+many files were; the links to it stay as they were written.
+
+A folder far beyond what a notes app should hold — more than 100 000
+notes and pages, more than 1 GiB of them, or more than a million entries to
+look through — is refused before anything is converted.
 
 ## Importing a Notion export
 
