@@ -2056,6 +2056,49 @@ final class GreekStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Επιλέξτε ένα EPUB για μετατροπή';
   @override
+  String get htmlConvertCommand => 'Μετατροπή HTML σε Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Μετατροπή αρχείου HTML σε Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Επιλέξτε ένα αρχείο HTML για μετατροπή';
+  @override
+  String get htmlConvertReading => 'Ανάγνωση της σελίδας…';
+  @override
+  String htmlConvertMany(int count) => 'Αρχεία HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Ανοίξτε μια βιβλιοθήκη για να μετατρέψετε μια ιστοσελίδα σε σημείωση';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      'Το «$name» δεν ήταν δυνατό να διαβαστεί';
+  @override
+  String get htmlConvertTooLarge =>
+      'Αυτή η σελίδα είναι πολύ μεγάλη για μετατροπή';
+  @override
+  String get htmlConvertCharset =>
+      'Η κωδικοποίηση κειμένου αυτής της σελίδας δεν υποστηρίζεται';
+  @override
+  String get htmlConvertFailed => 'Δεν ήταν δυνατή η μετατροπή της σελίδας';
+  @override
+  String get htmlDropTitle => 'Τι να γίνει με το HTML που αφήσατε;';
+  @override
+  String get htmlDropConvertDetail =>
+      'Δημιουργία σημείωσης από τη σελίδα, μαζί με τις εικόνες της';
+  @override
+  String get htmlDropAttach => 'Επισύναψη';
+  @override
+  String get htmlDropAttachDetail =>
+      'Το αρχείο μένει με την ανοιχτή σημείωση, ως έχει';
+  @override
+  String get htmlDropBoth => 'Επισύναψη και μετατροπή';
+  @override
+  String get htmlDropBothDetail =>
+      'Το αρχείο μένει με την ανοιχτή σημείωση και '
+      'δημιουργείται σημείωση από τη σελίδα';
+  @override
+  String get htmlDropNeedsNote =>
+      'Η επισύναψη απαιτεί μια ανοιχτή σημείωση στη βιβλιοθήκη';
+  @override
   String get openFileTitle => 'Άνοιγμα αρχείου';
   @override
   String get outsideFileNote =>

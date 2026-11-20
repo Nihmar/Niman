@@ -2000,6 +2000,48 @@ final class PortugueseStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Escolha um EPUB para converter';
   @override
+  String get htmlConvertCommand => 'Converter HTML em Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Converter um ficheiro HTML em Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Escolha um ficheiro HTML para converter';
+  @override
+  String get htmlConvertReading => 'A ler a página…';
+  @override
+  String htmlConvertMany(int count) => 'Ficheiros HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Abra uma biblioteca para converter uma página web em nota';
+  @override
+  String htmlConvertUnreadable(String name) => 'Não foi possível ler «$name»';
+  @override
+  String get htmlConvertTooLarge =>
+      'Esta página é grande demais para converter';
+  @override
+  String get htmlConvertCharset =>
+      'A codificação de texto desta página não é suportada';
+  @override
+  String get htmlConvertFailed => 'Não foi possível converter a página';
+  @override
+  String get htmlDropTitle => 'O que fazer com o HTML largado?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Criar uma nota da página, com as imagens';
+  @override
+  String get htmlDropAttach => 'Anexar';
+  @override
+  String get htmlDropAttachDetail =>
+      'Manter o ficheiro com a nota aberta, tal como está';
+  @override
+  String get htmlDropBoth => 'Anexar e converter';
+  @override
+  String get htmlDropBothDetail =>
+      'Manter o ficheiro com a nota aberta e criar uma nota da página';
+  @override
+  String get htmlDropNeedsNote =>
+      'Para anexar é preciso ter uma nota aberta na biblioteca';
+  @override
   String get openFileTitle => 'Abrir ficheiro';
   @override
   String get outsideFileNote =>

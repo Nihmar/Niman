@@ -1993,6 +1993,45 @@ final class SerbianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Изаберите EPUB за претварање';
   @override
+  String get htmlConvertCommand => 'Претвори HTML у Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Претвори HTML датотеку у Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Изаберите HTML датотеку за претварање';
+  @override
+  String get htmlConvertReading => 'Читање странице…';
+  @override
+  String htmlConvertMany(int count) => 'HTML датотеке: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Отворите библиотеку да бисте веб страницу претворили у белешку';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ није могуће прочитати';
+  @override
+  String get htmlConvertTooLarge => 'Ова страница је превелика за претварање';
+  @override
+  String get htmlConvertCharset => 'Кодирање текста ове странице није подржано';
+  @override
+  String get htmlConvertFailed => 'Страницу није могуће претворити';
+  @override
+  String get htmlDropTitle => 'Шта урадити са превученим HTML-ом?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Направи белешку од странице, заједно са сликама';
+  @override
+  String get htmlDropAttach => 'Приложи';
+  @override
+  String get htmlDropAttachDetail =>
+      'Задржи датотеку уз отворену белешку, онакву каква јесте';
+  @override
+  String get htmlDropBoth => 'Приложи и претвори';
+  @override
+  String get htmlDropBothDetail =>
+      'Задржи датотеку уз отворену белешку и направи белешку од странице';
+  @override
+  String get htmlDropNeedsNote =>
+      'За прилагање је потребна отворена белешка у библиотеци';
+  @override
   String get openFileTitle => 'Отвори датотеку';
   @override
   String get outsideFileNote =>

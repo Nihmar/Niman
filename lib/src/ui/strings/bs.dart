@@ -1994,6 +1994,46 @@ final class BosnianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Odaberite EPUB za pretvaranje';
   @override
+  String get htmlConvertCommand => 'Pretvori HTML u Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pretvori HTML datoteku u Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Odaberite HTML datoteku za pretvaranje';
+  @override
+  String get htmlConvertReading => 'Čitanje stranice…';
+  @override
+  String htmlConvertMany(int count) => 'HTML datoteke: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Otvorite biblioteku da biste web stranicu pretvorili u bilješku';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ se ne može pročitati';
+  @override
+  String get htmlConvertTooLarge => 'Ova stranica je prevelika za pretvaranje';
+  @override
+  String get htmlConvertCharset =>
+      'Kodiranje teksta ove stranice nije podržano';
+  @override
+  String get htmlConvertFailed => 'Stranicu nije moguće pretvoriti';
+  @override
+  String get htmlDropTitle => 'Šta učiniti s ispuštenim HTML-om?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Napravi bilješku od stranice, zajedno sa slikama';
+  @override
+  String get htmlDropAttach => 'Priloži';
+  @override
+  String get htmlDropAttachDetail =>
+      'Zadrži datoteku uz otvorenu bilješku, onakvu kakva jeste';
+  @override
+  String get htmlDropBoth => 'Priloži i pretvori';
+  @override
+  String get htmlDropBothDetail =>
+      'Zadrži datoteku uz otvorenu bilješku i napravi bilješku od stranice';
+  @override
+  String get htmlDropNeedsNote =>
+      'Za prilaganje je potrebna otvorena bilješka u biblioteci';
+  @override
   String get openFileTitle => 'Otvori datoteku';
   @override
   String get outsideFileNote =>

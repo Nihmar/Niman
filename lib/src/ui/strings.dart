@@ -1268,6 +1268,24 @@ final class AppStrings {
   static String get epubConvertOpening => _s.epubConvertOpening;
   static String get epubConvertContents => _s.epubConvertContents;
   static String get epubConvertPickTitle => _s.epubConvertPickTitle;
+  static String get htmlConvertCommand => _s.htmlConvertCommand;
+  static String get htmlConvertSettingsTitle => _s.htmlConvertSettingsTitle;
+  static String get htmlConvertPickTitle => _s.htmlConvertPickTitle;
+  static String get htmlConvertReading => _s.htmlConvertReading;
+  static String htmlConvertMany(int count) => _s.htmlConvertMany(count);
+  static String get htmlConvertNeedsLibrary => _s.htmlConvertNeedsLibrary;
+  static String htmlConvertUnreadable(String name) =>
+      _s.htmlConvertUnreadable(name);
+  static String get htmlConvertTooLarge => _s.htmlConvertTooLarge;
+  static String get htmlConvertCharset => _s.htmlConvertCharset;
+  static String get htmlConvertFailed => _s.htmlConvertFailed;
+  static String get htmlDropTitle => _s.htmlDropTitle;
+  static String get htmlDropConvertDetail => _s.htmlDropConvertDetail;
+  static String get htmlDropAttach => _s.htmlDropAttach;
+  static String get htmlDropAttachDetail => _s.htmlDropAttachDetail;
+  static String get htmlDropBoth => _s.htmlDropBoth;
+  static String get htmlDropBothDetail => _s.htmlDropBothDetail;
+  static String get htmlDropNeedsNote => _s.htmlDropNeedsNote;
   static String get openFileTitle => _s.openFileTitle;
   static String get outsideFileNote => _s.outsideFileNote;
   static String get typewriterOn => _s.typewriterOn;

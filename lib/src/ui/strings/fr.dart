@@ -2045,6 +2045,48 @@ final class FrenchStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Choisir un EPUB à convertir';
   @override
+  String get htmlConvertCommand => 'Convertir du HTML en Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Convertir un fichier HTML en Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Choisir un fichier HTML à convertir';
+  @override
+  String get htmlConvertReading => 'Lecture de la page…';
+  @override
+  String htmlConvertMany(int count) => 'Fichiers HTML : $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Ouvrez une bibliothèque pour convertir une page web en note';
+  @override
+  String htmlConvertUnreadable(String name) => '« $name » n’a pas pu être lu';
+  @override
+  String get htmlConvertTooLarge =>
+      'Cette page est trop volumineuse pour être convertie';
+  @override
+  String get htmlConvertCharset =>
+      'L’encodage du texte de cette page n’est pas pris en charge';
+  @override
+  String get htmlConvertFailed => 'La page n’a pas pu être convertie';
+  @override
+  String get htmlDropTitle => 'Que faire du HTML déposé ?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Créer une note de la page, avec ses images';
+  @override
+  String get htmlDropAttach => 'Joindre';
+  @override
+  String get htmlDropAttachDetail =>
+      'Garder le fichier avec la note ouverte, tel quel';
+  @override
+  String get htmlDropBoth => 'Joindre et convertir';
+  @override
+  String get htmlDropBothDetail =>
+      'Garder le fichier avec la note ouverte et créer une note de la page';
+  @override
+  String get htmlDropNeedsNote =>
+      'Pour joindre, une note doit être ouverte dans la bibliothèque';
+  @override
   String get openFileTitle => 'Ouvrir un fichier';
   @override
   String get outsideFileNote =>

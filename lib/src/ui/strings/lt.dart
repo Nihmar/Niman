@@ -1988,6 +1988,45 @@ final class LithuanianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Pasirinkite EPUB konvertuoti';
   @override
+  String get htmlConvertCommand => 'Konvertuoti HTML į Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertuoti HTML failą į Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Pasirinkite HTML failą konvertuoti';
+  @override
+  String get htmlConvertReading => 'Skaitomas puslapis…';
+  @override
+  String htmlConvertMany(int count) => 'HTML failai: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Atidarykite biblioteką, kad tinklalapį konvertuotumėte į pastabą';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ nepavyko perskaityti';
+  @override
+  String get htmlConvertTooLarge => 'Šis puslapis per didelis konvertuoti';
+  @override
+  String get htmlConvertCharset => 'Šio puslapio teksto koduotė nepalaikoma';
+  @override
+  String get htmlConvertFailed => 'Puslapio konvertuoti nepavyko';
+  @override
+  String get htmlDropTitle => 'Ką daryti su numestu HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Sukurti puslapio pastabą kartu su paveikslėliais';
+  @override
+  String get htmlDropAttach => 'Prisegti';
+  @override
+  String get htmlDropAttachDetail =>
+      'Palikti failą prie atidarytos pastabos tokį, koks yra';
+  @override
+  String get htmlDropBoth => 'Prisegti ir konvertuoti';
+  @override
+  String get htmlDropBothDetail =>
+      'Palikti failą prie atidarytos pastabos ir sukurti puslapio pastabą';
+  @override
+  String get htmlDropNeedsNote =>
+      'Norint prisegti, bibliotekoje turi būti atidaryta pastaba';
+  @override
   String get openFileTitle => 'Atidaryti failą';
   @override
   String get outsideFileNote =>

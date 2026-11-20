@@ -2006,6 +2006,45 @@ final class BasqueStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Aukeratu bihurtzeko EPUB bat';
   @override
+  String get htmlConvertCommand => 'Bihurtu HTML Markdown formatura…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Bihurtu HTML fitxategi bat Markdown formatura';
+  @override
+  String get htmlConvertPickTitle => 'Aukeratu bihurtzeko HTML fitxategi bat';
+  @override
+  String get htmlConvertReading => 'Orrialdea irakurtzen…';
+  @override
+  String htmlConvertMany(int count) => 'HTML fitxategiak: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Ireki liburutegi bat web-orri bat ohar bihurtzeko';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» ezin izan da irakurri';
+  @override
+  String get htmlConvertTooLarge => 'Orri hau handiegia da bihurtzeko';
+  @override
+  String get htmlConvertCharset => 'Orri honen testu-kodeketa ez da onartzen';
+  @override
+  String get htmlConvertFailed => 'Ezin izan da orria bihurtu';
+  @override
+  String get htmlDropTitle => 'Zer egin jaregindako HTMLarekin?';
+  @override
+  String get htmlDropConvertDetail => 'Egin orriaren ohar bat, irudiekin';
+  @override
+  String get htmlDropAttach => 'Erantsi';
+  @override
+  String get htmlDropAttachDetail =>
+      'Gorde fitxategia irekitako oharrarekin, dagoen bezala';
+  @override
+  String get htmlDropBoth => 'Erantsi eta bihurtu';
+  @override
+  String get htmlDropBothDetail =>
+      'Gorde fitxategia irekitako oharrarekin eta egin orriaren ohar bat';
+  @override
+  String get htmlDropNeedsNote =>
+      'Erantsi ahal izateko, liburutegian ohar bat irekita egon behar da';
+  @override
   String get openFileTitle => 'Ireki fitxategia';
   @override
   String get outsideFileNote =>

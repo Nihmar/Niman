@@ -1974,6 +1974,45 @@ final class TurkishStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Dönüştürülecek bir EPUB seçin';
   @override
+  String get htmlConvertCommand => 'HTML’yi Markdown’a dönüştür…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Bir HTML dosyasını Markdown’a dönüştür';
+  @override
+  String get htmlConvertPickTitle => 'Dönüştürülecek bir HTML dosyası seçin';
+  @override
+  String get htmlConvertReading => 'Sayfa okunuyor…';
+  @override
+  String htmlConvertMany(int count) => 'HTML dosyaları: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Bir web sayfasını nota dönüştürmek için bir kitaplık açın';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” okunamadı';
+  @override
+  String get htmlConvertTooLarge => 'Bu sayfa dönüştürülemeyecek kadar büyük';
+  @override
+  String get htmlConvertCharset => 'Bu sayfanın metin kodlaması desteklenmiyor';
+  @override
+  String get htmlConvertFailed => 'Sayfa dönüştürülemedi';
+  @override
+  String get htmlDropTitle => 'Bırakılan HTML ile ne yapılsın?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Sayfadan, görselleriyle birlikte bir not oluştur';
+  @override
+  String get htmlDropAttach => 'Ekle';
+  @override
+  String get htmlDropAttachDetail =>
+      'Dosyayı olduğu gibi açık notla birlikte tut';
+  @override
+  String get htmlDropBoth => 'Ekle ve dönüştür';
+  @override
+  String get htmlDropBothDetail =>
+      'Dosyayı açık notla birlikte tut ve sayfadan bir not oluştur';
+  @override
+  String get htmlDropNeedsNote => 'Eklemek için kitaplıkta açık bir not olmalı';
+  @override
   String get openFileTitle => 'Dosya aç';
   @override
   String get outsideFileNote =>

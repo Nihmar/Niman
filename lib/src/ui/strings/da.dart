@@ -1982,6 +1982,45 @@ final class DanishStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Vælg en EPUB at konvertere';
   @override
+  String get htmlConvertCommand => 'Konvertér HTML til Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertér en HTML-fil til Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Vælg en HTML-fil at konvertere';
+  @override
+  String get htmlConvertReading => 'Læser siden…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-filer: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Åbn et bibliotek for at konvertere en webside til en note';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” kunne ikke læses';
+  @override
+  String get htmlConvertTooLarge => 'Denne side er for stor til at konvertere';
+  @override
+  String get htmlConvertCharset =>
+      'Tegnkodningen på denne side understøttes ikke';
+  @override
+  String get htmlConvertFailed => 'Siden kunne ikke konverteres';
+  @override
+  String get htmlDropTitle => 'Hvad skal der ske med den droppede HTML-fil?';
+  @override
+  String get htmlDropConvertDetail => 'Lav en note af siden, med billeder';
+  @override
+  String get htmlDropAttach => 'Vedhæft';
+  @override
+  String get htmlDropAttachDetail =>
+      'Behold filen ved den åbne note, som den er';
+  @override
+  String get htmlDropBoth => 'Vedhæft og konvertér';
+  @override
+  String get htmlDropBothDetail =>
+      'Behold filen ved den åbne note, og lav en note af siden';
+  @override
+  String get htmlDropNeedsNote =>
+      'Vedhæftning kræver en åben note i biblioteket';
+  @override
   String get openFileTitle => 'Åbn fil';
   @override
   String get outsideFileNote =>

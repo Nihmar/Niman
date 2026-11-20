@@ -2010,6 +2010,48 @@ final class RomanianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Alege un EPUB de convertit';
   @override
+  String get htmlConvertCommand => 'Convertește HTML în Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Convertește un fișier HTML în Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Alege un fișier HTML de convertit';
+  @override
+  String get htmlConvertReading => 'Se citește pagina…';
+  @override
+  String htmlConvertMany(int count) => 'Fișiere HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Deschide o bibliotecă pentru a converti o pagină web într-o notă';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name” nu a putut fi citit';
+  @override
+  String get htmlConvertTooLarge =>
+      'Pagina este prea mare pentru a fi convertită';
+  @override
+  String get htmlConvertCharset =>
+      'Codificarea textului acestei pagini nu este acceptată';
+  @override
+  String get htmlConvertFailed => 'Pagina nu a putut fi convertită';
+  @override
+  String get htmlDropTitle => 'Ce să se facă cu HTML-ul plasat aici?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Creează o notă din pagină, împreună cu imaginile ei';
+  @override
+  String get htmlDropAttach => 'Atașează';
+  @override
+  String get htmlDropAttachDetail =>
+      'Păstrează fișierul lângă nota deschisă, așa cum este';
+  @override
+  String get htmlDropBoth => 'Atașează și convertește';
+  @override
+  String get htmlDropBothDetail =>
+      'Păstrează fișierul lângă nota deschisă și creează o notă din pagină';
+  @override
+  String get htmlDropNeedsNote =>
+      'Pentru atașare trebuie să fie deschisă o notă în bibliotecă';
+  @override
   String get openFileTitle => 'Deschide fișier';
   @override
   String get outsideFileNote =>

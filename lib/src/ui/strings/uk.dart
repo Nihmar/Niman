@@ -1993,6 +1993,45 @@ final class UkrainianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Виберіть EPUB для перетворення';
   @override
+  String get htmlConvertCommand => 'Перетворити HTML на Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Перетворити файл HTML на Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Виберіть файл HTML для перетворення';
+  @override
+  String get htmlConvertReading => 'Читання сторінки…';
+  @override
+  String htmlConvertMany(int count) => 'Файли HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Відкрийте бібліотеку, щоб перетворити вебсторінку на нотатку';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» не вдалося прочитати';
+  @override
+  String get htmlConvertTooLarge => 'Ця сторінка завелика для перетворення';
+  @override
+  String get htmlConvertCharset =>
+      'Кодування тексту цієї сторінки не підтримується';
+  @override
+  String get htmlConvertFailed => 'Не вдалося перетворити сторінку';
+  @override
+  String get htmlDropTitle => 'Що зробити з перетягнутим файлом HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Створити нотатку зі сторінки разом із зображеннями';
+  @override
+  String get htmlDropAttach => 'Прикріпити';
+  @override
+  String get htmlDropAttachDetail => 'Залишити файл при відкритій нотатці як є';
+  @override
+  String get htmlDropBoth => 'Прикріпити й перетворити';
+  @override
+  String get htmlDropBothDetail =>
+      'Залишити файл при відкритій нотатці та створити нотатку зі сторінки';
+  @override
+  String get htmlDropNeedsNote =>
+      'Щоб прикріпити, потрібна відкрита нотатка в бібліотеці';
+  @override
   String get openFileTitle => 'Відкрити файл';
   @override
   String get outsideFileNote =>

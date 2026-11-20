@@ -1985,6 +1985,46 @@ final class CroatianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Odaberite EPUB za pretvaranje';
   @override
+  String get htmlConvertCommand => 'Pretvori HTML u Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pretvori HTML datoteku u Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Odaberite HTML datoteku za pretvaranje';
+  @override
+  String get htmlConvertReading => 'Čitanje stranice…';
+  @override
+  String htmlConvertMany(int count) => 'HTML datoteke: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Otvorite knjižnicu da biste web-stranicu pretvorili u bilješku';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name” nije moguće pročitati';
+  @override
+  String get htmlConvertTooLarge => 'Ova je stranica prevelika za pretvaranje';
+  @override
+  String get htmlConvertCharset =>
+      'Kodiranje teksta ove stranice nije podržano';
+  @override
+  String get htmlConvertFailed => 'Stranicu nije bilo moguće pretvoriti';
+  @override
+  String get htmlDropTitle => 'Što učiniti s ispuštenim HTML-om?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Napravi bilješku od stranice, zajedno sa slikama';
+  @override
+  String get htmlDropAttach => 'Priloži';
+  @override
+  String get htmlDropAttachDetail =>
+      'Zadrži datoteku uz otvorenu bilješku, onakvu kakva jest';
+  @override
+  String get htmlDropBoth => 'Priloži i pretvori';
+  @override
+  String get htmlDropBothDetail =>
+      'Zadrži datoteku uz otvorenu bilješku i napravi bilješku od stranice';
+  @override
+  String get htmlDropNeedsNote =>
+      'Za prilaganje u knjižnici mora biti otvorena bilješka';
+  @override
   String get openFileTitle => 'Otvori datoteku';
   @override
   String get outsideFileNote =>

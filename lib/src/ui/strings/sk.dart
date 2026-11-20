@@ -1987,6 +1987,46 @@ final class SlovakStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Vyberte EPUB na prevod';
   @override
+  String get htmlConvertCommand => 'Previesť HTML na Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Previesť súbor HTML na Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Vyberte súbor HTML na prevod';
+  @override
+  String get htmlConvertReading => 'Číta sa stránka…';
+  @override
+  String htmlConvertMany(int count) => 'Súbory HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Otvorte knižnicu, aby ste mohli previesť webovú stránku na poznámku';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ sa nepodarilo prečítať';
+  @override
+  String get htmlConvertTooLarge => 'Táto stránka je na prevod príliš veľká';
+  @override
+  String get htmlConvertCharset =>
+      'Kódovanie textu tejto stránky nie je podporované';
+  @override
+  String get htmlConvertFailed => 'Stránku sa nepodarilo previesť';
+  @override
+  String get htmlDropTitle => 'Čo urobiť s presunutým súborom HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Vytvoriť zo stránky poznámku spolu s obrázkami';
+  @override
+  String get htmlDropAttach => 'Priložiť';
+  @override
+  String get htmlDropAttachDetail =>
+      'Ponechať súbor pri otvorenej poznámke tak, ako je';
+  @override
+  String get htmlDropBoth => 'Priložiť a previesť';
+  @override
+  String get htmlDropBothDetail =>
+      'Ponechať súbor pri otvorenej poznámke a vytvoriť zo stránky poznámku';
+  @override
+  String get htmlDropNeedsNote =>
+      'Na priloženie treba mať v knižnici otvorenú poznámku';
+  @override
   String get openFileTitle => 'Otvoriť súbor';
   @override
   String get outsideFileNote =>

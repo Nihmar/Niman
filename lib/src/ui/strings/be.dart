@@ -1990,6 +1990,47 @@ final class BelarusianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Выберыце EPUB для пераўтварэння';
   @override
+  String get htmlConvertCommand => 'Пераўтварыць HTML у Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Пераўтварыць файл HTML у Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Выберыце файл HTML для пераўтварэння';
+  @override
+  String get htmlConvertReading => 'Чытанне старонкі…';
+  @override
+  String htmlConvertMany(int count) => 'Файлы HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Адкрыйце бібліятэку, каб пераўтварыць вэб-старонку ў нататку';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» не ўдалося прачытаць';
+  @override
+  String get htmlConvertTooLarge =>
+      'Гэтая старонка завялікая для пераўтварэння';
+  @override
+  String get htmlConvertCharset =>
+      'Кадзіроўка тэксту гэтай старонкі не падтрымліваецца';
+  @override
+  String get htmlConvertFailed => 'Не ўдалося пераўтварыць старонку';
+  @override
+  String get htmlDropTitle => 'Што рабіць з перацягнутым HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Стварыць нататку са старонкі разам з малюнкамі';
+  @override
+  String get htmlDropAttach => 'Далучыць';
+  @override
+  String get htmlDropAttachDetail =>
+      'Захаваць файл разам з адкрытай нататкай як ёсць';
+  @override
+  String get htmlDropBoth => 'Далучыць і пераўтварыць';
+  @override
+  String get htmlDropBothDetail =>
+      'Захаваць файл разам з адкрытай нататкай і стварыць нататку са старонкі';
+  @override
+  String get htmlDropNeedsNote =>
+      'Каб далучыць, у бібліятэцы павінна быць адкрыта нататка';
+  @override
   String get openFileTitle => 'Адкрыць файл';
   @override
   String get outsideFileNote =>

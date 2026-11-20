@@ -1871,6 +1871,40 @@ final class JapaneseStrings extends Strings {
   @override
   String get epubConvertPickTitle => '変換する EPUB を選択';
   @override
+  String get htmlConvertCommand => 'HTML を Markdown に変換…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML ファイルを Markdown に変換';
+  @override
+  String get htmlConvertPickTitle => '変換する HTML ファイルを選択';
+  @override
+  String get htmlConvertReading => 'ページを読み込み中…';
+  @override
+  String htmlConvertMany(int count) => 'HTML ファイル：$count 件';
+  @override
+  String get htmlConvertNeedsLibrary => 'Web ページをノートに変換するにはライブラリを開いてください';
+  @override
+  String htmlConvertUnreadable(String name) => '「$name」 を読み込めませんでした';
+  @override
+  String get htmlConvertTooLarge => 'このページは大きすぎて変換できません';
+  @override
+  String get htmlConvertCharset => 'このページの文字エンコーディングには対応していません';
+  @override
+  String get htmlConvertFailed => 'ページを変換できませんでした';
+  @override
+  String get htmlDropTitle => 'ドロップした HTML をどうしますか？';
+  @override
+  String get htmlDropConvertDetail => 'ページを画像付きでノートにします';
+  @override
+  String get htmlDropAttach => '添付';
+  @override
+  String get htmlDropAttachDetail => '開いているノートにファイルをそのまま添付します';
+  @override
+  String get htmlDropBoth => '添付して変換';
+  @override
+  String get htmlDropBothDetail => '開いているノートにファイルを添付し、ページをノートにします';
+  @override
+  String get htmlDropNeedsNote => '添付するにはライブラリでノートを開いておく必要があります';
+  @override
   String get openFileTitle => 'ファイルを開く';
   @override
   String get outsideFileNote => 'ライブラリ外：その場所に保存。索引なし、履歴なし、リンクはたどりません';

@@ -1985,6 +1985,46 @@ final class SlovenianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Izberite EPUB za pretvorbo';
   @override
+  String get htmlConvertCommand => 'Pretvori HTML v Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pretvori datoteko HTML v Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Izberite datoteko HTML za pretvorbo';
+  @override
+  String get htmlConvertReading => 'Branje strani…';
+  @override
+  String htmlConvertMany(int count) => 'Datoteke HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Odprite knjižnico, da spletno stran pretvorite v zapisek';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      '»$name« ni bilo mogoče prebrati';
+  @override
+  String get htmlConvertTooLarge => 'Ta stran je prevelika za pretvorbo';
+  @override
+  String get htmlConvertCharset => 'Kodiranje besedila te strani ni podprto';
+  @override
+  String get htmlConvertFailed => 'Strani ni bilo mogoče pretvoriti';
+  @override
+  String get htmlDropTitle => 'Kaj storiti s spuščeno datoteko HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Naredi zapisek iz strani, skupaj s slikami';
+  @override
+  String get htmlDropAttach => 'Priloži';
+  @override
+  String get htmlDropAttachDetail =>
+      'Ohrani datoteko pri odprtem zapisku, kakršna je';
+  @override
+  String get htmlDropBoth => 'Priloži in pretvori';
+  @override
+  String get htmlDropBothDetail =>
+      'Ohrani datoteko pri odprtem zapisku in naredi zapisek iz strani';
+  @override
+  String get htmlDropNeedsNote =>
+      'Za prilaganje mora biti v knjižnici odprt zapisek';
+  @override
   String get openFileTitle => 'Odpri datoteko';
   @override
   String get outsideFileNote =>

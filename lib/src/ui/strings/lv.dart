@@ -1985,6 +1985,45 @@ final class LatvianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Izvēlieties pārvēršamo EPUB';
   @override
+  String get htmlConvertCommand => 'Pārvērst HTML par Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Pārvērst HTML failu par Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Izvēlieties pārvēršamo HTML failu';
+  @override
+  String get htmlConvertReading => 'Lasa lapu…';
+  @override
+  String htmlConvertMany(int count) => 'HTML faili: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Atveriet bibliotēku, lai tīmekļa lapu pārvērstu piezīmē';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” nevarēja nolasīt';
+  @override
+  String get htmlConvertTooLarge => 'Šī lapa ir pārāk liela, lai to pārvērstu';
+  @override
+  String get htmlConvertCharset =>
+      'Šīs lapas teksta kodējums netiek atbalstīts';
+  @override
+  String get htmlConvertFailed => 'Lapu nevarēja pārvērst';
+  @override
+  String get htmlDropTitle => 'Ko darīt ar nomesto HTML?';
+  @override
+  String get htmlDropConvertDetail => 'Izveidot lapas piezīmi kopā ar attēliem';
+  @override
+  String get htmlDropAttach => 'Pievienot';
+  @override
+  String get htmlDropAttachDetail =>
+      'Atstāt failu pie atvērtās piezīmes tādu, kāds tas ir';
+  @override
+  String get htmlDropBoth => 'Pievienot un pārvērst';
+  @override
+  String get htmlDropBothDetail =>
+      'Atstāt failu pie atvērtās piezīmes un izveidot lapas piezīmi';
+  @override
+  String get htmlDropNeedsNote =>
+      'Lai pievienotu, bibliotēkā jābūt atvērtai piezīmei';
+  @override
   String get openFileTitle => 'Atvērt failu';
   @override
   String get outsideFileNote =>

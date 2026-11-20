@@ -2005,6 +2005,48 @@ final class MacedonianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Изберете EPUB за претворање';
   @override
+  String get htmlConvertCommand => 'Претвори HTML во Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Претвори HTML датотека во Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Изберете HTML датотека за претворање';
+  @override
+  String get htmlConvertReading => 'Се чита страницата…';
+  @override
+  String htmlConvertMany(int count) => 'HTML датотеки: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Отворете библиотека за да претворите веб-страница во белешка';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      '„$name“ не можеше да се прочита';
+  @override
+  String get htmlConvertTooLarge => 'Оваа страница е преголема за претворање';
+  @override
+  String get htmlConvertCharset =>
+      'Кодирањето на текстот на оваа страница не е поддржано';
+  @override
+  String get htmlConvertFailed => 'Страницата не можеше да се претвори';
+  @override
+  String get htmlDropTitle => 'Што да се прави со спуштениот HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Направи белешка од страницата, со нејзините слики';
+  @override
+  String get htmlDropAttach => 'Приложи';
+  @override
+  String get htmlDropAttachDetail =>
+      'Задржи ја датотеката кај отворената белешка, каква што е';
+  @override
+  String get htmlDropBoth => 'Приложи и претвори';
+  @override
+  String get htmlDropBothDetail =>
+      'Задржи ја датотеката кај отворената '
+      'белешка и направи белешка од страницата';
+  @override
+  String get htmlDropNeedsNote =>
+      'За прилог е потребна отворена белешка во библиотеката';
+  @override
   String get openFileTitle => 'Отвори датотека';
   @override
   String get outsideFileNote =>

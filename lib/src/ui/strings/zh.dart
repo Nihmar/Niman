@@ -1830,6 +1830,40 @@ final class ChineseStrings extends Strings {
   @override
   String get epubConvertPickTitle => '选择要转换的 EPUB';
   @override
+  String get htmlConvertCommand => '将 HTML 转换为 Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => '将 HTML 文件转换为 Markdown';
+  @override
+  String get htmlConvertPickTitle => '选择要转换的 HTML 文件';
+  @override
+  String get htmlConvertReading => '正在读取网页…';
+  @override
+  String htmlConvertMany(int count) => 'HTML 文件：$count 个';
+  @override
+  String get htmlConvertNeedsLibrary => '请打开一个资料库，以便将网页转换为笔记';
+  @override
+  String htmlConvertUnreadable(String name) => '无法读取“$name”';
+  @override
+  String get htmlConvertTooLarge => '这个网页太大，无法转换';
+  @override
+  String get htmlConvertCharset => '不支持此网页的文本编码';
+  @override
+  String get htmlConvertFailed => '无法转换此网页';
+  @override
+  String get htmlDropTitle => '如何处理拖入的 HTML？';
+  @override
+  String get htmlDropConvertDetail => '将网页连同图片制成一条笔记';
+  @override
+  String get htmlDropAttach => '附加';
+  @override
+  String get htmlDropAttachDetail => '将文件原样保留在当前打开的笔记中';
+  @override
+  String get htmlDropBoth => '附加并转换';
+  @override
+  String get htmlDropBothDetail => '将文件保留在当前打开的笔记中，并将网页制成笔记';
+  @override
+  String get htmlDropNeedsNote => '附加文件需要在资料库中打开一条笔记';
+  @override
   String get openFileTitle => '打开文件';
   @override
   String get outsideFileNote => '不属于任何资料库：原地保存，不建索引，无历史，不跟随链接';

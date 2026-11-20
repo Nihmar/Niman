@@ -1999,6 +1999,46 @@ final class SwedishStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Välj en EPUB att konvertera';
   @override
+  String get htmlConvertCommand => 'Konvertera HTML till Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konvertera en HTML-fil till Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Välj en HTML-fil att konvertera';
+  @override
+  String get htmlConvertReading => 'Läser sidan…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-filer: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Öppna ett bibliotek för att konvertera en webbsida till en anteckning';
+  @override
+  String htmlConvertUnreadable(String name) => '”$name” kunde inte läsas';
+  @override
+  String get htmlConvertTooLarge =>
+      'Den här sidan är för stor för att konverteras';
+  @override
+  String get htmlConvertCharset => 'Textkodningen för den här sidan stöds inte';
+  @override
+  String get htmlConvertFailed => 'Sidan kunde inte konverteras';
+  @override
+  String get htmlDropTitle => 'Vad ska göras med den släppta HTML-filen?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Gör en anteckning av sidan, med dess bilder';
+  @override
+  String get htmlDropAttach => 'Bifoga';
+  @override
+  String get htmlDropAttachDetail =>
+      'Behåll filen vid den öppna anteckningen, som den är';
+  @override
+  String get htmlDropBoth => 'Bifoga och konvertera';
+  @override
+  String get htmlDropBothDetail =>
+      'Behåll filen vid den öppna anteckningen och gör en anteckning av sidan';
+  @override
+  String get htmlDropNeedsNote =>
+      'För att bifoga måste en anteckning vara öppen i biblioteket';
+  @override
   String get openFileTitle => 'Öppna fil';
   @override
   String get outsideFileNote =>

@@ -2006,6 +2006,48 @@ final class AlbanianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Zgjidhni një EPUB për ta shndërruar';
   @override
+  String get htmlConvertCommand => 'Shndërro HTML në Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Shndërro një skedar HTML në Markdown';
+  @override
+  String get htmlConvertPickTitle =>
+      'Zgjidhni një skedar HTML për ta shndërruar';
+  @override
+  String get htmlConvertReading => 'Po lexohet faqja…';
+  @override
+  String htmlConvertMany(int count) => 'Skedarë HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Hapni një bibliotekë për ta shndërruar një faqe uebi në shënim';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” nuk u lexua dot';
+  @override
+  String get htmlConvertTooLarge =>
+      'Kjo faqe është shumë e madhe për shndërrim';
+  @override
+  String get htmlConvertCharset =>
+      'Kodimi i tekstit të kësaj faqeje nuk mbështetet';
+  @override
+  String get htmlConvertFailed => 'Faqja nuk u shndërrua dot';
+  @override
+  String get htmlDropTitle => 'Çfarë të bëhet me HTML-në e lëshuar?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Bëj një shënim nga faqja, bashkë me figurat e saj';
+  @override
+  String get htmlDropAttach => 'Bashkëngjit';
+  @override
+  String get htmlDropAttachDetail =>
+      'Mbaje skedarin me shënimin e hapur, siç është';
+  @override
+  String get htmlDropBoth => 'Bashkëngjit dhe shndërro';
+  @override
+  String get htmlDropBothDetail =>
+      'Mbaje skedarin me shënimin e hapur dhe bëj një shënim nga faqja';
+  @override
+  String get htmlDropNeedsNote =>
+      'Për bashkëngjitje duhet një shënim i hapur në bibliotekë';
+  @override
   String get openFileTitle => 'Hap skedar';
   @override
   String get outsideFileNote =>

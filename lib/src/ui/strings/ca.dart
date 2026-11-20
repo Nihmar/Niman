@@ -2027,6 +2027,47 @@ final class CatalanStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Trieu un EPUB per convertir';
   @override
+  String get htmlConvertCommand => 'Converteix HTML a Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Converteix un fitxer HTML a Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Trieu un fitxer HTML per convertir';
+  @override
+  String get htmlConvertReading => 'Llegint la pàgina…';
+  @override
+  String htmlConvertMany(int count) => 'Fitxers HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Obriu una biblioteca per convertir una pàgina web en una nota';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» no s’ha pogut llegir';
+  @override
+  String get htmlConvertTooLarge =>
+      'Aquesta pàgina és massa gran per convertir-la';
+  @override
+  String get htmlConvertCharset =>
+      'La codificació del text d’aquesta pàgina no és compatible';
+  @override
+  String get htmlConvertFailed => 'No s’ha pogut convertir la pàgina';
+  @override
+  String get htmlDropTitle => 'Què voleu fer amb l’HTML deixat anar?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Crea una nota de la pàgina, amb les seves imatges';
+  @override
+  String get htmlDropAttach => 'Adjunta';
+  @override
+  String get htmlDropAttachDetail =>
+      'Conserva el fitxer amb la nota oberta, tal com és';
+  @override
+  String get htmlDropBoth => 'Adjunta i converteix';
+  @override
+  String get htmlDropBothDetail =>
+      'Conserva el fitxer amb la nota oberta i crea una nota de la pàgina';
+  @override
+  String get htmlDropNeedsNote =>
+      'Per adjuntar cal tenir una nota oberta a la biblioteca';
+  @override
   String get openFileTitle => 'Obre un fitxer';
   @override
   String get outsideFileNote =>

@@ -1980,6 +1980,46 @@ final class CzechStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Vyberte EPUB k převodu';
   @override
+  String get htmlConvertCommand => 'Převést HTML na Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Převést soubor HTML na Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Vyberte soubor HTML k převodu';
+  @override
+  String get htmlConvertReading => 'Čtení stránky…';
+  @override
+  String htmlConvertMany(int count) => 'Soubory HTML: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Otevřete knihovnu, abyste mohli převést webovou stránku na poznámku';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ se nepodařilo přečíst';
+  @override
+  String get htmlConvertTooLarge => 'Tato stránka je na převod příliš velká';
+  @override
+  String get htmlConvertCharset =>
+      'Kódování textu této stránky není podporováno';
+  @override
+  String get htmlConvertFailed => 'Stránku se nepodařilo převést';
+  @override
+  String get htmlDropTitle => 'Co udělat s přetaženým souborem HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Vytvoří ze stránky poznámku, včetně obrázků';
+  @override
+  String get htmlDropAttach => 'Připojit';
+  @override
+  String get htmlDropAttachDetail =>
+      'Ponechá soubor u otevřené poznámky tak, jak je';
+  @override
+  String get htmlDropBoth => 'Připojit a převést';
+  @override
+  String get htmlDropBothDetail =>
+      'Ponechá soubor u otevřené poznámky a vytvoří ze stránky poznámku';
+  @override
+  String get htmlDropNeedsNote =>
+      'K připojení je potřeba mít v knihovně otevřenou poznámku';
+  @override
   String get openFileTitle => 'Otevřít soubor';
   @override
   String get outsideFileNote =>

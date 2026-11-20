@@ -1979,6 +1979,44 @@ final class NorwegianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Velg en EPUB å konvertere';
   @override
+  String get htmlConvertCommand => 'Konverter HTML til Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Konverter en HTML-fil til Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Velg en HTML-fil å konvertere';
+  @override
+  String get htmlConvertReading => 'Leser siden…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-filer: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Åpne et bibliotek for å konvertere en nettside til et notat';
+  @override
+  String htmlConvertUnreadable(String name) => '«$name» kunne ikke leses';
+  @override
+  String get htmlConvertTooLarge => 'Denne siden er for stor til å konverteres';
+  @override
+  String get htmlConvertCharset => 'Tekstkodingen på denne siden støttes ikke';
+  @override
+  String get htmlConvertFailed => 'Siden kunne ikke konverteres';
+  @override
+  String get htmlDropTitle => 'Hva skal gjøres med den slippede HTML-filen?';
+  @override
+  String get htmlDropConvertDetail => 'Lag et notat av siden, med bildene';
+  @override
+  String get htmlDropAttach => 'Legg ved';
+  @override
+  String get htmlDropAttachDetail =>
+      'Behold filen sammen med det åpne notatet, som den er';
+  @override
+  String get htmlDropBoth => 'Legg ved og konverter';
+  @override
+  String get htmlDropBothDetail =>
+      'Behold filen sammen med det åpne notatet, og lag et notat av siden';
+  @override
+  String get htmlDropNeedsNote =>
+      'For å legge ved må et notat være åpent i biblioteket';
+  @override
   String get openFileTitle => 'Åpne fil';
   @override
   String get outsideFileNote =>

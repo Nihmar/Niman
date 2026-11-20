@@ -2004,6 +2004,46 @@ final class HungarianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Válassz egy átalakítandó EPUB-ot';
   @override
+  String get htmlConvertCommand => 'HTML átalakítása Markdownná…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML-fájl átalakítása Markdownná';
+  @override
+  String get htmlConvertPickTitle => 'Válassz egy átalakítandó HTML-fájlt';
+  @override
+  String get htmlConvertReading => 'Az oldal beolvasása…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-fájlok: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Nyiss meg egy könyvtárat, hogy a weboldalt jegyzetté alakíthasd';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name” nem olvasható';
+  @override
+  String get htmlConvertTooLarge => 'Ez az oldal túl nagy az átalakításhoz';
+  @override
+  String get htmlConvertCharset => 'Az oldal szövegkódolása nem támogatott';
+  @override
+  String get htmlConvertFailed => 'Az oldalt nem sikerült átalakítani';
+  @override
+  String get htmlDropTitle => 'Mi legyen az eldobott HTML-lel?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Jegyzet készítése az oldalból a képeivel együtt';
+  @override
+  String get htmlDropAttach => 'Csatolás';
+  @override
+  String get htmlDropAttachDetail =>
+      'A fájl megtartása a megnyitott jegyzet mellett, változatlanul';
+  @override
+  String get htmlDropBoth => 'Csatolás és átalakítás';
+  @override
+  String get htmlDropBothDetail =>
+      'A fájl megtartása a megnyitott jegyzet '
+      'mellett, és jegyzet készítése az oldalból';
+  @override
+  String get htmlDropNeedsNote =>
+      'A csatoláshoz a könyvtárban meg kell nyitni egy jegyzetet';
+  @override
   String get openFileTitle => 'Fájl megnyitása';
   @override
   String get outsideFileNote =>

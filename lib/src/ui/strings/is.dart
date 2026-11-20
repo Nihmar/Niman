@@ -1990,6 +1990,43 @@ final class IcelandicStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Veldu EPUB til að umbreyta';
   @override
+  String get htmlConvertCommand => 'Umbreyta HTML í Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Umbreyta HTML-skrá í Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Veldu HTML-skrá til að umbreyta';
+  @override
+  String get htmlConvertReading => 'Les síðuna…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-skrár: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Opnaðu safn til að umbreyta vefsíðu í glósu';
+  @override
+  String htmlConvertUnreadable(String name) => 'Ekki tókst að lesa „$name“';
+  @override
+  String get htmlConvertTooLarge => 'Þessi síða er of stór til að umbreyta';
+  @override
+  String get htmlConvertCharset => 'Textakóðun þessarar síðu er ekki studd';
+  @override
+  String get htmlConvertFailed => 'Ekki tókst að umbreyta síðunni';
+  @override
+  String get htmlDropTitle => 'Hvað á að gera við HTML-skrána sem var sleppt?';
+  @override
+  String get htmlDropConvertDetail => 'Búa til glósu úr síðunni, með myndunum';
+  @override
+  String get htmlDropAttach => 'Hengja við';
+  @override
+  String get htmlDropAttachDetail => 'Geyma skrána með opnu glósunni, óbreytta';
+  @override
+  String get htmlDropBoth => 'Hengja við og umbreyta';
+  @override
+  String get htmlDropBothDetail =>
+      'Geyma skrána með opnu glósunni og búa til glósu úr síðunni';
+  @override
+  String get htmlDropNeedsNote =>
+      'Til að hengja við þarf glósa að vera opin í safninu';
+  @override
   String get openFileTitle => 'Opna skrá';
   @override
   String get outsideFileNote =>

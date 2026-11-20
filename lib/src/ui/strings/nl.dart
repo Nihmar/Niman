@@ -2011,6 +2011,49 @@ final class DutchStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Kies een EPUB om om te zetten';
   @override
+  String get htmlConvertCommand => 'HTML naar Markdown omzetten…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Een HTML-bestand naar Markdown omzetten';
+  @override
+  String get htmlConvertPickTitle => 'Kies een HTML-bestand om om te zetten';
+  @override
+  String get htmlConvertReading => 'Pagina wordt gelezen…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-bestanden: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Open een bibliotheek om een webpagina naar een notitie om te zetten';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      '“$name” kon niet worden gelezen';
+  @override
+  String get htmlConvertTooLarge => 'Deze pagina is te groot om om te zetten';
+  @override
+  String get htmlConvertCharset =>
+      'De tekencodering van deze pagina wordt niet ondersteund';
+  @override
+  String get htmlConvertFailed => 'De pagina kon niet worden omgezet';
+  @override
+  String get htmlDropTitle => 'Wat moet er met de neergezette HTML gebeuren?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Maak een notitie van de pagina, met de afbeeldingen';
+  @override
+  String get htmlDropAttach => 'Bijvoegen';
+  @override
+  String get htmlDropAttachDetail =>
+      'Bewaar het bestand bij de geopende notitie, zoals het is';
+  @override
+  String get htmlDropBoth => 'Bijvoegen en omzetten';
+  @override
+  String get htmlDropBothDetail =>
+      'Bewaar het bestand bij de geopende notitie '
+      'en maak een notitie van de pagina';
+  @override
+  String get htmlDropNeedsNote =>
+      'Voor bijvoegen moet er een notitie open zijn in de bibliotheek';
+  @override
   String get openFileTitle => 'Bestand openen';
   @override
   String get outsideFileNote =>

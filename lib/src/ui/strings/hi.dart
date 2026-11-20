@@ -1960,6 +1960,45 @@ final class HindiStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'बदलने के लिए कोई EPUB चुनें';
   @override
+  String get htmlConvertCommand => 'HTML को Markdown में बदलें…';
+  @override
+  String get htmlConvertSettingsTitle => 'HTML फ़ाइल को Markdown में बदलें';
+  @override
+  String get htmlConvertPickTitle => 'बदलने के लिए कोई HTML फ़ाइल चुनें';
+  @override
+  String get htmlConvertReading => 'पेज पढ़ा जा रहा है…';
+  @override
+  String htmlConvertMany(int count) => 'HTML फ़ाइलें: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'वेब पेज को नोट में बदलने के लिए कोई लाइब्रेरी खोलें';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” पढ़ी नहीं जा सकी';
+  @override
+  String get htmlConvertTooLarge => 'यह पेज बदलने के लिए बहुत बड़ा है';
+  @override
+  String get htmlConvertCharset =>
+      'इस पेज का टेक्स्ट एन्कोडिंग समर्थित नहीं है';
+  @override
+  String get htmlConvertFailed => 'पेज बदला नहीं जा सका';
+  @override
+  String get htmlDropTitle => 'छोड़ी गई HTML का क्या करें?';
+  @override
+  String get htmlDropConvertDetail => 'पेज का नोट बनाएँ, उसकी तस्वीरों के साथ';
+  @override
+  String get htmlDropAttach => 'संलग्न करें';
+  @override
+  String get htmlDropAttachDetail =>
+      'फ़ाइल को खुले नोट के साथ जैसी है वैसी रखें';
+  @override
+  String get htmlDropBoth => 'संलग्न करें और बदलें';
+  @override
+  String get htmlDropBothDetail =>
+      'फ़ाइल को खुले नोट के साथ रखें और पेज का नोट बनाएँ';
+  @override
+  String get htmlDropNeedsNote =>
+      'संलग्न करने के लिए लाइब्रेरी में कोई नोट खुला होना चाहिए';
+  @override
   String get openFileTitle => 'फ़ाइल खोलें';
   @override
   String get outsideFileNote =>

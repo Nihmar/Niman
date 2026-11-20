@@ -1969,6 +1969,44 @@ final class EstonianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Vali teisendatav EPUB';
   @override
+  String get htmlConvertCommand => 'Teisenda HTML Markdowniks…';
+  @override
+  String get htmlConvertSettingsTitle => 'Teisenda HTML-fail Markdowniks';
+  @override
+  String get htmlConvertPickTitle => 'Vali teisendatav HTML-fail';
+  @override
+  String get htmlConvertReading => 'Lehe lugemine…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-faile: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Veebilehe märkmeks teisendamiseks ava kogu';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ ei õnnestunud lugeda';
+  @override
+  String get htmlConvertTooLarge => 'See leht on teisendamiseks liiga suur';
+  @override
+  String get htmlConvertCharset => 'Selle lehe tekstikodeeringut ei toetata';
+  @override
+  String get htmlConvertFailed => 'Lehte ei õnnestunud teisendada';
+  @override
+  String get htmlDropTitle => 'Mida teha ülekantud HTML-iga?';
+  @override
+  String get htmlDropConvertDetail => 'Tee lehest märge koos piltidega';
+  @override
+  String get htmlDropAttach => 'Lisa manusena';
+  @override
+  String get htmlDropAttachDetail =>
+      'Hoia fail avatud märkme juures sellisena, nagu see on';
+  @override
+  String get htmlDropBoth => 'Lisa manusena ja teisenda';
+  @override
+  String get htmlDropBothDetail =>
+      'Hoia fail avatud märkme juures ja tee lehest märge';
+  @override
+  String get htmlDropNeedsNote =>
+      'Manusena lisamiseks peab kogus olema märge avatud';
+  @override
   String get openFileTitle => 'Ava fail';
   @override
   String get outsideFileNote =>

@@ -1971,6 +1971,45 @@ final class EnglishStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Choose an EPUB to convert';
   @override
+  String get htmlConvertCommand => 'Convert HTML to Markdown…';
+  @override
+  String get htmlConvertSettingsTitle => 'Convert an HTML file to Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Choose an HTML file to convert';
+  @override
+  String get htmlConvertReading => 'Reading the page…';
+  @override
+  String htmlConvertMany(int count) => 'HTML files: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Open a library to convert a web page into a note';
+  @override
+  String htmlConvertUnreadable(String name) => '“$name” could not be read';
+  @override
+  String get htmlConvertTooLarge => 'This page is too large to convert';
+  @override
+  String get htmlConvertCharset =>
+      'The text encoding of this page is not supported';
+  @override
+  String get htmlConvertFailed => 'The page could not be converted';
+  @override
+  String get htmlDropTitle => 'What to do with the dropped HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Make a note of the page, with its pictures';
+  @override
+  String get htmlDropAttach => 'Attach';
+  @override
+  String get htmlDropAttachDetail =>
+      'Keep the file with the open note, as it is';
+  @override
+  String get htmlDropBoth => 'Attach and convert';
+  @override
+  String get htmlDropBothDetail =>
+      'Keep the file with the open note, and make a note of the page';
+  @override
+  String get htmlDropNeedsNote => 'Attaching needs a note open in the library';
+  @override
   String get openFileTitle => 'Open file';
   @override
   String get outsideFileNote =>

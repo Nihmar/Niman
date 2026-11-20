@@ -2006,6 +2006,48 @@ final class BulgarianStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Изберете EPUB за преобразуване';
   @override
+  String get htmlConvertCommand => 'Преобразуване на HTML в Markdown…';
+  @override
+  String get htmlConvertSettingsTitle =>
+      'Преобразуване на HTML файл в Markdown';
+  @override
+  String get htmlConvertPickTitle => 'Изберете HTML файл за преобразуване';
+  @override
+  String get htmlConvertReading => 'Четене на страницата…';
+  @override
+  String htmlConvertMany(int count) => 'HTML файлове: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Отворете библиотека, за да преобразувате уеб страница в бележка';
+  @override
+  String htmlConvertUnreadable(String name) => '„$name“ не може да се прочете';
+  @override
+  String get htmlConvertTooLarge =>
+      'Тази страница е твърде голяма за преобразуване';
+  @override
+  String get htmlConvertCharset =>
+      'Кодирането на текста на тази страница не се поддържа';
+  @override
+  String get htmlConvertFailed => 'Страницата не може да се преобразува';
+  @override
+  String get htmlDropTitle => 'Какво да се направи с пуснатия HTML?';
+  @override
+  String get htmlDropConvertDetail =>
+      'Създава бележка от страницата, заедно със снимките';
+  @override
+  String get htmlDropAttach => 'Прикачи';
+  @override
+  String get htmlDropAttachDetail =>
+      'Запазва файла към отворената бележка както е';
+  @override
+  String get htmlDropBoth => 'Прикачи и преобразувай';
+  @override
+  String get htmlDropBothDetail =>
+      'Запазва файла към отворената бележка и създава бележка от страницата';
+  @override
+  String get htmlDropNeedsNote =>
+      'За прикачване е нужна отворена бележка в библиотеката';
+  @override
   String get openFileTitle => 'Отвори файл';
   @override
   String get outsideFileNote =>

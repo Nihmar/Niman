@@ -2007,6 +2007,46 @@ final class FinnishStrings extends Strings {
   @override
   String get epubConvertPickTitle => 'Valitse muunnettava EPUB';
   @override
+  String get htmlConvertCommand => 'Muunna HTML Markdowniksi…';
+  @override
+  String get htmlConvertSettingsTitle => 'Muunna HTML-tiedosto Markdowniksi';
+  @override
+  String get htmlConvertPickTitle => 'Valitse muunnettava HTML-tiedosto';
+  @override
+  String get htmlConvertReading => 'Luetaan sivua…';
+  @override
+  String htmlConvertMany(int count) => 'HTML-tiedostoja: $count';
+  @override
+  String get htmlConvertNeedsLibrary =>
+      'Avaa kirjasto muuntaaksesi verkkosivun muistiinpanoksi';
+  @override
+  String htmlConvertUnreadable(String name) =>
+      'Tiedostoa ”$name” ei voitu lukea';
+  @override
+  String get htmlConvertTooLarge => 'Tämä sivu on liian suuri muunnettavaksi';
+  @override
+  String get htmlConvertCharset => 'Tämän sivun merkistökoodausta ei tueta';
+  @override
+  String get htmlConvertFailed => 'Sivua ei voitu muuntaa';
+  @override
+  String get htmlDropTitle => 'Mitä pudotetulle HTML-tiedostolle tehdään?';
+  @override
+  String get htmlDropConvertDetail => 'Tee sivusta muistiinpano kuvineen';
+  @override
+  String get htmlDropAttach => 'Liitä';
+  @override
+  String get htmlDropAttachDetail =>
+      'Säilytä tiedosto avoimen muistiinpanon mukana sellaisenaan';
+  @override
+  String get htmlDropBoth => 'Liitä ja muunna';
+  @override
+  String get htmlDropBothDetail =>
+      'Säilytä tiedosto avoimen muistiinpanon '
+      'mukana ja tee sivusta muistiinpano';
+  @override
+  String get htmlDropNeedsNote =>
+      'Liittäminen vaatii kirjastossa avoimen muistiinpanon';
+  @override
   String get openFileTitle => 'Avaa tiedosto';
   @override
   String get outsideFileNote =>
