@@ -31,7 +31,8 @@ final Set<LintRule> _keepParagraphs = {...LintRule.defaults}
   ..remove(LintRule.joinParagraphLines)
   ..remove(LintRule.splitParagraphLines);
 
-/// Every default rule but the one splitting a paragraph's lines: they are joined.
+/// Every default rule but the one splitting a paragraph's lines: they are
+/// joined.
 final Set<LintRule> _joinParagraphs = {...LintRule.defaults}
   ..remove(LintRule.splitParagraphLines);
 

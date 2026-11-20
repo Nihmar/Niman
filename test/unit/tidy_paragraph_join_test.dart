@@ -9,8 +9,8 @@ import 'package:niman/src/editor/markdown_format.dart';
 import 'package:niman/src/lint/line_join.dart';
 import 'package:niman/src/lint/lint_rule.dart';
 
-/// Every default rule but the one splitting a paragraph's lines, which wins over
-/// joining them.
+/// Every default rule but the one splitting a paragraph's lines, which wins
+/// over joining them.
 final Set<LintRule> _joining = {...LintRule.defaults}
   ..remove(LintRule.splitParagraphLines);
 
