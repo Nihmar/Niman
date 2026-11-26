@@ -15,7 +15,6 @@ import 'package:niman/src/diagrams/layered_node.dart';
 import 'package:niman/src/diagrams/layered_options.dart';
 import 'package:niman/src/diagrams/layered_position_x.dart';
 import 'package:niman/src/diagrams/layered_position_y.dart';
-import 'package:niman/src/diagrams/layered_segments.dart';
 
 /// Gives every node of [graph] an x and a y, every cluster a box and every
 /// edge its points, and returns the box that holds the real nodes, the
@@ -25,7 +24,7 @@ import 'package:niman/src/diagrams/layered_segments.dart';
 /// and the first rank's top is at y 0.
 LayeredBox positionLayered(LayeredGraph graph, LayeredOptions options) {
   positionRanks(graph, options);
-  positionAcross(graph, LayeredSegments.of(graph), options);
+  positionAcross(graph, options);
   for (final cluster in graph.clusters) {
     var left = double.infinity;
     var right = double.negativeInfinity;
@@ -41,6 +40,12 @@ LayeredBox positionLayered(LayeredGraph graph, LayeredOptions options) {
       right,
       cluster.borderBottom.y,
     );
+    // The top and the bottom float: they are where an edge to the cluster
+    // ends, which is anchored on the outline in _route, and the middle is
+    // as good a place as any for what is read from them otherwise.
+    final middle = (cluster.box.left + cluster.box.right) / 2;
+    cluster.borderTop.x = middle;
+    cluster.borderBottom.x = middle;
   }
   graph.edges.forEach(_route);
   return _bounds(graph);
@@ -54,11 +59,31 @@ void _route(LayeredEdge edge) {
     edge.points = const [];
     return;
   }
+  final nodes = [edge.from, ...edge.chain, edge.to];
   final points = <LayeredPoint>[
-    for (final node in [edge.from, ...edge.chain, edge.to])
-      (x: node.x, y: node.y),
+    for (final node in nodes) (x: node.x, y: node.y),
   ];
+  // An end that names a cluster is anchored on the cluster's outline, as
+  // near the edge's next point as the box allows, so the edge arrives
+  // straight where it can instead of at a spot the box was no part in.
+  if (floatsInCluster(edge.from)) {
+    points[0] = _anchored(edge.from, points[1].x);
+  }
+  if (floatsInCluster(edge.to)) {
+    points[points.length - 1] = _anchored(edge.to, points[points.length - 2].x);
+  }
   edge.points = edge.reversed ? points.reversed.toList() : points;
+}
+
+/// The point on the outline of the cluster that [border], its top or its
+/// bottom, belongs to: [x] if that is inside the box less its pads, else the
+/// nearest that is.
+LayeredPoint _anchored(LayeredNode border, double x) {
+  final cluster = border.parent!;
+  final low = cluster.box.left + cluster.padLeft;
+  final high = cluster.box.right - cluster.padRight;
+  if (low > high) return (x: border.x, y: border.y);
+  return (x: x.clamp(low, high), y: border.y);
 }
 
 /// The box round the real nodes, the clusters' boxes and the labels.

@@ -377,6 +377,75 @@ void main() {
       expect(out.points.last.y, graph.node('y')!.y);
     });
 
+    test('edges that name clusters do not stretch them', () {
+      // A graph found by search, in which the edges that end at a cluster's
+      // top or bottom dragged those border nodes out towards their far
+      // ends and the cluster's side with them: 1223 wide, now 440.
+      final random = math.Random(222);
+      final graph = LayeredGraph();
+      final clusters = 2 + random.nextInt(3);
+      for (var c = 0; c < clusters; c++) {
+        graph.addCluster(
+          'c$c',
+          padTop: 10,
+          padBottom: 6,
+          padLeft: 8,
+          padRight: 8,
+        );
+      }
+      final count = 6 + random.nextInt(10);
+      for (var i = 0; i < count; i++) {
+        graph.addNode(
+          'n$i',
+          width: 50.0 + random.nextInt(150),
+          height: 20,
+          parent: random.nextInt(4) == 0
+              ? null
+              : 'c${random.nextInt(clusters)}',
+        );
+      }
+      String end() => random.nextInt(6) == 0
+          ? 'c${random.nextInt(clusters)}'
+          : 'n${random.nextInt(count)}';
+      for (var i = 0; i < count + 4; i++) {
+        graph.addEdge(end(), end());
+      }
+      layOutLayered(graph);
+      for (final cluster in graph.clusters) {
+        expect(cluster.box.width, lessThan(600), reason: cluster.id);
+      }
+      // An end on a cluster is on its outline, inside its pads.
+      for (final edge in graph.edges.where((e) => e.clusterEnd)) {
+        if (edge.points.isEmpty) continue;
+        for (final (id, point) in [
+          (edge.fromId, edge.points.first),
+          (edge.toId, edge.points.last),
+        ]) {
+          final cluster = graph.cluster(id);
+          if (cluster == null) continue;
+          expect(
+            point.x,
+            inInclusiveRange(cluster.box.left + 8, cluster.box.right - 8),
+          );
+          expect([
+            cluster.box.top,
+            cluster.box.bottom,
+          ], contains(closeTo(point.y, _eps)));
+        }
+      }
+    });
+
+    test('an edge to a cluster arrives straight where the box allows', () {
+      final graph = LayeredGraph()
+        ..addCluster('S', padTop: 16, padLeft: 8, padRight: 8)
+        ..addNode('a', width: 150, height: 20, parent: 'S')
+        ..addNode('x', width: 40, height: 20)
+        ..addEdge('x', 'S');
+      layOutLayered(graph);
+      final end = graph.edges.single.points.last;
+      expect(end.x, closeTo(graph.node('x')!.x, _eps));
+    });
+
     test('empty ranks that hold no box add no tall band', () {
       // A long edge down the side of a chain: no rank is empty of boxes, but
       // a cluster's own top and bottom ranks hold only its border nodes.

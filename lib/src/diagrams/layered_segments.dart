@@ -5,6 +5,7 @@ library;
 import 'dart:typed_data';
 
 import 'package:niman/src/diagrams/layered_graph.dart';
+import 'package:niman/src/diagrams/layered_node.dart';
 
 /// Every segment between two nodes in neighbouring ranks, read off a
 /// graph whose edges are normalised and whose clusters have border nodes.
@@ -28,14 +29,16 @@ final class LayeredSegments {
     this.downWeights,
   );
 
-  /// Reads the segments of [graph].
-  factory of(LayeredGraph graph) {
+  /// Reads the segments of [graph], leaving out those that end at a node
+  /// [skip] holds for.
+  factory of(LayeredGraph graph, {bool Function(LayeredNode)? skip}) {
     final from = <int>[];
     final to = <int>[];
     final weight = <double>[];
-    void add(int upper, int lower, double w) {
-      from.add(upper);
-      to.add(lower);
+    void add(LayeredNode upper, LayeredNode lower, double w) {
+      if (skip != null && (skip(upper) || skip(lower))) return;
+      from.add(upper.index);
+      to.add(lower.index);
       weight.add(w);
     }
 
@@ -48,15 +51,15 @@ final class LayeredSegments {
       }
       var upper = edge.from;
       for (final stand in edge.chain) {
-        add(upper.index, stand.index, edge.weight);
+        add(upper, stand, edge.weight);
         upper = stand;
       }
-      add(upper.index, edge.to.index, edge.weight);
+      add(upper, edge.to, edge.weight);
     }
     for (final cluster in graph.clusters) {
       for (var i = 1; i < cluster.borderLeft.length; i++) {
-        add(cluster.borderLeft[i - 1].index, cluster.borderLeft[i].index, 1);
-        add(cluster.borderRight[i - 1].index, cluster.borderRight[i].index, 1);
+        add(cluster.borderLeft[i - 1], cluster.borderLeft[i], 1);
+        add(cluster.borderRight[i - 1], cluster.borderRight[i], 1);
       }
     }
     final count = graph.nodes.length;

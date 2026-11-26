@@ -60,6 +60,10 @@ Float64List alignAndCompact(
   final root = Int32List(nodeCount);
   final align = Int32List(nodeCount);
   final position = Int32List(nodeCount);
+  for (var i = 0; i < nodeCount; i++) {
+    root[i] = i;
+    align[i] = i;
+  }
   for (final layer in layers) {
     for (var i = 0; i < layer.length; i++) {
       root[layer[i]] = layer[i];

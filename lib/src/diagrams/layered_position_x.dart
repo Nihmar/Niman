@@ -18,24 +18,35 @@ import 'package:niman/src/diagrams/layered_options.dart';
 import 'package:niman/src/diagrams/layered_segments.dart';
 import 'package:niman/src/diagrams/layered_separation.dart';
 
-/// Sets the [LayeredNode.x] of every node of [graph], whose nodes must be
-/// ranked and ordered and whose edges normalised. [segments] are the
-/// graph's.
-void positionAcross(
-  LayeredGraph graph,
-  LayeredSegments segments,
-  LayeredOptions options,
-) {
+/// Whether [node] floats: the top or the bottom of a cluster's box, which
+/// an edge that names the cluster ends at. It is not aligned with that edge,
+/// or the cluster's sides would be dragged out to where the edge goes; its x
+/// is the caller's to choose within the box, once the box is known.
+bool floatsInCluster(LayeredNode node) =>
+    node.kind == LayeredNodeKind.border &&
+    (node.side == LayeredBorder.top || node.side == LayeredBorder.bottom);
+
+/// Sets the [LayeredNode.x] of every node of [graph] that does not float,
+/// whose nodes must be ranked and ordered and whose edges normalised.
+void positionAcross(LayeredGraph graph, LayeredOptions options) {
+  final segments = LayeredSegments.of(graph, skip: floatsInCluster);
   final count = graph.nodes.length;
   final layers = _layers(graph);
+  // Where each node is in its rank once the floating ones are not counted.
   final order = Int32List(count);
+  for (final layer in layers) {
+    for (var i = 0; i < layer.length; i++) {
+      order[layer[i]] = i;
+    }
+  }
   final isStand = Uint8List(count);
   final isBorder = Uint8List(count);
   final sideOf = Uint8List(count);
+  final floats = Uint8List(count);
   for (final node in graph.nodes) {
-    order[node.index] = node.order;
     if (node.kind != LayeredNodeKind.real) isStand[node.index] = 1;
     if (node.kind == LayeredNodeKind.border) isBorder[node.index] = 1;
+    if (floatsInCluster(node)) floats[node.index] = 1;
     sideOf[node.index] = switch (node.side) {
       LayeredBorder.left => 1,
       LayeredBorder.right => 2,
@@ -68,27 +79,31 @@ void positionAcross(
       alignments.add(x);
     }
   }
-  _alignTo(graph, alignments);
+  _alignTo(graph, alignments, floats);
   for (final node in graph.nodes) {
     final i = node.index;
+    if (floats[i] == 1) continue;
     final around = [for (final x in alignments) x[i]]..sort();
     node.x = (around[1] + around[2]) / 2;
   }
 }
 
-/// The nodes of each rank, left to right.
+/// The nodes of each rank that do not float, left to right.
 List<Int32List> _layers(LayeredGraph graph) {
   var last = 0;
-  final sizes = <int, int>{};
   for (final node in graph.nodes) {
     last = math.max(last, node.rank);
-    sizes[node.rank] = (sizes[node.rank] ?? 0) + 1;
   }
-  final layers = [for (var r = 0; r <= last; r++) Int32List(sizes[r] ?? 0)];
+  final ranks = [for (var r = 0; r <= last; r++) <LayeredNode>[]];
   for (final node in graph.nodes) {
-    layers[node.rank][node.order] = node.index;
+    if (!floatsInCluster(node)) ranks[node.rank].add(node);
   }
-  return layers;
+  return [
+    for (final rank in ranks)
+      Int32List.fromList([
+        for (final node in rank..sort((a, b) => a.order - b.order)) node.index,
+      ]),
+  ];
 }
 
 Int32List _reversed(Int32List row) {
@@ -102,13 +117,18 @@ Int32List _reversed(Int32List row) {
 /// Moves the alignments, which are in the order up-left, up-right, down-left,
 /// down-right, so the left ones have their lowest x where the narrowest has
 /// its lowest and the right ones their highest where its highest is.
-void _alignTo(LayeredGraph graph, List<Float64List> alignments) {
+void _alignTo(
+  LayeredGraph graph,
+  List<Float64List> alignments,
+  Uint8List floats,
+) {
   var narrowest = alignments.first;
   var narrowestWidth = double.infinity;
   for (final x in alignments) {
     var low = double.infinity;
     var high = double.negativeInfinity;
     for (final node in graph.nodes) {
+      if (floats[node.index] == 1) continue;
       final half = node.width / 2;
       low = math.min(low, x[node.index] - half);
       high = math.max(high, x[node.index] + half);
@@ -118,11 +138,11 @@ void _alignTo(LayeredGraph graph, List<Float64List> alignments) {
       narrowest = x;
     }
   }
-  final (anchorLow, anchorHigh) = _range(narrowest);
+  final (anchorLow, anchorHigh) = _range(narrowest, floats);
   for (var k = 0; k < alignments.length; k++) {
     final x = alignments[k];
     if (identical(x, narrowest)) continue;
-    final (low, high) = _range(x);
+    final (low, high) = _range(x, floats);
     final delta = k.isEven ? anchorLow - low : anchorHigh - high;
     if (delta != 0) {
       for (var i = 0; i < x.length; i++) {
@@ -132,12 +152,13 @@ void _alignTo(LayeredGraph graph, List<Float64List> alignments) {
   }
 }
 
-(double, double) _range(Float64List x) {
+(double, double) _range(Float64List x, Uint8List floats) {
   var low = double.infinity;
   var high = double.negativeInfinity;
-  for (final value in x) {
-    low = math.min(low, value);
-    high = math.max(high, value);
+  for (var i = 0; i < x.length; i++) {
+    if (floats[i] == 1) continue;
+    low = math.min(low, x[i]);
+    high = math.max(high, x[i]);
   }
   return (low, high);
 }
