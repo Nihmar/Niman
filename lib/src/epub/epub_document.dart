@@ -20,6 +20,7 @@ import 'package:crypto/crypto.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_book_text.dart';
+import 'package:niman/src/epub/epub_picture_cache.dart';
 import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
@@ -177,8 +178,14 @@ final class EpubDocument {
 ///
 /// Top-level for `Isolate.run`: it carries the two paths. The file is
 /// stat'ed there too, not on the UI isolate.
-Future<EpubDocument> openEpub(String path, String cacheDir) =>
-    Isolate.run(() => readEpub(path, pictureDirOf(path, cacheDir)));
+Future<EpubDocument> openEpub(String path, String cacheDir) => Isolate.run(() {
+  final dir = pictureDirOf(path, cacheDir);
+  final document = readEpub(path, dir);
+  // The cache is kept within its bound after each book (#1311), the
+  // folder of this one never among those taken.
+  pruneEpubCache(cacheDir, keep: dir);
+  return document;
+});
 
 /// The folder of [cacheDir] the pictures of the EPUB at [path] go to: named
 /// by the book's path, size and modification time, so a book opened again
@@ -231,11 +238,13 @@ EpubDocument readEpub(String path, String pictureDir) {
 }
 
 /// Writes the book's pictures under [dir], each once: a book opened again
-/// finds its pictures where it left them.
+/// finds its pictures where it left them ([writePictureWhole]).
 Map<String, String> _extract(EpubBook book, String dir) {
   final out = <String, String>{};
   if (book.pictures.isEmpty) return out;
   Directory(dir).createSync(recursive: true);
+  markEpubFolderUsed(dir);
+  dropStaleTemps(dir);
   for (var index = 0; index < book.pictures.length; index++) {
     final target = File(
       p.join(dir, '$index${p.extension(book.pictures[index]).toLowerCase()}'),
@@ -243,7 +252,7 @@ Map<String, String> _extract(EpubBook book, String dir) {
     if (!target.existsSync()) {
       final bytes = book.pictureBytes(index);
       if (bytes == null) continue;
-      target.writeAsBytesSync(bytes, flush: true);
+      writePictureWhole(target, bytes);
     }
     out['${EpubDocument.pictureScheme}:$index'] = target.path;
   }

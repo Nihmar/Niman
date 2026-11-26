@@ -33,6 +33,9 @@ const Map<String, String> _offTheUiIsolate = {
   'db/index_note_content.dart': 'the note reads of the reader isolate',
   'db/index_scan.dart': 'the walk, the listing and the probes, in isolates',
   'epub/epub_document.dart': 'readEpub, in its Isolate.run',
+  'epub/epub_picture_cache.dart':
+      "the pictures' writes and the pruning, in"
+      " openEpub's Isolate.run",
   'epub/epub_convert_job.dart': "the conversion's spawned isolate",
   'export/export_sources.dart': 'the image reads, in Isolate.run',
   'export/export_tree.dart': "the export's spawned isolate",

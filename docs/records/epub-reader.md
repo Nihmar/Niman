@@ -50,7 +50,13 @@ Read the EPUB with what the app has, draw it with the app's read view.
   `EpubContentsEntry (title, line, depth)`. Pictures named
   `epub-picture:N` and extracted once to `pictureDir/N.ext`, the folder
   named by a sha1 of the book's path, size and mtime (`pictureDirOf`)
-  under `<app cache>/epub`. Links into the book named `epub-link:N`
+  under `<app cache>/epub`. A picture is written to a temp name of its
+  folder and renamed in, so a crash leaves a temp file, never a cut-short
+  picture; a stale temp is removed when the book is read again. The cache
+  is bounded (#1311, `epub_picture_cache.dart`): each read marks its folder
+  as used (`.used`, a file whose time says when), and `openEpub` prunes
+  after the book is read, on the reader's isolate, the least recently used
+  folders past 512 MiB or 200 books, the one in use never. Links into the book named `epub-link:N`
   (`EpubDocument.lineOfLink`), external ones (`http:`, `mailto:`…) kept
   as they are.
 - `lib/src/ui/epub_pane.dart` — `EpubPane`: `AttachmentView` hands it
