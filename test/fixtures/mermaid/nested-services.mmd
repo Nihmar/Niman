@@ -1,0 +1,102 @@
+flowchart TB
+    %% Styling definitions
+    classDef edgeNode fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef computeNode fill:#0f172a,stroke:#22c55e,stroke-width:2px,color:#f8fafc;
+    classDef streamNode fill:#172554,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef dataNode fill:#2e1065,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
+    classDef alertNode fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fecaca;
+
+    subgraph EDGE["Edge & Ingress Layer"]
+        direction LR
+        Client["Web / Mobile Client"]:::edgeNode --> CDN["Global CDN & WAF"]:::edgeNode
+        CDN --> APIGW["API Gateway (Rate Limit & mTLS)"]:::edgeNode
+        APIGW --> AuthZ["AuthZ / Token Introspection"]:::edgeNode
+    end
+
+    subgraph CORE["Core Microservices (Kubernetes)"]
+        direction TB
+
+        subgraph SYNC["Synchronous Domain Services"]
+            direction LR
+            OrderSvc["Order Service"]:::computeNode
+            InvSvc["Inventory Reservation"]:::computeNode
+            PaySvc["Payment Orchestrator"]:::computeNode
+        end
+
+        subgraph ASYNC["Asynchronous Workers & Saga"]
+            direction LR
+            SagaCoord["Checkout Saga Coordinator"]:::computeNode
+            FulfillWorker["Fulfillment Dispatcher"]:::computeNode
+            LedgerWorker["Double-Entry Ledger Worker"]:::computeNode
+            RetryWorker["Exponential Backoff Consumer"]:::computeNode
+        end
+    end
+
+    subgraph STREAM["Event Streaming & Resilience"]
+        direction TB
+        Kafka["Kafka Cluster (Partitioned by Tenant)"]:::streamNode
+        SchemaReg["Schema Registry (Avro/Protobuf)"]:::streamNode
+        DLQ["Dead Letter Queue (DLQ)"]:::alertNode
+        ReplayJob["Manual / Automated Replay Job"]:::streamNode
+    end
+
+    subgraph DATA["Persistence & Analytics"]
+        direction LR
+        OrderDB[("Order & Saga DB\n(PostgreSQL Primary)")]:::dataNode
+        InvCache[("Distributed Lock & Stock\n(Redis Cluster)")]:::dataNode
+        LedgerDB[("Immutable Ledger\n(Append-Only Store)")]:::dataNode
+        Warehouse[("Lakehouse / OLAP\n(ClickHouse / Iceberg)")]:::dataNode
+    end
+
+    subgraph EXT["External Systems & Observability"]
+        direction LR
+        PSP["External PSP Gateway"]:::edgeNode
+        ERP["Warehouse / ERP Webhook"]:::edgeNode
+        OTel["OpenTelemetry Collector\n(Traces, Metrics, Logs)"]:::edgeNode
+    end
+
+    %% Edge to Core flows
+    AuthZ -- "Valid JWT + TraceContext" --> OrderSvc
+    AuthZ -. "401/403 Reject" .-> APIGW
+
+    %% Synchronous & Saga orchestration
+    OrderSvc -- "1. Persist Pending Order" --> OrderDB
+    OrderSvc -- "2. Start Checkout Saga" --> SagaCoord
+    SagaCoord -- "3. Reserve Stock" --> InvSvc
+    InvSvc <--> InvCache
+    InvSvc -- "Stock Locked / Failed" --> SagaCoord
+
+    SagaCoord -- "4. Authorize Charge" --> PaySvc
+    PaySvc <--> PSP
+    PaySvc -- "Auth Result" --> SagaCoord
+
+    %% Event publication
+    SagaCoord -- "Publish Domain Events" --> Kafka
+    OrderSvc -- "Order Lifecycle Events" --> Kafka
+    PaySvc -- "Settlement Events" --> Kafka
+    SchemaReg -. "Validate Payload Schema" .- Kafka
+
+    %% Stream consumers & error handling
+    Kafka -- "order.confirmed" --> FulfillWorker
+    Kafka -- "payment.settled" --> LedgerWorker
+    FulfillWorker -- "Dispatch Shipment" --> ERP
+    LedgerWorker -- "Append Balanced Entries" --> LedgerDB
+
+    FulfillWorker -- "Transient Failure" --> RetryWorker
+    LedgerWorker -- "Transient Failure" --> RetryWorker
+    RetryWorker -- "Re-enqueue (Delayed)" --> Kafka
+
+    RetryWorker -- "Max Retries Exceeded" --> DLQ
+    PaySvc -- "Malformed / Rejected Payload" --> DLQ
+    DLQ --> ReplayJob
+    ReplayJob -- "Sanitized Re-inject" --> Kafka
+
+    %% Analytics & Observability fan-out
+    Kafka -- "CDC & Event Stream" --> Warehouse
+    OrderDB -. "Debezium CDC" .-> Warehouse
+    LedgerDB -. "Audit Replication" .-> Warehouse
+
+    EDGE -.-> OTel
+    CORE -.-> OTel
+    STREAM -.-> OTel
+    DATA -.-> OTel
