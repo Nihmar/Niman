@@ -591,6 +591,39 @@ void main() {
     expect(uri, startsWith('data:image/bmp;base64,'));
   });
 
+  test(
+    'a remote picture is a link in the book, in a note and a folder',
+    () async {
+      const text = '# T\n\n![w](https://example.com/a.png)\n';
+      final payload = await exportNoteEpub(
+        text: text,
+        title: 'T',
+        path: 'T.md',
+        root: root.path,
+        language: 'en',
+      );
+      final file = p.join(root.path, 'remote.epub');
+      await File(file).writeAsBytes(payload.bytes);
+      var chapter = textEntries(file)['OEBPS/text/note.xhtml']!;
+      expect(chapter, isNot(contains('<img')));
+      expect(chapter, contains('<a href="https://example.com/a.png">w</a>'));
+
+      final notes = p.join(root.path, 'Notes');
+      await Directory(notes).create(recursive: true);
+      await File(p.join(notes, 'a.md')).writeAsString(text);
+      final out = p.join(root.path, 'folder.epub');
+      await TreeExport.run(
+        dir: notes,
+        zipPath: out,
+        format: ExportTreeFormat.epub,
+        language: 'en',
+      );
+      chapter = textEntries(out)['OEBPS/text/a.xhtml']!;
+      expect(chapter, isNot(contains('<img')));
+      expect(chapter, contains('<a href="https://example.com/a.png">w</a>'));
+    },
+  );
+
   test('a book progresses in chapters, not tree entries', () async {
     final notes = p.join(root.path, 'Notes');
     await Directory(notes).create(recursive: true);

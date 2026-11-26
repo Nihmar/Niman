@@ -190,6 +190,13 @@ demands; the container is `mimetype` (stored, first),
   library-relative path (`epub_identifier.dart`, namespace v5 of the
   project's address), never random: the same export twice is one book to a
   reader. A second `dc:identifier` is not written (#1307).
+- [x] In an EPUB a picture that is not in the container is its alt text
+  (#1309): `NoteHtmlSource.epub` turns on `ExportHooks.image`, a new
+  `HtmlHooks` way out the inline writer asks before it writes an `<img>`
+  (with whether the picture sits inside a link, which an anchor must not
+  nest in). A remote picture is `<a href>alt</a>` (the address when there
+  is no alt), a local one the book does not carry bare alt text. The
+  HTML page and the PDF leave the flag off and keep the `<img>`.
 - [x] A note's book is written off the UI isolate (#1305,
   `epub_note_writer.dart`): the UI side resolves the cover and the pictures
   against the link index — the one thing only it can do — and sends plain

@@ -150,6 +150,7 @@ abstract final class ExportTreeBook {
       links: ExportTreePages.linkUrls(text, noteDir, tree, '.xhtml'),
       anchors: ExportTreePages.linkAnchors(text, noteDir, tree),
       kanban: kanban,
+      epub: true,
     );
     final html = NoteHtml(source);
     final body = html.body();

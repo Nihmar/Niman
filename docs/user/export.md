@@ -45,7 +45,12 @@ one file:
   (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file (an
   SVG as an `images/img-N.svg` entry). A book carries the picture types
   EPUB itself does — PNG, JPEG, GIF, WebP and SVG — so a BMP is left out
-  of it, though the HTML page still shows it.
+  of it, though the HTML page still shows it. A book holds its pictures
+  inside it, so a picture that is not in the book — one on the web
+  (`![w](https://…)`), or one of a type the book cannot carry — is its
+  description instead: the text, as a link to where the picture was when it
+  was on the web. The HTML page and the PDF keep a picture on the web as it
+  is written.
   A `cover:` key in the note's frontmatter names a picture the book opens
   on. A wikilink out has nothing to point at, exactly as on a single HTML
   page.

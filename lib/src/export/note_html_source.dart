@@ -15,6 +15,7 @@ final class NoteHtmlSource {
     this.anchors = const <String, String>{},
     this.todoBlocks = const <String, PrintedTodoBlock>{},
     this.kanban = false,
+    this.epub = false,
   });
 
   /// The note, as written.
@@ -51,4 +52,11 @@ final class NoteHtmlSource {
   /// drawn as a board. Off, it is the sections and tasks it is in any other
   /// editor.
   final bool kanban;
+
+  /// Whether the page is an EPUB chapter (#1309): EPUB 3 holds its pictures
+  /// inside the container, so a picture that is not in [images] is drawn as
+  /// its description — a link to where it was when that is a remote
+  /// address — never as an `<img>` the book does not carry. A page and a PDF
+  /// keep a remote picture as it was written.
+  final bool epub;
 }

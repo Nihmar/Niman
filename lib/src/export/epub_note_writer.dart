@@ -204,6 +204,7 @@ Future<NoteEpubWritten> _write(
         images: images,
         todoBlocks: job.todoBlocks,
         kanban: job.kanban,
+        epub: true,
       ),
     );
     final body = html.body();
