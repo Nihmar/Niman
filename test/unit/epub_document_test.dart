@@ -165,6 +165,9 @@ void main() {
     expect(document.contents, [
       (title: 'A', line: 0, depth: 0),
       (title: 'B', line: 4, depth: 1),
+      // The page the spine names and the zip lacks has no text: its entry
+      // opens at the next chapter, as the conversion's does (#1314).
+      (title: 'Missing', line: 4, depth: 0),
     ]);
     expect(document.pictures, isEmpty);
     expect(Directory(pictures).existsSync(), isFalse);
@@ -285,6 +288,44 @@ void main() {
       expect(document.contents.map((entry) => entry.title), [
         'First',
         'Second',
+      ]);
+    },
+  );
+
+  test(
+    'a contents entry or a link on a page with no text opens the next (#1314)',
+    () {
+      // A part's title page has no text of its own: what points at it opens
+      // where the next chapter does, as the conversion makes it a folder there.
+      final file = writeTestEpub(
+        book('parts.epub'),
+        chapters: [
+          (path: 'part.xhtml', body: '<div class="part"></div>'),
+          (
+            path: 'ch1.xhtml',
+            body: '<h1>First</h1><p>one <a href="part.xhtml">back</a></p>',
+          ),
+          (path: 'ch2.xhtml', body: '<h1>Second</h1>'),
+        ],
+        nav:
+            '<ol><li><a href="part.xhtml">Part One</a><ol>'
+            '<li><a href="ch1.xhtml">First</a></li>'
+            '<li><a href="ch2.xhtml">Second</a></li></ol></li></ol>',
+      );
+      final document = readEpub(file.path, pictures);
+      expect(
+        document.markdown,
+        '# First\n\none [back](<epub-link:0>)\n\n---\n\n# Second\n',
+      );
+      expect(document.contents, [
+        (title: 'Part One', line: 0, depth: 0),
+        (title: 'First', line: 0, depth: 1),
+        (title: 'Second', line: 6, depth: 1),
+      ]);
+      expect(document.links, [0]);
+      expect(document.chapters, [
+        (file: 'OEBPS/ch1.xhtml', line: 0),
+        (file: 'OEBPS/ch2.xhtml', line: 6),
       ]);
     },
   );

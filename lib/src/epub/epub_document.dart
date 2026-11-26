@@ -19,6 +19,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_book_text.dart';
 import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
@@ -171,48 +172,25 @@ EpubDocument readEpub(String path, String pictureDir) {
   final input = InputFileStream(path);
   try {
     final book = parseEpub(EpubArchive.open(input));
-    final text = StringBuffer();
-    final chapterStart = <String, int>{};
-    final anchors = <String, Map<String, int>>{};
-    var line = 0;
-    for (final chapter in book.chapters) {
-      if (text.isNotEmpty) {
-        // A rule between two chapters, a blank line on each side of it.
-        text.write('\n\n---\n\n');
-        line += 4;
-      }
-      chapterStart[chapter.file] = line;
-      anchors[chapter.file] = {
-        for (final entry in chapter.anchors.entries)
-          entry.key: line + entry.value,
-      };
-      text.write(chapter.markdown);
-      line += '\n'.allMatches(chapter.markdown).length;
-    }
-    text.write('\n');
-    final markdown = text.toString();
-
-    int? lineOf(String file, String fragment) {
-      final start = chapterStart[file];
-      if (start == null) return null;
-      if (fragment.isEmpty) return start;
-      return epubAnchorLine(anchors[file], fragment) ?? start;
-    }
-
+    // The one join of the chapters, the conversion's own: a contents entry
+    // or a link on a page with no text opens at the next chapter's line.
+    final text = epubBookText(book);
+    final markdown = text.markdown;
     return EpubDocument(
       title: book.info.title ?? p.basenameWithoutExtension(path),
       markdown: markdown,
       contents: [
         for (final entry in book.contents)
-          if (lineOf(entry.file, entry.fragment) case final line?)
+          if (text.lineOf(entry.file, entry.fragment) case final line?)
             (title: entry.title, line: line, depth: entry.depth),
       ],
       pictures: _extract(book, pictureDir),
       links: [
-        for (final target in book.links) lineOf(target.file, target.fragment),
+        for (final target in book.links)
+          text.lineOf(target.file, target.fragment),
       ],
       chapters: [
-        for (final MapEntry(key: file, value: line) in chapterStart.entries)
+        for (final MapEntry(key: file, value: line) in text.starts.entries)
           (file: file, line: line),
       ],
       counts: EpubCounts.of(markdown),
