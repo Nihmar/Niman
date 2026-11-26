@@ -21,6 +21,8 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:niman/src/export/epub_book.dart';
 import 'package:niman/src/export/epub_note_chapters.dart';
+import 'package:niman/src/export/epub_web_pictures.dart';
+import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/note_html.dart';
 import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
@@ -162,6 +164,8 @@ Future<void> writeNoteEpub(NoteEpubRequest request) async {
     request.events.send(await _write(request.job, () => cancelled));
   } on EpubExportCancelled {
     request.events.send(const EpubExportCancelled());
+  } on EpubPicturesStopped {
+    request.events.send(const EpubExportCancelled());
   } on Object catch (error) {
     request.events.send(EpubExportFailed('$error'));
   } finally {
@@ -188,6 +192,10 @@ Future<NoteEpubWritten> _write(
   );
   var formulas = 0;
   var sources = 0;
+  // The pictures of the web the note shows, downloaded as the PDF's engine
+  // fetches them (#1309): off the UI isolate, here, a stop heard between
+  // and during the downloads.
+  final web = EpubWebPictures(isCancelled: isCancelled);
   try {
     final images = <String, String>{};
     for (final entry in job.pictures.entries) {
@@ -197,6 +205,15 @@ Future<NoteEpubWritten> _write(
       final href = await book.imageHref(_chapterDir, entry.value);
       if (href != null) images[entry.key] = href;
     }
+    images.addAll(
+      await web.carry(
+        book,
+        _chapterDir,
+        ExportSources.pictureTargets(job.text)
+            .where((target) => !images.containsKey(target)),
+      ),
+    );
+    check();
     final html = NoteHtml(
       NoteHtmlSource(
         text: job.text,
@@ -222,6 +239,7 @@ Future<NoteEpubWritten> _write(
       );
     }
   } finally {
+    await web.close();
     await book.close();
   }
   check();

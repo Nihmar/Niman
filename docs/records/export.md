@@ -197,6 +197,24 @@ demands; the container is `mimetype` (stored, first),
   nest in). A remote picture is `<a href>alt</a>` (the address when there
   is no alt), a local one the book does not carry bare alt text. The
   HTML page and the PDF leave the flag off and keep the `<img>`.
+- [x] A picture on the web is downloaded into the book (#1309), as the
+  PDF's engine fetches it while printing: `EpubWebPictures`
+  (`epub_web_pictures.dart`) runs on the isolate that writes the container
+  — `epub_note_writer.dart` for a note, `export_tree.dart` for a folder —
+  never the UI isolate. It is the capture's own download
+  (`downloadPicture`, `pictureHttpClient`, now in `capture_pictures.dart`
+  with the HTML import still reaching them from its store): http and https
+  only, at most 60 addresses a book, 15 MB and 30 s a picture, four at a
+  time, each address once. What came is kept in a scratch folder by its
+  SHA-256 and added through `EpubBook.imageHref`, so two addresses of the
+  same bytes are one item; the type is read from the bytes
+  (`epubPictureExtension`) and must be one of `epubPictureTypes`. The
+  chapter's `images` map then holds the address, and the hook only draws
+  the link for what did not come. A stop is looked for before each picture
+  and every 25 ms while one comes: the note's writer answers
+  `EpubExportCancelled`, the folder's loop stops as between two entries.
+  The scratch folder is deleted with the book's writer. The note's text
+  and the library are never written.
 - [x] A note's book is written off the UI isolate (#1305,
   `epub_note_writer.dart`): the UI side resolves the cover and the pictures
   against the link index — the one thing only it can do — and sends plain

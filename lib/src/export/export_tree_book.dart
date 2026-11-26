@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/export/epub_book.dart';
+import 'package:niman/src/export/epub_web_pictures.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/note_html.dart';
@@ -120,11 +121,13 @@ abstract final class ExportTreeBook {
 
   /// Adds one note of [tree] to [book] as a chapter (#303), answering how
   /// many formulas its page drew and how many it left as source — an
-  /// ad-hoc diagnostic for math that never shows.
+  /// ad-hoc diagnostic for math that never shows. Its pictures of the web
+  /// come through [web], which throws [EpubPicturesStopped] on a cancel.
   static Future<({int formulas, int sources})> addChapter(
     EpubBook book,
     ExportTreeWalk tree,
     ExportTreeEntry entry, {
+    required EpubWebPictures web,
     bool kanban = false,
   }) async {
     final rel = entry.rel;
@@ -132,7 +135,8 @@ abstract final class ExportTreeBook {
     final href = 'OEBPS/text/${tree.names[rel]}.xhtml';
     final text = ExportTreePages.readNote(entry.abs);
     final images = <String, String>{};
-    for (final target in ExportSources.pictureTargets(text)) {
+    final targets = ExportSources.pictureTargets(text);
+    for (final target in targets) {
       final picture = ExportTreePages.fileIn(target, noteDir, tree.files);
       if (picture == null) continue;
       final url = await book.imageHref(
@@ -141,6 +145,9 @@ abstract final class ExportTreeBook {
       );
       if (url != null) images[target] = url;
     }
+    // What is on the web is downloaded into the book (#1309); what did not
+    // come is the page's alt text, linked.
+    images.addAll(await web.carry(book, p.posix.dirname(href), targets));
     final title = ExportTreePages.pageTitle(text, rel);
     final source = NoteHtmlSource(
       text: text,

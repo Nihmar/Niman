@@ -34,6 +34,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/epub_book.dart';
+import 'package:niman/src/export/epub_web_pictures.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/export_tree_printer.dart';
@@ -442,6 +443,10 @@ Future<void> _exportTree(TreeExportRequest request) async {
   final encoder = book == null
       ? (ZipFileEncoder()..create(request.zipPath))
       : null;
+  // A book's pictures from the web, downloaded here (#1309).
+  final web = book == null
+      ? null
+      : EpubWebPictures(isCancelled: () => cancelled);
   // The PDF format's scratch: one page and one PDF at a time, reused.
   final scratch = request.format == ExportTreeFormat.pdf
       ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
@@ -475,12 +480,21 @@ Future<void> _exportTree(TreeExportRequest request) async {
         await encoder!.addFile(File(entry.abs), entry.rel);
       } else if (ExportTreePages.isNote(entry.rel)) {
         if (book != null) {
-          final drawn = await ExportTreeBook.addChapter(
-            book,
-            tree,
-            entry,
-            kanban: request.kanban,
-          );
+          final ({int formulas, int sources}) drawn;
+          try {
+            drawn = await ExportTreeBook.addChapter(
+              book,
+              tree,
+              entry,
+              web: web!,
+              kanban: request.kanban,
+            );
+          } on EpubPicturesStopped {
+            // A stop heard while a picture came: the same as one heard
+            // between entries.
+            stopped = true;
+            break;
+          }
           formulaCount += drawn.formulas;
           sourceCount += drawn.sources;
         } else {
@@ -557,6 +571,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
     rethrow;
   } finally {
     cancel.close();
+    await web?.close();
     try {
       scratch?.deleteSync(recursive: true);
     } on FileSystemException {
