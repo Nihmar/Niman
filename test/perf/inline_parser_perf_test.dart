@@ -1,4 +1,4 @@
-// Our inline parser on the leaves of the fixtures (docs/dev/block-tree.md,
+// Our inline parser on the leaves of the fixtures (docs/records/block-tree.md,
 // "Speed"). It replaced the package's parse, masked: measured on this host
 // 2026-10-06 (tool/inline_bench.dart), 5 ms against 52 on the 200 KB
 // fixture and 50 against 608 on the worst note — the package is gone, and

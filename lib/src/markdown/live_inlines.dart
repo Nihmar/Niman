@@ -1,5 +1,5 @@
 /// A block's inline constructs on its lines, for `live` and source mode:
-/// our parser's nodes (`docs/dev/block-tree.md`, phase 6), each put back
+/// our parser's nodes (`docs/records/block-tree.md`, phase 6), each put back
 /// on the note through its leaf's [SourceMap], split into its markers —
 /// what `live` hides — and its text.
 library;

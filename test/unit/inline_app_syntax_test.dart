@@ -1,4 +1,4 @@
-// The app's own inline syntax in our parser (docs/dev/block-tree.md, phase
+// The app's own inline syntax in our parser (docs/records/block-tree.md, phase
 // 4): math, wikilinks and embeds, tags, `==highlight==` and the HTML style
 // tags, read in the masker's order, CommonMark's constructs around them.
 import 'package:flutter_test/flutter_test.dart';

@@ -1,4 +1,4 @@
-/// Where a leaf's inline text stands in the note (`docs/dev/block-tree.md`).
+/// Where a leaf's inline text stands in the note (`docs/records/block-tree.md`).
 ///
 /// The inline parser reads a leaf's text — a paragraph's lines without
 /// their containers' marks and their leading white space, joined; a

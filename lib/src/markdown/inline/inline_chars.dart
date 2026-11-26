@@ -1,5 +1,5 @@
 /// The character classes the inline rules are written in
-/// (`docs/dev/block-tree.md`; the GFM spec 0.29, §2.1).
+/// (`docs/records/block-tree.md`; the GFM spec 0.29, §2.1).
 library;
 
 /// What CommonMark asks of a character.

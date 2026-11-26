@@ -1,4 +1,4 @@
-/// One block, drawn from its node of the tree (`docs/dev/block-tree.md`,
+/// One block, drawn from its node of the tree (`docs/records/block-tree.md`,
 /// phase 5).
 ///
 /// The renderer is a mapping, not an engine: the tree has said what the

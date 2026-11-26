@@ -1,6 +1,6 @@
 /// One block of a note as the read view draws it: its node of the tree,
 /// each leaf's lines and, for the leaves with inline text, our inline
-/// parser's nodes (`docs/dev/block-tree.md`, phase 5). `ReadParser` makes
+/// parser's nodes (`docs/records/block-tree.md`, phase 5). `ReadParser` makes
 /// it.
 library;
 

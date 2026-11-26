@@ -1,5 +1,5 @@
 /// The HTML tags the app reads as styles — `<u>`, `<sup>`, `<sub>` — made
-/// nodes of their own around what they hold (`docs/dev/block-tree.md`,
+/// nodes of their own around what they hold (`docs/records/block-tree.md`,
 /// phase 4): the toolbar writes `<u>` into a note, and the views draw what
 /// it means, not the tags.
 library;

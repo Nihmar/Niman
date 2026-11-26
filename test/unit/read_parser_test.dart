@@ -1,5 +1,5 @@
 // The read view's reading of a block: its node of the tree, and each
-// leaf's inline text read by our own parser (docs/dev/block-tree.md,
+// leaf's inline text read by our own parser (docs/records/block-tree.md,
 // phase 5).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/memory_reclaim.dart';

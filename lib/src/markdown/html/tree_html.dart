@@ -1,7 +1,7 @@
 /// A note written as HTML from its block tree and our inline parser, the
 /// way `cmark-gfm`'s HTML renderer writes it (`html.c` and the GFM
 /// extensions) — the form the specifications' examples are in
-/// (`docs/dev/block-tree.md`).
+/// (`docs/records/block-tree.md`).
 library;
 
 import 'package:niman/src/markdown/block.dart';

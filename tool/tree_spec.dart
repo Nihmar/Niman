@@ -1,5 +1,5 @@
 /// Measures the block tree and our inline parser against the conformance
-/// suites (`docs/dev/block-tree.md`): each example written by `TreeHtml`
+/// suites (`docs/records/block-tree.md`): each example written by `TreeHtml`
 /// and compared with the expected HTML under cmark's normalization.
 ///
 /// Usage:

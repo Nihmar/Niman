@@ -10,7 +10,7 @@
 /// with that much taken off, or — short of it — lazily, and then **as it
 /// stands**. Measuring every container from the margin instead is what
 /// six attempts at the old scanner could not reconcile
-/// (`docs/dev/block-scanner-indent-model.md`); walking the containers in
+/// (`docs/records/block-scanner-indent-model.md`); walking the containers in
 /// order makes each measure where its parent left the line.
 library;
 

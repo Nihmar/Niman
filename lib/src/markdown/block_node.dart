@@ -1,6 +1,6 @@
 /// A note's blocks as a tree: the containers the scanner reads — quotes,
 /// lists, items — with the leaves inside them, each leaf's lines mapped
-/// back to the note (`docs/dev/block-tree.md`). `BlockTree` builds it.
+/// back to the note (`docs/records/block-tree.md`). `BlockTree` builds it.
 ///
 /// The node kinds are one family, read by exhaustive switches, so they
 /// share this file.

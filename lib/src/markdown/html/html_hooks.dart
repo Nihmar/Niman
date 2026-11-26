@@ -1,6 +1,6 @@
 /// Where a page built on the writer (`TreeHtml`) draws a construct its own
 /// way: the export's code colours, formulas, diagrams, callouts, wikilinks
-/// and pictures (`docs/dev/block-tree.md`, phase 7). Each answer is HTML,
+/// and pictures (`docs/records/block-tree.md`, phase 7). Each answer is HTML,
 /// or null for the writer's own, `cmark-gfm`'s.
 library;
 
