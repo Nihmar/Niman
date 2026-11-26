@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:niman/src/export/epub_book.dart';
+import 'package:niman/src/export/epub_web_pictures.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/note_html.dart';
@@ -74,8 +75,8 @@ abstract final class ExportTreeBook {
   /// else. Why travels in the answer's `warnings`, for the caller to log
   /// where its logger lives (E3).
   static ExportTreeFrontmatter frontmatter(ExportTreeWalk tree) {
-    final rel = tree.notes['index.md'];
-    if (rel == null || p.dirname(rel) != '.') {
+    final rel = _rootIndex(tree);
+    if (rel == null) {
       const warning =
           'the exported folder has no index.md at its root: the book carries '
           "the folder's name and no metadata";
@@ -92,13 +93,41 @@ abstract final class ExportTreeBook {
     return (metadata: epubMetadataOf(text), warnings: warnings);
   }
 
+  /// The notes of [tree] a book holds, in reading order (#1308): name order
+  /// with the folders among the notes, as the walk lists them — a folder's
+  /// notes together, a part between the chapters that number around it —
+  /// with `index.md` at the exported folder's root first. That page is the
+  /// book's title, its cover and its contents: a book converted into notes
+  /// and exported again opens on it, wherever its name sorts.
+  static List<ExportTreeEntry> chapters(ExportTreeWalk tree) {
+    final notes = [
+      for (final entry in tree.entries)
+        if (!entry.isDir && ExportTreePages.isNote(entry.rel)) entry,
+    ];
+    final index = _rootIndex(tree);
+    final at = index == null
+        ? -1
+        : notes.indexWhere((entry) => entry.rel == index);
+    if (at <= 0) return notes;
+    return [notes[at], ...notes.sublist(0, at), ...notes.sublist(at + 1)];
+  }
+
+  /// The `index.md` at the exported folder's root, or null: the book's
+  /// metadata source, and its first page.
+  static String? _rootIndex(ExportTreeWalk tree) {
+    final rel = tree.notes['index.md'];
+    return rel == null || p.dirname(rel) != '.' ? null : rel;
+  }
+
   /// Adds one note of [tree] to [book] as a chapter (#303), answering how
   /// many formulas its page drew and how many it left as source — an
-  /// ad-hoc diagnostic for math that never shows.
+  /// ad-hoc diagnostic for math that never shows. Its pictures of the web
+  /// come through [web], which throws [EpubPicturesStopped] on a cancel.
   static Future<({int formulas, int sources})> addChapter(
     EpubBook book,
     ExportTreeWalk tree,
     ExportTreeEntry entry, {
+    required EpubWebPictures web,
     bool kanban = false,
   }) async {
     final rel = entry.rel;
@@ -106,7 +135,8 @@ abstract final class ExportTreeBook {
     final href = 'OEBPS/text/${tree.names[rel]}.xhtml';
     final text = ExportTreePages.readNote(entry.abs);
     final images = <String, String>{};
-    for (final target in ExportSources.pictureTargets(text)) {
+    final targets = ExportSources.pictureTargets(text);
+    for (final target in targets) {
       final picture = ExportTreePages.fileIn(target, noteDir, tree.files);
       if (picture == null) continue;
       final url = await book.imageHref(
@@ -115,6 +145,9 @@ abstract final class ExportTreeBook {
       );
       if (url != null) images[target] = url;
     }
+    // What is on the web is downloaded into the book (#1309); what did not
+    // come is the page's alt text, linked.
+    images.addAll(await web.carry(book, p.posix.dirname(href), targets));
     final title = ExportTreePages.pageTitle(text, rel);
     final source = NoteHtmlSource(
       text: text,
@@ -124,6 +157,7 @@ abstract final class ExportTreeBook {
       links: ExportTreePages.linkUrls(text, noteDir, tree, '.xhtml'),
       anchors: ExportTreePages.linkAnchors(text, noteDir, tree),
       kanban: kanban,
+      epub: true,
     );
     final html = NoteHtml(source);
     final body = html.body();
@@ -134,6 +168,8 @@ abstract final class ExportTreeBook {
       fontFaces: html.fontFaces,
       hasSvg: html.usesSvg,
       hasBoard: html.boardSheet != null,
+      folder: noteDir == '.' ? '' : noteDir,
+      opensFolder: _ownPage.hasMatch(p.basenameWithoutExtension(rel)),
     );
     return (
       formulas: _count(body, '<svg'),
@@ -141,6 +177,10 @@ abstract final class ExportTreeBook {
     );
   }
 }
+
+/// A folder's own page, the note a part opens on: its number is zero
+/// (`00 Part One.md`), as a converted book names it (#1138).
+final RegExp _ownPage = RegExp('^0+(?![0-9])');
 
 /// How many times [needle] appears in [text]; a diagnostic count, not a
 /// parser.

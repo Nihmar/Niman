@@ -26,6 +26,9 @@ import 'package:niman/src/markdown/inline/inline_node.dart';
 /// A local Markdown note link's path, a `#` fragment or `?` query aside.
 final RegExp _noteHref = RegExp(r'\.md(?:[#?].*)?$');
 
+/// An address a browser fetches: a picture an EPUB cannot carry.
+final RegExp _remote = RegExp('^(?:https?|ftp)://', caseSensitive: false);
+
 /// One page's drawing of what the writer leaves to it.
 final class ExportHooks extends HtmlHooks {
   /// The page of [source], its formulas through [math].
@@ -143,6 +146,21 @@ final class ExportHooks extends HtmlHooks {
   @override
   String? imageSource(String destination) =>
       _target(source.images, destination);
+
+  @override
+  String? image(String destination, String alt, {required bool inLink}) {
+    if (!source.epub || _target(source.images, destination) != null) {
+      return null;
+    }
+    // A picture outside the book is words: a remote one links to where it
+    // is; a local one the book could not carry has nowhere to point, and
+    // inside a link the link is already there.
+    if (inLink || !_remote.hasMatch(destination.trim())) {
+      return escapeHtml(alt);
+    }
+    return '<a href="${InlineHtml.escapeHref(destination)}">'
+        '${escapeHtml(alt.trim().isEmpty ? destination : alt)}</a>';
+  }
 
   /// What [targets] has for [written], as written or percent-decoded.
   static String? _target(Map<String, String> targets, String written) {

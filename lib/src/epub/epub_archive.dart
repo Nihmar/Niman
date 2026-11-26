@@ -15,6 +15,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:niman/src/core/percent.dart';
+import 'package:niman/src/epub/epub_text_bytes.dart';
 import 'package:niman/src/import/bounded_entry.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
@@ -127,19 +128,17 @@ final class EpubArchive {
             ? '"$path" expands past the $_maxBytes-byte budget'
             : '"$path" expands past the $within bytes one file may',
       );
-    } finally {
-      // The inflated bytes are cached on the entry: let them go.
-      file.clear();
     }
     _read += bytes?.length ?? 0;
     return bytes ?? Uint8List(0);
   }
 
-  /// [path] as text, or null when the zip does not hold it. Throws
+  /// [path] as text, in the encoding it is written in ([decodeEpubText]), or
+  /// null when the zip does not hold it. Throws
   /// [EpubRefused] when it expands past what one file read as text may.
   String? text(String path) {
     final bytes = this.bytes(path, limit: _maxTextBytes);
-    return bytes == null ? null : utf8.decode(bytes, allowMalformed: true);
+    return bytes == null ? null : decodeEpubText(bytes);
   }
 
   /// [path] parsed as XML. Throws [EpubRefused] when it is missing or not

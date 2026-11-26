@@ -2,7 +2,7 @@
 /// Markdown in reading order, its table of contents, and the pictures and
 /// links its chapters name. The reader joins the chapters into one text
 /// (`epub_document.dart`); the conversion writes them as notes
-/// (`epub_convert.dart`). One parse for both, so the notes say what the
+/// (`epub_convert_job.dart`). One parse for both, so the notes say what the
 /// reader shows.
 ///
 /// An EPUB is a zip: `META-INF/container.xml` names the package document
@@ -22,6 +22,7 @@ import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_info.dart';
 import 'package:niman/src/markdown/from_html/html_markdown.dart';
+import 'package:niman/src/markdown/from_html/xhtml_source.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 
@@ -74,9 +75,6 @@ final class EpubBook {
     required this.pictures,
     required this.links,
     required this._archive,
-    this.formulaSvgs = 0,
-    this.firstTex,
-    this.mathMl = 0,
   });
 
   /// What the book says about itself.
@@ -99,16 +97,6 @@ final class EpubBook {
 
   /// The book's own links, by the number their text names them by.
   final List<EpubTarget> links;
-
-  /// What the chapters' math looked like to a plain scan (#303): the
-  /// formula SVGs, the first one's TeX, and the MathML elements.
-  final int formulaSvgs;
-
-  /// See [formulaSvgs].
-  final String? firstTex;
-
-  /// See [formulaSvgs].
-  final int mathMl;
 
   final EpubArchive _archive;
 
@@ -187,19 +175,11 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
   final pictureIndex = <String, int>{};
   final links = <EpubTarget>[];
   final chapters = <EpubChapterText>[];
-  var formulaSvgs = 0;
-  var mathMl = 0;
-  String? firstTex;
   for (final chapter in spine) {
     yield null;
     final text = archive.text(chapter);
     if (text == null) continue;
     final dir = p.posix.dirname(chapter);
-    for (final match in _svgFormula.allMatches(text)) {
-      formulaSvgs++;
-      firstTex ??= match.group(1);
-    }
-    mathMl += _mathMl.allMatches(text).length;
     final converted = HtmlMarkdown(
       picture: (src) {
         final resolved = _resolve(dir, src);
@@ -221,7 +201,7 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
         ));
         return '$epubLinkScheme:${links.length - 1}';
       },
-    ).convert(text);
+    ).convert(text, xhtml: true);
     if (converted.markdown.trim().isEmpty) continue;
     chapters.add((
       file: chapter,
@@ -242,20 +222,8 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
     pictures: pictures,
     links: links,
     archive: archive,
-    formulaSvgs: formulaSvgs,
-    firstTex: firstTex,
-    mathMl: mathMl,
   );
 }
-
-/// A formula SVG's TeX, in its `aria-label`; an ad-hoc diagnostic (#303).
-final RegExp _svgFormula = RegExp(
-  '<svg[^>]*aria-label="([^"]*)"',
-  caseSensitive: false,
-);
-
-/// A MathML element; an ad-hoc diagnostic (#303).
-final RegExp _mathMl = RegExp(r'<math[\s>]', caseSensitive: false);
 
 /// A file of the book's manifest.
 typedef _Item = ({String path, String type, String properties});
@@ -315,7 +283,7 @@ List<EpubTocEntry> _contents(
 List<EpubTocEntry> _navContents(EpubArchive archive, String path) {
   final text = archive.text(path);
   if (text == null) return const [];
-  final document = html.parse(text);
+  final document = html.parse(expandSelfClosed(text));
   final navs = document.getElementsByTagName('nav');
   final toc =
       navs

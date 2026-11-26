@@ -19,6 +19,8 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_book.dart';
+import 'package:niman/src/epub/epub_book_text.dart';
+import 'package:niman/src/epub/epub_picture_cache.dart';
 import 'package:niman/src/epub/epub_progress.dart';
 import 'package:niman/src/reading/book_location.dart';
 import 'package:path/path.dart' as p;
@@ -34,16 +36,16 @@ typedef EpubChapter = ({String file, int line});
 /// A book, ready to read.
 final class EpubDocument {
   /// Wraps a read book.
-  const new({
+  new({
     required this.title,
     required this.markdown,
+    required this.lineCount,
     required this.contents,
     required this.pictures,
     required this.links,
     required this.chapters,
     required this.counts,
     this.language,
-    this.mathReport,
   });
 
   /// The book's title, or its file name when it gives none.
@@ -51,6 +53,11 @@ final class EpubDocument {
 
   /// The whole book, as Markdown.
   final String markdown;
+
+  /// How many lines the book's text has, counted once as it is read (off
+  /// the UI isolate): the end the last chapter's places are kept within
+  /// (#1306), not a count of [markdown]'s line breaks asked for every mark.
+  final int lineCount;
 
   /// Its table of contents, in the book's order.
   final List<EpubContentsEntry> contents;
@@ -77,11 +84,6 @@ final class EpubDocument {
   EpubProgress progress() =>
       EpubProgress(counts, [for (final chapter in chapters) chapter.line]);
 
-  /// An ad-hoc diagnostic (#303): what the chapters' math looked like to a
-  /// plain scan — the SVG formulas, their first TeX, the MathML — for the
-  /// pane to log. Null when the book shows none.
-  final String? mathReport;
-
   /// How the text names a picture: `epub-picture:3`.
   static const String pictureScheme = epubPictureScheme;
 
@@ -106,13 +108,38 @@ final class EpubDocument {
   /// the book spells it, else whatever its case (a Markdown link's
   /// fragment may come lowercased), else its file name alone (a link
   /// written by hand); -1 when none does.
-  int _chapterNamed(String name) {
-    final exact = chapters.indexWhere((c) => c.file == name);
-    if (exact != -1) return exact;
-    final lower = name.toLowerCase();
-    final anyCase = chapters.indexWhere((c) => c.file.toLowerCase() == lower);
-    if (anyCase != -1) return anyCase;
-    return chapters.indexWhere((c) => c.file.toLowerCase().endsWith('/$lower'));
+  int _chapterNamed(String name) =>
+      _byName[name] ??
+      _byLowerName[name.toLowerCase()] ??
+      _bySuffix[name.toLowerCase()] ??
+      -1;
+
+  // The chapters by name, built once the first time a place is asked for
+  // (#1306): a book's marks each used to walk the chapters, and the last
+  // chapter's walked the text. The first chapter of a name wins in each.
+  late final Map<String, int> _byName = {
+    for (var i = chapters.length - 1; i >= 0; i--) chapters[i].file: i,
+  };
+  late final Map<String, int> _byLowerName = {
+    for (var i = chapters.length - 1; i >= 0; i--)
+      chapters[i].file.toLowerCase(): i,
+  };
+
+  /// Every tail of a chapter's path that starts after a `/`, lowercased:
+  /// the file name alone, or the path from any folder down.
+  late final Map<String, int> _bySuffix = {
+    for (var i = chapters.length - 1; i >= 0; i--)
+      for (final tail in _tails(chapters[i].file.toLowerCase())) tail: i,
+  };
+
+  static Iterable<String> _tails(String path) sync* {
+    for (
+      var slash = path.indexOf('/');
+      slash != -1;
+      slash = path.indexOf('/', slash + 1)
+    ) {
+      yield path.substring(slash + 1);
+    }
   }
 
   /// [line] of the book's text, [fraction] into it, as a place in its
@@ -141,7 +168,7 @@ final class EpubDocument {
     final start = chapters[index].line;
     final end = index + 1 < chapters.length
         ? chapters[index + 1].line - 1
-        : '\n'.allMatches(markdown).length - 1;
+        : lineCount - 1;
     return (start + location.line).clamp(start, end < start ? start : end);
   }
 }
@@ -151,8 +178,14 @@ final class EpubDocument {
 ///
 /// Top-level for `Isolate.run`: it carries the two paths. The file is
 /// stat'ed there too, not on the UI isolate.
-Future<EpubDocument> openEpub(String path, String cacheDir) =>
-    Isolate.run(() => readEpub(path, pictureDirOf(path, cacheDir)));
+Future<EpubDocument> openEpub(String path, String cacheDir) => Isolate.run(() {
+  final dir = pictureDirOf(path, cacheDir);
+  final document = readEpub(path, dir);
+  // The cache is kept within its bound after each book (#1311), the
+  // folder of this one never among those taken.
+  pruneEpubCache(cacheDir, keep: dir);
+  return document;
+});
 
 /// The folder of [cacheDir] the pictures of the EPUB at [path] go to: named
 /// by the book's path, size and modification time, so a book opened again
@@ -171,48 +204,26 @@ EpubDocument readEpub(String path, String pictureDir) {
   final input = InputFileStream(path);
   try {
     final book = parseEpub(EpubArchive.open(input));
-    final text = StringBuffer();
-    final chapterStart = <String, int>{};
-    final anchors = <String, Map<String, int>>{};
-    var line = 0;
-    for (final chapter in book.chapters) {
-      if (text.isNotEmpty) {
-        // A rule between two chapters, a blank line on each side of it.
-        text.write('\n\n---\n\n');
-        line += 4;
-      }
-      chapterStart[chapter.file] = line;
-      anchors[chapter.file] = {
-        for (final entry in chapter.anchors.entries)
-          entry.key: line + entry.value,
-      };
-      text.write(chapter.markdown);
-      line += '\n'.allMatches(chapter.markdown).length;
-    }
-    text.write('\n');
-    final markdown = text.toString();
-
-    int? lineOf(String file, String fragment) {
-      final start = chapterStart[file];
-      if (start == null) return null;
-      if (fragment.isEmpty) return start;
-      return epubAnchorLine(anchors[file], fragment) ?? start;
-    }
-
+    // The one join of the chapters, the conversion's own: a contents entry
+    // or a link on a page with no text opens at the next chapter's line.
+    final text = epubBookText(book);
+    final markdown = text.markdown;
     return EpubDocument(
       title: book.info.title ?? p.basenameWithoutExtension(path),
       markdown: markdown,
+      lineCount: text.lines.length,
       contents: [
         for (final entry in book.contents)
-          if (lineOf(entry.file, entry.fragment) case final line?)
+          if (text.lineOf(entry.file, entry.fragment) case final line?)
             (title: entry.title, line: line, depth: entry.depth),
       ],
       pictures: _extract(book, pictureDir),
       links: [
-        for (final target in book.links) lineOf(target.file, target.fragment),
+        for (final target in book.links)
+          text.lineOf(target.file, target.fragment),
       ],
       chapters: [
-        for (final MapEntry(key: file, value: line) in chapterStart.entries)
+        for (final MapEntry(key: file, value: line) in text.starts.entries)
           (file: file, line: line),
       ],
       counts: EpubCounts.of(markdown),
@@ -220,28 +231,20 @@ EpubDocument readEpub(String path, String pictureDir) {
         final tag? when tag.isNotEmpty => tag,
         _ => null,
       },
-      mathReport: _mathReport(book.formulaSvgs, book.firstTex, book.mathMl),
     );
   } finally {
     input.closeSync();
   }
 }
 
-/// The math a book's chapters showed, as one log line's worth (#303):
-/// null when there was none.
-String? _mathReport(int formulas, String? firstTex, int mathMl) {
-  if (formulas == 0 && mathMl == 0) return null;
-  final sample = firstTex == null ? '' : ' (first: "$firstTex")';
-  final ml = mathMl == 0 ? '' : ', $mathMl mathml';
-  return '$formulas svg formulas$sample$ml';
-}
-
 /// Writes the book's pictures under [dir], each once: a book opened again
-/// finds its pictures where it left them.
+/// finds its pictures where it left them ([writePictureWhole]).
 Map<String, String> _extract(EpubBook book, String dir) {
   final out = <String, String>{};
   if (book.pictures.isEmpty) return out;
   Directory(dir).createSync(recursive: true);
+  markEpubFolderUsed(dir);
+  dropStaleTemps(dir);
   for (var index = 0; index < book.pictures.length; index++) {
     final target = File(
       p.join(dir, '$index${p.extension(book.pictures[index]).toLowerCase()}'),
@@ -249,7 +252,7 @@ Map<String, String> _extract(EpubBook book, String dir) {
     if (!target.existsSync()) {
       final bytes = book.pictureBytes(index);
       if (bytes == null) continue;
-      target.writeAsBytesSync(bytes, flush: true);
+      writePictureWhole(target, bytes);
     }
     out['${EpubDocument.pictureScheme}:$index'] = target.path;
   }

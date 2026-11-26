@@ -64,4 +64,9 @@ void main() {
       );
     }
   });
+
+  test('Markdown and books are offered to open with Niman (#1318)', () {
+    final types = valueOf('MimeType')!.split(';');
+    expect(types, containsAll(['text/markdown', 'application/epub+zip']));
+  });
 }

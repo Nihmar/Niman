@@ -5,29 +5,40 @@
 /// Files are opened by whoever is on screen to open them: the library's
 /// shell, or, with no library, the screen that opens one. Folders the
 /// same. The quick actions a later launch carries go the way the launch
-/// flags always went, through the shortcut service.
+/// flags always went, through the shortcut service. A book (`.epub`) a
+/// launch carries is not a file to open: it is offered for conversion into
+/// notes (#1318), as a dropped one is.
 library;
 
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:niman/src/core/launch_args.dart';
+import 'package:path/path.dart' as p;
+
+/// Whether [path] names a book, which a launch offers for conversion
+/// rather than opens.
+bool isLaunchedBook(String path) => p.extension(path).toLowerCase() == '.epub';
 
 /// The requests that reach the app.
 final class LaunchRequests {
   /// Requests for an app that started with `file` (null for none) and is
   /// handed [later] launches afterwards.
-  new({this._file, Stream<LaunchArgs> later = const Stream.empty()})
-    : _later = later.asBroadcastStream() {
+  new({String? file, Stream<LaunchArgs> later = const Stream.empty()})
+    : _file = file != null && isLaunchedBook(file) ? null : file,
+      _book = file != null && isLaunchedBook(file) ? file : null,
+      _later = later.asBroadcastStream() {
     _laterFiles = _later.listen((launch) {
-      if (launch.openPath case final path?) _files.add(path);
+      if (launch.openPath case final path?) openFile(path);
     });
   }
 
   String? _file;
+  String? _book;
   final Stream<LaunchArgs> _later;
   late final StreamSubscription<LaunchArgs> _laterFiles;
   final StreamController<String> _files = StreamController.broadcast();
+  final StreamController<String> _books = StreamController.broadcast();
   final StreamController<String> _folders = StreamController.broadcast();
   final StreamController<Uri> _pages = StreamController.broadcast();
 
@@ -38,9 +49,21 @@ final class LaunchRequests {
     return file;
   }
 
+  /// The book the app was started with, once; then null. Asked for apart
+  /// from [consumeFile]: a book is converted, not opened (#1318).
+  String? consumeBook() {
+    final book = _book;
+    _book = null;
+    return book;
+  }
+
   /// Files to open: the ones later launches asked for, and the ones
   /// dropped on the window.
   Stream<String> get files => _files.stream;
+
+  /// Books to offer for conversion into notes: the ones later launches
+  /// asked for (#1318). A dropped book comes as a [folders] entry.
+  Stream<String> get books => _books.stream;
 
   /// Folders dropped on the window (#75).
   Stream<String> get folders => _folders.stream;
@@ -53,8 +76,10 @@ final class LaunchRequests {
   /// where it landed.
   Stream<void> get arrivals => _later.map((_) {});
 
-  /// Asks for the file at [path] (absolute) to be opened.
-  void openFile(String path) => _files.add(path);
+  /// Asks for the file at [path] (absolute) to be opened: a book, to be
+  /// offered for conversion instead (#1318).
+  void openFile(String path) =>
+      (isLaunchedBook(path) ? _books : _files).add(path);
 
   /// Asks for the folder at [path] (absolute) to be opened.
   void openFolder(String path) => _folders.add(path);
@@ -88,6 +113,7 @@ final class LaunchRequests {
   Future<void> dispose() async {
     await _laterFiles.cancel();
     await _files.close();
+    await _books.close();
     await _folders.close();
     await _pages.close();
   }

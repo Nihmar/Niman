@@ -43,6 +43,13 @@ class HtmlHooks {
   /// Where a picture of [destination] is read from on the page.
   String? imageSource(String destination) => null;
 
+  /// A picture of [destination], whose description is [alt] as plain text,
+  /// drawn as something other than an `<img>`, as HTML (#1309): a page that
+  /// cannot hold the picture shows it as words. [inLink] says the picture
+  /// is inside a link, which an anchor must not be nested in. Null for the
+  /// writer's own `<img>`.
+  String? image(String destination, String alt, {required bool inLink}) => null;
+
   /// Whether attributes are written as XHTML has them: a value for every
   /// one (`data-footnotes=""`), as an EPUB's chapter must.
   bool get xhtml => false;

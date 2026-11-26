@@ -23,7 +23,12 @@ typedef TestChapter = ({String path, String body});
 /// the OPF's `<metadata>` after the title, [items] inside its `<manifest>`,
 /// and [unique] names the package's `unique-identifier`. [hrefs] writes a
 /// chapter's manifest `href` another way than its path (percent-encoded,
-/// say), by the path.
+/// say), by the path. [navInSpine] lists the navigation document in the
+/// spine too, after the chapters, as Sigil and InDesign write it; [again]
+/// lists chapters (by path) a second time at the end of the spine. [head]
+/// is what the chapters' and the navigation document's `<head>` holds;
+/// [encoded] writes a chapter (by its path) as these bytes instead of its
+/// XHTML, in an encoding of the test's choice.
 File writeTestEpub(
   String path, {
   required List<TestChapter> chapters,
@@ -37,6 +42,10 @@ File writeTestEpub(
   String items = '',
   String? unique,
   Map<String, String> hrefs = const {},
+  bool navInSpine = false,
+  List<String> again = const [],
+  String head = '<title>x</title>',
+  Map<String, List<int>> encoded = const {},
 }) {
   final o = prefix ? 'opf:' : '';
   final manifest = StringBuffer();
@@ -48,7 +57,12 @@ File writeTestEpub(
     );
     spine.write('<${o}itemref idref="c$index"/>');
   }
+  for (final path in again) {
+    final index = chapters.indexWhere((chapter) => chapter.path == path);
+    spine.write('<${o}itemref idref="c$index"/>');
+  }
   if (nav != null) {
+    if (navInSpine) spine.write('<${o}itemref idref="nav"/>');
     manifest.write(
       '<${o}item id="nav" href="nav.xhtml" properties="nav" '
       'media-type="application/xhtml+xml"/>',
@@ -100,15 +114,21 @@ File writeTestEpub(
     ..add(ArchiveFile.string('OEBPS/content.opf', opf));
   for (final chapter in chapters) {
     if (omit.contains(chapter.path)) continue;
+    final bytes = encoded[chapter.path];
     archive.add(
-      ArchiveFile.string('OEBPS/${chapter.path}', _xhtml(chapter.body)),
+      bytes == null
+          ? ArchiveFile.string(
+              'OEBPS/${chapter.path}',
+              _xhtml(chapter.body, head),
+            )
+          : ArchiveFile.bytes('OEBPS/${chapter.path}', bytes),
     );
   }
   if (nav != null) {
     archive.add(
       ArchiveFile.string(
         'OEBPS/nav.xhtml',
-        _xhtml('<nav epub:type="toc"><h1>Contents</h1>$nav</nav>'),
+        _xhtml('<nav epub:type="toc"><h1>Contents</h1>$nav</nav>', head),
       ),
     );
   }
@@ -133,8 +153,8 @@ String ncxPoint(String title, String src, [String inner = '']) =>
     '<navPoint><navLabel><text>$title</text></navLabel>'
     '<content src="$src"/>$inner</navPoint>';
 
-String _xhtml(String body) =>
+String _xhtml(String body, String head) =>
     '<?xml version="1.0" encoding="UTF-8"?>'
     '<html xmlns="http://www.w3.org/1999/xhtml" '
     'xmlns:epub="http://www.idpf.org/2007/ops">'
-    '<head><title>x</title></head><body>$body</body></html>';
+    '<head>$head</head><body>$body</body></html>';

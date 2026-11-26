@@ -68,6 +68,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     AppLanguages.revision.removeListener(_republishQuickActions);
     unawaited(_arrivals?.cancel());
     unawaited(_launchFiles?.cancel());
+    unawaited(_launchBooks?.cancel());
     unawaited(_launchFolders?.cancel());
     super.dispose();
   }
@@ -164,9 +165,16 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     // A file the app was started with (#41). With a library open the
     // shell takes it; with none, it opens on its own from here.
     if (!mounted || _libraryReady) return;
-    final path = ref.read(launchRequestsProvider).consumeFile();
+    final requests = ref.read(launchRequestsProvider);
+    final path = requests.consumeFile();
     if (path != null) _openOutside(path);
+    // A book needs a library to be converted into (#1318): say so.
+    if (requests.consumeBook() != null) _bookNeedsLibrary();
   }
+
+  void _bookNeedsLibrary() => ScaffoldMessenger.maybeOf(
+    context,
+  )?.showSnackBar(SnackBar(content: Text(AppStrings.epubConvertNeedsLibrary)));
 
   bool get _libraryReady =>
       ref.read(librarySessionProvider).phase == LibraryPhase.ready;
@@ -175,6 +183,7 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
   /// asks for opens here while there is no library for the shell.
   StreamSubscription<void>? _arrivals;
   StreamSubscription<String>? _launchFiles;
+  StreamSubscription<String>? _launchBooks;
   StreamSubscription<String>? _launchFolders;
 
   void _listenToLaunches() {
@@ -185,10 +194,18 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     _launchFiles = requests.files.listen((path) {
       if (mounted && !_libraryReady) _openOutside(path);
     });
+    _launchBooks = requests.books.listen((_) {
+      if (mounted && !_libraryReady) _bookNeedsLibrary();
+    });
     // A folder dropped with no library open is one to open as a library
-    // (#75), the way Open existing takes a folder.
+    // (#75), the way Open existing takes a folder; a book dropped is no
+    // folder, and needs a library to be converted into (#1318).
     _launchFolders = requests.folders.listen((path) {
       final session = ref.read(librarySessionProvider);
+      if (isLaunchedBook(path)) {
+        if (mounted && !_libraryReady) _bookNeedsLibrary();
+        return;
+      }
       // Only while nothing is open or opening: a library on its way in
       // is not replaced by a drop.
       if (mounted && session.phase == LibraryPhase.none) {

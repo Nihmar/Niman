@@ -25,6 +25,9 @@ abstract final class InlineHtml {
     HtmlHooks? hooks,
   }) {
     final stack = <Object>[...nodes.reversed];
+    // How many links are open: a hook that draws a picture as a link must
+    // not nest one in another.
+    var linkDepth = 0;
     void open(String tag, String close, List<InlineNode> children) {
       out.write(tag);
       stack
@@ -35,6 +38,7 @@ abstract final class InlineHtml {
     while (stack.isNotEmpty) {
       final item = stack.removeLast();
       if (item is String) {
+        if (item == '</a>') linkDepth--;
         out.write(item);
         continue;
       }
@@ -66,8 +70,18 @@ abstract final class InlineHtml {
             continue;
           }
           final titled = title == null ? '' : ' title="${escape(title)}"';
+          linkDepth++;
           open('<a href="${escapeHref(target)}"$titled>', '</a>', children);
         case ImageNode(:final destination, :final title, :final children):
+          final drawn = hooks?.image(
+            destination,
+            plain(children),
+            inLink: linkDepth > 0,
+          );
+          if (drawn != null) {
+            out.write(drawn);
+            continue;
+          }
           out
             ..write('<img src="')
             ..write(escapeHref(hooks?.imageSource(destination) ?? destination))

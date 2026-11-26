@@ -6,8 +6,6 @@
 /// nothing there spells a tag.
 library;
 
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/picture_mime.dart';
@@ -20,8 +18,17 @@ const String epubOpfDir = 'OEBPS';
 /// Where the pictures live, inside the package directory.
 const String epubImageDir = '$epubOpfDir/images';
 
-/// One chapter, as it was added.
-typedef EpubChapterEntry = ({String id, String href, String title, bool svg});
+/// One chapter, as it was added: `folder` is where the chapter was in the
+/// exported tree (`/`-separated, empty at the top), and `opensFolder` says
+/// it is that folder's own page (#1308).
+typedef EpubChapterEntry = ({
+  String id,
+  String href,
+  String title,
+  bool svg,
+  String folder,
+  bool opensFolder,
+});
 
 /// One picture, as it was copied in.
 typedef EpubPictureEntry = ({String id, String href, String path});
@@ -82,7 +89,8 @@ final class EpubMetadata {
   /// `rights:`.
   final String? rights;
 
-  /// `identifier:` or `isbn:`.
+  /// `identifier:` or `isbn:`, as written: the book's identifier is this
+  /// when it is given (`epubIdentifierOf`), an ISBN as `urn:isbn:`.
   final String? identifier;
 
   /// `cover:` — the target of the cover picture, as the note writes it.
@@ -120,7 +128,8 @@ EpubMetadata epubMetadataOf(String text) {
 /// name: one path segment at a time, because a space or a `#` in a note's
 /// name is not a URL character. The zip entries keep the note's own name;
 /// only the references to them are escaped (E5).
-String _iri(String href) => href.split('/').map(Uri.encodeComponent).join('/');
+String epubIri(String href) =>
+    href.split('/').map(Uri.encodeComponent).join('/');
 
 /// The page that shows the cover: a spine item in front of the chapters,
 /// so a reader opens on the picture, not on the first chapter.
@@ -129,7 +138,7 @@ String epubCoverXhtml({
   required String title,
   required String language,
 }) {
-  final src = _iri(p.posix.relative(coverHref, from: epubOpfDir));
+  final src = epubIri(p.posix.relative(coverHref, from: epubOpfDir));
   return '<?xml version="1.0" encoding="utf-8"?>\n'
       '<!DOCTYPE html>\n'
       '<html xmlns="http://www.w3.org/1999/xhtml" '
@@ -178,40 +187,6 @@ String epubChapterXhtml({
       '</html>\n';
 }
 
-/// The navigation document, one entry per chapter in spine order.
-String epubNavXhtml({
-  required List<EpubChapterEntry> chapters,
-  required String title,
-  required String language,
-}) {
-  final entries = StringBuffer();
-  for (final chapter in chapters) {
-    final href = _iri(p.posix.relative(chapter.href, from: epubOpfDir));
-    entries.write(
-      '      <li><a href="${escapeAttribute(href)}">'
-      '${escapeHtml(chapter.title)}</a></li>\n',
-    );
-  }
-  return '<?xml version="1.0" encoding="utf-8"?>\n'
-      '<!DOCTYPE html>\n'
-      '<html xmlns="http://www.w3.org/1999/xhtml" '
-      'xmlns:epub="http://www.idpf.org/2007/ops" '
-      'xml:lang="${escapeAttribute(language)}" '
-      'lang="${escapeAttribute(language)}">\n'
-      '<head>\n'
-      '  <meta charset="utf-8" />\n'
-      '  <title>${escapeHtml(title)}</title>\n'
-      '</head>\n'
-      '<body>\n'
-      '  <nav epub:type="toc" id="toc">\n'
-      '    <h1>${escapeHtml(title)}</h1>\n'
-      '    <ol>\n$entries'
-      '    </ol>\n'
-      '  </nav>\n'
-      '</body>\n'
-      '</html>\n';
-}
-
 /// The package: metadata, manifest and spine.
 String epubContentOpf({
   required String title,
@@ -220,6 +195,7 @@ String epubContentOpf({
   required List<EpubChapterEntry> chapters,
   required List<EpubPictureEntry> pictures,
   required EpubPictureEntry? cover,
+  required String identifier,
 }) {
   final manifest = StringBuffer()
     ..write(
@@ -233,15 +209,15 @@ String epubContentOpf({
       '    <item id="cover-page" href="cover.xhtml" '
       'media-type="application/xhtml+xml" />\n',
     );
-    final href = _iri(p.posix.relative(cover.href, from: epubOpfDir));
-    final type = pictureMime(p.extension(cover.path).toLowerCase());
+    final href = epubIri(p.posix.relative(cover.href, from: epubOpfDir));
+    final type = epubPictureMime(p.extension(cover.path).toLowerCase());
     manifest.write(
       '    <item id="cover-image" href="${escapeAttribute(href)}" '
       'media-type="$type" properties="cover-image" />\n',
     );
   }
   for (final chapter in chapters) {
-    final href = _iri(p.posix.relative(chapter.href, from: epubOpfDir));
+    final href = epubIri(p.posix.relative(chapter.href, from: epubOpfDir));
     manifest.write(
       '    <item id="${chapter.id}" href="${escapeAttribute(href)}" '
       'media-type="application/xhtml+xml"'
@@ -249,8 +225,8 @@ String epubContentOpf({
     );
   }
   for (final picture in pictures) {
-    final href = _iri(p.posix.relative(picture.href, from: epubOpfDir));
-    final type = pictureMime(p.extension(picture.path).toLowerCase());
+    final href = epubIri(p.posix.relative(picture.href, from: epubOpfDir));
+    final type = epubPictureMime(p.extension(picture.path).toLowerCase());
     manifest.write(
       '    <item id="${picture.id}" href="${escapeAttribute(href)}" '
       'media-type="$type" />\n',
@@ -266,7 +242,8 @@ String epubContentOpf({
   final modified = DateTime.now().toUtc().toIso8601String().split('.').first;
   final dc = StringBuffer()
     ..write(
-      '    <dc:identifier id="pub-id">urn:uuid:${_uuidV4()}</dc:identifier>\n',
+      '    <dc:identifier id="pub-id">${escapeHtml(identifier)}'
+      '</dc:identifier>\n',
     )
     ..write('    <dc:title>${escapeHtml(title)}</dc:title>\n')
     ..write('    <dc:language>${escapeAttribute(language)}</dc:language>\n');
@@ -294,12 +271,6 @@ String epubContentOpf({
   }
   if (metadata.rights != null) {
     dc.write('    <dc:rights>${escapeHtml(metadata.rights!)}</dc:rights>\n');
-  }
-  if (metadata.identifier != null) {
-    dc.write(
-      '    <dc:identifier>${escapeHtml(metadata.identifier!)}'
-      '</dc:identifier>\n',
-    );
   }
   if (metadata.series != null) {
     dc.write(
@@ -330,16 +301,4 @@ String epubContentOpf({
       '  <spine>\n$spine'
       '  </spine>\n'
       '</package>\n';
-}
-
-/// A version-4 UUID for the book's identifier.
-String _uuidV4() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  String hex(int at) => bytes[at].toRadixString(16).padLeft(2, '0');
-  return '${hex(0)}${hex(1)}${hex(2)}${hex(3)}-${hex(4)}${hex(5)}-'
-      '${hex(6)}${hex(7)}-${hex(8)}${hex(9)}-'
-      '${hex(10)}${hex(11)}${hex(12)}${hex(13)}${hex(14)}${hex(15)}';
 }

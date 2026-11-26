@@ -34,6 +34,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/process_run.dart';
 import 'package:niman/src/export/epub_book.dart';
+import 'package:niman/src/export/epub_web_pictures.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:niman/src/export/export_tree_pages.dart';
 import 'package:niman/src/export/export_tree_printer.dart';
@@ -165,6 +166,12 @@ final class TreeExport {
   /// of the folder is then drawn as a board. [paper] is what a PDF zip's
   /// notes are printed on (#1285), and what an HTML page asks a printer
   /// for.
+  ///
+  /// [libraryPath] is where [dir] is in its library, relative to the
+  /// library's root (the library's own folder name for the root itself): a
+  /// book without an identifier of its own is named by it, so the same
+  /// folder exported twice is one book (#1307). The folder's own name when
+  /// null.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
@@ -174,6 +181,7 @@ final class TreeExport {
     ProcessRunner? runner,
     bool kanban = false,
     PaperSize paper = PaperSize.a4,
+    String? libraryPath,
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
@@ -194,6 +202,7 @@ final class TreeExport {
         runner: runner,
         kanban: kanban,
         paper: paper,
+        libraryPath: libraryPath ?? p.basename(dir),
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -215,6 +224,7 @@ final class TreeExport {
     ProcessRunner? runner,
     bool kanban = false,
     PaperSize paper = PaperSize.a4,
+    String? libraryPath,
   }) async {
     final export = await start(
       dir: dir,
@@ -225,6 +235,7 @@ final class TreeExport {
       runner: runner,
       kanban: kanban,
       paper: paper,
+      libraryPath: libraryPath,
     );
     await export.done;
   }
@@ -375,6 +386,7 @@ typedef TreeExportRequest = ({
   ProcessRunner? runner,
   bool kanban,
   PaperSize paper,
+  String libraryPath,
   SendPort events,
 });
 
@@ -423,6 +435,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
           path: request.zipPath,
           title: p.basename(request.dir),
           language: request.language,
+          libraryPath: request.libraryPath,
           metadata: metadata,
           cover: cover == null ? null : p.join(tree.root, cover),
         )
@@ -430,6 +443,10 @@ Future<void> _exportTree(TreeExportRequest request) async {
   final encoder = book == null
       ? (ZipFileEncoder()..create(request.zipPath))
       : null;
+  // A book's pictures from the web, downloaded here (#1309).
+  final web = book == null
+      ? null
+      : EpubWebPictures(isCancelled: () => cancelled);
   // The PDF format's scratch: one page and one PDF at a time, reused.
   final scratch = request.format == ExportTreeFormat.pdf
       ? Directory.systemTemp.createTempSync('niman-tree-pdf-')
@@ -438,23 +455,22 @@ Future<void> _exportTree(TreeExportRequest request) async {
   // entry is too late, and the archive it wrote is the whole export.
   var stopped = false;
   try {
-    // A book's progress counts chapters, not the tree: a folder's
-    // attachments and its empty folders never enter the container (E10).
-    final total = book == null
-        ? tree.entries.length
-        : tree.files.where(ExportTreePages.isNote).length;
+    // A book carries its chapters and the pictures they cite, not the
+    // tree: a folder's attachments and its empty folders never enter the
+    // container, and its progress counts chapters (E10). Its chapters are
+    // the notes in reading order, `index.md` first (#1308): the tree's
+    // order, but for that one page.
+    final entries = book == null ? tree.entries : ExportTreeBook.chapters(tree);
+    final total = entries.length;
     var formulaCount = 0;
     var sourceCount = 0;
     var done = 0;
-    for (final entry in tree.entries) {
+    for (final entry in entries) {
       // Between entries, where the zip is never half-written.
       if (cancelled) {
         stopped = true;
         break;
       }
-      // A book carries its chapters and the pictures they cite, not the
-      // tree: an attachment nobody cites would only weigh the book down.
-      if (book != null && !ExportTreePages.isNote(entry.rel)) continue;
       // Every format keeps the tree's folders, empty ones included: a
       // folder in the Markdown zip and not in the HTML one is a support
       // question waiting to happen (L8).
@@ -464,12 +480,21 @@ Future<void> _exportTree(TreeExportRequest request) async {
         await encoder!.addFile(File(entry.abs), entry.rel);
       } else if (ExportTreePages.isNote(entry.rel)) {
         if (book != null) {
-          final drawn = await ExportTreeBook.addChapter(
-            book,
-            tree,
-            entry,
-            kanban: request.kanban,
-          );
+          final ({int formulas, int sources}) drawn;
+          try {
+            drawn = await ExportTreeBook.addChapter(
+              book,
+              tree,
+              entry,
+              web: web!,
+              kanban: request.kanban,
+            );
+          } on EpubPicturesStopped {
+            // A stop heard while a picture came: the same as one heard
+            // between entries.
+            stopped = true;
+            break;
+          }
           formulaCount += drawn.formulas;
           sourceCount += drawn.sources;
         } else {
@@ -546,6 +571,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
     rethrow;
   } finally {
     cancel.close();
+    await web?.close();
     try {
       scratch?.deleteSync(recursive: true);
     } on FileSystemException {

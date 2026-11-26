@@ -192,6 +192,20 @@ final class ShellInboundRoutes {
       (path) => unawaited(openPath(path)),
       request: true,
     );
+    // Books a launch asked for (#1318): offered for conversion into notes,
+    // the way a dropped one is. The one the app started with waits here
+    // until the shell is on screen.
+    _inbound.listen(
+      launchRequests.books,
+      (path) => unawaited(outside.bookLaunch(context(), path)),
+      request: true,
+    );
+    final started = launchRequests.consumeBook();
+    if (started != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted()) unawaited(outside.bookLaunch(context(), started));
+      });
+    }
     // Folders dropped on the window (#75).
     _inbound.listen(
       launchRequests.folders,

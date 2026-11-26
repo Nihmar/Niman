@@ -184,7 +184,54 @@ demands; the container is `mimetype` (stored, first),
   carry the folder's name and nothing else — with *Cancel* (stop and
   write the note) and *Export anyway*; the export logs the missing
   source, and a `cover:` that does not resolve too (E3).
-- [ ] Nav folded by folder (a flat, tree-ordered list for now).
+- [x] The package's `unique-identifier` is the frontmatter's
+  `identifier:`/`isbn:` (an ISBN as `urn:isbn:<digits>`, check digit
+  verified) or a name-based UUID v5 of the exported note's or folder's
+  library-relative path (`epub_identifier.dart`, namespace v5 of the
+  project's address), never random: the same export twice is one book to a
+  reader. A second `dc:identifier` is not written (#1307).
+- [x] In an EPUB a picture that is not in the container is its alt text
+  (#1309): `NoteHtmlSource.epub` turns on `ExportHooks.image`, a new
+  `HtmlHooks` way out the inline writer asks before it writes an `<img>`
+  (with whether the picture sits inside a link, which an anchor must not
+  nest in). A remote picture is `<a href>alt</a>` (the address when there
+  is no alt), a local one the book does not carry bare alt text. The
+  HTML page and the PDF leave the flag off and keep the `<img>`.
+- [x] A picture on the web is downloaded into the book (#1309), as the
+  PDF's engine fetches it while printing: `EpubWebPictures`
+  (`epub_web_pictures.dart`) runs on the isolate that writes the container
+  — `epub_note_writer.dart` for a note, `export_tree.dart` for a folder —
+  never the UI isolate. It is the capture's own download
+  (`downloadPicture`, `pictureHttpClient`, now in `capture_pictures.dart`
+  with the HTML import still reaching them from its store): http and https
+  only, at most 60 addresses a book, 15 MB and 30 s a picture, four at a
+  time, each address once. What came is kept in a scratch folder by its
+  SHA-256 and added through `EpubBook.imageHref`, so two addresses of the
+  same bytes are one item; the type is read from the bytes
+  (`epubPictureExtension`) and must be one of `epubPictureTypes`. The
+  chapter's `images` map then holds the address, and the hook only draws
+  the link for what did not come. A stop is looked for before each picture
+  and every 25 ms while one comes: the note's writer answers
+  `EpubExportCancelled`, the folder's loop stops as between two entries.
+  The scratch folder is deleted with the book's writer. The note's text
+  and the library are never written.
+- [x] A note's book is written off the UI isolate (#1305,
+  `epub_note_writer.dart`): the UI side resolves the cover and the pictures
+  against the link index — the one thing only it can do — and sends plain
+  strings and maps; the isolate stores the pictures, typesets the page,
+  cuts the chapters, closes the zip and reads it back, handing the bytes
+  over without a copy. A stop is asked for over a port and seen between the
+  writer's stages, as the folder export's is. Pictures are stored
+  (`CompressionType.none`, they are compressed already), `mimetype` first
+  and stored, text entries deflated — for the folder export too
+  (`EpubBook`).
+- [x] A folder's walk is by name key (`nameSortKey`, the name breaking a
+  tie) with folders and notes together — not the tree's folders-first,
+  because a converted book numbers parts and loose chapters in one
+  sequence — shared by every format; a book's chapters are that order with
+  the root `index.md` first, and the nav nests by folder
+  (`epub_nav.dart`): a folder's chapters under its entry, its own `00 …`
+  first note as the entry's target (#1308).
 
 ## Open questions
 

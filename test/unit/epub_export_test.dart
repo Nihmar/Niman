@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/export/epub_note.dart';
+import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/export_tree.dart';
 import 'package:niman/src/export/export_tree_book.dart';
 import 'package:path/path.dart' as p;
@@ -362,7 +363,14 @@ void main() {
     expect(opf, contains('<dc:subject>geometry</dc:subject>'));
     expect(opf, contains('<dc:subject>notes</dc:subject>'));
     expect(opf, contains('<dc:rights>Public domain</dc:rights>'));
-    expect(opf, contains('<dc:identifier>978-3-16-148410-0</dc:identifier>'));
+    // The ISBN is the book's identifier, once (#1307).
+    expect(
+      opf,
+      contains(
+        '<dc:identifier id="pub-id">urn:isbn:9783161484100</dc:identifier>',
+      ),
+    );
+    expect('<dc:identifier'.allMatches(opf), hasLength(1));
     expect(opf, contains('id="series">Notes</meta>'));
     expect(opf, contains('property="group-position">2</meta>'));
     expect(files['OEBPS/text/note.xhtml'], contains('xml:lang="it"'));
@@ -556,6 +564,31 @@ void main() {
       contains('src="../images/img-1.svg"'),
     );
     expect(files['OEBPS/content.opf'], contains('media-type="image/svg+xml"'));
+  });
+
+  test('a BMP is left out of the book, and the page still shows it', () async {
+    await File(p.join(root.path, 'old.bmp')).writeAsBytes(<int>[1, 2, 3]);
+    await File(p.join(root.path, 'new.png')).writeAsBytes(<int>[1, 2, 3]);
+    const text = '# T\n\n![old](old.bmp)\n\n![new](new.png)\n';
+    final payload = await exportNoteEpub(
+      text: text,
+      title: 'T',
+      path: 'T.md',
+      root: root.path,
+      language: 'en',
+    );
+    final file = p.join(root.path, 'bmp.epub');
+    await File(file).writeAsBytes(payload.bytes);
+    final files = textEntries(file);
+    expect(files.keys.where((name) => name.endsWith('.bmp')), isEmpty);
+    expect(files['OEBPS/content.opf'], isNot(contains('image/bmp')));
+    expect(files.keys, contains('OEBPS/images/img-1.png'));
+
+    // The HTML export keeps its own list: a browser draws a BMP.
+    final uri = await ExportSources.pictureDataUri(
+      p.join(root.path, 'old.bmp'),
+    );
+    expect(uri, startsWith('data:image/bmp;base64,'));
   });
 
   test('a book progresses in chapters, not tree entries', () async {

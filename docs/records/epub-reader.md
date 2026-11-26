@@ -1,7 +1,8 @@
 # EPUB reader (#280)
 
 EPUBs open in the note pane, beside pictures and PDFs
-(`lib/src/ui/attachment_view.dart`), on Android, Linux and Windows.
+(`lib/src/ui/attachment_view.dart`), on Android, Linux, Windows, macOS and
+iOS.
 
 ## Why not a package
 
@@ -19,9 +20,25 @@ Read the EPUB with what the app has, draw it with the app's read view.
 
 ## How it is built
 
-- `lib/src/epub/xhtml_markdown.dart` — `XhtmlMarkdown`: one chapter's
-  XHTML to Markdown (`ChapterMarkdown`: the text, and `id` → line for the
-  links into it). Headings, paragraphs, emphasis, strike, inline code,
+- `lib/src/epub/epub_archive.dart` — `EpubArchive` (#1138): the zip,
+  decoded from the file and never held whole, read within bounds — at most
+  100,000 entries and 1 GiB declared or inflated in all, 32 MiB for one
+  file read as text, every entry inflated against what is left of the
+  budget (`import/bounded_entry.dart`, the Notion import's reader) — and a
+  book whose spine files `META-INF/encryption.xml` lists is refused as
+  protected (DRM; an obfuscated font is listed there too and is harmless).
+  `EpubRefused` says why: not a book, protected, too large.
+  `looksLikeEpub` tells a book by its first entry, `mimetype`, whatever the
+  file is called.
+- `lib/src/epub/epub_book.dart` — `parseEpub`: the book read into its parts
+  (`EpubBook`: metadata, spine, chapters as Markdown, contents, the pictures
+  and links the chapters name), one parse for the reader and the
+  conversion; `epub_info.dart` reads the package's metadata.
+- `lib/src/markdown/from_html/html_markdown.dart` — `HtmlMarkdown` (it began
+  here as `XhtmlMarkdown` and is shared with web capture and the HTML
+  import): one chapter's XHTML to Markdown, called with `xhtml: true`
+  (`MarkdownWithAnchors`: the text, and `id` → line for the links into
+  it). Headings, paragraphs, emphasis, strike, inline code,
   `<br>` as a hard break, lists (nested, `start=`), blockquotes, `<pre>`,
   `<hr>`, tables (GFM, first row as header), pictures (`img`, SVG
   `image` — inline, as a browser has them), links. Every text character
@@ -35,13 +52,29 @@ Read the EPUB with what the app has, draw it with the app's read view.
   `openEpub(path, cacheDir)` (on an isolate, the file stat'ed there too):
   `META-INF/container.xml` → OPF (elements matched by local name,
   `<opf:item>` too) → manifest and spine → every chapter converted and
-  joined in spine order with a `---` between, line numbers tracked.
+  joined in spine order with a `---` between, line numbers tracked. The
+  join is `epubBookText`'s, the conversion's own: a contents entry or a
+  link on a spine page with no text opens at the next chapter. A text file
+  is decoded by its byte order mark (UTF-8, UTF-16), else the `encoding`
+  of its XML declaration (ISO-8859-1 and windows-1252 as Windows-1252),
+  else as UTF-8 (`epub_text_bytes.dart`); a chapter's self-closed
+  non-void elements (`<title/>`, `<a id="x"/>`) are written as empty pairs
+  before the HTML parser reads it (`xhtml_source.dart`); an archive entry
+  can be read as often as it is asked for (the spine may list the nav, or
+  a page twice).
   Table of contents from the EPUB 3 nav (`properties` containing `nav`,
   `nav[epub:type=toc] ol`) or the EPUB 2 NCX (`spine@toc`), as
   `EpubContentsEntry (title, line, depth)`. Pictures named
   `epub-picture:N` and extracted once to `pictureDir/N.ext`, the folder
   named by a sha1 of the book's path, size and mtime (`pictureDirOf`)
-  under `<app cache>/epub`. Links into the book named `epub-link:N`
+  under `<app cache>/epub`. A picture is written to a temp name of its
+  folder and renamed in, so a crash leaves a temp file, never a cut-short
+  picture; a stale temp is removed when the book is read again. The cache
+  is bounded (#1311, `epub_picture_cache.dart`): each read marks its folder
+  as used (`.used`, a file whose time says when), and `openEpub` prunes
+  after the book is read, on the reader's isolate, the least recently used
+  folders past 512 MiB or 200 books, the one in use never. Links into the
+  book named `epub-link:N`
   (`EpubDocument.lineOfLink`), external ones (`http:`, `mailto:`…) kept
   as they are.
 - `lib/src/ui/epub_pane.dart` — `EpubPane`: `AttachmentView` hands it
@@ -85,9 +118,12 @@ Read the EPUB with what the app has, draw it with the app's read view.
   of the contents indented by depth, the chapter at the top of the view
   marked, a tap jumps.
 
-Tests: `test/unit/xhtml_markdown_test.dart`,
+Tests: `test/unit/html_markdown_test.dart`, `test/unit/xhtml_source_test.dart`,
 `test/unit/epub_document_test.dart` (books built by
-`test/fakes/epub_builder.dart`), `test/unit/epub_look_test.dart`,
+`test/fakes/epub_builder.dart`), `test/unit/epub_archive_bounds_test.dart`,
+`test/unit/epub_text_bytes_test.dart`, `test/unit/epub_marks_test.dart`,
+`test/unit/epub_picture_cache_test.dart`,
+`test/perf/epub_marks_perf_test.dart`, `test/unit/epub_look_test.dart`,
 `test/widget/epub_pane_test.dart`, `test/widget/epub_look_sheet_test.dart`,
 `test/widget/epub_look_settings_test.dart`.
 
@@ -169,7 +205,7 @@ Tests: `test/unit/read_aloud_text_test.dart`,
 terms — a PDF's page and how far down it, an EPUB's chapter (its spine
 path), a line of that chapter and how far into it. Per chapter, not per
 line of the whole book: the book is Markdown converted from its XHTML, so
-a change to `XhtmlMarkdown` moves lines, and kept per chapter the place
+a change to `HtmlMarkdown` moves lines, and kept per chapter the place
 moves within one chapter at most (`EpubDocument.chapters`,
 `locationAt`, `lineOfLocation`, which keeps a place past a shortened
 chapter inside it). Links into a document (#282) and annotations (#284)
@@ -181,7 +217,10 @@ passed over) and `chapter=<path>&line=N`, values percent-decoded
 (`core/percent.dart`); `toFragment` writes them, escaping what would end
 the fragment or the link. `EpubDocument.lineOfLocation` finds a chapter
 by its exact path, else whatever its case (a Markdown href's fragment),
-else its file name alone. The shell hands the fragment to the pane as the
+else its file name alone, through maps built once (#1306), and keeps a
+place of the last chapter within `lineCount`, the book's lines counted
+as it is read. The pane places a book's marks once per change of the
+marks or the book (`EpubBlockMarksCache`), not in every build. The shell hands the fragment to the pane as the
 tab's `anchor`, the one a note gets for a heading, with the reload token
 for the same link followed again; the pane goes there on open, over the
 saved position, and on a new fragment or token later — not on the same
@@ -217,6 +256,26 @@ Tests: `test/unit/reading_positions_test.dart`,
 the `#281` groups of `test/widget/epub_pane_test.dart` and
 `test/unit/state_merge_test.dart`. The PDF view has no widget test:
 pdfium does not load under `flutter test`.
+
+## Converting a book into notes (#1138)
+
+The same parse (`parseEpub`) feeds the conversion, on an isolate of its
+own (`epub_convert_job.dart`, driven from the UI by `epub_conversion.dart`
+with a cooperative cancel): the reader's text, joined by `epubBookText`,
+is planned into notes by the book's contents (`epub_convert_plan.dart`
+over `import/book/book_plan.dart`, shared with the HTML book), each note's
+pictures and links rewritten to the library's files
+(`epub_convert_render.dart` — only where the converter wrote a
+placeholder, never words of the book that look like one), and the whole
+written into a hidden `.epub.niman-tmp-<micros>` folder moved in at the end
+(`import/book/book_move_in.dart`). The pictures are named by their content
+and typed by their bytes (`epub_picture_type.dart`). What a user sees:
+[organization](../user/organization.md#converting-a-book-into-notes).
+
+Tests: `test/unit/epub_convert_test.dart`,
+`test/unit/epub_convert_plan_test.dart`, `test/unit/epub_picture_type_test.dart`,
+`test/widget/epub_convert_dialog_test.dart`,
+`test/widget/epub_convert_flow_test.dart`.
 
 ## Later, maybe
 

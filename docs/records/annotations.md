@@ -13,7 +13,7 @@ the index only answers which notes declare the key.
   as a blockquote ending in `> — <link back>` (`placeLink`,
   `lib/src/links/place_link.dart`), the comment. The quote and the heading
   are escaped as a book's text is (`markdown/text_escape.dart`, shared
-  with `XhtmlMarkdown`), so a `#` in a PDF never becomes a tag. A place
+  with `HtmlMarkdown`), so a `#` in a PDF never becomes a tag. A place
   with no passage has the link on its own line.
 - `CompanionNotes`: `of(path)` asks `FieldSource.fieldValues('annotates')`
   — every note declaring the key, with its values, one join — and resolves

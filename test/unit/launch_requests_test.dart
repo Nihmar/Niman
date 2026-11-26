@@ -42,4 +42,28 @@ void main() {
     expect(folders, ['/d']);
     await requests.dispose();
   });
+
+  test('a book the app started with is not a file to open (#1318)', () {
+    final requests = LaunchRequests(file: '/a/Dune.EPUB');
+    expect(requests.consumeFile(), isNull);
+    expect(requests.consumeBook(), '/a/Dune.EPUB');
+    expect(requests.consumeBook(), isNull);
+  });
+
+  test('a later launch’s book goes to the conversion, its note to the '
+      'files (#1318)', () async {
+    final later = Stream.fromIterable(const [
+      LaunchArgs(openPath: '/b/Dune.epub'),
+      LaunchArgs(openPath: '/b/notes.md'),
+    ]);
+    final requests = LaunchRequests(later: later);
+    final files = <String>[];
+    final books = <String>[];
+    requests.files.listen(files.add);
+    requests.books.listen(books.add);
+    await pumpEventQueue();
+    expect(books, ['/b/Dune.epub']);
+    expect(files, ['/b/notes.md']);
+    await requests.dispose();
+  });
 }

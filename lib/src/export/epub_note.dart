@@ -11,40 +11,36 @@ library;
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:meta/meta.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/export/epub_book.dart';
-import 'package:niman/src/export/epub_note_chapters.dart';
+import 'package:niman/src/export/epub_note_writer.dart';
 import 'package:niman/src/export/export_note.dart';
 import 'package:niman/src/export/export_sources.dart';
-import 'package:niman/src/export/note_html_source.dart';
 import 'package:niman/src/export/printed_todo_block.dart';
 import 'package:niman/src/links/resolver.dart';
 import 'package:path/path.dart' as p;
 
+export 'package:niman/src/export/epub_note_writer.dart'
+    show EpubExportCancelled, EpubExportFailed;
+
 const AppLogger _log = AppLogger(name: 'export');
-
-/// The folder the book's chapters sit in, in the container.
-const String _chapterDir = 'OEBPS/text';
-
-/// The user stopped a note's EPUB export: no file is written.
-final class EpubExportCancelled implements Exception {
-  /// Creates the cancellation.
-  const new();
-
-  /// What a log line reads.
-  @override
-  String toString() => 'EPUB export cancelled';
-}
 
 /// The note at [path] (relative to [root]) as an EPUB payload.
 ///
+/// What only the UI isolate can do happens here — resolving the cover and
+/// the pictures against the link index ([linkSource]) — and the container is
+/// written on a background isolate (#1305): the pictures are read and
+/// stored, the page typeset and cut into chapters, and the book read back
+/// there, never here.
+///
 /// [scratch] is where the container is built, a temp directory of its own
-/// when null. [isCancelled] is asked at the stages a stop can land between —
-/// before the book, between its pictures, after the page is built — and
-/// answers with [EpubExportCancelled] rather than a file; the typesetting
-/// inside [ExportSources.xhtml] is one isolate pass and runs to its end.
+/// when null. [isCancelled] is asked before the pictures are resolved and
+/// again while the container is written, at the stages a stop can land
+/// between — before the book, between its pictures, after the page is
+/// built — and answers with [EpubExportCancelled] rather than a file.
 /// [todoBlocks] are the lists the note's `todo` fences are at this moment
-/// (#1152).
+/// (#1152). [writerProbe] is told, by a test, which isolate writes.
 Future<ExportPayload> exportNoteEpub({
   required String text,
   required String title,
@@ -56,13 +52,13 @@ Future<ExportPayload> exportNoteEpub({
   bool Function()? isCancelled,
   PrintedTodoBlocks todoBlocks = const <String, PrintedTodoBlock>{},
   bool kanban = false,
+  @visibleForTesting SendPort? writerProbe,
 }) async {
   if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
   final dir = scratch ?? await Directory.systemTemp.createTemp('niman-epub-');
   try {
     final file = p.join(dir.path, '${p.basenameWithoutExtension(path)}.epub');
-    final metadata = epubMetadataOf(text);
-    final coverTarget = metadata.cover;
+    final coverTarget = epubMetadataOf(text).cover;
     final cover = coverTarget == null
         ? null
         : await ExportSources.picturePath(
@@ -72,58 +68,37 @@ Future<ExportPayload> exportNoteEpub({
             linkSource: linkSource,
           );
     if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
-    final book = await EpubBook.start(
-      path: file,
-      title: title,
-      language: language,
-      metadata: metadata,
-      cover: cover,
+    final pictures = await ExportSources.imagePaths(
+      text: text,
+      notePath: p.join(root, path),
+      root: root,
+      linkSource: linkSource,
     );
-    try {
-      final paths = await ExportSources.imagePaths(
-        text: text,
-        notePath: p.join(root, path),
-        root: root,
-        linkSource: linkSource,
-      );
-      final images = <String, String>{};
-      for (final entry in paths.entries) {
-        if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
-        final href = await book.imageHref(_chapterDir, entry.value);
-        if (href != null) images[entry.key] = href;
-      }
-      final source = NoteHtmlSource(
+    final written = await writeNoteEpubInBackground(
+      (
+        file: file,
         text: text,
         title: title,
-        images: images,
+        libraryPath: path,
+        language: language,
+        cover: cover,
+        pictures: pictures,
         todoBlocks: todoBlocks,
         kanban: kanban,
-      );
-      final chapter = await ExportSources.xhtml(source);
-      if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
-      // A diagnostic for a formula that never shows (#303): what the chapter
-      // written into the container carries.
-      _log.info(
-        'epub "$title": ${_count(chapter.body, '<svg')} formulas drawn, '
-        '${_count(chapter.body, 'class="math-source"')} left as source',
-      );
-      for (final part in await _chaptersOf(chapter.body, title)) {
-        book.addChapter(
-          href: '$_chapterDir/${part.file}',
-          title: part.title,
-          body: part.body,
-          fontFaces: chapter.fontFaces,
-          hasSvg: chapter.hasSvg && part.body.contains('<svg'),
-          hasBoard: chapter.hasBoard,
-        );
-      }
-    } finally {
-      await book.close();
-    }
+      ),
+      isCancelled: isCancelled,
+      probe: writerProbe,
+    );
+    // A diagnostic for a formula that never shows (#303): what the chapter
+    // written into the container carries.
+    _log.info(
+      'epub "$title": ${written.formulas} formulas drawn, '
+      '${written.sources} left as source',
+    );
     if (isCancelled?.call() ?? false) throw const EpubExportCancelled();
     return (
       name: '${p.basenameWithoutExtension(path)}.epub',
-      bytes: await File(file).readAsBytes(),
+      bytes: written.bytes.materialize().asUint8List(),
       mimeType: 'application/epub+zip',
     );
   } finally {
@@ -135,24 +110,5 @@ Future<ExportPayload> exportNoteEpub({
         // export's failure.
       }
     }
-  }
-}
-
-/// The chapters of [body], cut off the UI isolate: a novel's page is a
-/// long one to read through. A function of its own, so the closure the
-/// isolate is sent holds the two strings and nothing of the export's.
-Future<List<EpubNoteChapter>> _chaptersOf(String body, String title) =>
-    Isolate.run(() => splitEpubNoteChapters(body, title: title));
-
-/// How many times [needle] appears in [text]; a diagnostic count, not a
-/// parser.
-int _count(String text, String needle) {
-  var count = 0;
-  var at = 0;
-  while (true) {
-    final found = text.indexOf(needle, at);
-    if (found < 0) return count;
-    count++;
-    at = found + needle.length;
   }
 }

@@ -14,9 +14,9 @@
 /// The strings it writes are `epub_package.dart`'s; this file is the zip.
 library;
 
-import 'dart:io';
-
 import 'package:archive/archive_io.dart';
+import 'package:niman/src/export/epub_identifier.dart';
+import 'package:niman/src/export/epub_nav.dart';
 import 'package:niman/src/export/epub_package.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/kanban_style.dart';
@@ -42,11 +42,12 @@ const String _containerXml =
 
 /// An EPUB 3 book taking shape.
 final class EpubBook {
-  new _(this._title, this._language, this._metadata);
+  new _(this._title, this._language, this._metadata, this._identifier);
 
   final String _title;
   final String _language;
   final EpubMetadata _metadata;
+  final String _identifier;
 
   late final ZipFileEncoder _encoder = ZipFileEncoder();
   final List<EpubChapterEntry> _chapters = <EpubChapterEntry>[];
@@ -61,13 +62,18 @@ final class EpubBook {
   ///
   /// [metadata] is the frontmatter's own metadata (#303): its title and
   /// language override [title] and [language] when they name one. [cover]
-  /// is the picture the metadata's `cover:` resolved to, or null. The
-  /// `mimetype` entry and the container are written here, first — every
-  /// other entry follows in whatever order the chapters are ready.
+  /// is the picture the metadata's `cover:` resolved to, or null.
+  /// [libraryPath] is where the exported note or folder is in its library,
+  /// relative to the library's root: it names the book when the metadata
+  /// gives no identifier, so the same note exported twice is one book
+  /// (#1307). The `mimetype` entry and the container are written here,
+  /// first; every other entry follows in whatever order the chapters are
+  /// ready.
   static Future<EpubBook> start({
     required String path,
     required String title,
     required String language,
+    required String libraryPath,
     EpubMetadata metadata = const EpubMetadata(),
     String? cover,
   }) async {
@@ -75,6 +81,7 @@ final class EpubBook {
       metadata.title ?? title,
       metadata.language ?? language,
       metadata,
+      epubIdentifierOf(metadata, libraryPath),
     );
     book._encoder.create(path);
     final mimetype = ArchiveFile.string('mimetype', 'application/epub+zip')
@@ -91,11 +98,11 @@ final class EpubBook {
   ///
   /// A type an EPUB cannot carry is no cover, not a failed book.
   Future<void> _addCover(String absolutePath) async {
-    final type = pictureMime(p.extension(absolutePath).toLowerCase());
+    final type = epubPictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return;
     final extension = p.extension(absolutePath).toLowerCase();
     final href = '$epubImageDir/cover$extension';
-    await _encoder.addFile(File(absolutePath), href);
+    await _store(absolutePath, href);
     _cover = (id: 'cover-image', href: href, path: absolutePath);
   }
 
@@ -109,7 +116,7 @@ final class EpubBook {
     if (existing != null) {
       return p.posix.relative(existing.href, from: fromDir);
     }
-    final type = pictureMime(p.extension(absolutePath).toLowerCase());
+    final type = epubPictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return null;
     final at = _picturesInOrder.length + 1;
     final extension = p.extension(absolutePath).toLowerCase();
@@ -117,8 +124,23 @@ final class EpubBook {
     final picture = (id: 'img-$at', href: href, path: absolutePath);
     _pictures[absolutePath] = picture;
     _picturesInOrder.add(picture);
-    await _encoder.addFile(File(absolutePath), href);
+    await _store(absolutePath, href);
     return p.posix.relative(href, from: fromDir);
+  }
+
+  /// Writes the picture at [absolutePath] into the container as [href],
+  /// stored, not deflated (#1305): a PNG, a JPEG, a GIF or a WebP is
+  /// compressed already, and deflating it again costs the time it takes and
+  /// saves nothing. Text entries stay deflated.
+  Future<void> _store(String absolutePath, String href) async {
+    final input = InputFileStream(absolutePath);
+    try {
+      _encoder.addArchiveFile(
+        ArchiveFile.stream(href, input)..compression = CompressionType.none,
+      );
+    } finally {
+      await input.close();
+    }
   }
 
   /// Adds one chapter, in spine order. [href] is container-relative (its
@@ -129,6 +151,11 @@ final class EpubBook {
   /// once for the whole book; [hasSvg] says the chapter embeds inline SVG
   /// (a formula), which the package must declare; [hasBoard] says it is a
   /// kanban board, whose style the book then carries (#1170).
+  ///
+  /// [folder] is the folder of the tree the chapter was in, `/`-separated
+  /// and empty at the top: the nav nests a folder's chapters under its entry
+  /// (#1308). [opensFolder] says the chapter is the folder's own page, which
+  /// the nav then makes the folder's entry.
   void addChapter({
     required String href,
     required String title,
@@ -136,6 +163,8 @@ final class EpubBook {
     String? fontFaces,
     bool hasSvg = false,
     bool hasBoard = false,
+    String folder = '',
+    bool opensFolder = false,
   }) {
     _fonts ??= fontFaces;
     _hasBoard = _hasBoard || hasBoard;
@@ -147,7 +176,14 @@ final class EpubBook {
       language: _language,
     );
     _encoder.addArchiveFile(ArchiveFile.string(href, xhtml));
-    _chapters.add((id: id, href: href, title: title, svg: hasSvg));
+    _chapters.add((
+      id: id,
+      href: href,
+      title: title,
+      svg: hasSvg,
+      folder: folder,
+      opensFolder: opensFolder,
+    ));
   }
 
   /// Writes the styles, the nav, the package, and closes the container.
@@ -191,6 +227,7 @@ final class EpubBook {
           chapters: _chapters,
           pictures: _picturesInOrder,
           cover: _cover,
+          identifier: _identifier,
         ),
       ),
     );

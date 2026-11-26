@@ -74,6 +74,10 @@ final class EpubPaneState extends State<EpubPane> {
   /// The book's marks, while it is in a library that has them.
   FileMarks? _marks;
 
+  /// The book's marks as lines of its text, placed once per change of the
+  /// marks rather than in every build (#1306).
+  final EpubBlockMarksCache _blockMarks = EpubBlockMarksCache();
+
   /// The link's fragment last gone to: handed again as a tab comes back,
   /// it does not move the reader.
   String? _anchorTaken;
@@ -176,9 +180,6 @@ final class EpubPaneState extends State<EpubPane> {
         _ => null,
       };
       if (!mounted || open != _opens) return;
-      // An ad-hoc diagnostic (#303): what the chapters carried and what
-      // the read text got of it.
-      _log.info('epub "${widget.path}": ${_mathReport(document)}');
       setState(() {
         _document = document;
         _buffer = SourceBuffer.fromText(document.markdown);
@@ -498,18 +499,6 @@ final class EpubPaneState extends State<EpubPane> {
     );
   }
 
-  /// An ad-hoc diagnostic (#303): the book's math, and what the read text
-  /// got of it.
-  static String _mathReport(EpubDocument document) {
-    final signs = RegExp(r'(?<!\\)\$').allMatches(document.markdown).length;
-    final first = RegExp(r'(?<!\\)\$\$?[^\$\n]{1,60}')
-        .firstMatch(document.markdown)
-        ?.group(0);
-    return '${document.mathReport ?? 'no math in the chapters'}; '
-        'text: $signs dollar signs'
-        '${first == null ? '' : ', first "$first"'}';
-  }
-
   /// The book, at the books' text size rather than the interface one, as
   /// a note's read view is at the note's, zoomed by a pinch as a note is.
   Widget _book(
@@ -546,7 +535,7 @@ final class EpubPaneState extends State<EpubPane> {
       // A paragraph links, and annotates, only in a library.
       selectionActions: _selectionActions(),
       marks: [
-        ...epubBlockMarks(document, _marks?.marks ?? const []),
+        ..._blockMarks.of(document, _marks?.marks ?? const []),
         ...?_aloud?.marks,
       ]..sort((a, b) => a.line.compareTo(b.line)),
       onTapMark: (start, end, anchor) =>

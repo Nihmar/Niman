@@ -34,6 +34,29 @@ String _articlePage({String head = '', String title = ''}) {
 }
 
 void main() {
+  group('an .xhtml file is read as XML (#1304)', () {
+    const xhtml =
+        '<html><head><title/></head><body><h1>Heading</h1>'
+        '<p>The text <a id="x"/>after an anchor.</p></body></html>';
+
+    test('a self-closed <title/> is empty and the text stays', () {
+      final page = _read(xhtml, fileName: 'page.xhtml', extent: .body);
+      expect(page.html, contains('The text'));
+      expect(page.html, contains('after an anchor.'));
+      expect(page.title, 'Heading');
+    });
+
+    test('the extension is not case-sensitive', () {
+      final page = _read(xhtml, fileName: 'PAGE.XHTML', extent: .body);
+      expect(page.html, contains('The text'));
+    });
+
+    test('a .html file keeps the HTML reading, as a browser has it', () {
+      final page = _read(xhtml, fileName: 'page.html', extent: .body);
+      expect(page.html, isNot(contains('The text')));
+    });
+  });
+
   group('the title', () {
     test('is the <title>', () {
       final page = _read(

@@ -23,6 +23,28 @@ List<BlockMark> epubBlockMarks(
     ),
 ]..sort((a, b) => a.line.compareTo(b.line));
 
+/// The block marks of a book, kept until its marks change (#1306).
+///
+/// Placing a book's marks is a pass over all of them; the pane asks for
+/// them on every build (a sentence read aloud, a step of the text-size
+/// slider), so the answer is kept for the document and the marks list
+/// it was made from, and made again only when either is another.
+final class EpubBlockMarksCache {
+  EpubDocument? _document;
+  List<AnnotationMark>? _marks;
+  List<BlockMark> _blocks = const [];
+
+  /// The block marks of [marks] in [document], ascending by line.
+  List<BlockMark> of(EpubDocument document, List<AnnotationMark> marks) {
+    if (!identical(document, _document) || !identical(marks, _marks)) {
+      _blocks = epubBlockMarks(document, marks);
+      _document = document;
+      _marks = marks;
+    }
+    return _blocks;
+  }
+}
+
 /// The [marks] of [document] that point at its lines [start]..[end], the
 /// end excluded: a paragraph's annotations.
 List<AnnotationMark> epubMarksBetween(

@@ -10,6 +10,9 @@
 /// - **The contents**, as the links `index.md` lists ([bookContents]).
 /// - **The frontmatter** a book's notes carry, in one style
 ///   ([bookFrontmatter]).
+/// - **Placeholders** the text converter writes for the book's pictures and
+///   links are found only as the destination it wrote
+///   ([bookPictureRef], [bookLinkRef]), never as words of the book.
 ///
 /// Every destination is percent-encoded segment by segment ([bookHref]), the
 /// one rule `percentDecoded` reads back.
@@ -60,6 +63,27 @@ String? bookLinkTo(
 /// The text of [line] when it is an ATX heading, or null when it is not.
 String? markdownHeading(String line) =>
     _heading.firstMatch(line)?.group(1)?.trim();
+
+/// A picture's placeholder as `HtmlMarkdown` writes it: `![alt](scheme:3)`,
+/// the alt text escaped, so `]` ends it only unescaped. Group 1 is the alt
+/// text, group 2 the number.
+///
+/// Matched whole — never `scheme:3` alone — because a book may say the
+/// words itself (#1313): its text is escaped, and an image is not made of
+/// them.
+RegExp bookPictureRef(String scheme) => RegExp(
+  r'!\[((?:[^\]\\]|\\.)*)\]\('
+  '$scheme:'
+  r'(\d+)\)',
+);
+
+/// A link's placeholder as `HtmlMarkdown` writes it: `](<scheme:3>)`, the
+/// end of the link's words and its destination. Group 1 is the number.
+RegExp bookLinkRef(String scheme) => RegExp(
+  r'\]\(<'
+  '$scheme:'
+  r'(\d+)>\)',
+);
 
 /// [path] relative to the folder [from] (both `/`-separated, relative to the
 /// same folder), each segment percent-encoded: a link's target.

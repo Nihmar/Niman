@@ -93,6 +93,21 @@
 				<string>net.daringfireball.markdown</string>
 			</array>
 		</dict>
+		<!-- A book opens with Niman the same way, to be converted into notes
+		     (#1318): Viewer, since Niman never edits the book. The type is the
+		     system's own, so it needs no declaration of its own. -->
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>EPUB book</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.idpf.epub-container</string>
+			</array>
+		</dict>
 	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>

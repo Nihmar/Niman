@@ -166,6 +166,16 @@ final class ShellOutsideRoutes {
     await imports.share(context, request);
   }
 
+  /// A book a launch carried (#1318): offered for conversion into notes as
+  /// a dropped one is, and left where it is (it is the user's own file,
+  /// never a share's cache copy to delete). The Features introduction waits
+  /// for it.
+  Future<void> bookLaunch(BuildContext context, String path) async {
+    featuresIntro.requested();
+    if (!context.mounted) return;
+    await imports.epubConvert.run(context, path);
+  }
+
   /// Where a capture's notification leads (#531): the note it made, its
   /// folder in the tree, or the capture's end. False when [route] is not
   /// a capture's.

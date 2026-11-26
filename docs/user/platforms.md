@@ -131,6 +131,12 @@ the two agree.
   `text/markdown`, so Niman is offered for `.md` files and can be made
   their default app. Double-clicking one opens it in the Niman already
   running, or starts one.
+- **Books (`.epub`) open in Niman too:** the entry declares
+  `application/epub+zip`, so Niman is in a book's *Open With* list, and
+  can be made its default app. A book opened that way is offered for
+  [conversion into notes](organization.md#converting-a-book-into-notes)
+  in the Niman already running, or in one started for it; the book itself
+  is left where it is. With no library open, a message says one is needed.
 - **The `niman` command** is the package's, not the AppImage's. The Arch
   package installs it at `/usr/bin/niman`, so it is on `PATH`. The
   `.tar.gz` ships a `niman` launcher at its root beside the bundle: put
@@ -208,6 +214,12 @@ the two agree.
   default only when nothing else claims `.md`, or when you pick it.
   Double-clicking one opens it in the Niman already running, or starts
   one.
+- The installer can also offer Niman for **`.epub`** books (a second
+  checkbox, on by default), the same way: in the *Open with* list, never
+  the default unless you pick it. A book opened that way is offered for
+  [conversion into notes](organization.md#converting-a-book-into-notes) in
+  the Niman already running, or in one started for it; the book itself is
+  left where it is. With no library open, a message says one is needed.
 - **The `niman` command** is the `niman.exe` in the install folder
   (`%LOCALAPPDATA%\Programs\Niman` for the per-user install). The
   installer puts nothing on `PATH`, so call it by path or add that folder
@@ -287,13 +299,18 @@ list at the end says what else it still lacks.
 - **Dropping files, folders and links** on the window opens, imports or
   captures them, with the frame Linux draws while a drag is over it; a
   web page asks whether to convert it, attach it or both. Niman is not in
-  Finder's *Open With* for a page, as it is not for a book: drop it, or use
-  the tree and the palette.
+  Finder's *Open With* for a page: drop it, or use the tree and the
+  palette (a book is in it, below).
 - A tree row's right-click menu can **show the note in Finder**, selected.
 - **Opening a `.md` from Finder:** Niman is in its *Open With* menu, as an
   alternate — the default stays the app you chose. Double-clicking a note
   set to open with Niman, or dropping one on its Dock icon, opens it in the
   Niman already running, or starts one.
+- **Opening an `.epub` from Finder:** Niman is in its *Open With* menu
+  too, as an alternate. A book opened that way is offered for
+  [conversion into notes](organization.md#converting-a-book-into-notes), in
+  the Niman already running or in one started for it; the book itself is
+  left where it is. With no library open, a message says one is needed.
 - **The Dock icon's menu** holds the same quick actions as the menu bar's
   icon.
 - **Paste as Markdown** reads the clipboard's HTML the browsers write:
@@ -339,6 +356,12 @@ page says of Android's screens holds there.
   [shortcuts](shortcuts.md)).
 - **Opening a `.md` from Files** or another app's *Share* or *Open in*
   opens it in Niman, in place: a note outside a library opens on its own.
+- **Opening an `.epub` from Files** or another app's *Share* or *Open in*
+  offers Niman for it as an alternate, the default staying the app you
+  chose, and the book is offered for
+  [conversion into notes](organization.md#converting-a-book-into-notes);
+  the book itself is left where it is. This takes the way a `.md` arrives
+  and is untried on a device, as everything on iOS is not yet released.
 - **Spell check** is the system's own, in the languages the keyboards
   have; the per-library personal dictionary applies on top.
 - **PDF export** goes through WebKit: paginated A4 with real, selectable

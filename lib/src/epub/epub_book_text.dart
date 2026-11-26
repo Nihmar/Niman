@@ -1,7 +1,11 @@
 /// A book's text as the reader joins it (#1138) — its chapters in reading
 /// order, a rule between two — and where each file and each anchor opens
-/// in it: the lines a conversion's plan splits into notes.
+/// in it: what the reader shows, and the lines a conversion's plan splits
+/// into notes. One join for both (#1314): a contents entry or a link on a
+/// file with no text answers the same wherever it is asked.
 library;
+
+import 'dart:collection';
 
 import 'package:niman/src/epub/epub_book.dart';
 
@@ -33,6 +37,14 @@ final class EpubBookText {
     }
     return _opening[file];
   }
+
+  /// The first line of each file that has text, in the order they are read.
+  /// A file the spine lists twice is at the line of its last reading.
+  Map<String, int> get starts => UnmodifiableMapView(_starts);
+
+  /// The text as one string: its [lines] a line break apart, and one after
+  /// the last.
+  String get markdown => '${lines.join('\n')}\n';
 
   /// Whether [line] is where a file of the book opens.
   bool opensFile(int line) => _startLines.contains(line);

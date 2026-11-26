@@ -43,7 +43,18 @@ one file:
   long note is minutes of work, not a hang.
 - **EPUB** — the note as a book, for an e-reader: the same page
   (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file (an
-  SVG as an `images/img-N.svg` entry).
+  SVG as an `images/img-N.svg` entry). A book carries the picture types
+  EPUB itself does — PNG, JPEG, GIF, WebP and SVG — so a BMP is left out
+  of it, though the HTML page still shows it. A book holds its pictures
+  inside it, so a picture on the web (`![w](https://…)`) is downloaded
+  when the book is written and carried in it, as the PDF's browser fetches
+  it while printing — each address once, at most 60 pictures a book, each
+  under 15 MB and 30 seconds. One that does not come (offline, not found,
+  too large, not a picture, or of a type the book cannot carry), and a
+  picture of a file the book cannot carry, is its description instead: the
+  text, as a link to where the picture was when it was on the web. The
+  note itself is never changed. The HTML page and the PDF keep a picture
+  on the web as it is written.
   A `cover:` key in the note's frontmatter names a picture the book opens
   on. A wikilink out has nothing to point at, exactly as on a single HTML
   page.
@@ -129,11 +140,19 @@ identifier: 978-3-16-148410-0
 
 `title` and `language` override the export's own (the note's display name
 and the app's language), `authors:` is read as `author:` and `lang:` as
-`language:`, `identifier:` — or `isbn:` — is the book's identifier,
+`language:`, `identifier:` — or `isbn:` — is the book's identifier (an
+ISBN is written `urn:isbn:` and its digits),
 `tags` become the book's subjects, `cover:`
 names the picture the book opens on, and `published:` — not `date:`,
 which is the note's own — the book's date. The Markdown cheatsheet
 carries the same example, under **EPUB metadata**.
+
+A reader — Apple Books, Kobo, KOReader, Calibre — knows a book by its
+identifier, and keeps the reading position and the highlights on it. Export
+the same note or folder again and it is still **the same book**: with no
+`identifier:` or `isbn:`, the identifier is made from the note's or the
+folder's path in the library, so it is the same on every export (rename or
+move the note and it is a new book). Two notes are two books.
 
 ## A folder, or the whole library
 
@@ -161,15 +180,29 @@ one zip:
   machine has neither a browser nor a system WebView (Android's, or
   WebKit on a Mac or an iPhone), the format is not offered.
 - **EPUB** — the folder (or the library) as **one book**: every Markdown
-  note is a chapter, in the tree's own order, with a table of contents
-  and links between the chapters. The pictures the chapters show travel
+  note is a chapter, in name order (below), with a table of
+  contents — nested by folder: a folder is an entry with its chapters
+  under it, and a folder's `00 …` note, the page a part opens on, is that
+  entry — and links between the chapters. The pictures the chapters show travel
   inside the book, each one once; an attachment no chapter shows is left
   out. The book's metadata and cover are the `index.md` frontmatter at the
-  exported folder's root. One EPUB, not one per note — a folder is a book,
+  exported folder's root, and that note is also the book's first chapter,
+  after the cover page, wherever its name sorts: the page with the title
+  and the contents opens the book. One EPUB, not one per note — a folder is a book,
   and the format is what its reader expects. It is the way back from
   [converting a book into notes](organization.md#converting-a-book-into-notes):
   the converted folder's `index.md`, numbered chapters and pictures make
   the book again, with its metadata and cover.
+
+**The order** of a folder's contents, in every format, is by name, numbers
+in numeric order, as the tree sorts names — folders and notes together:
+capitals and small letters are not told apart, nor accents, and numbers go
+by their value, so `Chapter 2` comes before `Chapter 10`. (The tree itself
+lists folders before notes; an export does not, so that `01 Preface.md`,
+`02 Part One/` and `03 Epilogue.md` read in that order.) In a book that is
+the order of the chapters, the contents and the spine: a book you convert
+into notes (and so number its chapters and parts) reads in order when you
+export it again, with `index.md` first.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those

@@ -311,4 +311,59 @@ void main() {
       expect(() => XmlDocument.parse('<div>$html</div>'), returnsNormally);
     });
   });
+
+  group('a picture outside the book (#1309)', () {
+    String chapter(String text, {Map<String, String> images = const {}}) =>
+        NoteHtml(
+          NoteHtmlSource(text: text, title: 't', images: images, epub: true),
+        ).body();
+
+    test('a remote picture is its alt text, linked to where it was', () {
+      final html = chapter('![a map](https://example.com/map.png)');
+      expect(html, isNot(contains('<img')));
+      expect(html, contains('<a href="https://example.com/map.png">a map</a>'));
+    });
+
+    test('a remote picture with no alt text is its address', () {
+      const address = 'https://example.com/map.png';
+      final html = chapter('![]($address)');
+      expect(html, contains('<a href="$address">$address</a>'));
+    });
+
+    test('a picture inside a link is its alt text, in the link only', () {
+      final html = chapter(
+        '[![logo](https://example.com/l.png)](https://example.com)',
+      );
+      expect(html, isNot(contains('<img')));
+      expect(html, contains('<a href="https://example.com">logo</a>'));
+      expect('<a '.allMatches(html), hasLength(1));
+    });
+
+    test('a link closed before a picture does not hide it', () {
+      final html = chapter(
+        '[x](https://a.example) ![p](https://b.example/p.png)',
+      );
+      expect(html, contains('<a href="https://b.example/p.png">p</a>'));
+    });
+
+    test('a local picture the book does not carry is its alt text', () {
+      final html = chapter('![old photo](old.bmp)');
+      expect(html, isNot(contains('<img')));
+      expect(html, isNot(contains('old.bmp')));
+      expect(html, contains('<p>old photo</p>'));
+    });
+
+    test('a picture the book carries is still a picture', () {
+      final html = chapter(
+        '![p](p.png)',
+        images: {'p.png': '../images/img-1.png'},
+      );
+      expect(html, contains('<img src="../images/img-1.png" alt="p" />'));
+    });
+
+    test('a page and a PDF keep a remote picture as written', () {
+      final html = body('![w](https://example.com/a.png)');
+      expect(html, contains('<img src="https://example.com/a.png" alt="w" />'));
+    });
+  });
 }

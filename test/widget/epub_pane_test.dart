@@ -14,6 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/annotations/annotation.dart';
 import 'package:niman/src/annotations/annotation_mark.dart';
 import 'package:niman/src/annotations/annotation_mark_source.dart';
+import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/theme.dart';
 import 'package:niman/src/epub/epub_document.dart';
 import 'package:niman/src/epub/epub_look.dart';
@@ -154,6 +155,23 @@ void main() {
     expect(find.text('Chapter one'), findsOneWidget);
     expect(find.text('It begins.'), findsOneWidget);
     expect(find.text('novel.epub'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('opening a book logs nothing of its path or its text (#1316)', (
+    tester,
+  ) async {
+    AppLog.clear();
+    final path = writeTestEpub(
+      p.join(dir.path, 'secret-diary.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: r'<p>Price $5 and $7, the formula x.</p>'),
+      ],
+    ).path;
+    await pump(tester, path);
+    expect(find.byType(MarkdownReadView), findsOneWidget);
+    expect(AppLog.dump(), isNot(contains('secret-diary')));
+    expect(AppLog.dump(), isNot(contains('formula')));
     await tester.pumpWidget(const SizedBox());
   });
 

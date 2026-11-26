@@ -95,6 +95,10 @@ void main() {
       expect(document.lineOfLocation(deep), 12);
     });
 
+    test('it knows its line count, the breaks of its text (#1306)', () {
+      expect(document.lineCount, '\n'.allMatches(document.markdown).length);
+    });
+
     test('a place past its chapter stays in it; a lost chapter is none', () {
       const past = EpubLocation(chapter: 'OEBPS/text/ch1.xhtml', line: 50);
       expect(document.lineOfLocation(past), 7);
@@ -165,6 +169,9 @@ void main() {
     expect(document.contents, [
       (title: 'A', line: 0, depth: 0),
       (title: 'B', line: 4, depth: 1),
+      // The page the spine names and the zip lacks has no text: its entry
+      // opens at the next chapter, as the conversion's does (#1314).
+      (title: 'Missing', line: 4, depth: 0),
     ]);
     expect(document.pictures, isEmpty);
     expect(Directory(pictures).existsSync(), isFalse);
@@ -225,4 +232,105 @@ void main() {
     file.writeAsStringSync('changed');
     expect(pictureDirOf(file.path, dir.path), isNot(first));
   });
+
+  test('a nav that is also in the spine still gives the contents (#1303)', () {
+    // Sigil, InDesign and Pages list the navigation document in the spine:
+    // it is read as a chapter first, and read again for the contents.
+    final file = writeTestEpub(
+      book('navspine.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: '<h1>A</h1><p>a</p>'),
+        (path: 'b.xhtml', body: '<h1>B</h1><p>b</p>'),
+      ],
+      nav:
+          '<ol><li><a href="a.xhtml">First</a></li>'
+          '<li><a href="b.xhtml">Second</a></li></ol>',
+      navInSpine: true,
+    );
+    final document = readEpub(file.path, pictures);
+    expect(document.contents.map((entry) => entry.title), ['First', 'Second']);
+    expect(document.chapters.map((chapter) => chapter.file), [
+      'OEBPS/a.xhtml',
+      'OEBPS/b.xhtml',
+      'OEBPS/nav.xhtml',
+    ]);
+  });
+
+  test('a file the spine lists twice is read twice (#1303)', () {
+    final file = writeTestEpub(
+      book('twice.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: '<p>Alpha.</p>'),
+        (path: 'b.xhtml', body: '<p>Beta.</p>'),
+      ],
+      again: ['a.xhtml'],
+    );
+    expect(
+      readEpub(file.path, pictures).markdown,
+      'Alpha.\n\n---\n\nBeta.\n\n---\n\nAlpha.\n',
+    );
+  });
+
+  test(
+    'a self-closed <title/> swallows neither a chapter nor the nav (#1304)',
+    () {
+      // XML: an empty title. Read as HTML it would hold the rest of the page,
+      // and a book of such chapters would be refused as having none.
+      final file = writeTestEpub(
+        book('emptytitle.epub'),
+        head: '<title/>',
+        chapters: [
+          (path: 'a.xhtml', body: '<a id="p1"/><h1>A</h1><p>Alpha.</p>'),
+          (path: 'b.xhtml', body: '<h1>B</h1><p>Beta.</p>'),
+        ],
+        nav:
+            '<ol><li><a href="a.xhtml">First</a></li>'
+            '<li><a href="b.xhtml">Second</a></li></ol>',
+      );
+      final document = readEpub(file.path, pictures);
+      expect(document.markdown, '# A\n\nAlpha.\n\n---\n\n# B\n\nBeta.\n');
+      expect(document.contents.map((entry) => entry.title), [
+        'First',
+        'Second',
+      ]);
+    },
+  );
+
+  test(
+    'a contents entry or a link on a page with no text opens the next (#1314)',
+    () {
+      // A part's title page has no text of its own: what points at it opens
+      // where the next chapter does, as the conversion makes it a folder there.
+      final file = writeTestEpub(
+        book('parts.epub'),
+        chapters: [
+          (path: 'part.xhtml', body: '<div class="part"></div>'),
+          (
+            path: 'ch1.xhtml',
+            body: '<h1>First</h1><p>one <a href="part.xhtml">back</a></p>',
+          ),
+          (path: 'ch2.xhtml', body: '<h1>Second</h1>'),
+        ],
+        nav:
+            '<ol><li><a href="part.xhtml">Part One</a><ol>'
+            '<li><a href="ch1.xhtml">First</a></li>'
+            '<li><a href="ch2.xhtml">Second</a></li></ol></li></ol>',
+      );
+      final document = readEpub(file.path, pictures);
+      expect(
+        document.markdown,
+        '# First\n\none [back](<epub-link:0>)\n\n---\n\n# Second\n',
+      );
+      expect(document.contents, [
+        (title: 'Part One', line: 0, depth: 0),
+        (title: 'First', line: 0, depth: 1),
+        (title: 'Second', line: 6, depth: 1),
+      ]);
+      expect(document.links, [0]);
+      expect(document.chapters, [
+        (file: 'OEBPS/ch1.xhtml', line: 0),
+        (file: 'OEBPS/ch2.xhtml', line: 6),
+      ]);
+    },
+  );
 }

@@ -180,9 +180,40 @@ void main() {
       final note = read('Books/Dune.md');
       expect(note, contains('# Arrakis'));
       expect(note, contains('# Muad'));
-      expect(note, contains('](assets/'));
+      // A Markdown link is written from the note's folder (#1315).
+      expect(note, contains('](../assets/'));
+      expect(note, isNot(contains('](assets/')));
       expect(note, contains('](<#The%20Storm>)'));
       expect(Directory(p.join(library, 'assets')).listSync(), hasLength(1));
+    });
+
+    test("one note's pictures resolve from the folder it is in", () async {
+      for (final parent in ['Books', 'Books/Sci-Fi (old)']) {
+        final converted = await convert(source, oneNote: true, parent: parent);
+        final note = read(converted.made);
+        final picture = RegExp(r'!\[Map\]\(([^)]+)\)').firstMatch(note);
+        expect(picture, isNotNull, reason: note);
+        final up = '../' * p.posix.split(parent).length;
+        expect(
+          picture!.group(1),
+          matches(
+            RegExp(
+              '^$up'
+              r'assets/[0-9a-f]{64}\.png$',
+            ),
+          ),
+        );
+        final noteFolder = p.joinAll([library, ...parent.split('/')]);
+        expect(
+          File(p.normalize(p.join(noteFolder, picture.group(1)))).existsSync(),
+          isTrue,
+        );
+      }
+    });
+
+    test("one note at the library's top keeps its pictures' path", () async {
+      final converted = await convert(source, oneNote: true);
+      expect(read(converted.made), contains('![Map](assets/'));
     });
 
     test('the preview says what would be written', () async {
@@ -193,6 +224,32 @@ void main() {
       expect(preview.folders, 0);
       expect(preview.pictures, 1);
     });
+  });
+
+  test("words that name a placeholder are the book's own (#1313)", () async {
+    final source = writeTestEpub(
+      book('about.epub'),
+      title: 'About',
+      chapters: [
+        (
+          path: 'one.xhtml',
+          body:
+              '<h1>One</h1><p>A picture is epub-picture:0, a link epub-link:0.'
+              '</p><pre>![x](epub-picture:9) [y](&lt;epub-link:9&gt;)</pre>'
+              '<p>See <a href="two.xhtml">two</a>.</p>',
+        ),
+        (path: 'two.xhtml', body: '<h1>Two</h1><p>Two.</p>'),
+      ],
+      nav:
+          '<ol><li><a href="one.xhtml">One</a></li>'
+          '<li><a href="two.xhtml">Two</a></li></ol>',
+    ).path;
+    expect(previewEpub(source, _words).pictures, 0);
+    await convert(source);
+    final one = read('About/01 One.md');
+    expect(one, contains('epub-picture:0, a link epub-link:0.'));
+    expect(one, contains('![x](epub-picture:9) [y](<epub-link:9>)'));
+    expect(one, contains('[two](<02%20Two.md>)'));
   });
 
   test('parts are folders, their chapters notes in them', () async {

@@ -428,6 +428,9 @@ final class ShellExportFlow {
         engine: engine,
         kanban: _kanban,
         paper: await controller.appSettings.pdfPaper,
+        // A book with no identifier of its own is named by where it is in
+        // the library (#1307).
+        libraryPath: dir.isEmpty ? name : dir,
       );
     } on Object catch (error) {
       if (context.mounted) {
