@@ -42,17 +42,22 @@ From the app itself, in English, on a library of sample notes: a phone
 Full guides live in [`docs/`](docs/):
 
 - **User:** [getting started](docs/user/getting-started.md),
-  [editing](docs/user/editing.md), [organization](docs/user/organization.md),
-  [export](docs/user/export.md),
+  [home](docs/user/home.md), [editing](docs/user/editing.md),
+  [list notes](docs/user/lists.md), [slide notes](docs/user/slides.md),
+  [flashcards](docs/user/flashcards.md), [kanban](docs/user/kanban.md),
+  [organization](docs/user/organization.md), [export](docs/user/export.md),
   [journal](docs/user/journal.md), [search](docs/user/search.md),
+  [text recognition](docs/user/text-recognition.md),
+  [web capture](docs/user/web-capture.md),
   [links](docs/user/links.md), [templates](docs/user/templates.md),
   [tasks & reminders](docs/user/tasks.md), [themes](docs/user/themes.md),
+  [features](docs/user/features.md),
   [settings](docs/user/settings.md), [shortcuts](docs/user/shortcuts.md),
   [sync](docs/user/sync.md), [home-screen widgets](docs/user/widgets.md),
   [platform notes](docs/user/platforms.md).
 - **Contributor:** [architecture](docs/dev/architecture.md),
   [building](docs/dev/building.md), [conventions](docs/dev/conventions.md),
-  [the documentation site](docs/dev/site.md),
+  [memory](docs/dev/memory.md), [the documentation site](docs/dev/site.md),
   [releasing](docs/dev/releasing.md), and the design records under
   [`docs/records/`](docs/records/) — the unified Markdown surface, read/live
   parity and huge notes, the workspace (open notes and tabs), the EPUB
@@ -83,15 +88,34 @@ Full guides live in [`docs/`](docs/):
 - **Images** copied into the library on insert (no base64 blobs), and
   **voice notes** whose recordings stay plain audio files — a recording
   can be transcribed on the device, with nothing uploaded.
-- **Spellcheck** on every platform (system/IME on Android, hunspell on
-  desktop) with a per-library personal dictionary.
+- **Spellcheck** on every platform (system/IME on Android, the system
+  checker on Windows, macOS and iOS, hunspell on Linux) with a per-library
+  personal dictionary.
 - **Tidy the Markdown** in one action — list indentation, heading spacing,
   tight lists, a closed fence where the note forgot one — with each rule
   on or off per library, and the tidy run by itself when a note is closed
   if you want it.
 - Find and replace, word count, heading outline and folding, **typewriter
   mode** on every platform, and **Zen mode** on the desktop.
+- **Columns**: blocks side by side, written as Pandoc's fenced divs
+  (`:::`), editable in live mode — see [editing](docs/user/editing.md#columns).
 - The **command palette** and **remappable keyboard shortcuts**.
+
+### Notes of other kinds
+
+A note's `type:` frontmatter key turns it into a view of its own; the file
+stays plain Markdown.
+
+- **List and shopping notes:** a checklist you tick, nest and drag, or a
+  shopping list with a quantity per item — see [lists](docs/user/lists.md).
+- **Kanban boards:** columns and cards kept as Markdown, edited by hand on a
+  desktop and with *Move to…* on a phone, and exported as the board they
+  are — see [kanban](docs/user/kanban.md).
+- **Flashcard decks:** the table rows, `::` lines and `==cloze==` of a note
+  are cards, studied with spaced repetition (SM-2) — see
+  [flashcards](docs/user/flashcards.md).
+- **Slide notes:** a note split by `---` into slides, presented full screen
+  with speaker notes — see [slides](docs/user/slides.md).
 
 ### Libraries and the workspace
 
@@ -100,10 +124,17 @@ Full guides live in [`docs/`](docs/):
   everything travels with it.
 - Each library is independent: its own editor preferences, trash policy,
   template folder, journal, tree sort order, and so on.
+- A per-library **Home**: a page of tiles (today's journal entry, the tasks
+  due, the notes you changed last) and the actions you set — see
+  [home](docs/user/home.md).
+- A **Features** switchboard (Settings → Library) turns a library's
+  features off, with nothing deleted — see
+  [features](docs/user/features.md).
 - Open multiple libraries from a remembered list; switch anytime, and
   **forget** one from its row's menu without touching its files.
 - **Tabs and split panes** on the desktop, an open-notes switcher on a
-  phone. The notes you had open, and where each was left, come back.
+  phone, and a **tablet layout** with a labelled rail and the toolbar above
+  the keyboard. The notes you had open, and where each was left, come back.
 - A **side panel** with the note's outline, tags and history, and the
   **journal** calendar.
 
@@ -116,7 +147,11 @@ Full guides live in [`docs/`](docs/):
 - **Annotate** a passage and it becomes a quoted section in a companion
   note, linked back to its place; the file marks where it was annotated.
 - Books have a **look of their own** — theme, brightness, font and text
-  size — apart from the notes.
+  size — apart from the notes, and on Android a book can be **read aloud**
+  with the system's voice.
+- **Text recognition (OCR):** the text of a scanned PDF or a picture, read on
+  the device into a note beside it that search indexes — see
+  [text recognition](docs/user/text-recognition.md).
 
 ### Starting out
 
@@ -146,6 +181,12 @@ Full guides live in [`docs/`](docs/):
   attachments kept. From *Settings → Maintenance → Import Notion export*,
   from sharing the zip to Niman on Android, or by dropping it on the
   desktop window.
+- **Capture a web page** as a note, or a passage of one, with its pictures —
+  see [web capture](docs/user/web-capture.md).
+- **Convert HTML into notes.** An `.html` file becomes a note, a book saved as
+  HTML (Archive of Our Own first) becomes a note per chapter, and a folder's
+  pages are converted with the rest — see
+  [organization](docs/user/organization.md#converting-a-web-page-into-a-note).
 - **Open an Obsidian vault.** Pick the vault folder as the library and
   Obsidian's own syntax reads as it stands — `[[wikilinks]]` and their
   aliases, `![[image.png]]` embeds, frontmatter and tags — with
@@ -179,8 +220,8 @@ Designed to stay fast at scale — the target is 1,000,000 notes.
 ### Themes
 
 Brightness (day / night / system) and a palette: System (the device's
-own colours), Niman, Catppuccin, Solarized or Gruvbox. Build a theme of
-your own, edit it colour by colour with the whole app wearing it as you
+own colours), Niman, Catppuccin, Solarized, Gruvbox or Sepia. Build a theme
+of your own, edit it colour by colour with the whole app wearing it as you
 move, and **export or import** one as a `.json` file to carry it to
 another installation.
 
@@ -192,6 +233,13 @@ another installation.
   fire with the screen off or the app killed, and desktop timers with the
   tray kept open. The app warns about permission and battery settings
   that could block delivery.
+- **Recurring tasks:** a `rec:` rule keeps a task coming back when it is
+  ticked; see [tasks](docs/user/tasks.md#recurring-tasks).
+- **Tasks and notes link both ways:** a task can link a note with `[[`, a
+  note lists the tasks that link it, and a `todo` block draws the tasks it
+  asks for; see [tasks](docs/user/tasks.md#links-to-notes).
+- **Calendar events**, recurring ones included, in the journal's calendar and
+  the day's card — see [journal](docs/user/journal.md#the-days-events).
 - **Home-screen widgets** on Android: the todo list, and a pinned note.
 
 ### Sync and the desktop
@@ -205,6 +253,9 @@ another installation.
 - **Close to tray** with a tray menu, **one Niman per desktop session**,
   **drag and drop** of files and folders onto the window, and *Open file*
   for a Markdown file outside any library.
+- **macOS and iOS in preview:** a Mac gets its own title bar, the menu bar's
+  commands and a disk image in the release; an iPhone or an iPad keeps its
+  libraries in the Files app — see [platform notes](docs/user/platforms.md).
 
 ### Debug log
 
@@ -220,7 +271,9 @@ the [issue tracker](https://github.com/Nihmar/Niman/issues).
 ## Platforms
 
 - **Android** (minSdk 30, Android 11), **Linux** (Wayland), **Windows**.
-- macOS and iOS are not built yet, but the code is kept portable.
+- **macOS** (14 and later) is in **preview**: a `.dmg` and a `.zip` come with
+  each release. **iOS and iPadOS** (17 and later) run but are not released
+  yet. See [platform notes](docs/user/platforms.md).
 
 ## Release
 
@@ -245,6 +298,9 @@ GitHub Release page.
 | Android | `.apk` |
 | Linux | `.tar.gz`, `.AppImage`, `.pkg.tar.zst` (Arch) |
 | Windows | Inno Setup installer (`.exe`), portable `.zip` |
+| macOS | `.dmg`, `.zip` (preview) |
+
+iOS is built and tested by CI but not released.
 
 ### Signing
 
@@ -254,6 +310,8 @@ GitHub Release page.
   back to the debug key, which changes from run to run and makes Android
   refuse to update over the last install — do not ship a release that way.
 - **Linux / Windows:** unsigned.
+- **macOS:** signed ad hoc (no Developer ID yet): Gatekeeper asks for
+  *Open Anyway* on the first launch.
 
 ### Building locally
 
@@ -281,7 +339,10 @@ asked. See [building](docs/dev/building.md).
 - **Credentials:** `flutter_secure_storage` (the WebDAV password, and
   whatever secrets a feature needs).
 - **Testing:** `flutter_test` + `integration_test`.
-- **CI:** tag-triggered GitHub Actions.
+- **CI:** GitHub Actions — `check.yml` (the checks) runs on every pull request
+  and on `main`, `site.yml` builds the documentation site on every pull
+  request, `pages.yml` publishes it from `main`; only `release.yml` is
+  triggered by version tags.
 
 ### Key packages
 
@@ -307,8 +368,8 @@ Niman is open source and contributions are welcome — the work is tracked in th
 platform, the checks it has to pass (`./scripts/niman.sh check`, the formatting
 gate, `flutter analyze --fatal-infos`, the integration suite), how a change is
 proposed (one logical change per commit, a pull request per issue), and the
-platform-parity expectation that Android, Linux and Windows ship a capability in
-the same round. It points at the full rules in [`AGENTS.md`](AGENTS.md) and
+platform-parity expectation that Android, Linux, Windows, macOS and iOS ship a
+capability in the same round. It points at the full rules in [`AGENTS.md`](AGENTS.md) and
 [`docs/dev/conventions.md`](docs/dev/conventions.md), and
 [building](docs/dev/building.md) has the flavours, the scripts and the artifacts.
 

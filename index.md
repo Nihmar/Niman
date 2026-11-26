@@ -12,10 +12,16 @@ title: Niman
 Start with [getting started](docs/user/getting-started.md), or pick the guide
 you need:
 
+- [Home](docs/user/home.md) — a page of tiles for what you come back to every
+  day, and the actions on it.
 - [Editing](docs/user/editing.md) — Markdown, math, Mermaid diagrams, images,
   spellcheck, the read view.
 - [List notes and shopping lists](docs/user/lists.md) — checklists with
   quantities.
+- [Slide notes](docs/user/slides.md) — a note presented as a deck.
+- [Flashcards](docs/user/flashcards.md) — a note as a deck, studied with
+  spaced repetition.
+- [Kanban boards](docs/user/kanban.md) — a note as columns of cards.
 - [Organization](docs/user/organization.md) — trash, history, frontmatter and
   tags.
 - [Export](docs/user/export.md) — a note, a folder or the library out as
@@ -39,13 +45,15 @@ you need:
 - [Sync](docs/user/sync.md) — WebDAV to your own server.
 - [Home-screen widgets](docs/user/widgets.md) — the todo list and a pinned
   note (Android).
-- [Platform notes](docs/user/platforms.md) — Android, Linux, Windows.
+- [Platform notes](docs/user/platforms.md) — Android, Linux, Windows, macOS, iOS.
 
 ## Building and changing Niman
 
 - [Architecture](docs/dev/architecture.md) — the modules, and what each holds.
 - [Building](docs/dev/building.md) — flavors, platforms, the local scripts.
 - [Code conventions](docs/dev/conventions.md) — the rules a change is held to.
+- [Memory](docs/dev/memory.md) — where the desktop app's memory goes, and how
+  to watch it.
 - [The documentation site](docs/dev/site.md) — the layouts, the stylesheet and
   how to preview it locally.
 - [Release process](docs/dev/releasing.md) — tags, artifacts, signing.

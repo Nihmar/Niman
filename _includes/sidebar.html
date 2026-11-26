@@ -30,7 +30,7 @@
 
   <p class="sidebar__group" id="sidebar-dev">Building and changing</p>
   <ul class="sidebar__list" aria-labelledby="sidebar-dev">
-    {%- assign dev_slugs = 'architecture,building,conventions,site,releasing' | split: ',' -%}
+    {%- assign dev_slugs = 'architecture,building,conventions,memory,site,releasing' | split: ',' -%}
     {%- for slug in dev_slugs -%}
       {%- assign path = 'docs/dev/' | append: slug | append: '.md' -%}
       {%- assign doc = site.pages | where: 'path', path | first -%}
