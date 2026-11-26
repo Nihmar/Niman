@@ -3,6 +3,7 @@
 // anywhere else, and on its own with no library at all — and every later
 // launch brings the window forward.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,8 +14,11 @@ import 'package:niman/src/core/launch_requests.dart';
 import 'package:niman/src/library/library_state.dart';
 import 'package:niman/src/todo/todo_source.dart';
 import 'package:niman/src/ui/note_view.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:path/path.dart' as p;
 
+import '../fakes/epub_builder.dart';
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_todo_source.dart';
 import '../fakes/fake_window_controller.dart';
@@ -116,5 +120,78 @@ void main() {
     await settle(tester);
     expect(outside, findsNothing);
     expect(noteTree(), findsOne);
+  });
+
+  group('a book (#1318)', () {
+    final needsLibrary = find.text(AppStrings.epubConvertNeedsLibrary);
+    final dialog = find.byKey(const Key('epub-convert-dialog'));
+
+    // The dialog reads the book on an isolate, which a test's fake clock
+    // does not wait for: give it the real time to answer, then close it.
+    Future<void> closeDialog(WidgetTester tester) async {
+      for (var i = 0; i < 40; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 250)),
+        );
+        await tester.pump();
+        final start = find.byKey(const Key('epub-convert-start'));
+        if (start.evaluate().isNotEmpty &&
+            tester.widget<FilledButton>(start).onPressed != null) {
+          break;
+        }
+      }
+      await tester.tap(find.text(AppStrings.actionCancel));
+      await settle(tester);
+    }
+
+    testWidgets('a later launch’s book is offered for conversion, never '
+        'opened on its own, and its file stays', (tester) async {
+      await pumpApp(tester);
+      await openLibrary(tester, filePicker);
+      final dir = Directory.systemTemp.createTempSync('niman_launch_book');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final book = writeTestEpub(
+        p.join(dir.path, 'Dune.epub'),
+        chapters: const [(path: 'one.xhtml', body: '<p>Arrakis</p>')],
+      );
+
+      await launch(tester, book.path);
+      expect(dialog, findsOne);
+      expect(outside, findsNothing);
+      expect(window.showCalls, 1);
+      await closeDialog(tester);
+      expect(book.existsSync(), isTrue);
+    });
+
+    testWidgets('with no library, a later launch’s book says a library is '
+        'needed', (tester) async {
+      await pumpApp(tester);
+      await launch(tester, '/elsewhere/Dune.epub');
+      expect(needsLibrary, findsOne);
+      expect(outside, findsNothing);
+      expect(find.byKey(const Key('open-outside-file')), findsOne);
+    });
+
+    testWidgets('started with a book and no library to resume, it says a '
+        'library is needed', (tester) async {
+      await pumpApp(tester, startedWith: '/elsewhere/Dune.epub');
+      expect(needsLibrary, findsOne);
+      expect(outside, findsNothing);
+    });
+
+    testWidgets('started with a book while the last library resumes, the '
+        'shell offers it for conversion', (tester) async {
+      controller = FakeLibrarySession(resumePath: '/fake/library');
+      final dir = Directory.systemTemp.createTempSync('niman_launch_book');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final book = writeTestEpub(
+        p.join(dir.path, 'Dune.epub'),
+        chapters: const [(path: 'one.xhtml', body: '<p>Arrakis</p>')],
+      );
+      await pumpApp(tester, startedWith: book.path);
+      expect(dialog, findsOne);
+      expect(outside, findsNothing);
+      await closeDialog(tester);
+    });
   });
 }

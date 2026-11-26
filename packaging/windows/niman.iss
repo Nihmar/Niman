@@ -31,8 +31,8 @@ UninstallDisplayName=Niman
 DisableProgramGroupPage=yes
 SetupIconFile=..\..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\niman.exe
-; The .md association below (#41): Explorer re-reads it on install and
-; uninstall.
+; The .md and .epub associations below (#41, #1318): Explorer re-reads them
+; on install and uninstall.
 ChangesAssociations=yes
 
 [Languages]
@@ -42,6 +42,7 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 Name: "mdassoc"; Description: "{cm:AssocFileExtension,Niman,.md}"
+Name: "epubassoc"; Description: "{cm:AssocFileExtension,Niman,.epub}"
 
 [Files]
 Source: "..\..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -58,6 +59,15 @@ Root: HKCU; Subkey: "Software\Classes\.md\OpenWithProgids"; ValueType: string; V
 Root: HKCU; Subkey: "Software\Classes\.markdown\OpenWithProgids"; ValueType: string; ValueName: "Niman.Markdown"; ValueData: ""; Flags: uninsdeletevalue; Tasks: mdassoc
 Root: HKCU; Subkey: "Software\Classes\Applications\niman.exe\SupportedTypes"; ValueType: string; ValueName: ".md"; ValueData: ""; Flags: uninsdeletekey; Tasks: mdassoc
 Root: HKCU; Subkey: "Software\Classes\Applications\niman.exe\SupportedTypes"; ValueType: string; ValueName: ".markdown"; ValueData: ""; Tasks: mdassoc
+
+; The same for a book (#1318): Niman is offered for .epub in the same list,
+; never made the default, and a book opened that way is offered for
+; conversion into notes; the file is left where it is.
+Root: HKCU; Subkey: "Software\Classes\Niman.Book"; ValueType: string; ValueName: ""; ValueData: "EPUB book"; Flags: uninsdeletekey; Tasks: epubassoc
+Root: HKCU; Subkey: "Software\Classes\Niman.Book\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\niman.exe,0"; Tasks: epubassoc
+Root: HKCU; Subkey: "Software\Classes\Niman.Book\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\niman.exe"" ""%1"""; Tasks: epubassoc
+Root: HKCU; Subkey: "Software\Classes\.epub\OpenWithProgids"; ValueType: string; ValueName: "Niman.Book"; ValueData: ""; Flags: uninsdeletevalue; Tasks: epubassoc
+Root: HKCU; Subkey: "Software\Classes\Applications\niman.exe\SupportedTypes"; ValueType: string; ValueName: ".epub"; ValueData: ""; Flags: uninsdeletevalue; Tasks: epubassoc
 
 [Icons]
 Name: "{autoprograms}\Niman"; Filename: "{app}\niman.exe"

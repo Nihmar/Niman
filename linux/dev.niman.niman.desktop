@@ -10,7 +10,7 @@ Terminal=false
 Categories=Office;TextEditor;Utility;
 Keywords=notes;markdown;note;todo;task;list;quick;new;reminder;journal;diary;niman;
 StartupWMClass=dev.niman.niman
-MimeType=text/markdown;text/x-markdown;
+MimeType=text/markdown;text/x-markdown;application/epub+zip;
 Actions=quick-note;journal-today;new-todo;new-note;new-list;new-voice;
 
 [Desktop Action quick-note]

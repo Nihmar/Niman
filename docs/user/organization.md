@@ -787,8 +787,13 @@ become notes of the library: editable, searchable, linkable, and exportable to a
 tree's menu on an `.epub` row, in the palette (*Library: Convert EPUB to
 Markdown…*, which converts the book on screen or the one selected, and
 otherwise asks for a file), in *Settings → Maintenance* (a book outside
-the library), and it is what dropping a book on the window or sharing one
-to Niman on Android does.
+the library), and it is what dropping a book on the window, sharing one
+to Niman on Android, or opening one with Niman from the system does: from
+a file manager's *Open with* on Android, Linux, Windows and macOS, and
+from Files on iOS. Niman is offered for books there, never made the
+default app for them, and the book itself is left where it is. With no
+library open, a message says one is needed. See [platforms](platforms.md) for what each system
+offers.
 
 The dialog says what the book will make, and asks two things:
 
