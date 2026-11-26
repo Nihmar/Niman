@@ -51,9 +51,9 @@ Create one with **New list note** in the Files FAB (or
 - **Add an item** from the field at the bottom; after each add the list
   scrolls to the item just written. Pressing Enter (or the check button)
   adds and keeps the cursor in the field, so the next item can be typed
-  at once. On Windows and Linux the field already has the cursor when
-  the list opens; on a phone it waits for a tap, so the keyboard does not
-  cover the list.
+  at once. On Windows, Linux and macOS the field already has the cursor
+  when the list opens; on a phone it waits for a tap, so the keyboard
+  does not cover the list.
 
 Prose between items is not shown in the GUI (the raw editor is where it
 lives), and it follows the item above it when that item is dragged or
@@ -80,7 +80,7 @@ What changes is the quantity:
   chip goes back to one. Quick counts are one tap away; the stepper goes
   up to 99.
 - Typing the quantity yourself works too: `latte x2` in the add field is
-  added as `Latte ×2`.
+  added as `latte ×2`.
 
 The quantity is part of the item's own text, so the note stays portable
 Markdown:

@@ -36,7 +36,8 @@ same Markdown either way, and only how it is drawn differs. The read view
   toolbar to cut, copy, paste or select all. Both have the find and replace
   bar, the spelling underline and its panel, the context menu, Ctrl+click on
   links, folding, typewriter mode and Zen.
-- **WYSIWYG editor**: the note drawn as it reads — the Markdown stays the
+- **WYSIWYG editor** (called *live* elsewhere in this guide, as in *live
+  mode*): the note drawn as it reads — the Markdown stays the
   note's text, and only where the caret is does it show as written. Headings
   are set at their size; bold, italic,
   strikethrough, `==highlight==`, underline (`<u>`) and superscript (`<sup>`) are drawn as
@@ -107,8 +108,8 @@ motion keeps the ellipsis instead.
   editor or the preview, so another window width, text size or note
   column lands on the same line. Renaming or moving an open note keeps its tab, its place and
   its undo.
-- **`Ctrl+click`** or the tree's right-click **Open in new tab** opens a
-  note alongside.
+- **`Ctrl+click`**, a middle click on a note in the tree, or the tree's
+  right-click **Open in new tab** opens a note alongside.
 - **The + after the tabs** opens a **new tab** with no note in it, and
   the launcher in its place: **New note**, **New from template**, **Go to
   note**, and the notes you looked at last. The note you open next —
@@ -126,8 +127,8 @@ motion keeps the ellipsis instead.
   finger; a thin bar under it shows where you are.
 - **Back and forward** go through the notes you looked at, in the order
   you looked at them, as a browser goes through pages: the mouse's side
-  buttons, `Alt+←` / `Alt+→` (remappable, and in the palette), or — on a
-  tablet — the arrows at the start of the tab row. One
+  buttons, `Alt+←` / `Alt+→` (`⌘[` / `⌘]` on a Mac; remappable, and in the
+  palette), or — on a tablet — the arrows at the start of the tab row. One
   history for the window, whichever pane showed the note. A note you
   closed since opens again in the place of the tab you are on, at the line
   where you left it, and adds no tab; one deleted since is skipped. From
@@ -217,8 +218,10 @@ the note, while the docked state you left (open or shut) comes back as
 soon as the window has room again.
 
 Each tab keeps its own way of showing its note: the source editor or the
-WYSIWYG one, the preview or not. The **Default editor** setting is the
-editor a note opens in. The last few tabs you looked at keep everything
+WYSIWYG one, the preview or not. A note opens in the editor the library
+last used on this device (`editorKind`); **Settings → Editor** has a
+switch for **Markdown source** and one for **WYSIWYG**, to offer both or
+only one (the last one on cannot be switched off). The last few tabs you looked at keep everything
 behind them, undo included. Older ones come back to where you left them
 (caret, selection, scroll) but start a fresh undo history. A very long
 note keeps its editor only while it is on screen.
@@ -264,7 +267,8 @@ count.
 
 ### Zen mode
 
-On Linux and Windows, `F11` (or *View: Enter Zen mode* in the command
+On Linux, Windows and macOS, `F11` (`⌃⌘F` on a Mac, where `F11` shows the
+desktop; or *View: Enter Zen mode* in the command
 palette) leaves the note and nothing else: the rail, the tree, the
 tabs, the side panel, the note's toolbar row, its status row, the
 row numbers and a journal entry's day strip all go, and the note fills
@@ -279,9 +283,9 @@ The window is maximized on the way in, and put back on the way out —
 unless it was maximized already, in which case it stays so. The taskbar
 stays visible: this is a writing mode, not a fullscreen.
 
-- **Leaving.** `Esc`, `F11` again, or the bar's button. `Esc` goes to
-  the nearest thing first: a find bar closes, a selection collapses, a
-  dialog or the palette shuts, and the next `Esc` leaves Zen.
+- **Leaving.** `Esc`, `F11` (`⌃⌘F` on a Mac) again, or the bar's button.
+  `Esc` goes to the nearest thing first: a find bar closes, a selection
+  collapses, a dialog or the palette shuts, and the next `Esc` leaves Zen.
 - **The preview** stays yours: a note read rather than written can be
   read in Zen in its preview. The note shows its editor or its preview,
   as its tab says, and the eye in Zen's bar (or *Show preview* / *Show
@@ -509,7 +513,8 @@ The **Markdown cheatsheet** shows every construct Niman reads, each as it
 is written beside how a note shows it — headings, emphasis, highlight,
 underline and super/subscript, lists and checkbox lists, quotes and
 callouts, links and links to notes, images and embeds, tags, code, math,
-tables, footnotes, rules, frontmatter and template placeholders. Open it
+tables, columns, footnotes, rules, frontmatter, EPUB metadata and template
+placeholders. Open it
 from the note's ⋮ menu, *Editor: Markdown cheatsheet* in the palette, or
 Settings, next to the changelog. Every example can be copied; opened from
 a note, it can also be inserted at the caret — one line where the caret
@@ -1003,7 +1008,14 @@ it, and outside Niman the block stays standard Mermaid.
 The engine is Niman's own, written in Dart and drawn on every platform;
 there is no browser and no script inside the app.
 
+**Insert diagram (Mermaid)**, in the command palette, drops a small
+`mermaid` fence at the caret: a flowchart with one edge, `Start` to `End`,
+to edit from there.
+
 ### Mind map
+
+**Insert mind map**, in the command palette, drops a small `mermaid` fence
+at the caret with a `mindmap` in it: a root and one idea under it.
 
 **Convert list to mind map** replaces the list at the cursor with a
 `mindmap` fence as one undo step, so Ctrl+Z brings the list back. It is
@@ -1081,7 +1093,7 @@ and a preview of exactly what it would write. The four readings are:
 | Name - values | `succo`, `brioche` |
 | Name: values | the whole row (no colon in it) |
 | Values, comma separated | `Chiara - succo`, `brioche` |
-| The whole row | `Chiara - succo, brioche` |
+| The whole row, as one value | `Chiara - succo, brioche` |
 
 The dash may be a hyphen, an en dash or an em dash, and needs a space
 only before it. A row with no separator counts as one value, so a plain
@@ -1176,22 +1188,26 @@ written from the library root by an older Niman still shows.
 
 ## Spellcheck
 
-Every platform spellchecks: system/IME on Android, hunspell on desktop.
-Desktop dictionaries are chosen per library (`spellDictionaries`, a list
-of hunspell names in selection order; empty = locale default). A word
-passes when any selected dictionary knows it.
+Every platform spellchecks: the system and the keyboard (IME) on
+Android, hunspell on Linux, the system's own checker on Windows, macOS
+and iOS. Everywhere but Android the dictionaries are chosen per library
+(`spellDictionaries`, a list of names in selection order; empty = locale
+default): hunspell dictionaries on Linux, the languages the system offers
+on Windows, macOS and iOS. A word passes when any selected dictionary
+knows it.
 
-Desktop additionally has a per-library personal dictionary: right-clicking
+Every platform with a checker of its own (Linux, Windows, macOS and iOS)
+additionally has a per-library personal dictionary: right-clicking
 a flagged word in either editor offers *Add to dictionary*, which writes
 the word to `<library>/.niman/dictionary.txt` (one word per line, next
-to `settings.json`). A personal word always passes, whatever the hunspell
+to `settings.json`). A personal word always passes, whatever the
 engines say, and its underline clears on the next scan. Words are read
 case-insensitively but stored as first typed. The file travels with the
 library, so different libraries can carry different vocabularies; it
 survives app restarts, and the WebDAV sync merges it word by word, so
 a word added on one device is known on the others.
 
-The spelling panel lists the note's misspellings, each with hunspell's
+The spelling panel lists the note's misspellings, each with the checker's
 suggestions; tapping one replaces the word. The panel opens at once on
 any note, however long: it checks the note a little at a time, with a
 bar showing how far it has got, and the list fills as it goes. The suggestions arrive just after the words they
