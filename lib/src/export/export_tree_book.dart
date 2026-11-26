@@ -92,12 +92,12 @@ abstract final class ExportTreeBook {
     return (metadata: epubMetadataOf(text), warnings: warnings);
   }
 
-  /// The notes of [tree] a book holds, in reading order (#1308): the
-  /// tree's own order — a folder's notes together, the folders before the
-  /// notes beside them, as the tree lists them — with `index.md` at the
-  /// exported folder's root first. That page is the book's title, its cover
-  /// and its contents: a book converted into notes and exported again opens
-  /// on it, wherever its name sorts.
+  /// The notes of [tree] a book holds, in reading order (#1308): name order
+  /// with the folders among the notes, as the walk lists them — a folder's
+  /// notes together, a part between the chapters that number around it —
+  /// with `index.md` at the exported folder's root first. That page is the
+  /// book's title, its cover and its contents: a book converted into notes
+  /// and exported again opens on it, wherever its name sorts.
   static List<ExportTreeEntry> chapters(ExportTreeWalk tree) {
     final notes = [
       for (final entry in tree.entries)

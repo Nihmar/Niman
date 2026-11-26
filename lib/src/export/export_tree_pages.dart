@@ -42,15 +42,19 @@ typedef ExportTreeWalk = ({
 
 /// One subtree, walked once, and the pages built from it.
 abstract final class ExportTreePages {
-  /// The subtree of [dir] in the tree's own order: every file and folder
-  /// whose name does not start with a dot (settings, trash and history are
-  /// not part of an export).
+  /// The subtree of [dir] in name order: every file and folder whose name
+  /// does not start with a dot (settings, trash and history are not part of
+  /// an export).
   ///
-  /// A folder's children are listed as the library's tree lists them
-  /// (#1308): the folders first, then each by its name key — `Chapter 2`
-  /// before `Chapter 10`, a capital with a small letter — and the name
-  /// breaking a tie. The Markdown, HTML and PDF zips list
-  /// their entries in it too: one order for every format.
+  /// A folder's children — folders and files together — are listed by the
+  /// name key the library's tree sorts names by (#1308): `Chapter 2` before
+  /// `Chapter 10`, a capital with a small letter, an accent with its bare
+  /// letter, and the name breaking a tie. Folders are not set apart (the
+  /// tree itself lists them first): a book converted into notes numbers its
+  /// parts and its loose chapters together (`01 Preface.md`,
+  /// `02 Part One/`, `03 Epilogue.md`), and that is the order it reads in.
+  /// The Markdown, HTML and PDF zips list their entries in it too: one
+  /// order for every format.
   static ExportTreeWalk walk(String dir) {
     final entries = <ExportTreeEntry>[];
     void visit(Directory current, String rel) {
@@ -77,11 +81,10 @@ abstract final class ExportTreePages {
     return index(dir, entries);
   }
 
-  /// [children] with their names, in the order the tree lists siblings in
-  /// (`notes_tree`: folders first, then `name_key`, then `name`, #1070).
-  /// Each key is made once, not at every comparison, and names compare by
-  /// code unit — SQLite's byte order but for the characters above the Basic
-  /// Multilingual Plane.
+  /// [children] with their names, by `name_key` then `name` as `notes_tree`
+  /// orders them (#1070), folders among the files. Each key is made once,
+  /// not at every comparison, and names compare by code unit — SQLite's byte
+  /// order but for the characters above the Basic Multilingual Plane.
   static List<(FileSystemEntity, String)> _inTreeOrder(
     List<FileSystemEntity> children,
   ) {
@@ -94,9 +97,6 @@ abstract final class ExportTreePages {
               key: nameSortKey(p.basename(child.path)),
             ),
         ]..sort((a, b) {
-          if ((a.entity is Directory) != (b.entity is Directory)) {
-            return a.entity is Directory ? -1 : 1;
-          }
           final keys = a.key.compareTo(b.key);
           return keys != 0 ? keys : a.name.compareTo(b.name);
         });

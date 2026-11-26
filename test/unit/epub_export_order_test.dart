@@ -78,7 +78,7 @@ void main() {
   }
 
   group('the walk', () {
-    test('lists folders first, then names as the tree sorts them', () {
+    test('lists folders among the files, by the names the tree sorts', () {
       final dir = folder('tree', [
         'Chapter 10.md',
         'Chapter 2.md',
@@ -95,13 +95,13 @@ void main() {
           'Alpha',
           'Alpha/a.md',
           'Alpha/b.md',
-          'Zed',
-          'Zed/inside.md',
           'chapter 1.md',
           'Chapter 2.md',
           'Chapter 10.md',
           'Émile.md',
           'eve.md',
+          'Zed',
+          'Zed/inside.md',
         ],
       );
     });
@@ -141,7 +141,7 @@ void main() {
       final tree = ExportTreePages.walk(dir);
       expect(
         [for (final entry in ExportTreeBook.chapters(tree)) entry.rel],
-        ['Part/b.md', 'Part/index.md', 'a.md'],
+        ['a.md', 'Part/b.md', 'Part/index.md'],
       );
     });
   });
@@ -219,31 +219,22 @@ void main() {
     });
   });
 
-  test('a book converted into notes is its chapters in order, the index '
-      'first, its parts nested', () async {
+  /// Converts a book of [chapters] and [nav] into notes in a library, and
+  /// exports the folder it made as a book again: that book's entries.
+  Future<Map<String, String>> roundTrip(
+    List<TestChapter> chapters,
+    String nav,
+  ) async {
     final library = p.join(tmp.path, 'library');
     Directory(library).createSync();
     final source = writeTestEpub(
-      p.join(tmp.path, 'parts.epub'),
+      p.join(tmp.path, 'book.epub'),
       title: 'Parts',
       metadata:
           '<dc:creator>Someone</dc:creator>'
           '<dc:language>en</dc:language>',
-      chapters: [
-        (path: 'p1.xhtml', body: '<h1>Part One</h1><p>An epigraph.</p>'),
-        (path: 'c1.xhtml', body: '<h1>First</h1><p>One.</p>'),
-        (path: 'c2.xhtml', body: '<h1>Second</h1><p>Two.</p>'),
-        (path: 'p2.xhtml', body: '<h1>Part Two</h1><p>More.</p>'),
-        (path: 'c3.xhtml', body: '<h1>Third</h1><p>Three.</p>'),
-      ],
-      nav:
-          '<ol>'
-          '<li><a href="p1.xhtml">Part One</a><ol>'
-          '<li><a href="c1.xhtml">First</a></li>'
-          '<li><a href="c2.xhtml">Second</a></li></ol></li>'
-          '<li><a href="p2.xhtml">Part Two</a><ol>'
-          '<li><a href="c3.xhtml">Third</a></li></ol></li>'
-          '</ol>',
+      chapters: chapters,
+      nav: nav,
     ).path;
     await convertEpub((
       source: source,
@@ -255,8 +246,27 @@ void main() {
       attachments: 'assets',
       words: _words,
     ));
+    return await exportBook(p.join(library, 'Parts'));
+  }
 
-    final files = await exportBook(p.join(library, 'Parts'));
+  test('a book converted into notes is its chapters in order, the index '
+      'first, its parts nested', () async {
+    final files = await roundTrip(
+      [
+        (path: 'p1.xhtml', body: '<h1>Part One</h1><p>An epigraph.</p>'),
+        (path: 'c1.xhtml', body: '<h1>First</h1><p>One.</p>'),
+        (path: 'c2.xhtml', body: '<h1>Second</h1><p>Two.</p>'),
+        (path: 'p2.xhtml', body: '<h1>Part Two</h1><p>More.</p>'),
+        (path: 'c3.xhtml', body: '<h1>Third</h1><p>Three.</p>'),
+      ],
+      '<ol>'
+      '<li><a href="p1.xhtml">Part One</a><ol>'
+      '<li><a href="c1.xhtml">First</a></li>'
+      '<li><a href="c2.xhtml">Second</a></li></ol></li>'
+      '<li><a href="p2.xhtml">Part Two</a><ol>'
+      '<li><a href="c3.xhtml">Third</a></li></ol></li>'
+      '</ol>',
+    );
     expect(spineOf(files['OEBPS/content.opf']!), [
       'text/index.xhtml',
       'text/01 Part One/00 Part One.xhtml',
@@ -290,4 +300,47 @@ void main() {
       ['01 First', '02 Second'],
     );
   });
+
+  test(
+    'loose chapters around a part read in order, the part between',
+    () async {
+      final files = await roundTrip(
+        [
+          (path: 'pre.xhtml', body: '<h1>Preface</h1><p>Before.</p>'),
+          (path: 'p1.xhtml', body: '<h1>Part One</h1><p>An epigraph.</p>'),
+          (path: 'c1.xhtml', body: '<h1>First</h1><p>One.</p>'),
+          (path: 'c2.xhtml', body: '<h1>Second</h1><p>Two.</p>'),
+          (path: 'epi.xhtml', body: '<h1>Epilogue</h1><p>After.</p>'),
+        ],
+        '<ol>'
+        '<li><a href="pre.xhtml">Preface</a></li>'
+        '<li><a href="p1.xhtml">Part One</a><ol>'
+        '<li><a href="c1.xhtml">First</a></li>'
+        '<li><a href="c2.xhtml">Second</a></li></ol></li>'
+        '<li><a href="epi.xhtml">Epilogue</a></li>'
+        '</ol>',
+      );
+      expect(spineOf(files['OEBPS/content.opf']!), [
+        'text/index.xhtml',
+        'text/01 Preface.xhtml',
+        'text/02 Part One/00 Part One.xhtml',
+        'text/02 Part One/01 First.xhtml',
+        'text/02 Part One/02 Second.xhtml',
+        'text/03 Epilogue.xhtml',
+      ]);
+      final nav = XmlDocument.parse(files['OEBPS/nav.xhtml']!);
+      final top = nav.findAllElements('ol').first.childElements.toList();
+      expect(
+        [for (final item in top) item.getElement('a')!.innerText],
+        ['Parts', '01 Preface', '02 Part One', '03 Epilogue'],
+      );
+      expect(
+        [
+          for (final item in top[2].getElement('ol')!.childElements)
+            item.innerText,
+        ],
+        ['01 First', '02 Second'],
+      );
+    },
+  );
 }

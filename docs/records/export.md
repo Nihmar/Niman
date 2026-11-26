@@ -207,9 +207,11 @@ demands; the container is `mimetype` (stored, first),
   (`CompressionType.none`, they are compressed already), `mimetype` first
   and stored, text entries deflated — for the folder export too
   (`EpubBook`).
-- [x] A folder's walk is the tree's own order (`nameSortKey`, folders first,
-  the name breaking a tie), shared by every format; a book's chapters are
-  that order with the root `index.md` first, and the nav nests by folder
+- [x] A folder's walk is by name key (`nameSortKey`, the name breaking a
+  tie) with folders and notes together — not the tree's folders-first,
+  because a converted book numbers parts and loose chapters in one
+  sequence — shared by every format; a book's chapters are that order with
+  the root `index.md` first, and the nav nests by folder
   (`epub_nav.dart`): a folder's chapters under its entry, its own `00 …`
   first note as the entry's target (#1308).
 
