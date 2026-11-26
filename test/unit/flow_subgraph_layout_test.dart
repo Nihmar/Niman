@@ -143,6 +143,20 @@ void main() {
       expect(box['S4']!.top, lessThan(box['S5']!.top));
     });
 
+    test('the legend lays its unconnected nodes out in a column', () {
+      // It declares direction LR and nothing joins it to the rest: in an LR
+      // layout unconnected nodes share the first rank, which is a column.
+      final nodes = [
+        for (final id in ['L1', 'L2', 'L3', 'L4']) layout.nodeOf(id)!.rect,
+      ];
+      for (final rect in nodes) {
+        expect(rect.center.dx, moreOrLessEquals(nodes.first.center.dx));
+      }
+      for (var i = 1; i < nodes.length; i++) {
+        expect(nodes[i].top, greaterThanOrEqualTo(nodes[i - 1].bottom));
+      }
+    });
+
     test('the subgraphs are not all in the first band', () {
       for (final id in ['S3', 'S4', 'S5']) {
         expect(box[id]!.top, greaterThan(box['S1']!.bottom), reason: id);
@@ -169,6 +183,148 @@ void main() {
         }
       },
     );
+  });
+
+  group("a subgraph's own direction", () {
+    List<Rect> chain(DiagramLayout layout, List<String> ids) => [
+      for (final id in ids) layout.nodeOf(id)!.rect,
+    ];
+
+    void sameRow(List<Rect> rects) {
+      for (final r in rects) {
+        expect(r.center.dy, moreOrLessEquals(rects.first.center.dy));
+      }
+    }
+
+    void sameColumn(List<Rect> rects) {
+      for (final r in rects) {
+        expect(r.center.dx, moreOrLessEquals(rects.first.center.dx));
+      }
+    }
+
+    test('an isolated subgraph in a top-down chart runs left to right', () {
+      final layout = _layout(
+        'flowchart TB\na --> b --> c\n'
+        'subgraph L\ndirection LR\nl1 --> l2 --> l3\nend',
+      );
+      final l = chain(layout, ['l1', 'l2', 'l3']);
+      sameRow(l);
+      expect(l[0].right, lessThan(l[1].left));
+      expect(l[1].right, lessThan(l[2].left));
+      final box = _boxes(layout)['L']!;
+      for (final rect in l) {
+        expect(box.contains(rect.topLeft), isTrue);
+        expect(box.contains(rect.bottomRight), isTrue);
+      }
+      for (final id in ['a', 'b', 'c']) {
+        expect(box.overlaps(layout.nodeOf(id)!.rect), isFalse, reason: id);
+      }
+      // The chain's edges run between its nodes, and the drawing is whole.
+      expect(layout.edges, hasLength(4));
+      expect(layout.nodes.map((n) => n.node.id), [
+        'a',
+        'b',
+        'c',
+        'l1',
+        'l2',
+        'l3',
+      ]);
+      for (final edge in layout.edges.skip(2)) {
+        expect(edge.start.dy, moreOrLessEquals(l.first.center.dy));
+        expect(edge.end.dy, moreOrLessEquals(l.first.center.dy));
+        expect(box.contains(edge.start), isTrue);
+        expect(box.contains(edge.end), isTrue);
+      }
+      expect(layout.size.width, greaterThanOrEqualTo(box.right));
+      expect(layout.size.height, greaterThanOrEqualTo(box.bottom));
+    });
+
+    test('an edge across its border makes it ignore its direction', () {
+      final layout = _layout(
+        'flowchart TB\na --> b --> c\n'
+        'subgraph L\ndirection LR\nl1 --> l2 --> l3\nend\nl3 --> x',
+      );
+      final l = chain(layout, ['l1', 'l2', 'l3']);
+      sameColumn(l);
+      expect(l[0].bottom, lessThan(l[1].top));
+      expect(l[1].bottom, lessThan(l[2].top));
+    });
+
+    test('so does an edge that names the subgraph', () {
+      final layout = _layout(
+        'flowchart TB\na --> L\n'
+        'subgraph L\ndirection LR\nl1 --> l2\nend',
+      );
+      sameColumn(chain(layout, ['l1', 'l2']));
+    });
+
+    test('an isolated subgraph in a left-right chart runs top down', () {
+      final layout = _layout(
+        'flowchart LR\na --> b\n'
+        'subgraph L\ndirection TB\nl1 --> l2 --> l3\nend',
+      );
+      final l = chain(layout, ['l1', 'l2', 'l3']);
+      sameColumn(l);
+      expect(l[0].bottom, lessThan(l[1].top));
+      expect(l[1].bottom, lessThan(l[2].top));
+      final box = _boxes(layout)['L']!;
+      for (final rect in l) {
+        expect(box.contains(rect.topLeft), isTrue);
+        expect(box.contains(rect.bottomRight), isTrue);
+      }
+    });
+
+    test('bottom up and right to left keep their order', () {
+      for (final (word, check) in [
+        ('BT', (List<Rect> r) => r[0].top > r[1].bottom),
+        ('RL', (List<Rect> r) => r[0].left > r[1].right),
+      ]) {
+        final layout = _layout(
+          'flowchart TB\na --> b\n'
+          'subgraph L\ndirection $word\nl1 --> l2\nend',
+        );
+        final l = chain(layout, ['l1', 'l2']);
+        expect(check(l), isTrue, reason: word);
+        if (word == 'BT') sameColumn(l);
+        if (word == 'RL') sameRow(l);
+      }
+    });
+
+    test('an isolated subgraph inside an isolated one has its own', () {
+      final layout = _layout(
+        'flowchart TB\na --> b\nsubgraph O\ndirection LR\no1 --> o2\n'
+        'subgraph I\ndirection TB\ni1 --> i2\nend\nend',
+      );
+      final o = chain(layout, ['o1', 'o2']);
+      sameRow(o);
+      expect(o[0].right, lessThan(o[1].left));
+      final i = chain(layout, ['i1', 'i2']);
+      sameColumn(i);
+      expect(i[0].bottom, lessThan(i[1].top));
+      final box = _boxes(layout);
+      expect(box.keys, containsAll(['O', 'I']));
+      for (final rect in [...o, ...i]) {
+        expect(box['O']!.contains(rect.topLeft), isTrue);
+        expect(box['O']!.contains(rect.bottomRight), isTrue);
+      }
+      for (final rect in i) {
+        expect(box['I']!.contains(rect.topLeft), isTrue);
+        expect(box['I']!.contains(rect.bottomRight), isTrue);
+      }
+      for (final rect in o) {
+        expect(box['I']!.overlaps(rect), isFalse);
+      }
+      // The inner box is painted after the one it is inside.
+      final order = [for (final sub in layout.subgraphs) sub.subgraph.id];
+      expect(order.indexOf('O'), lessThan(order.indexOf('I')));
+    });
+
+    test('a subgraph with the chart direction is laid out with the rest', () {
+      final same = _layout(
+        'flowchart TB\nsubgraph L\ndirection TB\nl1 --> l2\nend\na --> L2[b]',
+      );
+      sameColumn(chain(same, ['l1', 'l2']));
+    });
   });
 
   group('small charts', () {
