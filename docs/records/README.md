@@ -38,6 +38,7 @@ block-parser plans followed on 2026-11-26.
 | [web-capture.md](web-capture.md) | Capturing a web page or a selection as Markdown, with a Dart port of Readability (#531) |
 | [flashcards.md](flashcards.md) | Decks of flashcards in notes, reviewed with SM-2, the review state in `.niman/review.json` (#533) |
 | [export.md](export.md) | The working plan for exporting a note, a folder or the library as Markdown, HTML, PDF and EPUB (#24, #63, #303) |
+| [flowchart-layout.md](flowchart-layout.md) | Why a flowchart with subgraphs drew them in one row, and the compound layered layout after dagre that replaced the first one (#530) |
 | [kanban.md](kanban.md) | A note as a board of columns and cards, shown and edited as a board on a phone, a tablet and the desktop (#1154) — built in 0.3.0 |
 | [calendar-txt.md](calendar-txt.md) | Reading and writing `calendar.txt` beside `todo.txt`: the journal's events, the line-wise sync merge, reminders on an event (#730) |
 | [recurring-tasks.md](recurring-tasks.md) | Recurring tasks: the `rec:` grammar shared with events, the copy completing one makes, its reminder and the sync merge (#1153) — built in 0.3.2 |
