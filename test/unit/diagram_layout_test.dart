@@ -171,35 +171,59 @@ void main() {
       );
       final back = layout.edges.last;
       expect(back.edge.from, 'C');
-      double across(Offset p) => direction == 'TD' ? p.dx : p.dy;
-      final reach = layout.nodes
-          .map((n) => direction == 'TD' ? n.rect.right : n.rect.bottom)
-          .reduce((a, b) => a > b ? a : b);
-      // Both control points lie beyond every node it passes.
-      expect(across(back.control1), greaterThan(reach), reason: direction);
-      expect(across(back.control2), greaterThan(reach), reason: direction);
+      expect(back.edge.to, 'A');
+      // The whole way, from the node it leaves to the one it returns to, is
+      // clear of every node.
       for (final node in layout.nodes) {
+        for (var i = 1; i < 100; i++) {
+          expect(
+            node.rect.contains(back.at(i / 100)),
+            isFalse,
+            reason: '$direction ${node.node.id} at ${i / 100}',
+          );
+        }
         expect(
           node.rect.contains(back.labelBox?.center ?? Offset.infinite),
           isFalse,
         );
       }
+      // It runs against the chart: it leaves C on the side that faces A, and
+      // reaches A on the side that faces C.
+      final c = layout.nodeOf('C')!.rect;
+      final a = layout.nodeOf('A')!.rect;
+      if (direction == 'TD') {
+        expect(back.start.dy, moreOrLessEquals(c.top));
+        expect(back.end.dy, moreOrLessEquals(a.bottom));
+      } else {
+        expect(back.start.dx, moreOrLessEquals(c.left));
+        expect(back.end.dx, moreOrLessEquals(a.right));
+      }
     }
   });
 
-  test("a cycle's way back passes beside its own ranks' other nodes", () {
-    // L, D and C share a rank, D between the other two: with no side of D
-    // free, its way back to A leaves by its right side, past C.
+  test('the way back and the way there between two nodes lie apart', () {
+    // L, D and C share a rank: D's way back to A is an edge of its own
+    // beside the one that comes down to it, past neither L nor the wide C.
+    // Two lines on one another would read as one edge with two arrows.
     final layout = _layout(
       'flowchart TD\nA --> L\nA --> D\nA --> C[A wide node here]\nD --> A',
     );
     final back = layout.edges.last;
+    final there = layout.edges[1];
     expect(back.edge.from, 'D');
-    final from = layout.nodeOf('D')!.rect;
-    final wide = layout.nodeOf('C')!.rect;
-    expect(layout.nodeOf('L')!.rect.right, lessThan(from.left));
-    expect(wide.left, greaterThan(from.right));
-    expect(back.control1.dx, greaterThan(wide.right));
+    expect(there.edge.to, 'D');
+    expect(back.start.dx, isNot(closeTo(there.end.dx, 1)));
+    expect(back.end.dx, isNot(closeTo(there.start.dx, 1)));
+    for (final id in ['L', 'C']) {
+      final rect = layout.nodeOf(id)!.rect;
+      for (var i = 1; i < 100; i++) {
+        expect(rect.contains(back.at(i / 100)), isFalse, reason: id);
+      }
+    }
+    // Both stay on the sides they face: it leaves D's top and reaches A's
+    // bottom.
+    expect(back.start.dy, moreOrLessEquals(layout.nodeOf('D')!.rect.top));
+    expect(back.end.dy, moreOrLessEquals(layout.nodeOf('A')!.rect.bottom));
   });
 
   test('an edge past a rank goes round the nodes in its way', () {
@@ -211,12 +235,7 @@ void main() {
       final between = layout.nodeOf('B')!.rect;
       for (var i = 1; i < 20; i++) {
         final t = i / 20;
-        final u = 1 - t;
-        final point =
-            long.start * (u * u * u) +
-            long.control1 * (3 * u * u * t) +
-            long.control2 * (3 * u * t * t) +
-            long.end * (t * t * t);
+        final point = long.at(t);
         expect(between.contains(point), isFalse, reason: '$direction t=$t');
       }
     }
@@ -244,12 +263,7 @@ void main() {
       final rect = layout.nodeOf(id)!.rect;
       for (var i = 1; i < 100; i++) {
         final t = i / 100;
-        final u = 1 - t;
-        final point =
-            long.start * (u * u * u) +
-            long.control1 * (3 * u * u * t) +
-            long.control2 * (3 * u * t * t) +
-            long.end * (t * t * t);
+        final point = long.at(t);
         expect(rect.contains(point), isFalse, reason: '$id at t=$t');
       }
     }
@@ -273,12 +287,7 @@ void main() {
       if (node.node.id == 'PRODUCT' || node.node.id == 'LINE-ITEM') continue;
       for (var i = 1; i < 100; i++) {
         final t = i / 100;
-        final u = 1 - t;
-        final point =
-            long.start * (u * u * u) +
-            long.control1 * (3 * u * u * t) +
-            long.control2 * (3 * u * t * t) +
-            long.end * (t * t * t);
+        final point = long.at(t);
         expect(node.rect.contains(point), isFalse, reason: node.node.id);
       }
       expect(node.rect.overlaps(long.labelBox!), isFalse);

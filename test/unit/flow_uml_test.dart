@@ -223,7 +223,7 @@ void main() {
     }
   });
 
-  test("a cycle's way back takes the side its ends leave free", () {
+  test("a cycle's way back keeps clear of the note beside its end", () {
     const nodes = [
       FlowNode(id: 'A', label: 'Draft', shape: FlowNodeShape.round),
       FlowNode(id: 'B', label: 'Review', shape: FlowNodeShape.round),
@@ -239,7 +239,13 @@ void main() {
     final draft = layout.nodeOf('A')!.rect;
     final note = layout.nodeOf('n')!.rect;
     expect(note.left, greaterThan(draft.right), reason: 'the note is right');
-    expect(back.control1.dx, lessThan(draft.left), reason: 'so back goes left');
-    expect(back.end.dx, closeTo(draft.left, 0.01));
+    // It reaches Draft by Draft's own side, not through the note, and its
+    // whole way and its label are clear of it.
+    expect(back.end.dx, inInclusiveRange(draft.left, draft.right));
+    expect(back.end.dy, closeTo(draft.bottom, 0.01));
+    for (var i = 0; i <= 100; i++) {
+      expect(note.contains(back.at(i / 100)), isFalse, reason: 'at $i%');
+    }
+    expect(note.overlaps(back.labelBox!), isFalse);
   });
 }
