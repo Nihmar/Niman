@@ -17,6 +17,7 @@ import 'package:niman/src/diagrams/layered_layer_sort.dart';
 import 'package:niman/src/diagrams/layered_layers.dart';
 import 'package:niman/src/diagrams/layered_node.dart' show LayeredNode;
 import 'package:niman/src/diagrams/layered_order_init.dart';
+import 'package:niman/src/diagrams/layered_order_repair.dart';
 import 'package:niman/src/diagrams/layered_segments.dart';
 
 /// How many sweeps in a row may fail to cut a crossing before the ordering
@@ -61,6 +62,7 @@ void orderLayered(LayeredGraph graph) {
   for (final node in graph.nodes) {
     node.order = best[node.index];
   }
+  keepEdgesOutOfClusters(graph);
 }
 
 /// One sweep over the ranks, in [order]: up on an even [sweep], down on an

@@ -98,6 +98,31 @@ void _expectOrderHolds(LayeredGraph graph) {
   }
 }
 
+/// An edge's stand-ins never lie on opposite sides of a cluster they are not
+/// in, in two ranks the cluster spans: the edge passes it, not through it.
+void _expectChainsPassOnOneSide(LayeredGraph graph) {
+  for (final edge in graph.edges) {
+    for (var i = 1; i < edge.chain.length; i++) {
+      final upper = edge.chain[i - 1];
+      final lower = edge.chain[i];
+      for (final cluster in graph.clusters) {
+        if (_inside(upper, cluster) || _inside(lower, cluster)) continue;
+        if (upper.rank < cluster.minRank || lower.rank > cluster.maxRank) {
+          continue;
+        }
+        bool leftOf(LayeredNode node) =>
+            node.order < cluster.borderLeft[node.rank - cluster.minRank].order;
+        expect(
+          leftOf(upper),
+          leftOf(lower),
+          reason:
+              '$edge passes ${cluster.id} in ranks ${upper.rank}-${lower.rank}',
+        );
+      }
+    }
+  }
+}
+
 /// The weighted crossings of the order the nodes of [graph] have.
 double _crossings(LayeredGraph graph) {
   final order = Int32List(graph.nodes.length);
@@ -401,6 +426,35 @@ void main() {
       _expectOrderHolds(graph);
     });
 
+    test('an edge passes a cluster on one side, not through it', () {
+      // A graph found by search: the two edges from c0 go on either side of
+      // c1 once the sweeps have ordered it, and the one that is on the wrong
+      // side of c1 in the next rank crossed its box.
+      final random = math.Random(8581);
+      final graph = LayeredGraph();
+      final clusters = 2 + random.nextInt(2);
+      for (var c = 0; c < clusters; c++) {
+        graph.addCluster('c$c');
+      }
+      final count = 4 + random.nextInt(4);
+      for (var i = 0; i < count; i++) {
+        graph.addNode(
+          'n$i',
+          width: 40,
+          height: 20,
+          parent: random.nextInt(3) == 0
+              ? null
+              : 'c${random.nextInt(clusters)}',
+        );
+      }
+      for (var i = 3 + random.nextInt(6); i > 0; i--) {
+        graph.addEdge('n${random.nextInt(count)}', 'n${random.nextInt(count)}');
+      }
+      layOutLayered(graph);
+      _expectChainsPassOnOneSide(graph);
+      _expectOrderHolds(graph);
+    });
+
     test('the same graph twice has the same order', () {
       List<int> run() {
         final graph = LayeredGraph()
@@ -516,6 +570,7 @@ void main() {
         }
         layOutLayered(graph);
         _expectOrderHolds(graph);
+        _expectChainsPassOnOneSide(graph);
         for (final edge in graph.edges) {
           if (!edge.ranked) continue;
           expect(
