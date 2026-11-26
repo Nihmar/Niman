@@ -16,6 +16,7 @@ import 'package:niman/src/markdown/from_html/html_footnotes.dart';
 import 'package:niman/src/markdown/from_html/html_inline.dart';
 import 'package:niman/src/markdown/from_html/html_pictures.dart';
 import 'package:niman/src/markdown/from_html/markdown_blocks.dart';
+import 'package:niman/src/markdown/from_html/xhtml_source.dart';
 
 export 'package:niman/src/markdown/from_html/html_pictures.dart'
     show markdownImage;
@@ -60,8 +61,14 @@ final class HtmlMarkdown {
   final bool breaksAsParagraphs;
 
   /// The Markdown of the page [source].
-  MarkdownWithAnchors convert(String source) {
-    final document = html.parse(source);
+  ///
+  /// [xhtml] says [source] is XHTML, XML to be read as such — an EPUB's
+  /// chapter — whose self-closed elements (`<title/>`, `<a id="x"/>`) are
+  /// empty ones, where the HTML parser would open them and hold the rest of
+  /// the page in them (#1304). A page of HTML is parsed as it is, whatever
+  /// its extension.
+  MarkdownWithAnchors convert(String source, {bool xhtml = false}) {
+    final document = html.parse(xhtml ? expandSelfClosed(source) : source);
     final body = document.body ?? document.documentElement;
     final out = MarkdownBlocks();
     if (body != null) {

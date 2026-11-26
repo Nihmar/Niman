@@ -263,4 +263,29 @@ void main() {
       'Alpha.\n\n---\n\nBeta.\n\n---\n\nAlpha.\n',
     );
   });
+
+  test(
+    'a self-closed <title/> swallows neither a chapter nor the nav (#1304)',
+    () {
+      // XML: an empty title. Read as HTML it would hold the rest of the page,
+      // and a book of such chapters would be refused as having none.
+      final file = writeTestEpub(
+        book('emptytitle.epub'),
+        head: '<title/>',
+        chapters: [
+          (path: 'a.xhtml', body: '<a id="p1"/><h1>A</h1><p>Alpha.</p>'),
+          (path: 'b.xhtml', body: '<h1>B</h1><p>Beta.</p>'),
+        ],
+        nav:
+            '<ol><li><a href="a.xhtml">First</a></li>'
+            '<li><a href="b.xhtml">Second</a></li></ol>',
+      );
+      final document = readEpub(file.path, pictures);
+      expect(document.markdown, '# A\n\nAlpha.\n\n---\n\n# B\n\nBeta.\n');
+      expect(document.contents.map((entry) => entry.title), [
+        'First',
+        'Second',
+      ]);
+    },
+  );
 }

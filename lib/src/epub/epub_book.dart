@@ -22,6 +22,7 @@ import 'package:niman/src/core/percent.dart';
 import 'package:niman/src/epub/epub_archive.dart';
 import 'package:niman/src/epub/epub_info.dart';
 import 'package:niman/src/markdown/from_html/html_markdown.dart';
+import 'package:niman/src/markdown/from_html/xhtml_source.dart';
 import 'package:path/path.dart' as p;
 import 'package:xml/xml.dart';
 
@@ -221,7 +222,7 @@ Iterable<EpubBook?> _readSteps(EpubArchive archive) sync* {
         ));
         return '$epubLinkScheme:${links.length - 1}';
       },
-    ).convert(text);
+    ).convert(text, xhtml: true);
     if (converted.markdown.trim().isEmpty) continue;
     chapters.add((
       file: chapter,
@@ -315,7 +316,7 @@ List<EpubTocEntry> _contents(
 List<EpubTocEntry> _navContents(EpubArchive archive, String path) {
   final text = archive.text(path);
   if (text == null) return const [];
-  final document = html.parse(text);
+  final document = html.parse(expandSelfClosed(text));
   final navs = document.getElementsByTagName('nav');
   final toc =
       navs
