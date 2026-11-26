@@ -74,6 +74,10 @@ final class EpubPaneState extends State<EpubPane> {
   /// The book's marks, while it is in a library that has them.
   FileMarks? _marks;
 
+  /// The book's marks as lines of its text, placed once per change of the
+  /// marks rather than in every build (#1306).
+  final EpubBlockMarksCache _blockMarks = EpubBlockMarksCache();
+
   /// The link's fragment last gone to: handed again as a tab comes back,
   /// it does not move the reader.
   String? _anchorTaken;
@@ -531,7 +535,7 @@ final class EpubPaneState extends State<EpubPane> {
       // A paragraph links, and annotates, only in a library.
       selectionActions: _selectionActions(),
       marks: [
-        ...epubBlockMarks(document, _marks?.marks ?? const []),
+        ..._blockMarks.of(document, _marks?.marks ?? const []),
         ...?_aloud?.marks,
       ]..sort((a, b) => a.line.compareTo(b.line)),
       onTapMark: (start, end, anchor) =>

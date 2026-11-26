@@ -35,9 +35,10 @@ typedef EpubChapter = ({String file, int line});
 /// A book, ready to read.
 final class EpubDocument {
   /// Wraps a read book.
-  const new({
+  new({
     required this.title,
     required this.markdown,
+    required this.lineCount,
     required this.contents,
     required this.pictures,
     required this.links,
@@ -51,6 +52,11 @@ final class EpubDocument {
 
   /// The whole book, as Markdown.
   final String markdown;
+
+  /// How many lines the book's text has, counted once as it is read (off
+  /// the UI isolate): the end the last chapter's places are kept within
+  /// (#1306), not a count of [markdown]'s line breaks asked for every mark.
+  final int lineCount;
 
   /// Its table of contents, in the book's order.
   final List<EpubContentsEntry> contents;
@@ -101,13 +107,38 @@ final class EpubDocument {
   /// the book spells it, else whatever its case (a Markdown link's
   /// fragment may come lowercased), else its file name alone (a link
   /// written by hand); -1 when none does.
-  int _chapterNamed(String name) {
-    final exact = chapters.indexWhere((c) => c.file == name);
-    if (exact != -1) return exact;
-    final lower = name.toLowerCase();
-    final anyCase = chapters.indexWhere((c) => c.file.toLowerCase() == lower);
-    if (anyCase != -1) return anyCase;
-    return chapters.indexWhere((c) => c.file.toLowerCase().endsWith('/$lower'));
+  int _chapterNamed(String name) =>
+      _byName[name] ??
+      _byLowerName[name.toLowerCase()] ??
+      _bySuffix[name.toLowerCase()] ??
+      -1;
+
+  // The chapters by name, built once the first time a place is asked for
+  // (#1306): a book's marks each used to walk the chapters, and the last
+  // chapter's walked the text. The first chapter of a name wins in each.
+  late final Map<String, int> _byName = {
+    for (var i = chapters.length - 1; i >= 0; i--) chapters[i].file: i,
+  };
+  late final Map<String, int> _byLowerName = {
+    for (var i = chapters.length - 1; i >= 0; i--)
+      chapters[i].file.toLowerCase(): i,
+  };
+
+  /// Every tail of a chapter's path that starts after a `/`, lowercased:
+  /// the file name alone, or the path from any folder down.
+  late final Map<String, int> _bySuffix = {
+    for (var i = chapters.length - 1; i >= 0; i--)
+      for (final tail in _tails(chapters[i].file.toLowerCase())) tail: i,
+  };
+
+  static Iterable<String> _tails(String path) sync* {
+    for (
+      var slash = path.indexOf('/');
+      slash != -1;
+      slash = path.indexOf('/', slash + 1)
+    ) {
+      yield path.substring(slash + 1);
+    }
   }
 
   /// [line] of the book's text, [fraction] into it, as a place in its
@@ -136,7 +167,7 @@ final class EpubDocument {
     final start = chapters[index].line;
     final end = index + 1 < chapters.length
         ? chapters[index + 1].line - 1
-        : '\n'.allMatches(markdown).length - 1;
+        : lineCount - 1;
     return (start + location.line).clamp(start, end < start ? start : end);
   }
 }
@@ -173,6 +204,7 @@ EpubDocument readEpub(String path, String pictureDir) {
     return EpubDocument(
       title: book.info.title ?? p.basenameWithoutExtension(path),
       markdown: markdown,
+      lineCount: text.lines.length,
       contents: [
         for (final entry in book.contents)
           if (text.lineOf(entry.file, entry.fragment) case final line?)

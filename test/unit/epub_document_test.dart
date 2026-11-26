@@ -95,6 +95,10 @@ void main() {
       expect(document.lineOfLocation(deep), 12);
     });
 
+    test('it knows its line count, the breaks of its text (#1306)', () {
+      expect(document.lineCount, '\n'.allMatches(document.markdown).length);
+    });
+
     test('a place past its chapter stays in it; a lost chapter is none', () {
       const past = EpubLocation(chapter: 'OEBPS/text/ch1.xhtml', line: 50);
       expect(document.lineOfLocation(past), 7);

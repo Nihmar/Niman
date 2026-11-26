@@ -190,7 +190,10 @@ passed over) and `chapter=<path>&line=N`, values percent-decoded
 (`core/percent.dart`); `toFragment` writes them, escaping what would end
 the fragment or the link. `EpubDocument.lineOfLocation` finds a chapter
 by its exact path, else whatever its case (a Markdown href's fragment),
-else its file name alone. The shell hands the fragment to the pane as the
+else its file name alone, through maps built once (#1306), and keeps a
+place of the last chapter within `lineCount`, the book's lines counted
+as it is read. The pane places a book's marks once per change of the
+marks or the book (`EpubBlockMarksCache`), not in every build. The shell hands the fragment to the pane as the
 tab's `anchor`, the one a note gets for a heading, with the reload token
 for the same link followed again; the pane goes there on open, over the
 saved position, and on a new fragment or token later — not on the same
