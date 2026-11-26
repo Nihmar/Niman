@@ -7,6 +7,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/diagrams/canvas_target.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
+import 'package:niman/src/diagrams/flow_edge_curve.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/svg_target.dart';
 
@@ -69,5 +70,41 @@ void main() {
     // Halfway along the second piece, by the cubic's own formula.
     expect(edge.at(0.75).dx, closeTo(15, 1e-9));
     expect(edge.at(0.75).dy, closeTo(45, 1e-9));
+  });
+
+  test('the basis curve starts and ends on its points, with straight ends', () {
+    const points = [
+      Offset.zero,
+      Offset(0, 50),
+      Offset(40, 100),
+      Offset(40, 150),
+    ];
+    final path = flowBasisPath(points);
+    expect((path.length - 1) % 3, 0);
+    expect(path.first, points.first);
+    expect(path.last, points.last);
+    // The first piece runs towards the second point, the last comes from the
+    // one before the end: where a cap points.
+    expect(path[1].dx, 0);
+    expect(path[1].dy, greaterThan(0));
+    final last = path.last - path[path.length - 2];
+    final before = points.last - points[points.length - 2];
+    expect(last.dx * before.dy - last.dy * before.dx, closeTo(0, 1e-9));
+    expect(last.dx * before.dx + last.dy * before.dy, greaterThan(0));
+  });
+
+  test('the basis curve through points in a line is that line', () {
+    final path = flowBasisPath(const [
+      Offset(10, 0),
+      Offset(10, 40),
+      Offset(10, 90),
+      Offset(10, 130),
+    ]);
+    for (final point in path) {
+      expect(point.dx, 10);
+    }
+    for (var i = 1; i < path.length; i++) {
+      expect(path[i].dy, greaterThanOrEqualTo(path[i - 1].dy));
+    }
   });
 }
