@@ -44,7 +44,6 @@ final class EpubDocument {
     required this.chapters,
     required this.counts,
     this.language,
-    this.mathReport,
   });
 
   /// The book's title, or its file name when it gives none.
@@ -77,11 +76,6 @@ final class EpubDocument {
   /// The progress through the book, its chapters' starts the measure.
   EpubProgress progress() =>
       EpubProgress(counts, [for (final chapter in chapters) chapter.line]);
-
-  /// An ad-hoc diagnostic (#303): what the chapters' math looked like to a
-  /// plain scan — the SVG formulas, their first TeX, the MathML — for the
-  /// pane to log. Null when the book shows none.
-  final String? mathReport;
 
   /// How the text names a picture: `epub-picture:3`.
   static const String pictureScheme = epubPictureScheme;
@@ -198,20 +192,10 @@ EpubDocument readEpub(String path, String pictureDir) {
         final tag? when tag.isNotEmpty => tag,
         _ => null,
       },
-      mathReport: _mathReport(book.formulaSvgs, book.firstTex, book.mathMl),
     );
   } finally {
     input.closeSync();
   }
-}
-
-/// The math a book's chapters showed, as one log line's worth (#303):
-/// null when there was none.
-String? _mathReport(int formulas, String? firstTex, int mathMl) {
-  if (formulas == 0 && mathMl == 0) return null;
-  final sample = firstTex == null ? '' : ' (first: "$firstTex")';
-  final ml = mathMl == 0 ? '' : ', $mathMl mathml';
-  return '$formulas svg formulas$sample$ml';
 }
 
 /// Writes the book's pictures under [dir], each once: a book opened again
