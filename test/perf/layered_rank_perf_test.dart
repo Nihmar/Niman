@@ -112,7 +112,7 @@ void main() {
 
   // The whole layout of a 3000-node chain or a 2000-node cycle is held to
   // 60 ms; the stages before the placing have their share of it. Laying out
-  // is every stage so far: ranking, stand-ins, border nodes, ordering.
+  // is the whole engine: ranking, stand-ins, border nodes, ordering, places.
   check(
     'ranking a 3000-node chain',
     15,
