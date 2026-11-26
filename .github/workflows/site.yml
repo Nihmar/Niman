@@ -53,7 +53,7 @@ jobs:
       # Skipping it would leave a check that passes here and fails on `main`.
       - name: Keep Niman's placeholders out of Liquid's way
         run: |
-          find . -name '*.md' -not -name 'README.md' -not -path './index.md' -print0 \
+          find . -name '*.md' -not -path './index.md' -print0 \
             | xargs -0 sed -i -e '/{{/{s/^/{% raw %}/;s/$/{% endraw %}/}'
 
       - name: Configure Pages

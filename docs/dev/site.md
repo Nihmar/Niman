@@ -22,8 +22,8 @@ Two things are not literal:
   the workflow wraps every line that carries one in a raw block, in the
   checkout only; the pages published are then the Markdown in the repository,
   character for character. `index.md` is the site's own page and uses Liquid on
-  purpose, and `README.md` is never rendered by this build, so neither is
-  wrapped.
+  purpose, so it is not wrapped; a folder's `README.md` is that folder's page
+  (`docs/`, `docs/records/`), so it is.
 - **GitHub's plugins are on**, not Jekyll's bare defaults: pages under `docs/`
   have no front matter (`jekyll-optional-front-matter` supplies one), each
   page's title is taken from its first heading
