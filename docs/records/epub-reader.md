@@ -35,7 +35,16 @@ Read the EPUB with what the app has, draw it with the app's read view.
   `openEpub(path, cacheDir)` (on an isolate, the file stat'ed there too):
   `META-INF/container.xml` → OPF (elements matched by local name,
   `<opf:item>` too) → manifest and spine → every chapter converted and
-  joined in spine order with a `---` between, line numbers tracked.
+  joined in spine order with a `---` between, line numbers tracked. The
+  join is `epubBookText`'s, the conversion's own: a contents entry or a
+  link on a spine page with no text opens at the next chapter. A text file
+  is decoded by its byte order mark (UTF-8, UTF-16), else the `encoding`
+  of its XML declaration (ISO-8859-1 and windows-1252 as Windows-1252),
+  else as UTF-8 (`epub_text_bytes.dart`); a chapter's self-closed
+  non-void elements (`<title/>`, `<a id="x"/>`) are written as empty pairs
+  before the HTML parser reads it (`xhtml_source.dart`); an archive entry
+  can be read as often as it is asked for (the spine may list the nav, or
+  a page twice).
   Table of contents from the EPUB 3 nav (`properties` containing `nav`,
   `nav[epub:type=toc] ol`) or the EPUB 2 NCX (`spine@toc`), as
   `EpubContentsEntry (title, line, depth)`. Pictures named
