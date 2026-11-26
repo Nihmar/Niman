@@ -19,10 +19,10 @@ The constraint that shapes the rest: **no new pub dependency.**
   Apache-2.0) over `package:html`, already a dependency through the EPUB
   reader. The port keeps upstream's algorithm and names, so a diff against a
   new upstream release stays readable.
-- **The conversion** to Markdown is `XhtmlMarkdown`
-  (`lib/src/epub/xhtml_markdown.dart`), moved to
-  `lib/src/markdown/from_html/` (`markdown/html/` is the writer the other way)
-  and grown for the web.
+- **The conversion** to Markdown is `HtmlMarkdown`
+  (`lib/src/markdown/from_html/html_markdown.dart`; `markdown/html/` is the
+  writer the other way): the EPUB reader's `XhtmlMarkdown`, moved out of
+  `lib/src/epub/`, renamed and grown for the web.
 - **HTTP** is `dart:io`'s `HttpClient`, as the sync and the updates use it.
 - **The clipboard's HTML** is read by Niman's own native code on each
   platform, not by `super_clipboard`, which would bring a Rust toolchain.

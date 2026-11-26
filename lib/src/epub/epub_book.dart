@@ -2,7 +2,7 @@
 /// Markdown in reading order, its table of contents, and the pictures and
 /// links its chapters name. The reader joins the chapters into one text
 /// (`epub_document.dart`); the conversion writes them as notes
-/// (`epub_convert.dart`). One parse for both, so the notes say what the
+/// (`epub_convert_job.dart`). One parse for both, so the notes say what the
 /// reader shows.
 ///
 /// An EPUB is a zip: `META-INF/container.xml` names the package document
