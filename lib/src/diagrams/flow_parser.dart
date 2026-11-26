@@ -46,6 +46,14 @@ final class _FlowParser {
   final List<_SubgraphBuild> _stack = [];
   int? _subgraphStartLine;
 
+  /// The subgraph each node belongs to: the first to close that mentions
+  /// it, as in Mermaid, where a subgraph drops the members an earlier one
+  /// already holds.
+  final Map<String, String> _owner = {};
+
+  /// The subgraph each closed subgraph is written inside, or null.
+  final Map<String, String?> _parentOf = {};
+
   /// The ids written with a shape (`A[Text]`), not only mentioned bare.
   final Set<String> _shaped = {};
 
@@ -209,11 +217,29 @@ final class _FlowParser {
     }
     final build = _stack.removeLast();
     _subgraphStartLine = _stack.isEmpty ? null : _subgraphStartLine;
+    // A node an earlier subgraph holds stays there, unless that subgraph is
+    // written inside this one: two boxes both drawn round it lay one over
+    // the other.
+    bool within(String subgraph) {
+      for (String? s = subgraph; s != null; s = _parentOf[s]) {
+        if (s == build.id) return true;
+      }
+      return false;
+    }
+
+    final nodeIds = [
+      for (final id in build.nodeIds)
+        if (_owner[id] == null || within(_owner[id]!)) id,
+    ];
+    for (final id in nodeIds) {
+      _owner.putIfAbsent(id, () => build.id);
+    }
+    _parentOf[build.id] = build.parent;
     _subgraphs.add(
       FlowSubgraph(
         id: build.id,
         title: build.title,
-        nodeIds: List.unmodifiable(build.nodeIds),
+        nodeIds: List.unmodifiable(nodeIds),
         direction: build.direction,
         parent: build.parent,
       ),
