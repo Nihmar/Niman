@@ -26,7 +26,9 @@ typedef TestChapter = ({String path, String body});
 /// say), by the path. [navInSpine] lists the navigation document in the
 /// spine too, after the chapters, as Sigil and InDesign write it; [again]
 /// lists chapters (by path) a second time at the end of the spine. [head]
-/// is what the chapters' and the navigation document's `<head>` holds.
+/// is what the chapters' and the navigation document's `<head>` holds;
+/// [encoded] writes a chapter (by its path) as these bytes instead of its
+/// XHTML, in an encoding of the test's choice.
 File writeTestEpub(
   String path, {
   required List<TestChapter> chapters,
@@ -43,6 +45,7 @@ File writeTestEpub(
   bool navInSpine = false,
   List<String> again = const [],
   String head = '<title>x</title>',
+  Map<String, List<int>> encoded = const {},
 }) {
   final o = prefix ? 'opf:' : '';
   final manifest = StringBuffer();
@@ -111,8 +114,14 @@ File writeTestEpub(
     ..add(ArchiveFile.string('OEBPS/content.opf', opf));
   for (final chapter in chapters) {
     if (omit.contains(chapter.path)) continue;
+    final bytes = encoded[chapter.path];
     archive.add(
-      ArchiveFile.string('OEBPS/${chapter.path}', _xhtml(chapter.body, head)),
+      bytes == null
+          ? ArchiveFile.string(
+              'OEBPS/${chapter.path}',
+              _xhtml(chapter.body, head),
+            )
+          : ArchiveFile.bytes('OEBPS/${chapter.path}', bytes),
     );
   }
   if (nav != null) {
