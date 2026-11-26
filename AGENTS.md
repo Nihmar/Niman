@@ -1,5 +1,5 @@
 # AGENTS.md
-Niman: Flutter Markdown notes (Android + Linux + Windows).
+Niman: Flutter Markdown notes (Android + Linux + Windows; macOS and iOS in preview).
 Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issues).
 
 ## Language
@@ -9,6 +9,7 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - Flutter on PATH (currently 3.47.2 stable).
   - Linux fallback: `export PATH="$PATH:~/develop/flutter/bin"` (`scripts/niman.sh` does this itself).
   - Android SDK (Linux): `~/Android/Sdk` via gitignored `android/local.properties` (never commit).
+- macOS/iOS (a Mac with Xcode only): `./scripts/niman.sh macos [beta]` / `ios [beta]`; details in `docs/dev/building.md`.
 - Repo-root `niman-release.apk` / `niman-linux-x64.tar.gz` are gitignored artifacts, not sources.
 
 ## Commits
@@ -43,12 +44,13 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
   runs it against a build of `scripts/ocr-engine.sh` instead). A second job,
   in parallel, runs the Android app module's Kotlin unit tests
   (`android/app/src/test`) on the JVM: `flutter build apk --config-only`,
-  then `cd android && ./gradlew :app:testBetaDebugUnitTest` (#813). A third,
+  then `cd android && ./gradlew :app:testBetaDebugUnitTest` (#813) and the
+  Android API-level lint, `./gradlew :app:lintBetaDebug`. A third,
   on `macos-26`, runs the suite on a Mac (the live OCR case against the
   bundled engine it builds), a debug build of the beta app, and `app_boot`
   and `sync_e2e` (`-d macos`). A fourth, on `macos-26` too, builds the iOS
   beta app for a device unsigned and runs `app_boot` and `sync_e2e` in an
-  iPhone simulator. Run checks
+  iPhone simulator (`scripts/ios-sim-test.sh`). Run checks
   locally too:
   - Linux: `./scripts/niman.sh check` (logs: `/tmp/niman/niman-check.log`),
     plus `./scripts/niman.sh integration` for `integration_test/`
@@ -87,7 +89,7 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 ## Codegen
 - Two drift DBs in `lib/src/db/`, `.g.dart` committed:
   - `AppDatabase` (`app_database.dart`): settings, long migration chain.
-  - `IndexDatabase` (`index_database.dart`): one per library, schema 1, no migrations — delete the file to rebuild.
+  - `IndexDatabase` (`index_database.dart`): one per library, no migration chain — a schema bump drops every table and rescans, so deleting the file rebuilds it too.
 - After schema/DAO changes: `dart run build_runner build`.
 
 ## Output discipline
@@ -102,9 +104,9 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - **Scale**: 1M notes + novel-length files. No O(n) full scans on hot paths; FTS5 for search; tree rows materialized.
 - **No disk I/O on UI isolate**: use `Isolate.run` (every `listSync`/`statSync` is a FUSE round trip on Android). Drift writes stay on main.
 - **Vocabulary**: Library, note, folder, tag, template, wikilink, trash, history. Not vault/canvas/daily note/backlinks.
-- **Every platform ships every feature**: a feature lands on Android, Linux and Windows in the same round — no platform is left behind, forgotten or quietly skipped. Same capability, not the same UI: the shape adapts to the surface (desktop tabs are an open-notes switcher on a phone) while the model underneath stays one. A platform that genuinely cannot have it says so in the issue and in `docs/user/platforms.md` — as a decision, not an omission.
+- **Every platform ships every feature**: a feature lands on Android, Linux, Windows, macOS and iOS in the same round — no platform is left behind, forgotten or quietly skipped. macOS and iOS are the most neglected platforms, because developing and testing on them is the hardest, so they may lag behind; a gap there is still stated in the issue and in `docs/user/platforms.md`, as for any platform. Same capability, not the same UI: the shape adapts to the surface (desktop tabs are an open-notes switcher on a phone) while the model underneath stays one. A platform that genuinely cannot have it says so in the issue and in `docs/user/platforms.md` — as a decision, not an omission.
 - **Interface**: icons are outline — a filled one says a state is on (selected tab, pinned note, current library). A control that shows in only some states keeps its place: disable it, or put it on the side the row grows from, so nothing on screen moves under a thumb already on it.
-- **Layout**: `lib/src/<module>/` — core, library, db, editor, preview, links, search, frontmatter, templates, sync, ui.
+- **Layout**: `lib/src/<module>/` — annotations, calendar, capture, core, db, diagrams, diff, editor, epub, export, flashcards, frontmatter, history, home, import, journal, kanban, library, links, lint, markdown, ocr, preview, reading, search, spellcheck, sync, templates, todo, transcription, ui, update, widget, workspace.
 - **No god classes**: one class per file, split at ~300 lines or when responsibilities mix.
   - **The gate**: `test/unit/source_file_size_test.dart` fails a file in `lib/`
     over 600 code lines (blank and comment-only lines do not count). The files
@@ -122,10 +124,10 @@ Pending work is tracked in [GitHub Issues](https://github.com/Nihmar/Niman/issue
 - When a feature is added, modified, or removed, update the corresponding documentation in `docs/` in the same PR.
 
 ## Release
-- CI builds **only from version tags** (`vX.Y.Z`, no suffixes).
+- CI builds **only from version tags** (`vX.Y.Z`, no suffixes); the one other tag, `ocr-engine-N`, makes `.github/workflows/ocr-engine.yml` build the OCR engine as a prerelease, pinned in `lib/src/ocr/ocr_engine_build.dart`.
 - Update `CHANGELOG.md` at every release: a new `## [X.Y.Z] - YYYY-MM-DD` section describing the tagged version. It ships as an asset and feeds the in-app changelog (launch dialog after an update, Settings → About).
 - Cut a release: bump `version:` in `pubspec.yaml`, commit both with the changelog, `git tag vX.Y.Z`, `git push origin vX.Y.Z`.
-- Workflow: `.github/workflows/release.yml`. Artifacts: Android `.apk`; Linux `.tar.gz` + `.AppImage` + `.pkg.tar.zst`; Windows `.exe` (Inno Setup) + `.zip`.
+- Workflow: `.github/workflows/release.yml`. Artifacts: Android `.apk`; Linux `.tar.gz` + `.AppImage` + `.pkg.tar.zst`; Windows `.exe` (Inno Setup) + `.zip`; macOS `.dmg` + `.zip` (preview, ad-hoc signed). iOS is built by CI but not released.
 - Android APK is signed with the release key from the Actions secrets
   (`ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`,
   `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`). Without them the build

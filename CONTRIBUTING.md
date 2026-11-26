@@ -1,8 +1,8 @@
 # Contributing
 
-Niman is a Flutter app for Android, Linux and Windows: a Markdown note-taking
-app whose notes are ordinary `.md` files and whose database is a rebuildable
-index. Work is tracked in the
+Niman is a Flutter app for Android, Linux, Windows, macOS and iOS (the last two
+in preview): a Markdown note-taking app whose notes are ordinary `.md` files
+and whose database is a rebuildable index. Work is tracked in the
 [issue tracker](https://github.com/Nihmar/Niman/issues), and the user guides are
 published at <https://nihmar.github.io/Niman/>.
 
@@ -32,6 +32,9 @@ commit messages.
   [building, Prerequisites](docs/dev/building.md#prerequisites).
 - **Windows desktop**: Visual Studio with the *Desktop development with C++*
   workload; the installer additionally needs Inno Setup 6.
+- **macOS and iOS**: a Mac with Xcode, plus `cmake` and `ninja` for the OCR
+  engine the app bundles
+  ([building, Prerequisites](docs/dev/building.md#prerequisites)).
 - The **first build on a machine needs network**: `sqlite3` and `pdfrx` fetch
   prebuilt native libraries through Dart build hooks.
 
@@ -58,6 +61,8 @@ tail:
 ./scripts/niman.sh check         # analyze + test
 ./scripts/niman.sh integration   # the end-to-end suite
 scripts\niman.bat windows beta   # Windows testing build, on a Windows host
+./scripts/niman.sh macos beta    # macOS testing build and disk image, on a Mac
+./scripts/niman.sh ios beta      # iOS testing build (unsigned), on a Mac
 ```
 
 [docs/dev/building.md](docs/dev/building.md) has the flavours, the artifacts and
@@ -94,9 +99,11 @@ dart format lib test tool
 - **Windows**: `scripts\niman.bat check`, and `pwsh scripts/newfail.ps1` prints
   only the failures that are not already in `scripts/known-failures.txt`.
 
-CI (`.github/workflows/check.yml`) runs the same gates on every pull request and
-on `main`: the formatting gate, analyze, the unit and widget suites, and the
-integration files, the WebDAV flow included.
+CI (`.github/workflows/check.yml`) runs on every pull request and on `main`, in
+four jobs: the formatting gate, analyze, the unit, widget and perf suites, and
+the integration files, the WebDAV flow included; the Android module's Kotlin
+unit tests and API-level lint; the suite, a beta build and the integration files
+on a Mac; and an iOS beta build with the integration files in a simulator.
 
 ## How a change is proposed
 
@@ -119,12 +126,15 @@ integration files, the WebDAV flow included.
   says what the test did before the fix, with the command you ran.
 - **Documentation moves with the code:** a feature added, changed or removed
   updates the corresponding page under `docs/` in the same pull request.
-- **Every platform ships every feature.** A capability lands on Android, Linux
-  and Windows in the same round — the same capability, not the same UI; the
-  shape adapts to the surface while the model underneath stays one. A platform
-  that genuinely cannot have it says so in the issue and in
-  [docs/user/platforms.md](docs/user/platforms.md), as a decision rather than an
-  omission (`AGENTS.md`, Design rules).
+- **Every platform ships every feature.** A capability lands on Android, Linux,
+  Windows, macOS and iOS in the same round — the same capability, not the same
+  UI; the shape adapts to the surface while the model underneath stays one.
+  macOS and iOS are the most neglected platforms, because developing and
+  testing on them is the hardest, so they may lag behind; a gap there is still
+  stated in the issue and in [docs/user/platforms.md](docs/user/platforms.md),
+  as for any platform. A platform that genuinely cannot have a capability says
+  so in the same places, as a decision rather than an omission (`AGENTS.md`,
+  Design rules).
 - [.github/pull_request_template.md](.github/pull_request_template.md) is the
   shape the pull request body takes: what changed, the tests, the docs the
   change updates, and **what was left out**.
