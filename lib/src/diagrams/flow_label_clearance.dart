@@ -7,10 +7,10 @@
 /// another edge's label, two edges crossing at their middles; or a
 /// subgraph's outline, where an edge into it crosses — a label is wholly
 /// in a box or wholly out of it. Once the drawing is turned to its
-/// direction, such a label slides along its own curve to the nearest point
-/// where it covers none of them, the labels placed in the order the edges
-/// were written. A label with nowhere free on its curve stays at the
-/// middle.
+/// direction, such a label slides along its own curve, the whole chain of
+/// its pieces, to the nearest point where it covers none of them, the labels
+/// placed in the order the edges were written. A label with nowhere free on
+/// its curve stays at the middle.
 library;
 
 import 'package:flutter/painting.dart';
@@ -71,7 +71,7 @@ List<LaidOutEdge> placeEdgeLabels(
     if (!free(box)) {
       for (final t in _stops) {
         final moved = Rect.fromCenter(
-          center: _at(edge, t),
+          center: edge.at(t),
           width: box.width,
           height: box.height,
         );
@@ -82,21 +82,7 @@ List<LaidOutEdge> placeEdgeLabels(
       }
     }
     placed.add(chosen);
-    result.add(
-      chosen == box
-          ? edge
-          : LaidOutEdge(
-              edge: edge.edge,
-              start: edge.start,
-              control1: edge.control1,
-              control2: edge.control2,
-              end: edge.end,
-              label: edge.label,
-              labelBox: chosen,
-              startLabelBox: edge.startLabelBox,
-              endLabelBox: edge.endLabelBox,
-            ),
-    );
+    result.add(chosen == box ? edge : edge.withLabelBox(chosen));
   }
   return result;
 }
@@ -107,13 +93,4 @@ bool _straddles(Rect label, Rect box) {
   final inside = box.inflate(0.01);
   return !(inside.contains(label.topLeft) &&
       inside.contains(label.bottomRight));
-}
-
-/// The point at [t] along [edge]'s cubic.
-Offset _at(LaidOutEdge edge, double t) {
-  final u = 1 - t;
-  return edge.start * (u * u * u) +
-      edge.control1 * (3 * u * u * t) +
-      edge.control2 * (3 * u * t * t) +
-      edge.end * (t * t * t);
 }

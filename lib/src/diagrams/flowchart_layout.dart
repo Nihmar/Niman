@@ -179,7 +179,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
     }
     // A curve stays inside its control points: an edge that bends round a
     // node, or a cycle's way back, is drawn whole.
-    for (final point in [edge.control1, edge.control2]) {
+    for (final point in edge.path) {
       include(Rect.fromCircle(center: point, radius: 0));
     }
   }

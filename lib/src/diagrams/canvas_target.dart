@@ -72,6 +72,28 @@ final class CanvasDiagramTarget implements DiagramTarget {
   }
 
   @override
+  void curve(
+    List<Offset> points, {
+    required Color color,
+    double strokeWidth = 1,
+    bool dashed = false,
+  }) {
+    if (points.length < 4) return;
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (var i = 1; i + 2 < points.length; i += 3) {
+      path.cubicTo(
+        points[i].dx,
+        points[i].dy,
+        points[i + 1].dx,
+        points[i + 1].dy,
+        points[i + 2].dx,
+        points[i + 2].dy,
+      );
+    }
+    _stroke(path, color, strokeWidth, dashed);
+  }
+
+  @override
   void line(
     Offset from,
     Offset to, {
