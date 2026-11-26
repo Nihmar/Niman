@@ -40,6 +40,24 @@ const Map<String, String> _extensions = {
 /// A picture fetched: its bytes and the extension it is stored under.
 typedef FetchedPicture = ({Uint8List bytes, String extension});
 
+/// Fetches the picture at an absolute http or https address; null when it
+/// is not a picture, is too large or does not come, and throws on a
+/// connection that fails.
+typedef PictureFetcher = Future<FetchedPicture?> Function(String url);
+
+/// The capture's own download of [client], each picture given [timeout].
+PictureFetcher httpPictureFetcher(
+  HttpClient client, {
+  Duration timeout = const Duration(seconds: 30),
+}) =>
+    (url) => downloadPicture(client, url).timeout(timeout);
+
+/// An [HttpClient] set as the capture sets its own: what every download of
+/// a picture from the web — a capture, an import, an export — uses.
+HttpClient pictureHttpClient() => HttpClient()
+  ..connectionTimeout = const Duration(seconds: 15)
+  ..userAgent = 'Niman';
+
 /// Downloads the pictures at [urls] — absolute http, https or base64
 /// `data:` addresses — into `<libraryRoot>/<attachmentsFolder>/`, and gives
 /// each one that landed its library-relative path.
@@ -51,9 +69,7 @@ Future<Map<String, String>> downloadPictures(
 }) async {
   final queue = urls.toSet().take(maxCapturedPictures).toList();
   final stored = <String, String>{};
-  final client = HttpClient()
-    ..connectionTimeout = const Duration(seconds: 15)
-    ..userAgent = 'Niman';
+  final client = pictureHttpClient();
   var next = 0;
   Future<void> worker() async {
     while (next < queue.length) {

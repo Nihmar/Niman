@@ -17,22 +17,10 @@ import 'package:niman/src/capture/capture_pictures.dart';
 import 'package:niman/src/import/html/html_picture_source.dart';
 import 'package:path/path.dart' as p;
 
-/// Fetches the picture at an absolute http or https address; null when it
-/// is not a picture, is too large or does not come, and throws on a
-/// connection that fails.
-typedef PictureFetcher = Future<FetchedPicture?> Function(String url);
-
-/// The capture's own download of [client], each picture given [timeout].
-PictureFetcher httpPictureFetcher(
-  HttpClient client, {
-  Duration timeout = const Duration(seconds: 30),
-}) =>
-    (url) => downloadPicture(client, url).timeout(timeout);
-
-/// An [HttpClient] set as the capture sets its own.
-HttpClient pictureHttpClient() => HttpClient()
-  ..connectionTimeout = const Duration(seconds: 15)
-  ..userAgent = 'Niman';
+// The download is the capture's own (`capture_pictures.dart`); the import's
+// jobs reach it from here, with the store that keeps what it fetches.
+export 'package:niman/src/capture/capture_pictures.dart'
+    show PictureFetcher, httpPictureFetcher, pictureHttpClient;
 
 /// The staging folder's pictures.
 final class HtmlPictureStore {
