@@ -16,6 +16,7 @@ import 'package:niman/src/capture/readability/dom.dart';
 import 'package:niman/src/capture/readability/metadata.dart' show documentTitle;
 import 'package:niman/src/capture/readability/readability.dart';
 import 'package:niman/src/import/html/html_convert_failures.dart';
+import 'package:niman/src/markdown/from_html/xhtml_source.dart';
 import 'package:path/path.dart' as p;
 
 /// How much of a page becomes the note.
@@ -78,13 +79,19 @@ HtmlPage readHtmlPage(
   required String fileName,
   HtmlExtent extent = HtmlExtent.article,
 }) {
-  final text = decodePage(bytes);
-  if (text == null) {
+  final decoded = decodePage(bytes);
+  if (decoded == null) {
     throw HtmlRefused(
       HtmlRefusal.unsupportedCharset,
       'charset ${charsetOfMeta(bytes) ?? '?'}',
     );
   }
+  // An .xhtml file is XML: `<title/>` is an empty title, not one that
+  // holds the rest of the page. The tree is made here and the note's HTML
+  // is its serialization, so this is where the file is read as XML (#1304).
+  final text = p.extension(fileName).toLowerCase() == '.xhtml'
+      ? expandSelfClosed(decoded)
+      : decoded;
   final document = html.parse(text);
   // What the page says of itself, before Readability changes the tree.
   final pageTitle = _clean(documentTitle(document));
