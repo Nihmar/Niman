@@ -10,7 +10,8 @@
 ///   — has no height, and takes no gap of its own: a run of them costs the
 ///   one gap between the rows round it;
 /// - a cluster's own pad is the room between its outline and what it holds,
-///   so no gap is added where a cluster opens or closes;
+///   so no gap is added where a cluster opens or closes — unless a box
+///   outside it shares the border's row, and needs its gap as any box does;
 /// - an edge that needs room at an end, for an arrow cap or a text, widens
 ///   the gap its first or last piece crosses.
 library;
@@ -71,7 +72,14 @@ import 'package:niman/src/diagrams/layered_options.dart';
     final share =
         (hasBox[r] + hasPad[r] > 0 ? base / 2 : 0.0) +
         (hasBox[r + 1] + hasPad[r + 1] > 0 ? base / 2 : 0.0);
-    var between = opens[r] == 1 || closes[r + 1] == 1 ? 0.0 : share;
+    // Where a cluster opens or closes, its pad is the room between its
+    // outline and what it holds — unless a box outside the cluster is in
+    // the border's row too: then the row's own height is that box's, and
+    // the box beside the cluster needs its gap from the row next to it.
+    final padOnly =
+        (opens[r] == 1 && hasBox[r] == 0) ||
+        (closes[r + 1] == 1 && hasBox[r + 1] == 0);
+    var between = padOnly ? 0.0 : share;
     // A row of no height still has to be told from its neighbours, or the
     // pieces of an edge through it would lie on one another.
     if (between < base / 10 && (height[r] == 0 || height[r + 1] == 0)) {

@@ -397,6 +397,38 @@ void main() {
       expect(saving.contains(writing.topLeft), isTrue);
     });
 
+    test('a node in the row a subgraph opens or closes keeps its gap', () {
+      // Two charts a fuzz found: a node outside the subgraph shares the
+      // row of its outline, and the gap below that row was dropped as if
+      // the subgraph's pad filled it, so the node touched the one under it.
+      const first =
+          'flowchart TB\nsubgraph S0\nn0["lbl n0"]\nend\n'
+          'n1\nn2\nn3\nn4\nn5\nn6\nn7\nn2 --> n5\nS0 --> n5';
+      const second =
+          'flowchart TB\nsubgraph S0\ndirection LR\nn0\nn1["lbl n1"]\n'
+          'n0 --> n1\nend\nsubgraph S1\nn2["lbl n2"]\nend\n'
+          'n3\nn4\nn5\nn6\nn3 -->|"t0"| n3\nS0 --> n0\n'
+          'n6 -->|"t2"| n1\nn5 --> n0\nS1 -->|"t4"| n6';
+      const charts = [first, second];
+      for (final source in charts) {
+        final nodes = _layout(source).nodes;
+        for (var i = 0; i < nodes.length; i++) {
+          for (var j = i + 1; j < nodes.length; j++) {
+            final a = nodes[i].rect;
+            final b = nodes[j].rect;
+            final across = a.left < b.right && b.left < a.right;
+            if (!across) continue;
+            final apart = math.max(b.top - a.bottom, a.top - b.bottom);
+            expect(
+              apart,
+              greaterThan(0),
+              reason: '${nodes[i].node.id} and ${nodes[j].node.id}',
+            );
+          }
+        }
+      }
+    });
+
     test('an edge naming a subgraph ends on its outline', () {
       for (final direction in ['TB', 'LR']) {
         final layout = _layout(
