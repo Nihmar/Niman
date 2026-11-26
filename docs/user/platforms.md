@@ -188,8 +188,9 @@ the two agree.
   `vcruntime140_1.dll`, next to `niman.exe`), so the installer and the
   zip run on a Windows that never had the redistributable installed. A
   release build fails if they are missing.
-- spellcheck via hunspell, same setting as Linux, plus the per-library
-  personal dictionary.
+- spellcheck through the system's own checker, not hunspell: it offers
+  the languages installed in Windows, named by their tags (`it-IT`, `en-US`) in the same `spellDictionaries`
+  setting, plus the per-library personal dictionary.
 - The app draws its own title bar, as on Linux. The window keeps its
   system behaviours — resizing from the edges, Aero Snap, `Win`+Arrow —
   because the frame is still there underneath; the app only paints over
@@ -214,12 +215,12 @@ the two agree.
   [shortcuts](shortcuts.md#cli-launch-flags-desktop).
 - **Updates** are not looked for: Settings → Updates → **Release page**
   opens the latest release, whose setup installs over this one (#1270).
-- **Dropping files and folders on the window** takes the paths Win32
-  hands the window (`WM_DROPFILES`), and the drop opens or imports what
-  it names (a web page asks whether to convert it, attach it or both). The frame that Linux draws while a drag is over the window is
-  **not** drawn here: reporting a drag that is over the window and has
-  not landed needs an OLE `IDropTarget` registered on the Flutter view,
-  which this pass does not do (#224). The drop itself is unaffected.
+- **Dropping files and folders on the window** goes through an OLE drop
+  target the window registers (#224, #531), and the drop opens or imports
+  what it names (a web page asks whether to convert it, attach it or
+  both). The frame that Linux draws while a drag is over the window is
+  drawn here too: the target reports a drag as it comes in over the
+  window and as it leaves.
 - A tree row's right-click menu can show the note in Explorer (selected)
   or open it in the default app — see
   [organization](organization.md#opening-a-note-outside-niman).
@@ -247,6 +248,8 @@ list at the end says what else it still lacks.
 
 - **Getting it:** `niman-<V>-macos.dmg` on the release page — open it and
   drag Niman onto Applications. One app for Apple silicon and Intel Macs.
+  The same release carries `niman-<V>-macos.zip`, the app itself zipped,
+  for where a disk image is no use.
   It is not yet signed with an Apple Developer ID, so on the first launch
   macOS refuses it: open System Settings → Privacy & Security and choose
   **Open Anyway** (a right click → Open no longer gets past it since
@@ -575,12 +578,13 @@ like the shortcuts, and a pinned command still shows only where it can
 run.
 
 **Keyboard shortcuts** can be changed wherever there is a keyboard: on
-Linux and Windows, and on Android with a hardware keyboard attached, the
-same screen under Settings. Without a keyboard the screen says so
-instead of opening.
+Linux, Windows and macOS, and on Android, iPadOS and iOS with a hardware
+keyboard attached, the same screen under Settings. Without a keyboard the
+screen says so instead of opening.
 
-**Zen mode** (`F11`, see [editing](editing.md#zen-mode)) is Linux and
-Windows only. It needs the app's own title bar, which is where its thin
+**Zen mode** (`F11`, `⌃⌘F` on a Mac, see
+[editing](editing.md#zen-mode)) is for the desktops: Linux, Windows and
+macOS. It needs the app's own title bar, which is where its thin
 bar goes, and a phone is already one note on one screen. The window is
 maximized for it; if the window manager declines, Zen still hides
 everything but the note.
@@ -621,8 +625,9 @@ platform:
 
 **Opening a file outside any library** (`Ctrl+Shift+O`, see
 [organization](organization.md#opening-a-file-outside-any-library)) is
-Linux and Windows only for now: Android's picker hands over a copy of
-the file, which could be read but not saved back.
+only on the desktops — Linux, Windows and macOS — for now: Android's
+picker hands over a copy of the file, which could be read but not saved
+back.
 
 **Sharing into Niman (Android)** goes the other way: another app's
 **Share** menu offers Niman for text and for a Markdown file, and a file
@@ -654,7 +659,7 @@ link here, the tasks that link it, history beside the note, and the
 [journal](journal.md)'s calendar) docks beside the note on any wide
 window at least 1000 px wide: desktops and tablets. A narrower wide
 window keeps the panel's button and opens the
-panel over the note instead (see [editing](editing.md#the-side-panel)). A phone,
+panel over the note instead (see [editing](editing.md#open-notes-and-tabs)). A phone,
 upright or turned, has no room for a note and a panel side by side, so
 this is a decision rather than an omission: the note's status row keeps
 its outline and spelling buttons there — both open as sheets — and the

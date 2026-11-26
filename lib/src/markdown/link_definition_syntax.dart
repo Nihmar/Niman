@@ -1,7 +1,7 @@
 /// A link reference definition's lines, as the read view's parser reads
 /// them: `package:markdown`'s `LinkReferenceDefinitionSyntax`, whose
 /// `LinkParser` reads one definition off the lines of a paragraph that
-/// starts with `[` (`docs/dev/block-tree.md`).
+/// starts with `[` (`docs/records/block-tree.md`).
 library;
 
 /// Whether a line starts a link reference definition, and how many lines

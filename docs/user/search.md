@@ -24,8 +24,20 @@ scrolls to the first occurrence of what you searched for, selects it, and the
 find bar marks every other one (`Esc` closes the bar).
 A right click on a result opens its menu:
 *Open*, *Open in new tab*, *Open to the side*, *Reveal in tree* and
-*Replace in this note*; a middle click or `Ctrl`+click opens it in a new
-tab. On a phone a long press gives *Replace in this note*.
+*Replace in this note…*; a middle click or `Ctrl`+click opens it in a new
+tab. On a phone a long press gives *Replace in this note…*.
+
+**Replace.** The **Replace…** button at the right of the search bar's
+mode row opens a panel under the field: a **Replace with** field, a
+**Case-sensitive** toggle (off by default), a preview of how many notes
+the replace reaches (*in 12 notes*) and a **Replace** button that counts
+the occurrences it will change. Only exact whole-word matches are replaced
+— `art` is not touched inside `part` — in every note the search found.
+Each note is rewritten atomically and re-indexed at once. *Replace in this
+note…*, from a result's menu, opens the same panel limited to that one
+note. The button is there only in **Words** mode, once there are results,
+and not while the box holds a `key = value` filter; **Contains** has no
+library-wide replace.
 
 **Replace all and the notes you have open.** A replace saves the notes open
 with unsaved edits first, so it rewrites what you see; if one of them cannot
@@ -55,7 +67,8 @@ A word search asks the index, so it stays fast up to ~1M notes.
 
 A query that is one lone `+project` or `@context` (`+thesis`, `@phone`)
 also answers from `todo.txt` and the library's `calendar.txt`, in a
-**Tasks and events** group above the notes:
+**Tasks and events** group above the notes (in Words mode; Contains reads
+the text literally):
 
 - the events whose line carries the token, with their time as written and
 the day they are on; an event that repeats
@@ -107,6 +120,16 @@ A lone `#tag` token searches that tag (`#work`). Mixed input
 
 Matching is case-insensitive on key and value. Anything that is not
 `key = value` (e.g. `x = y + 1`, a second `=`) is a plain text search.
+The filter applies in **Words** mode only: in **Contains** mode `x = y` is
+the text to find, as typed.
+
+## Short queries
+
+A query of fewer than 2 characters does not run: the list says *Type at
+least 2 characters*. In **Words** mode the last token — the one still
+growing — has to be 2 characters too, whatever came before it, so a word
+followed by a lone letter waits for the second one. A `key = value` filter
+is exempt: `x = 1` runs.
 
 A filter that matches many notes lists 500 of them, in path order, and says
 how many there are in all; *Show more* reads the next 500.

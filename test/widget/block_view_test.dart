@@ -499,7 +499,7 @@ void main() {
     expect(screen, isNot(contains(']]')));
   });
 
-  group('drawn from the tree (docs/dev/block-tree.md, phase 5)', () {
+  group('drawn from the tree (docs/records/block-tree.md, phase 5)', () {
     testWidgets("a block after an item's own stands at the item's indent", (
       tester,
     ) async {

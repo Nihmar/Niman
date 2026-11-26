@@ -1,5 +1,5 @@
 /// What our inline parser makes of a leaf's text: a tree of inline nodes,
-/// each with where it stands in that text (`docs/dev/block-tree.md`).
+/// each with where it stands in that text (`docs/records/block-tree.md`).
 ///
 /// The kinds are one family, read by exhaustive switches, so they share
 /// this file.

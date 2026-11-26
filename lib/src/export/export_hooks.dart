@@ -2,7 +2,7 @@
 /// the read view's forms — coloured code, formulas and diagrams as SVG, a
 /// raw HTML block as its source, a callout's frame, wikilinks and embeds —
 /// and the pictures and links the export points elsewhere (#24,
-/// `docs/dev/block-tree.md` phase 7).
+/// `docs/records/block-tree.md` phase 7).
 library;
 
 import 'package:niman/src/export/html_blocks.dart';

@@ -37,6 +37,10 @@
 - **Windows desktop build**: Visual Studio with the *Desktop development
   with C++* workload. The installer additionally needs Inno Setup 6 —
   `choco install innosetup`, as `release.yml` does.
+- **macOS and iOS builds**: a Mac with Xcode (the CI runners are
+  `macos-26`; `xcodebuild` and `xcrun simctl` come with it), and `cmake` and
+  `ninja` (`brew install cmake ninja`) for the OCR engine the app bundles.
+  Neither builds on Linux or Windows.
 
 ## Helper scripts
 
@@ -45,14 +49,16 @@ Terse output; full logs in `/tmp/niman/niman-<cmd>.log`
 
 ```
 ./scripts/niman.sh analyze   # flutter analyze --fatal-infos
-./scripts/niman.sh test      # flutter test (unit + widget)
+./scripts/niman.sh test      # flutter test (unit, widget and perf)
 ./scripts/niman.sh check     # analyze + test; run before every commit
-./scripts/niman.sh integration  # integration_test/; run before every commit (issue #241)
+./scripts/niman.sh integration  # integration_test/; once a feature is finished (issue #241)
 ./scripts/niman.sh apk       # Android release APK
 ./scripts/niman.sh apk beta  # Android testing build (issue #106)
 ./scripts/niman.sh apk frames  # that build in profile mode, with the frame log (#1145)
 ./scripts/niman.sh linux     # Linux release bundle
 ./scripts/niman.sh linux beta  # Linux testing build (its own data folder)
+./scripts/niman.sh macos [beta]  # macOS release build and its disk image, on a Mac
+./scripts/niman.sh ios [beta]  # iOS release build, unsigned, on a Mac
 scripts\niman.bat check      # Windows equivalent
 scripts\niman.bat integration  # the headless integration_test/ files (sync_e2e needs Linux)
 scripts\niman.bat apk beta   # Android testing build, from Windows
@@ -70,27 +76,70 @@ built from a worktree in the middle of an edit says so, and a log that
 names a bare hash can be trusted to be that commit. Both scripts do it the
 same way; the release workflow builds from a tag and passes the bare hash.
 
-`check` (`.github/workflows/check.yml`) runs the formatting gate, analyze,
-`flutter test` and the integration files on every pull request, so the
+`check` (`.github/workflows/check.yml`) runs on every pull request and on
+`main`, in four jobs that run in parallel. The first, `check`, runs the
+formatting gate, analyze, `flutter test` and the integration files, so the
 suite cannot rot unnoticed again (issue #241). The WebDAV sync flow needs
 a device (`flutter test -d linux`), which CI provides on a virtual
 display, and CI installs hunspell so the live spell-check cases run there
 instead of skipping (issue #363).
 
-A second job in the same workflow runs the JVM unit tests of the Android
-app module (`android/app/src/test`, e.g. `LaunchIntentTest`,
-`ShareCopyTest`) in parallel with the first: `flutter build apk
---config-only` writes the Gradle project (`android/gradlew` and
-`android/local.properties` are not in the repository), then
-`./gradlew :app:testBetaDebugUnitTest` compiles the Kotlin and runs JUnit —
-no APK, no device (issue #813). Locally: the same two commands, with
-`gradlew.bat` on Windows and `JAVA_HOME` set (Android Studio's `jbr` will
-do).
+The second, `android-unit`, runs the JVM unit tests of the Android app
+module (`android/app/src/test`, e.g. `LaunchIntentTest`, `ShareCopyTest`):
+`flutter build apk --config-only` writes the Gradle project
+(`android/gradlew` and `android/local.properties` are not in the
+repository), then `./gradlew :app:testBetaDebugUnitTest` compiles the
+Kotlin and runs JUnit — no APK, no device (issue #813) — and
+`./gradlew :app:lintBetaDebug` checks that every framework call in the
+app's own Kotlin exists at `minSdk` (the `NewApi` and `InlinedApi` lint
+checks only). Locally: the same commands, with `gradlew.bat` on Windows
+and `JAVA_HOME` set (Android Studio's `jbr` will do).
+
+The third, `macos` (on `macos-26`), builds the OCR engine the app bundles,
+runs the suite on a Mac (the live OCR case against that engine), builds the
+beta app in debug mode, and runs `app_boot` and `sync_e2e` with `-d macos`.
+The fourth, `ios`, builds the iOS beta app for a device, unsigned, and runs
+`app_boot` and `sync_e2e` in an iPhone simulator through
+`scripts/ios-sim-test.sh`.
+
+## The Apple builds (macOS and iOS)
+
+`./scripts/niman.sh macos [beta]` builds the Mac app in release mode and
+wraps it in a disk image: the official build is `Niman.app` in
+`build/macos/Build/Products/Release-official/` with
+`build/macos/niman-<V>-macos.dmg`, and `beta` is "Niman (Testing)" (bundle
+id `dev.niman.niman.beta`, its own Application Support folder, the
+`APP_CHANNEL=testing` define). `./scripts/niman.sh ios [beta]` builds the
+iPhone and iPad app with `flutter build ios --release --no-codesign` into
+`build/ios/iphoneos/Runner.app`, unsigned: signing for a device and
+TestFlight need the Apple Developer Program. Both need a Mac with Xcode.
+Of the two only macOS is released ([releasing](releasing.md#artifacts)); iOS
+is built and tested by CI alone.
+
+Three more pieces belong to them:
+
+- `scripts/ocr-engine.sh <target> <out dir>` builds the text recognition
+  engine, one shared library holding Tesseract and Leptonica, for `linux-x64`,
+  `android-arm64-v8a`, `android-x86_64`, `windows-x64`, `macos-universal`,
+  `ios-arm64` and `ios-sim-arm64`. Linux, Android and Windows download it on
+  demand from the `ocr-engine-N` release the app pins; a Mac's and an
+  iPhone's is built by `niman.sh` (once, into `build/ocr-engine`) and
+  bundled in the app, because the hardened runtime loads only a library
+  signed with the app's own team and iOS loads no downloaded code.
+- `scripts/ios-sim-test.sh <test file> <simulator udid> <log>` runs one
+  integration file in an iPhone simulator and starts it again when the Flutter
+  tool loses the app at launch (it waits for the VM service address with no
+  limit of its own).
+- `packages/niman_apple` is the plugin with Niman's native Swift for both
+  platforms, one source in `darwin/`: audio decoding to WAV, the PDF export,
+  the clipboard's HTML, the offscreen page reader of web capture, and on iOS
+  the screen, quick actions, opened files and background time. The design
+  is in [apple-platforms.md](../records/apple-platforms.md).
 
 `site` (`.github/workflows/site.yml`) builds the documentation site on
 every pull request with the deploy's own steps — the Jekyll build from
-`pages.yml`, the step that wraps Niman's `{{…}}` template syntax in
-`{% raw %}`/`{% endraw %}` included. Publishing runs on `main` alone
+`pages.yml`, the step that hands Niman's `{{…}}` template syntax to
+Liquid as raw blocks included. Publishing runs on `main` alone
 (issue #441), so without it a layout, a Liquid tag or a `_config.yml` key
 Jekyll refuses would surface when the site deploys, after the merge
 (issue #470). It deploys nothing: `contents: read`, no artifact.
@@ -183,16 +232,20 @@ APKs handed the in-app update the testing one (0.0.10; see
    --set-exit-if-changed lib test tool`).
 2. `./scripts/niman.sh check` (infos are fatal:
    `flutter analyze --fatal-infos`).
-3. `flutter test` runs `test/unit/` + `test/widget/`; single test:
+3. `flutter test` runs `test/unit/`, `test/widget/` and `test/perf/`; single test:
    `flutter test test/unit/<f>.dart --plain-name "<name>"`.
    `integration_test/` is E2E, not part of the default run: `app_boot` and
    `sync_e2e` run in CI too (`sync_e2e` on `-d linux`, under xvfb);
    `template_backlink` is a repro harness and skips unless a library is
    seeded at `/tmp/niman/repro_lib`. `./scripts/niman.sh
-   integration` runs all three (issue #241).
-4. Windows note: ~20 tests fail on path separators and temp-dir cleanup
-   (pre-existing, green on Linux). Use `pwsh scripts/newfail.ps1` — it
-   prints only failures not in `scripts/known-failures.txt` (exit 1 =
+   integration` runs all three (issue #241), once a feature's implementation
+   is finished — never after the intermediate commits of work in progress.
+4. Windows note: the suite is green on Windows too (since 2026-09-10;
+   the entries `scripts/known-failures.txt` used to carry were real bugs,
+   fixed). What remains is five flakes — the same fault under full-suite
+   load, a rename or a delete on a file another process still holds — which
+   pass in isolation and are listed there. Use `pwsh scripts/newfail.ps1` —
+   it prints only failures not in `scripts/known-failures.txt` (exit 1 =
    something new broke; `-Update` rewrites the baseline).
 
 ## Codegen
@@ -200,7 +253,8 @@ APKs handed the in-app update the testing one (0.0.10; see
 Two drift databases in `lib/src/db/`, `.g.dart` committed:
 
 - `AppDatabase` (`app_database.dart`): settings, long migration chain.
-- `IndexDatabase` (`index_database.dart`): one per library, schema 1, no
-  migrations — delete the file to rebuild.
+- `IndexDatabase` (`index_database.dart`): one per library, no migration
+  chain — a schema bump drops every table and rescans, so deleting the file
+  rebuilds it too.
 
 After schema/DAO changes: `dart run build_runner build`.

@@ -1,5 +1,5 @@
 // The app's own inline constructs as our parser reads them (`AppSyntax`,
-// `docs/dev/block-tree.md` phase 4): the forms of a formula, a wikilink, an
+// `docs/records/block-tree.md` phase 4): the forms of a formula, a wikilink, an
 // embed and a tag the notes use, and a code span reading first, holding
 // what looks like one. They were the masker's tests.
 import 'dart:math';

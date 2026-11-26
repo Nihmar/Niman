@@ -2,7 +2,7 @@
 
 The fixtures behind `test/unit/tree_conformance_test.dart`, which measures
 Niman's own reading of a note — the block tree, our inline parser and the
-writer (`docs/dev/block-tree.md`) — against the specifications it follows:
+writer (`docs/records/block-tree.md`) — against the specifications it follows:
 `cmark-gfm`'s GFM, and CommonMark as a second count. These files are where
 "conformant" stops being an assumption.
 

@@ -9,14 +9,15 @@ Four folders, by what each holds:
   home-screen widgets, settings,
   shortcuts, sync, and platform notes.
 - **`dev/`** — how to build and change Niman: architecture, build
-  instructions, code conventions, the documentation site and the release
-  process. Living documentation, kept current with the code.
+  instructions, code conventions, memory, the documentation site and the
+  release process. Living documentation, kept current with the code.
 - **`records/`** — the design, research and measurement records behind
   the features, kept as they were written (not kept current): the unified
   Markdown surface and its parity and huge-note measurements, the rejected
   editor alternatives, the workspace, the EPUB reader, annotations, the
   note history and WebDAV sync, the index scan, transcription, text
-  recognition, web capture, and `calendar.txt`. See [records/README.md](records/README.md).
+  recognition, web capture, `calendar.txt`, and the block-parser plans the
+  block tree superseded. See [records/README.md](records/README.md).
 - **`design/`** — the mockups a round was agreed against, one folder per
   round, with the decision each screen records.
 

@@ -1,5 +1,5 @@
 # Examples the block tree and our inline parser do not match yet, each with
-# its bucket and reason (docs/dev/block-tree.md).
+# its bucket and reason (docs/records/block-tree.md).
 #
 # Format: `<suite>/<example> <bucket>: <reason>`, the bucket one of:
 #

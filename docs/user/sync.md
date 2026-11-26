@@ -21,8 +21,9 @@ library at home can go to the NAS and one at work to the office server.
    where nothing travels over the open internet.
 3. **User** and **Password**, or leave both empty if the server asks for
    none. The password is kept in the device's keychain (Android
-   Keystore, Windows Credential Manager, the Linux keyring), never in the
-   library's files.
+   Keystore, Windows Credential Manager, the Linux keyring, the Apple
+   Keychain, which on a Mac whose build lacks the keychain entitlement is
+   the login keychain), never in the library's files.
 4. **Test connection.** Niman tries reading, writing, renaming and
    deleting in a temporary folder on the server, removes it, and tells
    you what the server can do. A server that lacks some features (no
@@ -101,7 +102,9 @@ What travels: every note and attachment, plus the library's
 `.niman/settings.json`, `.niman/counters.json`, its [Home](home.md)
 (`.niman/home.json`), where each book and PDF
 was left (`.niman/reading.json`) and personal dictionary
-(`.niman/dictionary.txt`, the words added with *Add to dictionary*). What stays on each
+(`.niman/dictionary.txt`, the words added with *Add to dictionary*) and
+the state of your flashcard reviews (`.niman/review.json`, merged card by
+card). What stays on each
 device: `.trash/`, `.history/`, any other dot folder (a `.git/`, for
 example), and the files the operating system drops into folders
 (`Thumbs.db`, `desktop.ini`).
@@ -114,8 +117,8 @@ example), and the files the operating system drops into folders
   is **moved to this device's trash**, never deleted outright. After such
   a sync a message offers **Show**, which opens the trash.
 - The library's own files (`.niman/settings.json`, `.niman/counters.json`,
-  `.niman/home.json`, `.niman/reading.json`, `.niman/dictionary.txt`) are
-  never deleted by a sync: if one goes
+  `.niman/home.json`, `.niman/reading.json`, `.niman/review.json`,
+  `.niman/dictionary.txt`) are never deleted by a sync: if one goes
   missing on one side, it is put back from the other.
 - If a sync would remove more than 10 files and more than half of the
   library, Niman stops and asks first. That is what a wrong address, an

@@ -1,5 +1,5 @@
 /// Our inline parser on the paragraphs and headings of the markdown
-/// fixtures and of a math-heavy note (`docs/dev/block-tree.md`, "Speed"),
+/// fixtures and of a math-heavy note (`docs/records/block-tree.md`, "Speed"),
 /// with the app's syntax and without it. What it replaced — the package's
 /// parse, masked — is gone with the package; its numbers are in the plan.
 ///

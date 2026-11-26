@@ -1,6 +1,6 @@
 /// The read view's reading of a note: each block the scanner found, as its
 /// node of the tree, its leaves' inline text read by our own parser
-/// (`docs/dev/block-tree.md`, phase 5).
+/// (`docs/records/block-tree.md`, phase 5).
 library;
 
 import 'dart:math' as math;

@@ -24,8 +24,8 @@ What was left out, and why — the part a reviewer would otherwise look for here
 
 ## Platforms
 
-Which of Android, Linux and Windows the change touches, and what is left behind
-where one of them cannot have it.
+Which of Android, Linux, Windows, macOS and iOS the change touches, and what is
+left behind where one of them cannot have it.
 
 ## Checks
 

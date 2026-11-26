@@ -1,7 +1,7 @@
 /// A footnote definition's lines, as `cmark-gfm` reads them: a container
 /// opened by `[^label]:` at the margin, holding the lines four columns in
 /// and, lazily, the lines that go on with its paragraph
-/// (`docs/dev/block-tree.md`).
+/// (`docs/records/block-tree.md`).
 library;
 
 import 'package:niman/src/markdown/line_syntax.dart';

@@ -28,7 +28,7 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `sync/transfers/` | The bulk transfers of a sync run (download, hash-by-download, upload): a worker isolate per run in production, the run's own client in tests — see [sync.md](../records/sync.md) |
 | `sync/` | Sync state store (`sync_destinations`, `sync_items`, `sync_ops`), secure password store, pure reconcile, the engine (full and quick runs), the trigger scheduler and network monitor, and `LibrarySyncService` for the UI |
 | `ui/sync/` | WebDAV settings screen (with the trigger options), status icon and panel (with the queue), first-sync and mass-deletion dialogs, conflict screen (merge by region, or whole copies) |
-| `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, schema 1, no migrations — delete to rebuild); the indexer facade, the full scan that reconciles one directory at a time with bounded memory (#302), the tree materialization and the content store |
+| `db/` | `AppDatabase` (app settings, migration chain) + `IndexDatabase` (one per library, no migration chain: a schema bump drops every table and rescans, so deleting the file rebuilds it too); the indexer facade, the full scan that reconciles one directory at a time with bounded memory (#302), the tree materialization and the content store |
 | `markdown/` | The one Markdown surface ([unified-surface.md](../records/unified-surface.md)): `SourceBuffer`, the block scanner and parser (over the `markdown` AST), the styler, the surface controller, and under `render/` the source view (modes `source` and `live`, the WYSIWYG) and the read view (the preview); `edit/` holds selection, caret motion, input, history and find; `from_html/` turns HTML into Markdown (an EPUB's chapters, captured pages) |
 | `editor/` | What the surface is driven by: the incremental tokenizer (`highlighting.dart`), the Markdown commands (`md_editing.dart`), toolbar and its layout, context menu, find bar, outline, word count, list tally, typewriter and note column |
 | `preview/` | KaTeX math (typesetting, cache, rasterizing), code highlight, image aspect — what the surface draws with |
@@ -36,11 +36,25 @@ fields) — it stores nothing that cannot be reconstructed from disk.
 | `search/` | FTS query builder (user text is never raw FTS), field/tag queries, excerpts and the contains scan read from the notes, replace |
 | `frontmatter/` | YAML parse, known fields (`title tags date pinned aliases`), field repo |
 | `templates/` | Substitution engine (`engine.dart`), directives, includes, `ask`/`choice` prompts, counters |
-| `todo/` | todo.txt line model, file store, filters, reminder scheduling backends |
-| `spellcheck/` | hunspell (desktop) / system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
+| `todo/` | todo.txt line model, file store, filters, reminder scheduling backends; the next copy of a recurring task (`recurring_line.dart`, #1189); the links between tasks and notes (`task_link*.dart`, #1152) and the `todo` fence that draws the tasks it asks for (`todo_block_*.dart`) — see [recurring-tasks.md](../records/recurring-tasks.md) and [todo-note-links.md](../records/todo-note-links.md) |
+| `calendar/` | `calendar.txt` beside `todo.txt`: the line parser, the file store and writer, the events of a day and, for a repeating one, its occurrences read from the rule (`calendar_recurrence.dart`, #1190) with `except:`/`until:` — see [calendar-txt.md](../records/calendar-txt.md) and [recurring-events.md](../records/recurring-events.md) |
+| `home/` | A library's Home (#535): its tiles and actions, and the `.niman/home.json` layout that syncs key by key — the screens are `ui/home/` |
+| `kanban/` | A board read from a note's text (`board_parser.dart`, `KanbanBoard`) and the byte-stable edits of its columns and cards — see [kanban.md](../records/kanban.md); the view is `ui/kinds/` |
+| `diagrams/` | The Mermaid engine of Niman's own (#530): a parser per diagram kind behind `mermaid_parser.dart`, a layout, and one drawing (`diagram_renderer.dart`) that targets the Flutter canvas for the screen and live mode or the SVG target for an export |
+| `lint/` | The rules of the Markdown corrector behind *Tidy the Markdown* (`lint_rule.dart`): list, fence, paragraph and hard-break fixes, each switchable per library |
+| `ocr/` | Text recognition (#532): the Tesseract bindings and where the engine comes from (bundled or downloaded), the languages, the job queue and worker, and the `.ocr.md` note a recognition writes beside its file — see [ocr.md](../records/ocr.md); the screens are `ui/ocr/` |
+| `spellcheck/` | hunspell (Linux), the system checker (Windows: `windows_spell_checker.dart`; macOS and iOS: `apple_spell_checker.dart`) and the system IME (Android) providers, per-library personal dictionary layered in front (right-click *Add to dictionary*) |
 | `transcription/` | On-device speech-to-text for audio notes (whisper_ggml): model catalog, downloads, the model directory, transcription settings — see [transcription.md](../records/transcription.md) |
 | `ui/` | Shell, tree, settings screens, shared widgets; `ui/welcome/` is the first-run deck (#266) and `ui/tour/` the guided tour with its target registry; `ui/kinds/` the views of the note kinds (`type:`) |
 | `widget/` | Android home-screen widgets: placement, payload, refresh, theming, background row ops (native Kotlin providers in `android/app/src/main/kotlin/dev/niman/niman/`) |
+
+`packages/` holds two path packages: `niman_apple`, the Swift native code
+macOS and iOS share (audio decoding, the PDF export, the clipboard's HTML,
+the page reader of web capture, quick actions and background time — see
+[apple-platforms.md](../records/apple-platforms.md)), and
+`ffmpeg_kit_flutter_new_min`, a copy of the FFmpeg plugin `whisper_ggml`
+depends on, put in place of the published one by `dependency_overrides` and
+left out of the Apple builds.
 
 State: Riverpod. No god classes — one class per file, split at ~300
 lines or when responsibilities mix.

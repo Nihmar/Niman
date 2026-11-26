@@ -1,7 +1,7 @@
 # Block scanner: the indentation model (design for the remaining repros)
 
 > **Superseded, kept for its evidence.** The model was built — phase 3 of
-> the plan in `docs/dev/block-scanner-containers.md` — but not as this
+> the plan in `docs/records/block-scanner-containers.md` — but not as this
 > document designs it. Its diagnosis held (each container must measure
 > the line where its parent left it); its model did not: the target
 > parser, `package:markdown`, keeps no container stack, and hands a lazy
@@ -10,9 +10,9 @@
 > cases 1 and 4 turned out to be the harness's, not the scanner's. Read
 > the plan document for what was done; the tables below are the evidence
 > it started from. The package itself is gone since
-> (`docs/dev/block-tree.md`, phase 8): the reading is `cmark-gfm`'s.
+> (`docs/records/block-tree.md`, phase 8): the reading is `cmark-gfm`'s.
 
-`docs/dev/block-scanner-containers.md` records the container rework up to
+`docs/records/block-scanner-containers.md` records the container rework up to
 309 of 40 000 documents differing (138 minimal) on
 `fix/block-scanner-containers`. Everything left needs one change the
 incremental fixes could not make: **a single, per-line notion of how far
@@ -24,7 +24,7 @@ _listMarker`; start from the model below and rewrite those three to
 follow it.
 
 The names below are the ones the code had when this was written. Since
-phase 2 of the plan (`docs/dev/block-scanner-containers.md`) the readers
+phase 2 of the plan (`docs/records/block-scanner-containers.md`) the readers
 live in `line_containers.dart` (`LineContainers.contentColumn`, …),
 `line_syntax.dart` (`LineSyntax.listMarker`, `LineSyntax.indentOf`, …)
 and `line_rules.dart` (`LineRules.listAfter`, …); that document has the
@@ -215,10 +215,10 @@ The red classes, in the harness's own counts: 1 and 4 are the
    test/unit/block_scanner_commonmark_test.dart`; the minimal count must
    fall at every step. A step that raises it is reverted whole.
 4. Keep `block_scanner_test.dart`'s "a rescan that stops short" green at
-   every step: phase 1 of the plan in `docs/dev/block-scanner-containers.md`
+   every step: phase 1 of the plan in `docs/records/block-scanner-containers.md`
    unskips it before the rewrite starts.
 5. Only then touch the downstream `BlockParser.contentText` indent
-   strip `docs/dev/block-scanner-containers.md` lists.
+   strip `docs/records/block-scanner-containers.md` lists.
 
 ## What the last two attempts proved (do not repeat)
 

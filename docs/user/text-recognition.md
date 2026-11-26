@@ -128,18 +128,21 @@ Il contratto scade il 28 febbraio. <!-- ocr 0.093 0.193 0.660 0.215 -->
 
 ## Nothing extra in the app until you use it
 
-The app does not ship the recognition engine or any language: installing
-or updating Niman costs nothing for a feature you may never use. Each piece
-is downloaded once, from inside the app, the first time it is needed, and
-can be deleted again from the same page.
+The app ships no language and, except on a Mac or an iPhone, no
+recognition engine: installing or updating Niman costs nothing for a
+feature you may never use. Each piece is downloaded once, from inside the
+app, the first time it is needed, and can be deleted again from the same
+page.
 
 - **The engine** — Tesseract 5, about 2.3 MB on a phone, 2.9 MB on Linux,
   3.9 MB on Windows. On **Linux**, when the distribution's Tesseract is
-  installed (`tesseract` on Arch, `libtesseract5` on Debian and Ubuntu),
-  Niman uses it and downloads no engine at all: the page says **System
-  library**. On a **Mac** the engine (about 4 MB) comes inside the app,
-  since a Mac loads only libraries signed with the app: nothing to
-  download but the languages.
+  installed (`tesseract` on Arch, `libtesseract5` on Debian and Ubuntu;
+  version 4.1 or later, so `libtesseract4` serves too), Niman uses it and
+  downloads no engine at all: the page says **System library**. On a
+  **Mac** the engine (about 4 MB) comes inside the app, since a Mac loads
+  only libraries signed with the app; on an **iPhone** it comes inside the
+  app too, as a framework, since iOS loads no code an app downloads:
+  nothing to download but the languages.
 - **The languages** — 123 of them, each a separate download.
 
 Every file is checked against the checksum the app carries before it is
@@ -149,8 +152,9 @@ used: a damaged or tampered download is thrown away, never loaded.
 
 The same page on the desktop and on the phone:
 
-- **Engine** — where the engine comes from (downloaded, or the system
-  library), its size, and **Download** or **Delete**.
+- **Engine** — where the engine comes from (downloaded, the system
+  library, or *Included in the app*), its size, and **Download** or
+  **Delete**.
 - **Quality** — **Fast** (1–4 MB per language, quick on any device) or
   **Best** (10–15 MB per language, better on hard scans, two or three
   times slower). Each quality keeps its own languages: switching shows the
@@ -181,4 +185,5 @@ In the app's own folder, under `ocr/`, never in the library:
 The app folder is `~/.local/share/dev.niman.niman` on Linux,
 `%APPDATA%\dev.niman\niman` on Windows, `~/Library/Application
 Support/dev.niman.niman` on a Mac (where there is no engine folder), and
-the app's private storage on Android; the testing build keeps its own.
+the app's private storage on Android and on an iPhone (where there is none
+either); the testing build keeps its own.

@@ -1,7 +1,7 @@
 // Moving a theme between installations (issue #269).
 //
 // One theme, one file: JSON and not an `.ini`, because a theme is two
-// structured maps of twenty-six colors, JSON carries that structure natively
+// structured maps of thirty-three colors, JSON carries that structure natively
 // and validates cheaply, and it is what the app already writes elsewhere
 // (`settings.json`). The file says what it is (`format`) and which shape
 // it is in (`version`), so a file from a later build is refused with an

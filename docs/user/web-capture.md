@@ -19,7 +19,10 @@ Three ways in, all to the same dialog:
   read view. A link pasted into the editor or a field stays a paste.
 - **A link dropped** on the window, dragged from the browser's address
   bar or a page: the frame says **Drop to capture this page**. Files
-  dropped on the window still open as they always have.
+  dropped on the window still open as they always have, except a saved
+  web page (`.html`, `.htm`, `.xhtml`): that asks whether to **Convert**
+  it, **Attach** it or **Attach and convert** it (see
+  [Dropping files on the window](organization.md#dropping-files-on-the-window)).
 
 The dialog says each step as it happens — **Downloaded · 212 KB**, then,
 for a page that builds its text with a script, **Only 40 words found**
@@ -194,10 +197,10 @@ few words. Then the page is run in a browser and read again:
 
 - **Windows**: Edge, run hidden;
 - **Linux**: a Chromium-based browser found on `PATH` — Chromium, Chrome,
-  Edge, Brave, Vivaldi — the one the PDF export already uses;
+  Edge, Brave, Vivaldi, Helium — the one the PDF export already uses;
 - **Android**: a WebView Niman keeps hidden;
-- **macOS**: WebKit, the engine behind Safari, in a view Niman keeps
-  hidden and that keeps nothing between captures.
+- **macOS** and **iOS**: WebKit, the engine behind Safari, in a view
+  Niman keeps hidden and that keeps nothing between captures.
 
 The browser runs with a profile of its own, deleted afterwards: your own
 browser, its sign-ins and its cookies are never used.

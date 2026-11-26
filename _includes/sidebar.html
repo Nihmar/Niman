@@ -30,7 +30,7 @@
 
   <p class="sidebar__group" id="sidebar-dev">Building and changing</p>
   <ul class="sidebar__list" aria-labelledby="sidebar-dev">
-    {%- assign dev_slugs = 'architecture,building,conventions,site,releasing' | split: ',' -%}
+    {%- assign dev_slugs = 'architecture,building,conventions,memory,site,releasing' | split: ',' -%}
     {%- for slug in dev_slugs -%}
       {%- assign path = 'docs/dev/' | append: slug | append: '.md' -%}
       {%- assign doc = site.pages | where: 'path', path | first -%}
@@ -49,7 +49,7 @@
     <li class="sidebar__item">
       <a class="sidebar__link{% if page.url == '/docs/records/' %} is-current{% endif %}" href="{{ site.baseurl }}/docs/records/"{% if page.url == '/docs/records/' %} aria-current="page"{% endif %}>Records overview</a>
     </li>
-    {%- assign record_slugs = 'unified-surface,editor-alternatives,read-live-parity,huge-notes,desktop-performance,workspace,epub-reader,annotations,sync,index-reconcile,transcription' | split: ',' -%}
+    {%- assign record_slugs = 'unified-surface,editor-alternatives,block-tree,block-scanner-containers,block-scanner-indent-model,read-live-parity,huge-notes,desktop-performance,performance-audit,memory-usage,tree-window,workspace,epub-reader,annotations,sync,history-store,index-reconcile,transcription,ocr,web-capture,flashcards,export,kanban,calendar-txt,recurring-tasks,recurring-events,todo-note-links,note-columns,library-features,apple-platforms,review-v0.1.3' | split: ',' -%}
     {%- for slug in record_slugs -%}
       {%- assign path = 'docs/records/' | append: slug | append: '.md' -%}
       {%- assign doc = site.pages | where: 'path', path | first -%}

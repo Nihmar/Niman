@@ -7,7 +7,7 @@
 /// It was the bridge to `package:markdown` too: the package parsed each
 /// block given in its container's coordinates, and its runs were found back
 /// in the source. The read view and `live` read blocks with the tree and our
-/// own inline parser now (`docs/dev/block-tree.md`, phases 5 and 6).
+/// own inline parser now (`docs/records/block-tree.md`, phases 5 and 6).
 library;
 
 import 'package:meta/meta.dart';

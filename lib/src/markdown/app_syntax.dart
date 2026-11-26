@@ -1,6 +1,6 @@
 /// The app's own inline constructs, by the rules the app has always read
 /// them with: display math, inline math, wikilinks and embeds, tags
-/// (`docs/dev/block-tree.md`, phase 4).
+/// (`docs/records/block-tree.md`, phase 4).
 ///
 /// Our inline parser asks for one where a `$`, a `[[`, a `![[` or a `#`
 /// stands ([AppSyntax.at]), in this order, which is the priority: `$$`

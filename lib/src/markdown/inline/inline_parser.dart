@@ -1,5 +1,5 @@
 /// Our inline parser: a leaf's inline text read into [InlineNode]s as
-/// `cmark-gfm` reads it (`docs/dev/block-tree.md`; `cmark`'s `inlines.c`,
+/// `cmark-gfm` reads it (`docs/records/block-tree.md`; `cmark`'s `inlines.c`,
 /// the GFM spec 0.29).
 library;
 
@@ -44,7 +44,7 @@ final class InlineParser {
 
   /// Whether the app's own inline syntax is read — math, wikilinks and
   /// embeds, tags, `==highlight==`, `<u>`/`<sup>`/`<sub>` — in
-  /// `AppSyntax`'s order (`docs/dev/block-tree.md`, phase 4). Always
+  /// `AppSyntax`'s order (`docs/records/block-tree.md`, phase 4). Always
   /// in the app; off for the specifications' examples.
   final bool appSyntax;
 

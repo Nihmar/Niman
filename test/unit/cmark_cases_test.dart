@@ -1,5 +1,5 @@
 /// Documents where our reading once parted from `cmark-gfm`'s, held to the
-/// HTML `cmark-gfm` writes for them (`docs/dev/block-tree.md`).
+/// HTML `cmark-gfm` writes for them (`docs/records/block-tree.md`).
 ///
 /// The specs' examples cannot reach every shape containers make;
 /// `tool/cmark_harness.dart` finds the ones they miss on documents made at

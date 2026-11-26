@@ -1,5 +1,5 @@
 /// The conformance gate of the block tree and our inline parser
-/// (`docs/dev/block-tree.md`): every example of the GFM spec, of CommonMark
+/// (`docs/records/block-tree.md`): every example of the GFM spec, of CommonMark
 /// 0.31.2 and of `cmark-gfm`'s extension tests, written by `TreeHtml` and
 /// compared with the expected HTML under cmark's normalization.
 ///

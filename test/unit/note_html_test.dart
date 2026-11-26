@@ -274,7 +274,7 @@ void main() {
     expect(html, contains('font-family="system-ui, sans-serif"'));
   });
 
-  group('on the tree and its writer (docs/dev/block-tree.md, phase 7)', () {
+  group('on the tree and its writer (docs/records/block-tree.md, phase 7)', () {
     test("a callout's written title keeps its inlines", () {
       final html = body('> [!tip] Mind **this**\n> body\n');
       expect(

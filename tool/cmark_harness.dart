@@ -1,5 +1,5 @@
 /// Our reading held to `cmark-gfm` itself, on documents made at random
-/// (`docs/dev/block-tree.md`, "Next"): the specs' examples cannot reach
+/// (`docs/records/block-tree.md`, "Next"): the specs' examples cannot reach
 /// every shape containers make, and where they do not, the reading was
 /// the package's. Each document is written by `TreeHtml` and by
 /// `cmark-gfm` (`tool/cmark_render.py`, its binding through `uv`), the two

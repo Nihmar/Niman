@@ -1,7 +1,7 @@
 /// A note as HTML (#24): the body of an exported page.
 ///
 /// The note is read as the read view reads it — the tree, our inline parser
-/// (`docs/dev/block-tree.md`, phase 7) — and written by the writer
+/// (`docs/records/block-tree.md`, phase 7) — and written by the writer
 /// (`TreeHtml`), `cmark-gfm`'s HTML, so lists, footnotes and link references
 /// read as a document's. What the page draws its own way, as the read view
 /// draws it, it draws through the writer's hooks ([ExportHooks]): coloured

@@ -1,4 +1,4 @@
-/// The scanner's blocks made a tree (`docs/dev/block-tree.md`): the one
+/// The scanner's blocks made a tree (`docs/records/block-tree.md`): the one
 /// reading of a note's structure, which every surface can draw from.
 library;
 

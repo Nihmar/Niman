@@ -1,7 +1,13 @@
 # Release process
 
 CI builds **only from version tags** (`vX.Y.Z`, no suffixes).
-Workflow: `.github/workflows/release.yml`.
+Workflow: `.github/workflows/release.yml`. The one other workflow a tag
+starts is `.github/workflows/ocr-engine.yml`: a tag `ocr-engine-N` builds the
+OCR engine for every target and publishes it as a **prerelease** (the updater
+asks `/releases/latest`, which never answers with one, and `release.yml` runs
+on `v*` tags only). The app pins each file's URL, size and SHA-256 in
+`lib/src/ocr/ocr_engine_build.dart`, so a new engine is a new tag and an app
+release that points at it.
 
 ## Cutting a release
 
@@ -50,6 +56,10 @@ corrected after the fact with `gh release edit` without re-tagging.
 | Android | `.apk` (the official build; **the release pipeline never builds the testing flavor** — see below) |
 | Linux | `.tar.gz`, `.AppImage`, `.pkg.tar.zst` (Arch) |
 | Windows | Inno Setup installer (`.exe`), portable `.zip` |
+| macOS | `niman-<V>-macos.dmg` and `niman-<V>-macos.zip` (preview; the `.zip` keeps the bundle's symlinks and signature) |
+
+iOS is not built by the release: CI builds and tests it (`check.yml`), but
+it has no artifact until the app can be signed for a device and TestFlight.
 
 See `packaging/` for AppImage, Arch pkg, and Inno Setup details.
 
@@ -78,6 +88,9 @@ pages cut before this rule.
   ([#160](https://github.com/Nihmar/Niman/issues/160)). Never ship a
   release from a debug-signed build.
 - **Linux / Windows:** unsigned, as planned for v1.
+- **macOS:** signed ad hoc, as a build with no Developer ID is: Gatekeeper
+  asks for *Open Anyway* on the first launch. Developer ID signing and
+  notarisation come with the Apple Developer Program's secrets.
 
 ## Testing build (Android)
 
@@ -88,7 +101,9 @@ install side by side with the official app. The testing build is
 release-equivalent (same build type, signing, SDK, optimizations); its
 update management is disabled in full — no Updates settings section,
 no scheduler, no polling — since it is sideloaded and never on the
-release channel. See "Testing build" in `docs/dev/building.md`.
+release channel. See [The two Android builds](building.md#the-two-android-builds-issue-106)
+and, for the desktop, [The desktop testing build](building.md#the-desktop-testing-build)
+in `docs/dev/building.md`.
 
 ## After each commit (local rebuild)
 

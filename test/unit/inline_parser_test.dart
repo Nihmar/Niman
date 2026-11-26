@@ -1,4 +1,4 @@
-// Our inline parser (docs/dev/block-tree.md): what the spec examples do not
+// Our inline parser (docs/records/block-tree.md): what the spec examples do not
 // check — where each node stands in the leaf's text.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
