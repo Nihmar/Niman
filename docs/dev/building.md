@@ -138,8 +138,8 @@ Three more pieces belong to them:
 
 `site` (`.github/workflows/site.yml`) builds the documentation site on
 every pull request with the deploy's own steps — the Jekyll build from
-`pages.yml`, the step that wraps Niman's `{{…}}` template syntax in
-`{% raw %}`/`{% endraw %}` included. Publishing runs on `main` alone
+`pages.yml`, the step that hands Niman's `{{…}}` template syntax to
+Liquid as raw blocks included. Publishing runs on `main` alone
 (issue #441), so without it a layout, a Liquid tag or a `_config.yml` key
 Jekyll refuses would surface when the site deploys, after the merge
 (issue #470). It deploys nothing: `contents: read`, no artifact.
