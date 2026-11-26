@@ -325,14 +325,9 @@ void main() {
     });
 
     test('a remote picture with no alt text is its address', () {
-      final html = chapter('![](https://example.com/map.png)');
-      expect(
-        html,
-        contains(
-          '<a href="https://example.com/map.png">'
-          'https://example.com/map.png</a>',
-        ),
-      );
+      const address = 'https://example.com/map.png';
+      final html = chapter('![]($address)');
+      expect(html, contains('<a href="$address">$address</a>'));
     });
 
     test('a picture inside a link is its alt text, in the link only', () {
