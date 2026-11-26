@@ -12,7 +12,7 @@ at once, everywhere, and the choice is remembered on this device.
 
 | Theme | What it is |
 |-------|------------|
-| System | The device's own colors: the wallpaper palette (Material You on Android 12+, the accent color on Windows and GTK), falling back to Niman's own where the OS offers neither |
+| System | The device's own colors: the wallpaper palette (Material You on Android 12+, the accent color on Windows, macOS and GTK), falling back to Niman's own where the OS offers neither |
 | Niman | The app's own colors, taken from the logo (the default) |
 | Catppuccin | Latte by day, Mocha by night |
 | Solarized | Schoonover's light and dark |
@@ -82,7 +82,7 @@ shipped names included — is refused while it is typed.
 - **Export**, in a theme's ⋮ menu, writes that one theme into a single
   `.json` file wherever you say, through the system's own save dialog: the
   name, the format version, and the colors at day and at night. JSON and
-  not an `.ini`, because a theme is two structured maps of twenty-seven
+  not an `.ini`, because a theme is two structured maps of thirty-three
   colors.
 - **Import**, the row after *New theme*, reads such a file back. This is
   how a theme gets to another device: it is stored with the installation,

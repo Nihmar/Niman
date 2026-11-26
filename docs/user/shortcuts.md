@@ -146,7 +146,10 @@ Editor find/replace follows the familiar bindings:
 - `Ctrl/⌘+F` — find
 - `Ctrl/⌘+Alt+F`, or classic `Ctrl+H` on non-mac desktop — replace
 - `Esc` — close the find bar
-- `PageUp` / `PageDown` — move in results
+- `PageUp` / `PageDown`, or `F3` / `Shift+F3` — next / previous result
+- `Enter` / `Shift+Enter` — next / previous result (`Enter` in the
+  replacement field replaces the match instead)
+- `Tab` / `Shift+Tab` — between the query and the replacement fields
 
 Links: `Ctrl+click` a link in the source editor to follow it.
 
@@ -253,7 +256,7 @@ published at startup; on iOS they are the icon's quick actions):
   made first when there is none
 - **New todo** — opens the Todo tab's add-task dialog
 - **New note** — the Files FAB's "New note" flow
-- **New list note** — the Files FAB's "New list note" flow (desktop tray
+- **New list** — the Files FAB's "New list note" flow (desktop tray
   and Linux launcher; Android launchers and iOS show the first four)
 - **New voice note** — the Files FAB's "New voice note" flow (likewise)
 

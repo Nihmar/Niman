@@ -14,9 +14,11 @@ Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
 recognition, export, updates, diagnostics),
 the open **Library** (features, folders, journal, study, navigation, trash and history, sync,
-transcription, reminders), and **Maintenance** (re-index, rebuild the index, switch or
-close the library; in the settings window only the first two, since the
-rail's library window switches and closes).
+transcription, reminders), and **Maintenance** (re-index, rebuild the index, import a Notion
+export or a folder, convert an EPUB or an HTML file to Markdown, switch
+or close the library; in the settings window only the two library rows,
+switch and close, are left out, since the rail's library window switches
+and closes).
 Rebuilding deletes the library's index file and reads every note into a
 fresh one — the repair for an index a full disk or an interrupted update
 left unreadable, which a re-index over the same file could not fix. The
@@ -130,12 +132,13 @@ sync) in `.niman/settings.json`.
 | `indentWidth` | 2 | Spaces per indent (2–8, clamped) |
 | `newCardsPerDay` | 20 | New flashcards each deck shows per day (**Settings → Study → New cards per day**; 0 = none, up to 1000, clamped). **Reset all reviews** there makes every card of every deck new again; no note changes |
 | `tidyOnClose` | true | Tidy the Markdown of a note closed after an edit (**Settings → Editor → Tidy the Markdown on close**); notes over 4 MB are left as they are, and a `type: audio` note's clip document is never tidied |
+| `deleteCarriesNotes` | true | Which answer the delete question emphasises when the file's own notes (annotations, an OCR sidecar) could go with it (#717): the last one given, so the usual choice is one Enter away. The notes are never taken without the question |
 | `cascadeChecklist` | true | Ticking a checklist item ticks the tasks nested under it (**Settings → Editor → Tick nested checkboxes**); clearing a parent leaves its children as they are |
 | `linkPreview` | true | Whether hovering a link previews the note it points at (**Settings → Editor → Preview links**): a card at the pointer in the read view, with Ctrl (⌘) held in the editor, and a sheet from a long press on a touch screen (see [links](links.md#preview-a-link)) |
 | `frontmatterPanel` | true | Whether a note's frontmatter is drawn as the properties panel above it (**Settings → Editor → Properties panel**): closed until it is opened, away while the note is scrolled past its head. Off, a note is its own text everywhere (see [frontmatter](organization.md)) |
 | `lintRulesOff` | [] | The #72 rules on by default turned off, by id (`tight-lists`, `task-marker`, `list-spacing`, `closing-fence`, `fence-language`, `join-wrapped-items`, `join-paragraph-lines`, `split-paragraph-lines`), chosen in **Settings → Editor → Markdown rules**; a rule added in a later build runs, or not, as it ships |
 | `lintRulesOn` | [] | The #72 rules off by default turned on, by id (`hard-breaks-as-paragraphs`), chosen in the same place |
-| `spellDictionaries` | [] (= locale default) | hunspell dictionaries, selection order |
+| `spellDictionaries` | [] (= locale default) | Spellcheck dictionaries, selection order: hunspell's on Linux, the system's languages (`it-IT`) on Windows, macOS and iOS |
 | `reminderShowTokens` | false | Keep `+`/`@`/`#` markers in reminder notifications |
 | `journalFolder` | `Journal` | Where the [journal](journal.md)'s entries go (empty = the root) |
 | `journalEntryName` | `YYYY/MM/YYYY-MM-DD` | An entry's name: `YYYY` `MM` `M` `DD` `D`, `/` for a folder, `'quoted'` text |
@@ -144,7 +147,7 @@ sync) in `.niman/settings.json`.
 | `journalClockTimes` | false | Read an event's time as a clock (`09:00–12:00`, in the device's zone) rather than as `calendar.txt` writes it (`9-12`); the file is never touched by it (**Settings → Journal → Calendar → Event times**) |
 | `features` | none (= every feature on) | The switches that are off, by id: `{"todo": false}` (**Settings → Features**); an absent id reads as on, so a feature a later build adds is born on, and an id this build does not know is kept. Written only once a switch has been flipped (see [features](features.md)) |
 | `featuresReviewed` | false | Whether the Features introduction has been through its screen: written when the screen is left, never when it opens, and synced with the library |
-| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order, hidden destinations and start (**Settings → Navigation**): `{"order": [names], "hidden": [names], "start": name}` with `files`, `todo`, `search`, `home`, `quicknote`, `settings`, where `start` (**Opens on**) is absent for Files; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
+| `navigation` | none (= every destination, in the shipped order) | The bar's and the rail's order, hidden destinations and start (**Settings → Navigation**): `{"order": [names], "hidden": [names], "start": name}` with `files`, `todo`, `search`, `home`, `quicknote`, `study`, `settings`, where `study` starts hidden and `start` (**Opens on**) is absent for Files; a destination a later build adds goes in after its default neighbour, shown, and a name this build does not know is kept |
 
 The **Diagnostics and info** area also carries the first run again
 (#266): *What Niman can do* reopens the welcome deck read-only, and
@@ -165,6 +168,7 @@ leave the file at its next write.
 | `editorKind` | `source` | `source` or `wysiwyg` |
 | `enabledEditors` | both | Which editors the settings screen offers (never none) |
 | `treeSort` | `nameAsc` | Tree order and the way (`nameAsc`, `nameDesc`, `modifiedAsc`, `modifiedDesc`, `createdAsc`, `createdDesc`, `sizeAsc`, `sizeDesc`). Names order without regard to case or accents, and numbers by value: `note 2` before `note 10`, `apple` before `Zebra`, `Émile` among the e's |
+| `todoCollapsedSections` | `{done}` | The todo list's sections folded on this device, by section id (#1003): Done starts folded, and an empty set leaves every section open |
 | `treeView` | `list` | How the Files pane shows a folder: `list` (the tree) or `grid` |
 | `pinnedCollapsed` | false | Tree's pinned section rolled up |
 | `lineNumbers` | true | Editor row-number column |
@@ -184,6 +188,7 @@ leave the file at its next write.
 | `epubProgress` | `chapter` | What the books' progress line shows: `chapter`, `book` or `time` (the time left); also set by a tap on the line |
 | `epubTextScale` | 1.0 | The books' text size (0.8–2.5, wider than the note's); also set by a pinch over a book and, with a book on screen, by the zoom keys and commands |
 | `deviceNavigation` | none (= the library's `navigation`) | This device's own navigation, same shape as `navigation`, set by **Only on this device**; while there, it wins |
+| `deviceHome` | none (= the library's Home) | This device's own Home, the object `.niman/home.json` would hold, set by **Only on this device**; while there, it wins |
 
 The five folder keys — `listNoteFolder`, `templateFolder`,
 `attachmentsFolder`, `annotationsFolder`, `captureFolder` — are paths
@@ -201,7 +206,7 @@ takes the app down. Writes are atomic (temp file + rename).
 Brightness (day / night / system) and the theme the app wears are on
 **Themes** (below); UI language, last opened library, debug log toggle
 (default on), the keyboard shortcuts and the formatting keys, the
-commands pinned in the palette, and — on the desktops — *Close to the
+commands pinned in the palette, and — on Linux and Windows — *Close to the
 tray* (default on: the window's × hides Niman and leaves it running).
 
 ### Export
@@ -246,6 +251,9 @@ download the new version there and install it as you installed this one.
 A desktop install takes too many shapes (an AppImage run from anywhere, a
 tarball, a package, a setup, a disk image) for the app to replace the one
 that runs.
+
+On iOS the screen holds one row too, and it only says that the App Store
+keeps Niman up to date: there is nothing to check or download.
 
 On Android, `Automatic updates` (default off) checks GitHub Releases
 shortly after launch and then every 6 hours, quietly: a failure (offline,
