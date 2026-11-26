@@ -30,7 +30,8 @@ final class LayeredCluster {
   /// The cluster it is inside, or null at the top level.
   final LayeredCluster? parent;
 
-  /// The nodes it holds directly, in the order they were added.
+  /// The nodes the caller put in it directly, in the order they were added.
+  /// The layout's own stand-ins and border nodes are not listed.
   final List<LayeredNode> nodes = [];
 
   /// The clusters it holds directly, in the order they were added.
@@ -41,6 +42,14 @@ final class LayeredCluster {
 
   /// The node that stands for its bottom: every member lies above it.
   late final LayeredNode borderBottom;
+
+  /// The node on its left side in each rank of its box, from [minRank] on:
+  /// the one in rank `r` is `borderLeft[r - minRank]`. Empty until the layout
+  /// adds them.
+  final List<LayeredNode> borderLeft = [];
+
+  /// The node on its right side in each rank of its box, from [minRank] on.
+  final List<LayeredNode> borderRight = [];
 
   /// The first rank of its box, once ranked: the rank of [borderTop].
   int minRank = 0;

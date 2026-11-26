@@ -12,6 +12,7 @@ library;
 import 'dart:typed_data';
 
 import 'package:niman/src/diagrams/layered_acyclic.dart';
+import 'package:niman/src/diagrams/layered_edge.dart';
 import 'package:niman/src/diagrams/layered_graph.dart';
 import 'package:niman/src/diagrams/layered_nesting.dart';
 import 'package:niman/src/diagrams/layered_nesting_cycles.dart';
@@ -29,17 +30,28 @@ import 'package:niman/src/diagrams/layered_rank_network.dart';
 void rankLayered(LayeredGraph graph) {
   if (graph.nodes.isEmpty) return;
   breakCycles(graph);
+  // Room for a label on a rank between the ends of every edge: ranks are
+  // twice as far apart, so an edge that has a label has a rank to put it in.
+  final labelled = [
+    for (final edge in graph.edges)
+      if (edge.ranked && edge.hasLabel) edge,
+  ];
+  graph.rankSpacing = labelled.isEmpty ? 1 : 2;
   final nesting = LayeredNesting.add(graph);
   breakNestingCycles(graph);
-  final network = RankNetwork.of(graph, nesting.nodeRankFactor);
+  final network = RankNetwork.of(
+    graph,
+    nesting.nodeRankFactor,
+    spacing: graph.rankSpacing,
+  );
   networkSimplex(network);
   _normalize(network.rank);
   for (final node in graph.nodes) {
     node.rank = network.rank[node.index];
   }
-  _removeEmptyRanks(graph, nesting.nodeRankFactor);
+  _removeEmptyRanks(graph, nesting.nodeRankFactor, labelled);
   nesting.cleanup();
-  _startAtZero(graph);
+  _startAtZero(graph, labelled);
   for (final cluster in graph.clusters) {
     cluster.minRank = cluster.borderTop.rank;
     cluster.maxRank = cluster.borderBottom.rank;
@@ -60,7 +72,14 @@ void _normalize(Int32List ranks) {
 /// Drops the ranks no node is on, except the multiples of [factor]: those
 /// are the rows of nodes, and a long edge has a stand-in on each of them
 /// even where no box is. The rest were room for borders that did not come.
-void _removeEmptyRanks(LayeredGraph graph, int factor) {
+///
+/// A rank halfway along an edge of [labelled] is kept as well, for its
+/// label: it is held in `labelRank` once the ranks are closed up.
+void _removeEmptyRanks(
+  LayeredGraph graph,
+  int factor,
+  List<LayeredEdge> labelled,
+) {
   var last = 0;
   for (final node in graph.nodes) {
     if (node.rank > last) last = node.rank;
@@ -68,6 +87,10 @@ void _removeEmptyRanks(LayeredGraph graph, int factor) {
   final used = Uint8List(last + 1);
   for (final node in graph.nodes) {
     used[node.rank] = 1;
+  }
+  for (final edge in labelled) {
+    edge.labelRank = (edge.from.rank + edge.to.rank) >> 1;
+    used[edge.labelRank] = 1;
   }
   // How many ranks have gone by each rank.
   final gone = Int32List(last + 1);
@@ -79,15 +102,22 @@ void _removeEmptyRanks(LayeredGraph graph, int factor) {
   for (final node in graph.nodes) {
     node.rank -= gone[node.rank];
   }
+  for (final edge in labelled) {
+    edge.labelRank -= gone[edge.labelRank];
+  }
 }
 
-/// Moves the ranks of [graph]'s nodes so the lowest is 0.
-void _startAtZero(LayeredGraph graph) {
+/// Moves the ranks of [graph]'s nodes, and the label ranks of [labelled],
+/// so the lowest node is on 0.
+void _startAtZero(LayeredGraph graph, List<LayeredEdge> labelled) {
   var lowest = graph.nodes.first.rank;
   for (final node in graph.nodes) {
     if (node.rank < lowest) lowest = node.rank;
   }
   for (final node in graph.nodes) {
     node.rank -= lowest;
+  }
+  for (final edge in labelled) {
+    edge.labelRank -= lowest;
   }
 }

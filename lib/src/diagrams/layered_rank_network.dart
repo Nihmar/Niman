@@ -25,8 +25,10 @@ final class RankNetwork {
   }
 
   /// Reads the ranked edges of [graph]. A caller's edge is [rankFactor]
-  /// times as long as it asks to be; the nesting graph's own are not.
-  factory of(LayeredGraph graph, int rankFactor) {
+  /// times [spacing] times as long as it asks to be, and at least [spacing]
+  /// times [rankFactor] if it has a label, which needs a rank of its own;
+  /// the nesting graph's own edges are as long as they are.
+  factory of(LayeredGraph graph, int rankFactor, {int spacing = 1}) {
     final nodeCount = graph.nodes.length;
     final tail = <int>[];
     final head = <int>[];
@@ -37,7 +39,8 @@ final class RankNetwork {
       if (!edge.ranked) continue;
       final from = edge.from.index;
       final to = edge.to.index;
-      final length = edge.nesting ? edge.minlen : edge.minlen * rankFactor;
+      final asked = edge.hasLabel && edge.minlen < 1 ? 1 : edge.minlen;
+      final length = edge.nesting ? edge.minlen : asked * spacing * rankFactor;
       final merged = at[from * nodeCount + to];
       if (merged == null) {
         at[from * nodeCount + to] = tail.length;

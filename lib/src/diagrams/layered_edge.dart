@@ -81,6 +81,21 @@ final class LayeredEdge {
   /// How the ranking treats it.
   LayeredEdgeFlow flow = LayeredEdgeFlow.forward;
 
+  /// Whether it has a label.
+  bool get hasLabel => labelWidth > 0 || labelHeight > 0;
+
+  /// The stand-ins on it, one in each rank between its ends, from the one
+  /// below [from] to the one above [to]. Empty if it spans one rank or none.
+  /// Set when the edges are normalised.
+  final List<LayeredNode> chain = [];
+
+  /// The rank its label sits in, strictly between its ends, or -1 if it has
+  /// no label or has not been ranked.
+  int labelRank = -1;
+
+  /// The stand-in that holds the room for its label, once it is normalised.
+  LayeredNode? labelNode;
+
   /// Whether it is turned against the caller's direction.
   bool get reversed => flow == LayeredEdgeFlow.reversed;
 

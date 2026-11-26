@@ -49,6 +49,11 @@ final class LayeredGraph {
   /// The clusters outside every other, in the order they were added.
   final List<LayeredCluster> topClusters = [];
 
+  /// How many ranks apart the caller's own edges are drawn: 2 once there is
+  /// room for a label on every rank between two nodes, else 1. Set by the
+  /// ranking.
+  int rankSpacing = 1;
+
   /// The node named [id], or null.
   LayeredNode? node(String id) => _nodeById[id];
 
@@ -93,11 +98,13 @@ final class LayeredGraph {
     cluster.borderTop = addAuxiliary(
       LayeredNodeKind.border,
       parent: cluster,
+      side: LayeredBorder.top,
       name: 'top',
     );
     cluster.borderBottom = addAuxiliary(
       LayeredNodeKind.border,
       parent: cluster,
+      side: LayeredBorder.bottom,
       name: 'bottom',
     );
     return cluster;
@@ -110,6 +117,7 @@ final class LayeredGraph {
     double width = 0,
     double height = 0,
     LayeredCluster? parent,
+    LayeredBorder? side,
     String name = '',
   }) {
     final id = '\u0000${kind.name}${_auxiliary++}$name';
@@ -119,6 +127,7 @@ final class LayeredGraph {
       height: height,
       kind: kind,
       parent: parent,
+      side: side,
     );
   }
 
@@ -237,6 +246,7 @@ final class LayeredGraph {
     required double height,
     required LayeredNodeKind kind,
     required LayeredCluster? parent,
+    LayeredBorder? side,
   }) {
     _checkFree(id);
     final node = LayeredNode(
@@ -246,6 +256,7 @@ final class LayeredGraph {
       height: height,
       kind: kind,
       parent: parent,
+      side: side,
     );
     _nodes.add(node);
     _nodeById[id] = node;
