@@ -4,7 +4,17 @@
 
 Deletes go to `.trash/` (soft delete) or remove the file permanently
 (hard delete), depending on the library's `trashEnabled` setting
-(default true). Restore by moving the file back out of `.trash/`.
+(default true).
+
+**The Trash screen.** It opens from the trash button in the tree's
+footer (on a phone, in the top bar) and from *Settings → Trash and
+history → Trash*. Each item shows its name, the folder it was deleted
+from (*was at …*, or *was in the library root*) and the day it went.
+**Restore** puts it back where it was; **Delete permanently** removes it
+for good, after asking; **Empty** (tooltip **Empty trash**) deletes
+everything in `.trash/` for good, after asking. A row at the foot of the
+screen shows the auto-empty wait and opens that setting. You can still
+restore by hand by moving the file back out of `.trash/`.
 
 Deleting a file that notes were written about — a PDF's annotations, a
 scan's recognized text — asks about them on the delete's own question:
@@ -34,15 +44,15 @@ Every feature is on every platform, only the shape of it differs
 (`platforms.md`).
 
 **Emptying it on its own.** *Settings → Trash and history → Auto-empty
-trash* is **Never** until you set it: pick a wait (a week, a month, a
-year) and every deletion that has sat in `.trash/` longer than that is
-deleted for good
-the next time the library opens. It happens quietly and there is no
-undo, which is why nothing is deleted until you choose a wait. Only what
-Niman put in the trash is counted — a file you moved into `.trash/`
-yourself carries no deletion date and is left where it is. **Empty
-trash**, by hand, is not that: it takes everything in `.trash/`, yours
-included.
+trash* is **Never** until you set it: pick a wait (**7 days**, **30
+days**, **90 days**, **180 days** or **365 days**) and every deletion
+that has sat in `.trash/` longer than that is deleted for good the next
+time the library opens. The row is disabled while the trash is off. It
+happens quietly and there is no undo, which is why nothing is deleted
+until you choose a wait. Only what Niman put in the trash is counted — a
+file you moved into `.trash/` yourself carries no deletion date and is
+left where it is. **Empty trash**, by hand, is not that: it takes
+everything in `.trash/`, yours included.
 
 ## History
 
@@ -140,7 +150,9 @@ aliases: [My alias]
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
 shows the checklist, `shopping-list` the same with a quantity per item,
-`audio` shows the recordings, `slides` shows a deck, `kanban` shows a board). Everything else is your own vocabulary —
+`audio` shows the recordings, `slides` shows a deck, `kanban` shows a
+board, `flashcard` a deck of cards to review: see
+[flashcards](flashcards.md)). Everything else is your own vocabulary —
 stored, searchable, but driving nothing.
 
 `pinned: true` notes appear in the tree's pinned section.
@@ -236,6 +248,12 @@ newest first; size counts bytes and smallest first and largest first — a
 folder's own size is 0, and the folders keep the lead whichever field is
 chosen. Ties fall back to the name. The order and the way are one setting
 of this device, kept like the tree's width (see [settings](settings.md#library-settings-kept-on-this-device)).
+
+On a wide window with no title bar of Niman's own — a tablet — nothing
+else says which library the tree shows, so a header tops it: the
+library's name, the folder the selection is in under it (nothing under
+it at the root), and a **Switch library** button. The desktops have a
+title bar of Niman's own, and the tree has no header there.
 
 The folders you have open stay open: they are kept with the library's open
 notes on this device, so a restart or a switch of library finds the tree as
@@ -349,14 +367,15 @@ What does not ask the rule, because it already says where:
   note is open or selected in the tree.
   The view shows the whole library, so its New starts at the top of it;
   to make something inside a folder, use that folder's menu (below).
-- **Create … here** in a folder's context menu, and the tree's and the
-  grid's right-click menus on empty space: the note or folder goes in that
-  folder (the library root, for the empty space of the tree). The same
-  menus offer **New voice note here**, **New slides here**, **New
-  flashcards here** and **New kanban board here** (#997): the kind is made right there instead of where
-  the setting says, with the content it always starts from. The list
-  note, the journal and a capture keep folders of their own, so none of
-  them is on a folder's menu.
+- **New note here**, **New from template here** and **New folder here**
+  in a folder's context menu, and the tree's and the grid's right-click
+  menus on empty space: the note or folder goes in that folder (the
+  library root, for the empty space of the tree). The same menus offer
+  **New voice note here**, **New slides here**, **New flashcards here**
+  and **New Kanban board here** (#997): the kind is made right there
+  instead of where the setting says, with the content it always starts
+  from. The list note, the journal and a capture keep folders of their
+  own, so none of them is on a folder's menu.
 - A link that names a path (`[[Sub/Foo]]`), a template whose frontmatter
   names its `folder`, a Home action's own folder, and the folder picked in
   a capture.
@@ -448,18 +467,20 @@ attach it to a mail, to drag it somewhere, to open it in another editor.
 Long-press a note in the tree (right-click on desktop) and pick:
 
 - **Show in file manager** — opens the note's folder with the note
-  itself selected. On Windows that is Explorer; on Linux it is whichever
-  file manager answers the freedesktop interface (Nautilus, Dolphin,
-  Nemo, Thunar, …), falling back to just opening the folder when none
-  does.
+  itself selected. On Windows that is Explorer; on macOS it is Finder;
+  on Linux it is whichever file manager answers the freedesktop
+  interface (Nautilus, Dolphin, Nemo, Thunar, …), falling back to just
+  opening the folder when none does.
 - **Open in default app** — hands the `.md` to whatever application the
   system opens Markdown with, or to the default text editor when
   nothing claims `.md`.
 
-Both entries are desktop only (Linux and Windows) and appear on notes,
-not on folders. Neither changes the note or moves anything: if the file
-is not on disk, or the system refuses to open it, Niman says so and the
-note stays exactly as it was.
+**Show in file manager** is desktop only (Linux, Windows and macOS):
+Android has no file manager to select a path in. **Open in default app**
+is on the desktops and on Android. Both appear on notes, not on
+folders. Neither changes the note or moves anything: if the file is not
+on disk, or the system refuses to open it, Niman says so and the note
+stays exactly as it was.
 
 ### Files that are not notes
 
@@ -471,7 +492,7 @@ library.
   pane, on every platform: a picture fitted to the pane, zoomed with a
   pinch or the mouse wheel and dragged around; a PDF page after page,
   zoomed the same way. The row under them names the file and, on
-  desktop, offers **Open in default app**.
+  the desktops and Android, offers **Open in default app**.
 - The row under a PDF or a book has a **link** button: it copies a link
   to the place being read, to paste into a note (see
   [links](links.md#links-into-a-pdf-or-a-book)).
@@ -563,7 +584,7 @@ library.
   the book, or swiping Niman away, stops it.
 - **Anything else** (an audio clip, an archive) does not go
   in the editor: the pane says the file is not a text note, and on
-  desktop offers **Open in default app** right there.
+  the desktops and Android offers **Open in default app** right there.
 - **With the readers off** ([Features](features.md)), a PDF or a book is
   not shown either: the pane names the file and offers **Open in default
   app**, on every platform. Pictures are still shown.
@@ -665,7 +686,7 @@ leaves those commands out too.
 ## Opening a file outside any library
 
 Not every text file belongs in a library: a project's README, a draft
-from another app, a downloaded article. On Linux and Windows,
+from another app, a downloaded article. On Linux, Windows and macOS,
 **Open file** (`Ctrl+Shift+O`, or *Note: Open file…* in the command
 palette) opens one on its own, with Niman's editor and nothing else. The
 screen that opens a library offers the same button, so no library is
@@ -686,7 +707,7 @@ The file gets the editor, both of them, and the preview. It gets none of
 what a library adds:
 
 - **Saved where it is**, as it is. Nothing is written beside it.
-- **Not indexed**: search, tags and backlinks never see it.
+- **Not indexed**: search, tags and *Links to this note* never see it.
 - **No history, no sync, no trash.**
 - **Links shown, not followed** into a library. Its frontmatter is text:
   a `type:` in it draws no list.
@@ -968,7 +989,7 @@ app's HTML export, a pile of Markdown — becomes a folder of notes. It starts
 from a **drop on the window** (Linux, Windows and macOS; see
 [Dropping files on the window](#dropping-files-on-the-window)) and from
 *Settings → Maintenance → Import a folder*, which picks the folder on every
-platform ([platforms](platforms.md#importing-a-folder) says how on Android
+platform ([platforms](platforms.md) says how on Android
 and iOS). The offer names the folder and says what it will make — "its
 Markdown files (12) are copied and its web pages (30) converted into
 notes" — and nothing is touched until you accept. The folder you chose is
@@ -1139,7 +1160,8 @@ the **language** spoken in your recordings (naming it beats letting whisper
 detect it, and *Same as the app* follows the app's language). Tiny, base,
 small, medium and large are offered, from fastest-and-least-accurate to
 most-accurate-and-hungry, and a downloaded model can be deleted there to
-free its space.
+free its space. A phone does not offer large, and marks medium as slow
+there.
 
 A WAV recording transcribes on every platform. A recording in another
 format (m4a, mp3, AAC…) transcribes on Android and on a Mac (a clip is

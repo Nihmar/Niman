@@ -103,9 +103,9 @@ a preset and selected when they match none.
   are not downloaded while their switch is off.
 - **PDF and EPUB.** With the readers off, a PDF or a book opens as a pane
   that names the file and offers **Open in default app**, on Linux,
-  Windows and Android alike. On Android the file is handed over through a
-  read-only grant for that one start. Pictures are shown whatever the
-  readers say.
+  Windows, macOS and Android alike. On Android the file is handed over
+  through a read-only grant for that one start. Pictures are shown
+  whatever the readers say.
 - **Shortcuts, notifications and widgets.** A launcher shortcut, a
   reminder notification or a widget tap that leads to a feature that is off
   opens one sentence, *Todo and reminders is off in this library*, with
