@@ -6,11 +6,15 @@ resident memory, and bring it down.
 ## Status and method
 
 This is the **code audit** half of the investigation. The absolute numbers
-(resident at idle, with a large library, with many tabs, and after long
-editing sessions) are **not recorded here yet**: they come from a profile
-build on a Linux or Windows desktop, following the procedure below. Each
-fix that follows asks for a printed before/after, so the figures land with
-the change that moves them.
+are in [memory-usage.md](../records/memory-usage.md): the resident set the
+app's log prints, the floor of about 270 MB attributed by owner with
+`tool/memory_report.dart` (#1193), and nine holders ranked with the fix
+each asked for. Those fixes shipped in 0.3.2 (#1194–#1202): pictures decoded
+at the size they are drawn, the registry of rebuildable caches (see "Giving
+memory back"), the block scanner's typed arrays, no whole-note join, the
+read view's parse cache bounded, one scanner per note, the tree windowed,
+a root resync a directory at a time, and the smaller holders. A fix asks for
+a printed before/after, so the figures land with the change that moves them.
 
 What *is* in this file: the owners of desktop memory, read from the code,
 with their limits and lifetimes; what is kept for notes and tabs that are
@@ -74,7 +78,7 @@ B a line and 193 B a task.
 | Open note text | One `SourceBuffer` per open note (the whole file, in memory) | One per open tab; dropped when the tab closes; the library's workspace is disposed on `close()` | `lib/src/markdown/source_buffer.dart`, `lib/src/workspace/workspace_controller.dart` |
 | Undo history | Up to 200 `EditStep`s per note, each holding the removed and inserted text; an edit over a long span keeps only the lines that changed (`line_hunks.dart`) | `EditHistory.limit = 200` steps **and** `EditHistory.defaultBudget` = 16 M code units (32 MB of UTF-16) of text, the oldest dropped first and the newest never (#1050); one per open note, owner's history survives a tab move but not library close | `lib/src/markdown/edit/edit_history.dart`, `edit_step.dart`, `line_hunks.dart` |
 | Parsed / highlighted spans | `SourceStyler`'s line store, block list and per-line tokens for every open note; the read view's block heights | Per open note; rebuilt on edit; released with the note | `lib/src/markdown/source_styler.dart`, `lib/src/markdown/render/block_height_map.dart` |
-| KaTeX boxes and rasters | Typeset formulas, as boxes (512) and rasterized images (128) | Bounded per `MathCache`/`MathRaster`; one cache per `NoteView` (`_mathCache`), disposed in `NoteView.dispose` | `lib/src/preview/math_cache.dart`, `lib/src/preview/math_raster.dart` |
+| KaTeX boxes and rasters | Typeset formulas, as boxes (512) and rasterized images (128) | Bounded per `MathCache`/`MathRaster`; one cache per `NoteView` (`_parts.mathCache`, `note_view_parts.dart`), disposed in `NoteView.dispose` | `lib/src/preview/math_cache.dart`, `lib/src/preview/math_raster.dart` |
 | Flutter's image cache | Decoded images in the read view and attachments — default **1000 images / 100 MB** | Global to the engine, not per library; released only by age/size eviction | engine (`PaintingBinding.imageCache`) |
 
 The open-note buffers are the largest scaling term: **memory is
@@ -92,9 +96,9 @@ There are **three connections**, not two:
 - `AppDatabase` — app settings, one row; the small one.
 - `IndexDatabase` — the library's index (tree rows, stems, tags, links,
   FTS5), on its **own background isolate** (`NativeDatabase.createInBackground`
-  in `defaultIndexDatabase`, `library_state.dart`).
+  in `defaultIndexDatabase`, `library_databases.dart`).
 - A second `IndexDatabase` over the **same file** for search, also on its own
-  isolate (`defaultSearchDatabase`, `library_state.dart`).
+  isolate (`defaultSearchDatabase`, `library_databases.dart`).
 
 Each connection carries SQLite's own page cache (a few MiB by default, in
 the isolate's native heap) and, for the index, the FTS5 tables. `PRAGMA
@@ -108,12 +112,15 @@ switching libraries?".
 
 ### Materialized tree rows
 
-`NoteDao.tree` runs **one query** returning the rows of the root and of the
-expanded folders (`NoteDao.tree`, `dao.dart`); the tree widget materializes only what it
-shows. At 1M notes the index holds 1M row objects *on disk*, but the app
-holds only the visible/expanded set. Confirm by expanding the whole tree of
-a large library that the query's result set is what grows — that is the term
-to watch, not the library size itself.
+Since #1200 the tree holds the pages of rows around the viewport, not the
+rows it has scrolled past: `VisibleTree` (`ui/visible_tree.dart`) keeps
+only counts, and `TreePages` (`ui/tree_pages.dart`) reads and lets go of the
+pages as the list scrolls (see [architecture.md](architecture.md), "Tree
+rows", and [tree-window.md](../records/tree-window.md)). At 1M notes the
+index holds 1M row objects *on disk*, and the app holds the few pages on
+screen: a folder of a million notes held 3.6 MB after a scroll to its end,
+against some 700 MB before. `tree_window_memory_test.dart` in `test/perf/`
+measures it.
 
 ### The PDF engine, the WebView, the EPUB reader
 
@@ -147,9 +154,9 @@ The transcription model is **kept loaded between clips**
 (`SpeechTranscriber`, "the model stays loaded after each call; the queue
 calls `release()` when it empties"). A whisper model is tens to hundreds of
 MB. This is the largest single item that can sit resident with nothing
-visibly running — the first thing to check whether it is released when the
-transcription queue drains, and whether it should be released after a
-timeout rather than held for the session.
+visibly running, which is why `TranscriptionQueue` releases it the moment
+the queue drains and when it is disposed (`_release`); whether it should
+also go after a timeout is not decided.
 
 ### Background isolates
 
@@ -208,7 +215,7 @@ anything whose loss shows as a reload.
 Read from the code, the hot paths hold a **window**, not the library or the
 whole file:
 
-- FTS5 for search; the tree is materialized per expanded folder; the index
+- FTS5 for search; the tree holds the pages around the viewport (#1200); the index
   full scan is **directory-at-a-time with bounded memory** (#302).
 - `filePathsUnder` is an index seek, not a walk (`dao.dart`).
 - A novel-length note is read in slices for the scan
@@ -224,17 +231,24 @@ proportional to the note's lines).
 ## Candidate fixes
 
 Each is one issue, with a printed before/after (perf tests print; the
-absolute bar goes behind `NIMAN_PERF`):
+absolute bar goes behind `NIMAN_PERF`). The ones the 0.3.2 round of
+[memory-usage.md](../records/memory-usage.md) took are marked done; the rest
+stay open.
 
-1. **Release the transcription model when it is not needed** (on queue
-   drain, or after a timeout, or when the window goes to the tray). Measure
-   RSS with a model loaded and after release.
+1. ~~**Release the transcription model when it is not needed** (on queue
+   drain, or after a timeout, or when the window goes to the tray).~~ Done on
+   the queue's drain and on its disposal (`TranscriptionQueue._release`); a
+   timeout and the tray are not built.
 2. **Drop the engine image cache on library close** (or lower its cap for
    the read view), so switching libraries does not carry decoded images.
-   Measure the image cache's current/limit bytes in DevTools.
+   Measure the image cache's current/limit bytes in DevTools. Still open:
+   #1194 decodes a picture at the size it is drawn, so the cache holds far
+   less, but nothing empties it on a library close.
 3. **Verify closed tabs release their note** — a perf-style integration test
    that opens N notes, closes them, and prints the Dart heap from the VM
-   service before and after.
+   service before and after. Still open: #1202 releases the old note before
+   the next one loads in a pane, and `memory_retention_test.dart` prints what
+   one open buffer holds, but no test closes a tab and reads the heap.
 4. ~~**Bound `EditHistory` by bytes, not only by record count**, so 200 large
    deletions of a novel cannot hold it whole.~~ Done (#1050).
 5. **Release the search connection when no search screen is open** if the
@@ -242,4 +256,7 @@ absolute bar goes behind `NIMAN_PERF`):
 6. **A resident-memory regression guard**: an integration test (or a
    `NIMAN_PERF`-gated perf file) that opens/closes a library and several
    notes and asserts the process returns near its starting RSS, printed with
-   the number it saw.
+   the number it saw. Partly done (#1193): `test/perf/memory_retention_test.dart`,
+   `block_memory_test.dart` and `tree_window_memory_test.dart` print what a
+   structure holds and gate their bars behind `NIMAN_PERF`; the library
+   open/close round trip is still open.
