@@ -64,11 +64,8 @@ final class DiagramRenderer {
   void _edges(DiagramTarget target) {
     for (final edge in layout.edges) {
       if (edge.edge.style == FlowEdgeStyle.invisible) continue;
-      target.cubic(
-        edge.start,
-        edge.control1,
-        edge.control2,
-        edge.end,
+      target.curve(
+        edge.path,
         color: style.palette.edge,
         strokeWidth: edge.edge.style.width,
         dashed: edge.edge.style == FlowEdgeStyle.dotted,

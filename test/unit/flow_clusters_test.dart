@@ -49,11 +49,16 @@ void main() {
     final box = {for (final s in layout.subgraphs) s.subgraph.id: s.rect};
     final start = layout.nodes.firstWhere((n) => n.node.id == 'M').rect;
     // Each comes wholly below the last, with the style's gap between:
-    // room for the arrow joining them.
+    // room for the arrow joining them. Between two boxes the ranks the
+    // edge crosses add a few pixels of their own, so the gap is the
+    // style's, and no more than a rank's tenth over it.
     final gap = const DiagramStyle().rankGap;
     expect(box['F1']!.top - start.bottom, moreOrLessEquals(gap));
-    expect(box['F2']!.top - box['F1']!.bottom, moreOrLessEquals(gap));
-    expect(box['F3']!.top - box['F2']!.bottom, moreOrLessEquals(gap));
+    for (final (above, below) in [('F1', 'F2'), ('F2', 'F3')]) {
+      final between = box[below]!.top - box[above]!.bottom;
+      expect(between, greaterThanOrEqualTo(gap), reason: below);
+      expect(between, lessThan(gap * 1.1), reason: below);
+    }
     // The edges run from outline to outline.
     final joining = layout.edges.firstWhere(
       (e) => e.edge.from == 'F1' && e.edge.to == 'F2',

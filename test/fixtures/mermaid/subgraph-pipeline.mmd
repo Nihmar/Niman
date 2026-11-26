@@ -1,0 +1,116 @@
+flowchart TB
+    classDef manuale fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a
+    classDef auto fill:#dcfce7,stroke:#15803d,color:#14532d
+    classDef dati fill:#fef9c3,stroke:#a16207,color:#713f12
+    classDef dubrink fill:#f3f4f6,stroke:#4b5563,color:#111827,stroke-dasharray:4 3
+
+    subgraph LEG["Legenda"]
+        direction LR
+        L1["Manuale (utente)"]:::manuale
+        L2["Automatico (funzione asincrona)"]:::auto
+        L3[("Dato salvato da noi")]:::dati
+        L4{{"Su Dubrink"}}:::dubrink
+    end
+
+    subgraph S1["1 · Nascita delle righe CBAM"]
+        A1["Analisi CBAM da desktop<br/>Ricerca prospetti, Allinea / Riallinea CBAM"]:::manuale
+        A2["LanciaCorrezioneCBAM<br/>LanciaCorrezioneCBMRNP"]:::auto
+        A3["Aggiungi Import (web)"]:::manuale
+        A4["Crea righe D mancanti<br/>AllineaRigheCbam, passo 1"]:::auto
+        R0[("CBMRNP: riga R livello 1<br/>+ D senza produttore con tutto il peso<br/>STATO_INVIO_DUBRINK vuoto")]:::dati
+        A1 --> R0
+        A2 --> R0
+        A3 --> R0
+        A4 --> R0
+    end
+
+    subgraph S2["2 · Produttori e pesi"]
+        P1["Anagrafica produttore<br/>web Impianti Produttivi"]:::manuale
+        P0[("CBAMPR senza CUID_DUBRINK")]:::dati
+        P2["Produttori e pesi / Associa Plant (web)<br/>Associazione produttori (desktop)"]:::manuale
+        D1[("D con produttore e peso<br/>se già inviata: STATO_INVIO 'I'")]:::dati
+        P1 --> P0
+        P2 --> D1
+    end
+    R0 --> P2
+    P0 -.-> P2
+
+    subgraph S3["3 · Invio: AllineaRigheCbam passo 2 = InviaRigheImportADubrink"]
+        I1["Produttore senza CUID<br/>POST /supplier/new + /supplier/connect"]:::auto
+        I2["D senza CUID<br/>POST /import-line/batch-create<br/>anche senza produttore"]:::auto
+        I3["D in 'I'<br/>POST /import-line/{cuid}"]:::auto
+        I4["D con produttore<br/>POST /import-line/{cuid}/transition submit"]:::auto
+        I5["Passa righe al produttore<br/>AllineaRigheCbam passo 3<br/>D con produttore ancora in Draft"]:::auto
+        X1{{"Supplier creato e connesso<br/>CBAMPR.CUID_DUBRINK, CONNESSO_DUBRINK 'S'"}}:::dubrink
+        X2{{"Import line Draft (1)<br/>CUID_DUBRINK, STATO_INVIO 'R'"}}:::dubrink
+        X3{{"Submitted (2): passata al produttore<br/>da qui la D non si modifica più"}}:::dubrink
+        I1 --> X1
+        I2 --> X2
+        I3 --> X2
+        X2 --> I4
+        I4 -->|"ok"| X3
+        X2 --> I5
+        I5 --> X3
+    end
+    R0 --> I2
+    D1 --> I1
+    D1 --> I2
+    D1 --> I3
+    I4 -->|"errore: torna 'I', riprova al giro dopo"| D1
+
+    subgraph S4["4 · Lavoro del produttore e ritorno dello stato"]
+        X4{{"Il produttore inserisce le emissioni<br/>fino a Completed (5)"}}:::dubrink
+        X5["Produttore messo o cambiato<br/>direttamente sul portale Dubrink"]:::manuale
+        U1["AggiornaStatoRigheImportDaDubrink<br/>AllineaRigheCbam passo 4<br/>D con CUID non ancora a 5"]:::auto
+        U2["Icona stato della riga (web Import Soggette)<br/>Allinea da Dubrink (desktop)"]:::manuale
+        D2[("D: DUBRINK_STATUS, produttore,<br/>costi, emissioni default / effettive / imponibili")]:::dati
+        C1["Confronto con Dubrink<br/>AllineaRigheCbam passo 5<br/>sola lettura, differenze via mail"]:::auto
+        X3 --> X4
+        X4 --> U1
+        X5 --> U1
+        U1 --> D2
+        U2 --> D2
+        D2 --> C1
+    end
+
+    subgraph S5["5 · Relazioni: ciclo a parte, fuori da AllineaRigheCbam"]
+        RL0["Richiesta relazione per periodo<br/>web Relazioni"]:::manuale
+        RL1[("CBAMRE")]:::dati
+        RV["VerificaRichiesteRelazioni<br/>delegante, periodo, date, pesi completi,<br/>nessuna D senza produttore, righe inviate"]:::auto
+        RE[("Esiti via mail IMPORT_DUBRINK")]:::dati
+        RI["InviaRelazioniADubrink<br/>POST /xml-report/new"]:::auto
+        RR["InviaRigheRelazioniADubrink<br/>POST /xml-report/{cuid}"]:::auto
+        RS["SalvaRelazioniDaDubrink<br/>GET /xml-report/{cuid}, /attachment/{cuid}/download<br/>download e archiviazione ArcDoc RELCBAM"]:::auto
+        XR1[("CBAMRE INVIATA")]:::dati
+        XR2{{"PRONTA: le righe passano a 5<br/>anche quelle ancora in Draft"}}:::dubrink
+        XR3[("DISPONIBILE → SCARICABILE → SCARICATA")]:::dati
+        RD["Download del PDF (web Relazioni)"]:::manuale
+        RL0 --> RL1
+        RL1 --> RV
+        RV -->|"errori"| RE
+        RV -->|"ok"| RI
+        RI --> XR1
+        XR1 --> RR
+        RR --> XR2
+        XR2 --> RS
+        RS --> XR3
+        XR3 --> RD
+    end
+    D2 --> RV
+    XR2 -.->|"lo stato 5 torna con l'aggiornamento"| U1
+
+    subgraph S6["Console Dubrink del desktop: gli stessi passi a mano, con la form di modifica del payload"]
+        M1["Produttori: Invia · Connetti · Aggiorna"]:::manuale
+        M2["Righe import: Invia · Aggiorna"]:::manuale
+        M3["Relazioni: Invia relazione · Invia righe · Scarica · Stato · Confronta"]:::manuale
+        M4["Manutenzione: un pulsante per ogni funzione asincrona,<br/>più Crea righe D mancanti, Passa righe al produttore, Confronta righe"]:::manuale
+    end
+    M1 -.-> I1
+    M2 -.-> I2
+    M2 -.-> I3
+    M3 -.-> RI
+    M3 -.-> RR
+    M3 -.-> RS
+    M4 -.-> A4
+    M4 -.-> I5
+    M4 -.-> RV

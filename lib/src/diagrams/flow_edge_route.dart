@@ -2,52 +2,46 @@
 /// its label sits in (#530), in canonical space.
 library;
 
-import 'dart:math' as math;
-
 import 'package:flutter/painting.dart';
 import 'package:niman/src/diagrams/diagram_layout.dart';
 import 'package:niman/src/diagrams/diagram_metrics.dart';
 import 'package:niman/src/diagrams/diagram_style.dart';
+import 'package:niman/src/diagrams/flow_edge_curve.dart';
 import 'package:niman/src/diagrams/flow_model.dart';
-
-/// The curve's straight run before it reaches a node, as a share of the gap.
-const double _curveBend = 0.45;
+import 'package:niman/src/diagrams/layered_edge.dart';
 
 /// How far from an edge's end the text there begins, along the edge.
 const double endTextGap = 4;
 
-/// How far an edge keeps from a node it goes round.
-const double _clearance = 16;
+/// What an edge ends on: the rectangle of a node, or of a subgraph's box.
+typedef FlowEnd = ({Rect rect, bool box});
 
-/// How many steps along a curve are checked for the nodes it goes round.
-const int _samples = 24;
-
-/// How far a cycle's way back bulges past the nodes it goes round.
-const double _backBulge = 36;
-
-/// The curve joining two placed nodes; [across] when the chart is drawn
-/// left to right or right to left, and its label box is laid on its side.
+/// The curve joining two placed ends, and where its texts go; [across] when
+/// the chart is drawn left to right or right to left, and its label box is
+/// laid on its side.
 ///
-/// A downward edge leaves its node's bottom at [startX] and reaches the
-/// other's top at [endX]: the layout spreads the edges sharing a side
-/// along it. Without them it uses the middles.
+/// [routed] is the layout's route for the edge: the points it runs through,
+/// a stand-in on each rank it passes and one for its label. A downward edge
+/// leaves its tail's bottom at [startX] and reaches its head's top at
+/// [endX]; the layout spreads the edges sharing a side along it, and
+/// without them the middles are used. An edge the layout turned back to
+/// break a cycle leaves the top and reaches the bottom. An end on a
+/// subgraph's box is anchored on its outline already. With no stand-ins it
+/// is one cubic; with some it is a smooth curve through them.
 ///
-/// [passing] are the nodes of the ranks the edge passes, which it bends
-/// round: the ranks strictly between its ends, or for a cycle's way back
-/// the ranks it spans, its own two included. The layout hands only those,
-/// so an edge between neighbouring ranks — nearly every one — looks at
-/// none.
+/// An edge with no route — a self loop, a tie between a note and its node —
+/// or one the layout could not rank is drawn beside its ends: a loop on the
+/// right of the node, a flat edge from side to side.
 LaidOutEdge routeFlowEdge(
   FlowEdge edge,
-  Map<String, Rect> rects,
+  FlowEnd? from,
+  FlowEnd? to,
+  LayeredEdge? routed,
   DiagramStyle style, {
   required bool across,
-  Iterable<Rect> passing = const [],
   double? startX,
   double? endX,
 }) {
-  final from = rects[edge.from];
-  final to = rects[edge.to];
   if (from == null || to == null) {
     return LaidOutEdge(
       edge: edge,
@@ -57,57 +51,24 @@ LaidOutEdge routeFlowEdge(
       end: Offset.zero,
     );
   }
-  Offset start;
-  Offset control1;
-  Offset control2;
-  Offset end;
-
+  final List<Offset> path;
+  Offset? labelAt;
   if (edge.from == edge.to) {
-    final dy = from.height * 0.22;
-    start = Offset(from.right, from.center.dy - dy);
-    end = Offset(from.right, from.center.dy + dy);
-    control1 = Offset(from.right + 40, from.center.dy - 34);
-    control2 = Offset(from.right + 40, from.center.dy + 34);
-  } else if ((to.center.dy - from.center.dy).abs() < 1) {
-    final right = to.center.dx >= from.center.dx;
-    start = Offset(right ? from.right : from.left, from.center.dy);
-    end = Offset(right ? to.left : to.right, to.center.dy);
-    final bend = (end.dx - start.dx) * _curveBend;
-    control1 = Offset(start.dx + bend, start.dy);
-    control2 = Offset(end.dx - bend, end.dy);
-  } else if (to.center.dy > from.center.dy) {
-    start = Offset(startX ?? from.center.dx, from.bottom);
-    end = Offset(endX ?? to.center.dx, to.top);
-    final bend = (end.dy - start.dy) * _curveBend;
-    final aside = _aside(start, end, bend, passing);
-    control1 = Offset(aside ?? start.dx, start.dy + bend);
-    control2 = Offset(aside ?? end.dx, end.dy - bend);
+    path = _loop(from.rect);
+  } else if (routed != null && routed.points.length >= 2) {
+    path = _ranked(routed, from, to, startX, endX);
+    final centre = routed.labelCenter;
+    if (centre != null) labelAt = Offset(centre.x, centre.y);
+  } else if (routed?.flow == LayeredEdgeFlow.free) {
+    path = _free(from, to);
+  } else if ((to.rect.center.dy - from.rect.center.dy).abs() < 1) {
+    path = _flat(from.rect, to.rect);
   } else {
-    // Upwards is a cycle's way back (the ranking sets those edges aside,
-    // so every other edge runs down): straight up it would cross the very
-    // edges it closes, and every node between. It leaves and comes back
-    // by the nodes' sides and bulges past the nodes of the ranks it spans,
-    // its own two included — by the right, unless a node stands right
-    // beside one of its ends (a note, say) and none on the left.
-    bool beside(Rect end, {required bool right}) => passing.any(
-      (rect) =>
-          (rect.center.dy - end.center.dy).abs() < 1 &&
-          (right ? rect.left >= end.right : rect.right <= end.left),
+    final down = to.rect.center.dy > from.rect.center.dy;
+    path = flowCubic(
+      Offset(startX ?? from.rect.center.dx, _side(from.rect, bottom: down)),
+      Offset(endX ?? to.rect.center.dx, _side(to.rect, bottom: !down)),
     );
-    final blockedRight = beside(from, right: true) || beside(to, right: true);
-    final blockedLeft = beside(from, right: false) || beside(to, right: false);
-    final right = !blockedRight || blockedLeft;
-    var reach = right
-        ? math.max(from.right, to.right)
-        : math.min(from.left, to.left);
-    for (final rect in passing) {
-      reach = right ? math.max(reach, rect.right) : math.min(reach, rect.left);
-    }
-    final bulge = right ? reach + _backBulge : reach - _backBulge;
-    start = Offset(right ? from.right : from.left, from.center.dy);
-    end = Offset(right ? to.right : to.left, to.center.dy);
-    control1 = Offset(bulge, start.dy);
-    control2 = Offset(bulge, end.dy);
   }
 
   final label = edge.label == null || edge.label!.isEmpty ? null : edge.label;
@@ -118,127 +79,100 @@ LaidOutEdge routeFlowEdge(
           style.edgeLabelPadding.horizontal,
       style.fontSize * style.lineHeight + style.edgeLabelPadding.vertical,
     );
-    final mid = _cubicMidpoint(start, control1, control2, end);
-    // Laid out across, the box is turned with the drawing: its canonical
-    // sides are the text's the other way round.
+    final drawn = LaidOutEdge.along(edge: edge, path: path);
+    // The label sits where its stand-in is, on the line the curve makes
+    // of its points, or halfway along an edge that has none. Laid out
+    // across, the box is turned with the drawing: its canonical sides are
+    // the text's the other way round.
     labelBox = Rect.fromCenter(
-      center: mid,
+      center: labelAt == null
+          ? drawn.at(0.5)
+          : flowNearestOnPath(path, labelAt),
       width: across ? size.height : size.width,
       height: across ? size.width : size.height,
     );
   }
-  return LaidOutEdge(
+  return LaidOutEdge.along(
     edge: edge,
-    start: start,
-    control1: control1,
-    control2: control2,
-    end: end,
+    path: path,
     label: label,
     labelBox: labelBox,
-    startLabelBox: _endBox(edge.startLabel, start, control1, style, across),
-    endLabelBox: _endBox(edge.endLabel, end, control2, style, across),
+    startLabelBox: _endBox(edge.startLabel, path.first, path[1], style, across),
+    endLabelBox: _endBox(
+      edge.endLabel,
+      path.last,
+      path[path.length - 2],
+      style,
+      across,
+    ),
   );
 }
 
-/// The x both control points of a downward edge from [start] to [end],
-/// bending [bend] down from one and up to the other, take to go round the
-/// nodes of the ranks it passes; null when none is in its way. An edge
-/// past a rank otherwise ran straight through the node between its ends.
-///
-/// It goes round on the nearer side, and far enough that the curve is
-/// clear of every node in its way all down that node's height — not only
-/// at its middle, where it bulges most: a curve checked there alone still
-/// cut the corner of a node lower down.
-double? _aside(Offset start, Offset end, double bend, Iterable<Rect> rects) {
-  final between = [
-    for (final rect in rects)
-      if (rect.top > start.dy && rect.bottom < end.dy) rect,
+/// A self loop: out of the right of the node and back into it.
+List<Offset> _loop(Rect node) {
+  final dy = node.height * 0.22;
+  return [
+    Offset(node.right, node.center.dy - dy),
+    Offset(node.right + 40, node.center.dy - 34),
+    Offset(node.right + 40, node.center.dy + 34),
+    Offset(node.right, node.center.dy + dy),
   ];
-  final blocking = [
-    for (final rect in between)
-      if (_across(start, end, rect)) rect,
-  ];
-  if (blocking.isEmpty) return null;
-  // Going round the nodes in the way can lead into others of their ranks:
-  // those join the ones to go round, until the curve meets none.
-  for (var round = 0; round <= between.length; round++) {
-    final control = _control(start, end, bend, blocking);
-    final hit = between.where(
-      (rect) =>
-          !blocking.contains(rect) && _meets(start, end, bend, control, rect),
-    );
-    if (hit.isEmpty) return control;
-    blocking.addAll(hit);
-  }
-  return _control(start, end, bend, blocking);
 }
 
-/// The control x that takes the curve round [blocking] on its nearer side.
-double _control(Offset start, Offset end, double bend, List<Rect> blocking) {
-  var left = double.infinity;
-  var right = double.negativeInfinity;
-  for (final rect in blocking) {
-    left = math.min(left, rect.left);
-    right = math.max(right, rect.right);
-  }
-  final middle = (start.dx + end.dx) / 2;
-  final goRight = right - middle <= middle - left;
-  final goal = goRight ? right + _clearance : left - _clearance;
-  // x(t) = u³·start + t³·end + (3u²t + 3ut²)·cx: for every t whose point
-  // is level with a node in the way, cx puts x(t) past the goal.
-  double? control;
-  for (var i = 1; i < _samples; i++) {
-    final t = i / _samples;
-    final u = 1 - t;
-    final y = _y(start, end, bend, t);
-    final level = blocking.any(
-      (rect) => y >= rect.top - _clearance && y <= rect.bottom + _clearance,
-    );
-    if (!level) continue;
-    final fixed = u * u * u * start.dx + t * t * t * end.dx;
-    final needed = (goal - fixed) / (3 * u * u * t + 3 * u * t * t);
-    control = control == null
-        ? needed
-        : (goRight ? math.max(control, needed) : math.min(control, needed));
-  }
-  return control ?? (goal - middle / 4) * 4 / 3;
+/// Two ends in one rank: from the side of one to the side of the other.
+List<Offset> _flat(Rect from, Rect to) {
+  final right = to.center.dx >= from.center.dx;
+  return flowFlatCubic(
+    Offset(right ? from.right : from.left, from.center.dy),
+    Offset(right ? to.left : to.right, to.center.dy),
+  );
 }
 
-/// Whether the curve with both control points at [control] meets [rect].
-bool _meets(Offset start, Offset end, double bend, double control, Rect rect) {
-  for (var i = 1; i < _samples; i++) {
-    final t = i / _samples;
-    final u = 1 - t;
-    final x =
-        u * u * u * start.dx +
-        (3 * u * u * t + 3 * u * t * t) * control +
-        t * t * t * end.dx;
-    if (rect
-        .inflate(_clearance / 2)
-        .contains(Offset(x, _y(start, end, bend, t)))) {
-      return true;
-    }
-  }
-  return false;
+/// An edge between a subgraph's box and what it holds, which no rank can
+/// honour: a plain curve between the box's outline and the node, at the
+/// node's middle. Out of a box it leaves the bottom and reaches the node's
+/// bottom; into one it leaves the node's top and reaches the box's top.
+List<Offset> _free(FlowEnd from, FlowEnd to) {
+  // The end that is inside the other: the smaller.
+  final inner =
+      from.rect.width * from.rect.height <= to.rect.width * to.rect.height
+      ? from.rect
+      : to.rect;
+  final x = inner.center.dx;
+  final leavingBox = from.box;
+  final start = Offset(
+    x,
+    leavingBox ? from.rect.bottom : _side(from.rect, bottom: false),
+  );
+  final end = Offset(
+    x,
+    to.box ? to.rect.top : _side(to.rect, bottom: leavingBox),
+  );
+  return flowCubic(start, end);
 }
 
-/// The curve's y at [t]: its control points [bend] below its start and
-/// above its end.
-double _y(Offset start, Offset end, double bend, double t) {
-  final u = 1 - t;
-  return u * u * u * start.dy +
-      3 * u * u * t * (start.dy + bend) +
-      3 * u * t * t * (end.dy - bend) +
-      t * t * t * end.dy;
+/// The route's points with the ends put on the nodes' sides.
+List<Offset> _ranked(
+  LayeredEdge routed,
+  FlowEnd from,
+  FlowEnd to,
+  double? startX,
+  double? endX,
+) {
+  final points = [for (final p in routed.points) Offset(p.x, p.y)];
+  final down = !routed.reversed;
+  final start = from.box
+      ? points.first
+      : Offset(startX ?? from.rect.center.dx, _side(from.rect, bottom: down));
+  final end = to.box
+      ? points.last
+      : Offset(endX ?? to.rect.center.dx, _side(to.rect, bottom: !down));
+  if (points.length == 2) return flowCubic(start, end);
+  return flowBasisPath([start, ...points.sublist(1, points.length - 1), end]);
 }
 
-/// Whether the straight line from [start] to [end] passes [rect], level
-/// with its middle.
-bool _across(Offset start, Offset end, Rect rect) {
-  final t = (rect.center.dy - start.dy) / (end.dy - start.dy);
-  final x = start.dx + (end.dx - start.dx) * t;
-  return x >= rect.left - _clearance && x <= rect.right + _clearance;
-}
+double _side(Rect rect, {required bool bottom}) =>
+    bottom ? rect.bottom : rect.top;
 
 /// Where [text] sits beside the end of an edge at [at], the curve leaving
 /// towards [towards]: from just past the end along the edge, and off to its
@@ -270,20 +204,4 @@ Rect? _endBox(
     width: across ? height : width,
     height: across ? width : height,
   );
-}
-
-Offset _cubicMidpoint(Offset p0, Offset c1, Offset c2, Offset p1) {
-  const t = 0.5;
-  const u = 1 - t;
-  final x =
-      u * u * u * p0.dx +
-      3 * u * u * t * c1.dx +
-      3 * u * t * t * c2.dx +
-      t * t * t * p1.dx;
-  final y =
-      u * u * u * p0.dy +
-      3 * u * u * t * c1.dy +
-      3 * u * t * t * c2.dy +
-      t * t * t * p1.dy;
-  return Offset(x, y);
 }

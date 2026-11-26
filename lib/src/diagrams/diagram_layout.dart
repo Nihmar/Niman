@@ -55,35 +55,55 @@ final class LaidOutNode {
   final Rect rect;
 }
 
-/// One edge and the curve it is drawn along.
+/// One edge and the curve it is drawn along: a chain of cubic Béziers.
 final class LaidOutEdge {
-  /// Creates a placed edge.
-  const new({
+  /// Creates an edge drawn along one cubic from [start] to [end].
+  new({
     required this.edge,
-    required this.start,
-    required this.control1,
-    required this.control2,
-    required this.end,
+    required Offset start,
+    required Offset control1,
+    required Offset control2,
+    required Offset end,
     this.label,
     this.labelBox,
     this.startLabelBox,
     this.endLabelBox,
-  });
+  }) : path = [start, control1, control2, end];
+
+  /// Creates an edge drawn along [path]: a poly-Bézier of 3k + 1 points,
+  /// `[p0, c1, c2, p1, c1, c2, p2, ...]`, each piece running from one
+  /// anchor to the next through its two control points.
+  new along({
+    required this.edge,
+    required this.path,
+    this.label,
+    this.labelBox,
+    this.startLabelBox,
+    this.endLabelBox,
+  }) : assert(
+         path.length >= 4 && (path.length - 1) % 3 == 0,
+         'a poly-Bézier has 3k + 1 points',
+       );
 
   /// The model edge.
   final FlowEdge edge;
 
+  /// The curve: anchors and control points, as [LaidOutEdge.along] says.
+  final List<Offset> path;
+
   /// The tail's point, on the source node's outline.
-  final Offset start;
+  Offset get start => path.first;
 
-  /// The first cubic control point.
-  final Offset control1;
+  /// The control point the curve leaves its tail towards: the direction it
+  /// leaves in.
+  Offset get control1 => path[1];
 
-  /// The second cubic control point.
-  final Offset control2;
+  /// The control point the curve reaches its head from: the direction it
+  /// arrives in.
+  Offset get control2 => path[path.length - 2];
 
   /// The head's point, on the target node's outline.
-  final Offset end;
+  Offset get end => path.last;
 
   /// The label's text, or null.
   final String? label;
@@ -96,6 +116,41 @@ final class LaidOutEdge {
 
   /// Where [FlowEdge.endLabel] sits, beside the head, or null.
   final Rect? endLabelBox;
+
+  /// The point [t] of the way along the curve, `t` from 0 at the start to 1
+  /// at the end, each piece taking an equal share.
+  Offset at(double t) {
+    final pieces = (path.length - 1) ~/ 3;
+    final scaled = t.clamp(0.0, 1.0) * pieces;
+    final piece = scaled >= pieces ? pieces - 1 : scaled.floor();
+    final s = scaled - piece;
+    final u = 1 - s;
+    final i = piece * 3;
+    return path[i] * (u * u * u) +
+        path[i + 1] * (3 * u * u * s) +
+        path[i + 2] * (3 * u * s * s) +
+        path[i + 3] * (s * s * s);
+  }
+
+  /// This edge moved by [by], its labels with it.
+  LaidOutEdge shifted(Offset by) => LaidOutEdge.along(
+    edge: edge,
+    path: [for (final point in path) point + by],
+    label: label,
+    labelBox: labelBox?.shift(by),
+    startLabelBox: startLabelBox?.shift(by),
+    endLabelBox: endLabelBox?.shift(by),
+  );
+
+  /// This edge with its label put in [box].
+  LaidOutEdge withLabelBox(Rect box) => LaidOutEdge.along(
+    edge: edge,
+    path: path,
+    label: label,
+    labelBox: box,
+    startLabelBox: startLabelBox,
+    endLabelBox: endLabelBox,
+  );
 }
 
 /// One subgraph and the box drawn round it.

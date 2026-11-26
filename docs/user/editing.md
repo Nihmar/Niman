@@ -901,7 +901,12 @@ Twenty-two kinds are drawn:
   `B:::warn`, and `classDef default` for every node. A `style` wins over
   a class, and a class given later over one given earlier. A colour is
   written as `#rgb`, `#rrggbb`, `rgb(…)` or a common name; a fill with no
-  `color` gets black or white text, whichever reads on it.
+  `color` gets black or white text, whichever reads on it. Subgraphs are
+  laid out as Mermaid lays them out: stacked in the chart's direction by
+  the edges between them, never one over another. A subgraph's own
+  `direction` is followed when no edge crosses its border and, as in
+  Mermaid, ignored when one does; a node named in two subgraphs belongs to
+  the first.
 - **Sequence diagrams** (`sequenceDiagram`): participants and their
   aliases, every message arrow, notes, and the frames of `loop`, `alt`,
   `opt`, `par`, `critical` and `break` with their sections.

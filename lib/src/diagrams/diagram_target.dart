@@ -29,6 +29,16 @@ abstract interface class DiagramTarget {
     bool dashed = false,
   });
 
+  /// Draws a chain of cubic Béziers as one stroke, so a dashed pattern runs
+  /// on across the joins: [points] are `[p0, c1, c2, p1, c1, c2, p2, ...]`,
+  /// 3k + 1 of them.
+  void curve(
+    List<Offset> points, {
+    required Color color,
+    double strokeWidth = 1,
+    bool dashed = false,
+  });
+
   /// Draws a straight line, optionally dashed.
   void line(
     Offset from,

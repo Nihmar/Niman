@@ -60,12 +60,9 @@ final class FlowOrientation {
   }
 
   /// [edge], turned.
-  LaidOutEdge edge(LaidOutEdge edge) => LaidOutEdge(
+  LaidOutEdge edge(LaidOutEdge edge) => LaidOutEdge.along(
     edge: edge.edge,
-    start: point(edge.start),
-    control1: point(edge.control1),
-    control2: point(edge.control2),
-    end: point(edge.end),
+    path: [for (final p in edge.path) point(p)],
     label: edge.label,
     labelBox: edge.labelBox == null ? null : rect(edge.labelBox!),
     startLabelBox: edge.startLabelBox == null

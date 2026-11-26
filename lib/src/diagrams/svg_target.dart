@@ -79,6 +79,27 @@ final class SvgDiagramTarget implements DiagramTarget {
   }
 
   @override
+  void curve(
+    List<Offset> points, {
+    required Color color,
+    double strokeWidth = 1,
+    bool dashed = false,
+  }) {
+    if (points.length < 4) return;
+    final path = StringBuffer(
+      'M ${_n(points.first.dx)} ${_n(points.first.dy)}',
+    );
+    for (var i = 1; i + 2 < points.length; i += 3) {
+      path.write(
+        ' C ${_n(points[i].dx)} ${_n(points[i].dy)} '
+        '${_n(points[i + 1].dx)} ${_n(points[i + 1].dy)} '
+        '${_n(points[i + 2].dx)} ${_n(points[i + 2].dy)}',
+      );
+    }
+    _stroke(path.toString(), color, strokeWidth, dashed);
+  }
+
+  @override
   void line(
     Offset from,
     Offset to, {

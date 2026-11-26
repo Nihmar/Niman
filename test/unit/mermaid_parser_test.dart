@@ -226,6 +226,28 @@ void main() {
     expect(chart.subgraphs.single.nodeIds, ['A', 'B']);
   });
 
+  test('a node another subgraph already holds stays in that one', () {
+    // Mermaid's makeUniq: X3 is S3's; S4 only names it in an edge. Drawn
+    // round X3 as well, S4's box lay over S3's.
+    final chart = _chart(
+      'flowchart TB\nsubgraph S3\nI4 --> X3\nend\n'
+      'subgraph S4\nX3 --> X4\nend',
+    );
+    final [s3, s4] = chart.subgraphs;
+    expect(s3.nodeIds, ['I4', 'X3']);
+    expect(s4.nodeIds, ['X4']);
+  });
+
+  test('a subgraph keeps the nodes of the subgraphs written inside it', () {
+    final chart = _chart(
+      'flowchart TB\nsubgraph O\nsubgraph I\na --> b\nend\nb --> c\nend',
+    );
+    final inner = chart.subgraphs.firstWhere((s) => s.id == 'I');
+    final outer = chart.subgraphs.firstWhere((s) => s.id == 'O');
+    expect(inner.nodeIds, ['a', 'b']);
+    expect(outer.nodeIds, ['a', 'b', 'c']);
+  });
+
   test('an apostrophe is a letter, not a quote', () {
     final chart = _chart("flowchart TD\nA[Don't stop] --> B(l'utente)");
     expect(_node(chart, 'A').label, "Don't stop");
