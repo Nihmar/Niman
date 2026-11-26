@@ -72,4 +72,21 @@ void main() {
     final archive = open(zip, maxTextBytes: 100000);
     expect(() => archive.text('lie.xhtml'), _refusedAsTooLarge());
   });
+
+  test('an entry can be read as often as it is asked for (#1303)', () {
+    // Deflated and stored, text and bytes: every read starts at the
+    // entry's beginning, none finds what an earlier one left empty.
+    final archive = Archive()
+      ..add(ArchiveFile.string('deflated.xhtml', 'x' * 500))
+      ..add(
+        ArchiveFile.noCompress('stored.xhtml', 500, List.filled(500, 0x79)),
+      );
+    final zip = open(Uint8List.fromList(ZipEncoder().encodeBytes(archive)));
+    for (final name in ['deflated.xhtml', 'stored.xhtml']) {
+      final first = zip.text(name);
+      expect(first, hasLength(500));
+      expect(zip.text(name), first);
+      expect(zip.bytes(name), hasLength(500));
+    }
+  });
 }

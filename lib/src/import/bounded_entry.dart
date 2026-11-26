@@ -40,7 +40,9 @@ final class EntryOverBudget implements Exception {
 /// there is nothing to write for it. Throws [EntryOverBudget] when the entry
 /// would go over. A deflated entry is
 /// inflated in chunks that stop at the budget; a stored one is compared with
-/// the budget before it is read. [onInflated] hears the length of every
+/// the budget before it is read. An entry can be read again, as often as it
+/// is asked for, unless the caller [ArchiveFile.clear]s it: nothing of it is
+/// kept inflated between two reads. [onInflated] hears the length of every
 /// chunk the inflater produces, so a test can say how far the inflation got
 /// before the refusal.
 Uint8List? readEntryWithin(
@@ -52,11 +54,15 @@ Uint8List? readEntryWithin(
   if (raw == null) return null;
   if (raw is ZipFile) {
     final method = raw.compressionMethod;
-    if (method == CompressionType.deflate) {
-      return _inflate(raw.getStream(decompress: false), limit, onInflated);
-    }
-    if (method == CompressionType.none) {
-      return _stored(raw.getStream(decompress: false), limit);
+    if (method == CompressionType.deflate || method == CompressionType.none) {
+      // The entry's compressed bytes are one stream, with a read position of
+      // its own that every read moves to the end: an entry read a second time
+      // starts where the first stopped, and finds nothing. Each read starts
+      // at the beginning.
+      final stream = raw.getStream(decompress: false)..reset();
+      return method == CompressionType.deflate
+          ? _inflate(stream, limit, onInflated)
+          : _stored(stream, limit);
     }
   }
   // Any other content: whatever writes its bytes into a sink that counts.

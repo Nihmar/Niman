@@ -127,9 +127,6 @@ final class EpubArchive {
             ? '"$path" expands past the $_maxBytes-byte budget'
             : '"$path" expands past the $within bytes one file may',
       );
-    } finally {
-      // The inflated bytes are cached on the entry: let them go.
-      file.clear();
     }
     _read += bytes?.length ?? 0;
     return bytes ?? Uint8List(0);

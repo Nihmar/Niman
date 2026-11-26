@@ -225,4 +225,42 @@ void main() {
     file.writeAsStringSync('changed');
     expect(pictureDirOf(file.path, dir.path), isNot(first));
   });
+
+  test('a nav that is also in the spine still gives the contents (#1303)', () {
+    // Sigil, InDesign and Pages list the navigation document in the spine:
+    // it is read as a chapter first, and read again for the contents.
+    final file = writeTestEpub(
+      book('navspine.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: '<h1>A</h1><p>a</p>'),
+        (path: 'b.xhtml', body: '<h1>B</h1><p>b</p>'),
+      ],
+      nav:
+          '<ol><li><a href="a.xhtml">First</a></li>'
+          '<li><a href="b.xhtml">Second</a></li></ol>',
+      navInSpine: true,
+    );
+    final document = readEpub(file.path, pictures);
+    expect(document.contents.map((entry) => entry.title), ['First', 'Second']);
+    expect(document.chapters.map((chapter) => chapter.file), [
+      'OEBPS/a.xhtml',
+      'OEBPS/b.xhtml',
+      'OEBPS/nav.xhtml',
+    ]);
+  });
+
+  test('a file the spine lists twice is read twice (#1303)', () {
+    final file = writeTestEpub(
+      book('twice.epub'),
+      chapters: [
+        (path: 'a.xhtml', body: '<p>Alpha.</p>'),
+        (path: 'b.xhtml', body: '<p>Beta.</p>'),
+      ],
+      again: ['a.xhtml'],
+    );
+    expect(
+      readEpub(file.path, pictures).markdown,
+      'Alpha.\n\n---\n\nBeta.\n\n---\n\nAlpha.\n',
+    );
+  });
 }
