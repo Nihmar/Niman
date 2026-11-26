@@ -6,8 +6,6 @@
 /// nothing there spells a tag.
 library;
 
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/export/html_text.dart';
 import 'package:niman/src/export/picture_mime.dart';
@@ -82,7 +80,8 @@ final class EpubMetadata {
   /// `rights:`.
   final String? rights;
 
-  /// `identifier:` or `isbn:`.
+  /// `identifier:` or `isbn:`, as written: the book's identifier is this
+  /// when it is given (`epubIdentifierOf`), an ISBN as `urn:isbn:`.
   final String? identifier;
 
   /// `cover:` — the target of the cover picture, as the note writes it.
@@ -220,6 +219,7 @@ String epubContentOpf({
   required List<EpubChapterEntry> chapters,
   required List<EpubPictureEntry> pictures,
   required EpubPictureEntry? cover,
+  required String identifier,
 }) {
   final manifest = StringBuffer()
     ..write(
@@ -266,7 +266,8 @@ String epubContentOpf({
   final modified = DateTime.now().toUtc().toIso8601String().split('.').first;
   final dc = StringBuffer()
     ..write(
-      '    <dc:identifier id="pub-id">urn:uuid:${_uuidV4()}</dc:identifier>\n',
+      '    <dc:identifier id="pub-id">${escapeHtml(identifier)}'
+      '</dc:identifier>\n',
     )
     ..write('    <dc:title>${escapeHtml(title)}</dc:title>\n')
     ..write('    <dc:language>${escapeAttribute(language)}</dc:language>\n');
@@ -294,12 +295,6 @@ String epubContentOpf({
   }
   if (metadata.rights != null) {
     dc.write('    <dc:rights>${escapeHtml(metadata.rights!)}</dc:rights>\n');
-  }
-  if (metadata.identifier != null) {
-    dc.write(
-      '    <dc:identifier>${escapeHtml(metadata.identifier!)}'
-      '</dc:identifier>\n',
-    );
   }
   if (metadata.series != null) {
     dc.write(
@@ -330,16 +325,4 @@ String epubContentOpf({
       '  <spine>\n$spine'
       '  </spine>\n'
       '</package>\n';
-}
-
-/// A version-4 UUID for the book's identifier.
-String _uuidV4() {
-  final random = Random.secure();
-  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
-  bytes[6] = (bytes[6] & 0x0f) | 0x40;
-  bytes[8] = (bytes[8] & 0x3f) | 0x80;
-  String hex(int at) => bytes[at].toRadixString(16).padLeft(2, '0');
-  return '${hex(0)}${hex(1)}${hex(2)}${hex(3)}-${hex(4)}${hex(5)}-'
-      '${hex(6)}${hex(7)}-${hex(8)}${hex(9)}-'
-      '${hex(10)}${hex(11)}${hex(12)}${hex(13)}${hex(14)}${hex(15)}';
 }

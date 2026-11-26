@@ -131,11 +131,19 @@ identifier: 978-3-16-148410-0
 
 `title` and `language` override the export's own (the note's display name
 and the app's language), `authors:` is read as `author:` and `lang:` as
-`language:`, `identifier:` — or `isbn:` — is the book's identifier,
+`language:`, `identifier:` — or `isbn:` — is the book's identifier (an
+ISBN is written `urn:isbn:` and its digits),
 `tags` become the book's subjects, `cover:`
 names the picture the book opens on, and `published:` — not `date:`,
 which is the note's own — the book's date. The Markdown cheatsheet
 carries the same example, under **EPUB metadata**.
+
+A reader — Apple Books, Kobo, KOReader, Calibre — knows a book by its
+identifier, and keeps the reading position and the highlights on it. Export
+the same note or folder again and it is still **the same book**: with no
+`identifier:` or `isbn:`, the identifier is made from the note's or the
+folder's path in the library, so it is the same on every export (rename or
+move the note and it is a new book). Two notes are two books.
 
 ## A folder, or the whole library
 

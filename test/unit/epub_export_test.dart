@@ -363,7 +363,14 @@ void main() {
     expect(opf, contains('<dc:subject>geometry</dc:subject>'));
     expect(opf, contains('<dc:subject>notes</dc:subject>'));
     expect(opf, contains('<dc:rights>Public domain</dc:rights>'));
-    expect(opf, contains('<dc:identifier>978-3-16-148410-0</dc:identifier>'));
+    // The ISBN is the book's identifier, once (#1307).
+    expect(
+      opf,
+      contains(
+        '<dc:identifier id="pub-id">urn:isbn:9783161484100</dc:identifier>',
+      ),
+    );
+    expect('<dc:identifier'.allMatches(opf), hasLength(1));
     expect(opf, contains('id="series">Notes</meta>'));
     expect(opf, contains('property="group-position">2</meta>'));
     expect(files['OEBPS/text/note.xhtml'], contains('xml:lang="it"'));

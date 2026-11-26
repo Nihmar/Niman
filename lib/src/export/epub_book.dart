@@ -17,6 +17,7 @@ library;
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import 'package:niman/src/export/epub_identifier.dart';
 import 'package:niman/src/export/epub_package.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/kanban_style.dart';
@@ -42,11 +43,12 @@ const String _containerXml =
 
 /// An EPUB 3 book taking shape.
 final class EpubBook {
-  new _(this._title, this._language, this._metadata);
+  new _(this._title, this._language, this._metadata, this._identifier);
 
   final String _title;
   final String _language;
   final EpubMetadata _metadata;
+  final String _identifier;
 
   late final ZipFileEncoder _encoder = ZipFileEncoder();
   final List<EpubChapterEntry> _chapters = <EpubChapterEntry>[];
@@ -61,13 +63,18 @@ final class EpubBook {
   ///
   /// [metadata] is the frontmatter's own metadata (#303): its title and
   /// language override [title] and [language] when they name one. [cover]
-  /// is the picture the metadata's `cover:` resolved to, or null. The
-  /// `mimetype` entry and the container are written here, first — every
-  /// other entry follows in whatever order the chapters are ready.
+  /// is the picture the metadata's `cover:` resolved to, or null.
+  /// [libraryPath] is where the exported note or folder is in its library,
+  /// relative to the library's root: it names the book when the metadata
+  /// gives no identifier, so the same note exported twice is one book
+  /// (#1307). The `mimetype` entry and the container are written here,
+  /// first; every other entry follows in whatever order the chapters are
+  /// ready.
   static Future<EpubBook> start({
     required String path,
     required String title,
     required String language,
+    required String libraryPath,
     EpubMetadata metadata = const EpubMetadata(),
     String? cover,
   }) async {
@@ -75,6 +82,7 @@ final class EpubBook {
       metadata.title ?? title,
       metadata.language ?? language,
       metadata,
+      epubIdentifierOf(metadata, libraryPath),
     );
     book._encoder.create(path);
     final mimetype = ArchiveFile.string('mimetype', 'application/epub+zip')
@@ -191,6 +199,7 @@ final class EpubBook {
           chapters: _chapters,
           pictures: _picturesInOrder,
           cover: _cover,
+          identifier: _identifier,
         ),
       ),
     );

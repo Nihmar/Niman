@@ -76,6 +76,8 @@ Future<ExportPayload> exportNoteEpub({
       path: file,
       title: title,
       language: language,
+      // Where the note is in the library names the book (#1307).
+      libraryPath: path,
       metadata: metadata,
       cover: cover,
     );

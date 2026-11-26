@@ -184,6 +184,12 @@ demands; the container is `mimetype` (stored, first),
   carry the folder's name and nothing else — with *Cancel* (stop and
   write the note) and *Export anyway*; the export logs the missing
   source, and a `cover:` that does not resolve too (E3).
+- [x] The package's `unique-identifier` is the frontmatter's
+  `identifier:`/`isbn:` (an ISBN as `urn:isbn:<digits>`, check digit
+  verified) or a name-based UUID v5 of the exported note's or folder's
+  library-relative path (`epub_identifier.dart`, namespace v5 of the
+  project's address), never random: the same export twice is one book to a
+  reader. A second `dc:identifier` is not written (#1307).
 - [ ] Nav folded by folder (a flat, tree-ordered list for now).
 
 ## Open questions

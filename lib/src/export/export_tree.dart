@@ -165,6 +165,12 @@ final class TreeExport {
   /// of the folder is then drawn as a board. [paper] is what a PDF zip's
   /// notes are printed on (#1285), and what an HTML page asks a printer
   /// for.
+  ///
+  /// [libraryPath] is where [dir] is in its library, relative to the
+  /// library's root (the library's own folder name for the root itself): a
+  /// book without an identifier of its own is named by it, so the same
+  /// folder exported twice is one book (#1307). The folder's own name when
+  /// null.
   static Future<TreeExport> start({
     required String dir,
     required String zipPath,
@@ -174,6 +180,7 @@ final class TreeExport {
     ProcessRunner? runner,
     bool kanban = false,
     PaperSize paper = PaperSize.a4,
+    String? libraryPath,
   }) async {
     if (format == ExportTreeFormat.pdf &&
         engine == null &&
@@ -194,6 +201,7 @@ final class TreeExport {
         runner: runner,
         kanban: kanban,
         paper: paper,
+        libraryPath: libraryPath ?? p.basename(dir),
         events: events.sendPort,
       ),
       onError: errors.sendPort,
@@ -215,6 +223,7 @@ final class TreeExport {
     ProcessRunner? runner,
     bool kanban = false,
     PaperSize paper = PaperSize.a4,
+    String? libraryPath,
   }) async {
     final export = await start(
       dir: dir,
@@ -225,6 +234,7 @@ final class TreeExport {
       runner: runner,
       kanban: kanban,
       paper: paper,
+      libraryPath: libraryPath,
     );
     await export.done;
   }
@@ -375,6 +385,7 @@ typedef TreeExportRequest = ({
   ProcessRunner? runner,
   bool kanban,
   PaperSize paper,
+  String libraryPath,
   SendPort events,
 });
 
@@ -423,6 +434,7 @@ Future<void> _exportTree(TreeExportRequest request) async {
           path: request.zipPath,
           title: p.basename(request.dir),
           language: request.language,
+          libraryPath: request.libraryPath,
           metadata: metadata,
           cover: cover == null ? null : p.join(tree.root, cover),
         )
