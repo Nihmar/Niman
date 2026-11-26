@@ -132,6 +132,7 @@ Future<HtmlConverted> convertHtmlBook(
       plan: plan,
       day: importedDay(request.importedOn ?? DateTime.now()),
       pictures: (index) {
+        if (index >= text.pictureSrcs.length) return null;
         final address = addressOf[text.pictureSrcs[index]];
         return (
           kept: address == null ? null : kept[address],

@@ -432,6 +432,29 @@ void main() {
       );
     });
 
+    test('a code sample that names a picture the book lacks stays', () async {
+      // The placeholder is the converter's own; a number it never gave is
+      // words of the book (#1313).
+      final source = page(
+        'Sample.html',
+        '<html lang="en"><head><title>Sample</title>'
+            '<meta name="author" content="Ada"></head><body>'
+            '<h1>Sample</h1><ul><li><a href="#c1">Chapter 1</a></li>'
+            '<li><a href="#c2">Chapter 2</a></li>'
+            '<li><a href="#c3">The Last</a></li></ul>'
+            '<h2 id="c1">Chapter 1</h2>${_paragraph(9000)}'
+            '<pre>![x](niman-picture:7)</pre>'
+            '<h2 id="c2">Chapter 2</h2>${_paragraph(9000)}'
+            '<h2 id="c3">The Last</h2>${_paragraph(9000)}'
+            '</body></html>',
+      );
+      final converted = await convertHtmlBook(
+        request(source, split: HtmlBookSplit.oneNote),
+        fetch: noFetch,
+      );
+      expect(read(converted.made), contains('![x](niman-picture:7)'));
+    });
+
     test('is named free beside a folder that has its name', () async {
       await convertHtmlBook(request(novel()), fetch: noFetch);
       final second = await convertHtmlBook(

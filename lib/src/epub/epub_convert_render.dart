@@ -34,14 +34,20 @@ String renderNote(
   final body = noteBody(plan, note);
   final titled = body.startsWith('#') ? body : '# ${note.title}\n\n$body';
   final from = noteFolderOf(note.path);
+  final count = plan.book.pictures.length;
   return titled
       .replaceAllMapped(_picture, (match) {
-        final at = pictureAt(int.parse(match.group(1)!));
-        return at == null ? '' : bookHref(at, from: from);
+        final index = int.parse(match.group(2)!);
+        // A number the book has no picture for is words of the book.
+        if (index >= count) return match.group(0)!;
+        final at = pictureAt(index);
+        final href = at == null ? '' : bookHref(at, from: from);
+        return '![${match.group(1)}]($href)';
       })
       .replaceAllMapped(_link, (match) {
         final index = int.parse(match.group(1)!);
-        return _linkTarget(plan, note, written, index) ?? '#';
+        if (index >= plan.book.links.length) return match.group(0)!;
+        return '](<${_linkTarget(plan, note, written, index) ?? '#'}>)';
       });
 }
 
@@ -95,5 +101,16 @@ String _frontmatter(EpubInfo info, {required String title, String? cover}) =>
       ('cover', cover),
     ]);
 
-final RegExp _picture = RegExp('$epubPictureScheme:(\\d+)');
-final RegExp _link = RegExp('$epubLinkScheme:(\\d+)');
+final RegExp _picture = bookPictureRef(epubPictureScheme);
+final RegExp _link = bookLinkRef(epubLinkScheme);
+
+/// The numbers of the book's pictures [markdown] shows, in order, each
+/// once: the destination of an image the converter wrote, a number the book
+/// has a picture for. Words that say `epub-picture:0` show none (#1313).
+Iterable<int> picturesShown(EpubPlan plan, String markdown) sync* {
+  final seen = <int>{};
+  for (final match in _picture.allMatches(markdown)) {
+    final index = int.parse(match.group(2)!);
+    if (index < plan.book.pictures.length && seen.add(index)) yield index;
+  }
+}

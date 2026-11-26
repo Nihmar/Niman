@@ -285,15 +285,9 @@ List<EpubPlannedNote> _written(EpubPlan plan) => [
 ];
 
 /// The pictures [written] show, by their numbers, in order.
-List<int> _picturesNamed(EpubPlan plan, List<EpubPlannedNote> written) {
-  final out = <int>{};
-  for (final note in written) {
-    for (final match in _picture.allMatches(noteBody(plan, note))) {
-      out.add(int.parse(match.group(1)!));
-    }
-  }
-  return out.toList();
-}
+List<int> _picturesNamed(EpubPlan plan, List<EpubPlannedNote> written) =>
+    {for (final note in written) ...picturesShown(plan, noteBody(plan, note))}
+        .toList();
 
 /// The number of the cover picture among the book's pictures — added to
 /// them when no chapter shows it — or null when the book names none.
@@ -323,8 +317,6 @@ String _keepPicture(
   }
   return '$attachments/$name';
 }
-
-final RegExp _picture = RegExp('$epubPictureScheme:(\\d+)');
 
 /// The entry of the conversion's isolate: [convertEpub], its progress and
 /// its end sent to the port it is handed, as plain messages.

@@ -195,6 +195,32 @@ void main() {
     });
   });
 
+  test("words that name a placeholder are the book's own (#1313)", () async {
+    final source = writeTestEpub(
+      book('about.epub'),
+      title: 'About',
+      chapters: [
+        (
+          path: 'one.xhtml',
+          body:
+              '<h1>One</h1><p>A picture is epub-picture:0, a link epub-link:0.'
+              '</p><pre>![x](epub-picture:9) [y](&lt;epub-link:9&gt;)</pre>'
+              '<p>See <a href="two.xhtml">two</a>.</p>',
+        ),
+        (path: 'two.xhtml', body: '<h1>Two</h1><p>Two.</p>'),
+      ],
+      nav:
+          '<ol><li><a href="one.xhtml">One</a></li>'
+          '<li><a href="two.xhtml">Two</a></li></ol>',
+    ).path;
+    expect(previewEpub(source, _words).pictures, 0);
+    await convert(source);
+    final one = read('About/01 One.md');
+    expect(one, contains('epub-picture:0, a link epub-link:0.'));
+    expect(one, contains('![x](epub-picture:9) [y](<epub-link:9>)'));
+    expect(one, contains('[two](<02%20Two.md>)'));
+  });
+
   test('parts are folders, their chapters notes in them', () async {
     final source = writeTestEpub(
       book('parts.epub'),

@@ -32,13 +32,12 @@ import 'package:niman/src/markdown/text_escape.dart';
 /// when it came from one. Both null for a picture that is left out.
 typedef BookPicture = ({String? kept, String? web});
 
-/// The picture the placeholder numbered [index] stands for.
-typedef BookPictures = BookPicture Function(int index);
+/// The picture the placeholder numbered [index] stands for; null when the
+/// book has no such picture and the text is words of the book (#1313).
+typedef BookPictures = BookPicture? Function(int index);
 
 /// A picture's placeholder in the text: `![alt](niman-picture:3)`.
-final RegExp _picture = RegExp(
-  '!\\[((?:[^\\]\\\\]|\\\\.)*)\\]\\($pictureScheme:(\\d+)\\)',
-);
+final RegExp _picture = bookPictureRef(pictureScheme);
 
 /// The notes of one HTML book, written.
 final class HtmlBookWriter {
@@ -158,6 +157,7 @@ final class HtmlBookWriter {
     var dropped = false;
     final written = markdown.replaceAllMapped(_picture, (match) {
       final picture = pictures(int.parse(match[2]!));
+      if (picture == null) return match[0]!;
       final kept = picture.kept;
       if (kept != null) return embed(kept, match[1]!);
       final web = picture.web;
