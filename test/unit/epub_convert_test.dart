@@ -180,9 +180,40 @@ void main() {
       final note = read('Books/Dune.md');
       expect(note, contains('# Arrakis'));
       expect(note, contains('# Muad'));
-      expect(note, contains('](assets/'));
+      // A Markdown link is written from the note's folder (#1315).
+      expect(note, contains('](../assets/'));
+      expect(note, isNot(contains('](assets/')));
       expect(note, contains('](<#The%20Storm>)'));
       expect(Directory(p.join(library, 'assets')).listSync(), hasLength(1));
+    });
+
+    test("one note's pictures resolve from the folder it is in", () async {
+      for (final parent in ['Books', 'Books/Sci-Fi (old)']) {
+        final converted = await convert(source, oneNote: true, parent: parent);
+        final note = read(converted.made);
+        final picture = RegExp(r'!\[Map\]\(([^)]+)\)').firstMatch(note);
+        expect(picture, isNotNull, reason: note);
+        final up = '../' * p.posix.split(parent).length;
+        expect(
+          picture!.group(1),
+          matches(
+            RegExp(
+              '^$up'
+              r'assets/[0-9a-f]{64}\.png$',
+            ),
+          ),
+        );
+        final noteFolder = p.joinAll([library, ...parent.split('/')]);
+        expect(
+          File(p.normalize(p.join(noteFolder, picture.group(1)))).existsSync(),
+          isTrue,
+        );
+      }
+    });
+
+    test("one note at the library's top keeps its pictures' path", () async {
+      final converted = await convert(source, oneNote: true);
+      expect(read(converted.made), contains('![Map](assets/'));
     });
 
     test('the preview says what would be written', () async {

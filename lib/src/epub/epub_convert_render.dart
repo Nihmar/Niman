@@ -4,7 +4,9 @@
 ///
 /// - **Pictures** point at their copy in the book's folder, relative to the
 ///   note: the folder moves whole, and a folder exported as a book takes the
-///   pictures inside it along.
+///   pictures inside it along. In one note they are the library's own, and
+///   are written from the folder the note goes in (`../assets/…`), as any
+///   Markdown link is (#1282, #1315).
 /// - **A link into the book** points at the note it lands in, relative to
 ///   the note it is written in, and at its heading when it lands on one
 ///   (`02%20Part/01%20Arrival.md#The%20Storm`). A link out of the book is
@@ -19,21 +21,35 @@ import 'package:niman/src/epub/epub_book.dart';
 import 'package:niman/src/epub/epub_convert_plan.dart';
 import 'package:niman/src/epub/epub_info.dart';
 import 'package:niman/src/import/book/book_render.dart';
+import 'package:niman/src/links/rewrite.dart' show hrefFrom;
 
 export 'package:niman/src/import/book/book_render.dart' show noteBody;
 
 /// The text of [note], one of [written] — the notes of [plan] that have
 /// text. [pictureAt] answers where picture `n` was written, relative to
 /// the folder the notes' paths are relative to; null when it was not.
+///
+/// A book that is one note has its pictures in the library, not beside
+/// it: [libraryFolder] is the library-relative folder the note goes in
+/// ('' for the top), and [pictureAt] answers library-relative paths, which
+/// are written from that folder. Left null, the pictures are the book
+/// folder's, written from the note's own folder in it.
 String renderNote(
   EpubPlan plan,
   EpubPlannedNote note,
   List<EpubPlannedNote> written, {
   required String? Function(int picture) pictureAt,
+  String? libraryFolder,
 }) {
   final body = noteBody(plan, note);
   final titled = body.startsWith('#') ? body : '# ${note.title}\n\n$body';
   final from = noteFolderOf(note.path);
+  String href(String at) => libraryFolder == null
+      ? bookHref(at, from: from)
+      : hrefFrom(
+          at,
+          note: libraryFolder.isEmpty ? 'note.md' : '$libraryFolder/note.md',
+        );
   final count = plan.book.pictures.length;
   return titled
       .replaceAllMapped(_picture, (match) {
@@ -41,8 +57,7 @@ String renderNote(
         // A number the book has no picture for is words of the book.
         if (index >= count) return match.group(0)!;
         final at = pictureAt(index);
-        final href = at == null ? '' : bookHref(at, from: from);
-        return '![${match.group(1)}]($href)';
+        return '![${match.group(1)}](${at == null ? '' : href(at)})';
       })
       .replaceAllMapped(_link, (match) {
         final index = int.parse(match.group(1)!);

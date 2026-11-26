@@ -174,7 +174,13 @@ Future<EpubConverted> convertEpub(
         final file = File(p.joinAll([staging.path, ...note.path.split('/')]));
         file.parent.createSync(recursive: true);
         file.writeAsStringSync(
-          renderNote(plan, note, written, pictureAt: (index) => at[index]),
+          renderNote(
+            plan,
+            note,
+            written,
+            pictureAt: (index) => at[index],
+            libraryFolder: request.oneNote ? request.parent : null,
+          ),
         );
       }
       if (!request.oneNote) {
