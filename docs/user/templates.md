@@ -42,27 +42,30 @@ Substitution, not a language — unknown `{{…}}` is copied verbatim:
 | `{{time}}` / `{{time:FORMAT}}` | Time (default `HH:mm`) |
 | `{{now}}` / `{{now:FORMAT}}` | Date + time (default `YYYY-MM-DD HH:mm`) |
 | `{{uuid}}` | A fresh UUID v4, one per occurrence |
-| `{{cursor}}` | Caret stop after insertion (writes nothing; `{{cursor:2}}` numbers stops) |
+| `{{cursor}}` | Where the caret lands in a new note (writes nothing). Only the first marker counts: any other, `{{cursor:2}}` included, is dropped — the number is ignored. An appended note gets no caret placed |
 | `{{counter:name}}` | Per-library counter, hands out 1, 2, 3… (two creations at once never share a number; cancelling the name prompt, or a note that fails to be created, does not use one up) |
 | `{{clipboard}}` | Paste contents (title-cased by filters below) |
 | `{{selection}}` | The text selected in the editor when the note was created (empty when nothing is) |
 | `{{ask:Label}}` / `{{ask:Label:default}}` | Prompt for a value when creating |
 | `{{choice:Label:a,b,c}}` | Pick from a list when creating |
+| `{{folder}}` | The folder the note lands in, relative to the Library (empty at the root); empty inside the `niman:` directives, which decide it |
 | `{{parent}}` | Reserved: answered by the creation flow (e.g. `[[{{parent}}]]`); never `{{ask:parent}}` |
 | `{{include:name}}` | Paste another template's content (its own placeholders resolve too) |
 
 Date formats use the tokens you already know: `YYYY MM DD HH mm ss`,
-plus `D` / `M` / `H` / `m` / `s` without the leading zero, `dddd` / `ddd`
-for the weekday's name, `MMMM` / `MMM` for the month's (in the app's
-language), `WW` for the ISO week and `Q` for the quarter — and date
-arithmetic, see filters. `{{folder}}` and `{{title}}`-style
-self-references inside directives resolve against the creation context.
+plus `YY` for the two-digit year, `D` / `M` / `H` / `m` / `s` without the
+leading zero, `dddd` / `ddd` for the weekday's name, `MMMM` / `MMM` for
+the month's (in the app's language), `WW` for the ISO week (`W` without
+the leading zero) and `Q` for the quarter — and date arithmetic, see
+filters. `{{title}}`-style self-references inside directives resolve
+against the creation context.
 
 ## Filters
 
 Append with `|`: `{{title|slug}}`, `{{date:YYYY-MM-DD|+7d}}`,
 `{{counter:quest|pad:3}}`. Known filters: case (`upper`, `lower`,
-`title`), `slug`, `trim`, numeric padding (`pad:3`), and date moves
+`title`), `slug`, `trim`, numeric padding (`pad:3`), a fallback for an
+empty value (`{{clipboard|default:nothing}}`), and date moves
 (`+7d`, `+1y`, `startof:month`, … — applied left to right, before case
 filters). Moves apply only to `{{date}}`, `{{time}}` and `{{now}}`, and
 only as the first filters: `{{date|+1d|upper}}` works, while
@@ -144,7 +147,18 @@ niman:
 ```
 
 `folder` / `filename` accept placeholders (resolved before the path is
-used). The remaining frontmatter merges into the new note. A `niman`
+used). Two more directives say what happens when the note is made:
+
+- `append: true` adds to a note that is already there, instead of making
+  a second file next to it. The filled-in template goes at the end of the
+  existing note, after a blank line, and no `{{cursor}}` is applied.
+  Without it, a name already taken gets a number. Pair it with
+  `filename`, so every run names the same note.
+- `open: editor`, `open: preview` or `open: none` says what happens once
+  the note exists: the editor (the default), the preview, or nothing —
+  the note is filed away and you stay where you were.
+
+The remaining frontmatter merges into the new note. A `niman`
 block that does not parse declares nothing: the note is still created —
 in the folder the creation came from, under the name the template gives
 it — and a message says what the block's problem is.

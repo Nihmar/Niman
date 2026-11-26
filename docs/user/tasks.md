@@ -376,7 +376,7 @@ in the background never fires an alarm, whatever the notifications say.
 
 Notification text is the task's prose without `key:value` tags (and
 without `+`/`@`/`#` markers unless the library's `reminderShowTokens`
-is true).
+is true — **Settings → Reminders → Tags in reminder notifications**).
 
 An event in `calendar.txt` carries its reminder the same way — `17-18
 jogging @park rem:16:30.`, a clock time on the line's own day
@@ -390,7 +390,7 @@ A repeating event's reminder fires on **every occurrence**
 that time on each occurrence's day, and a full `rem:` date-time keeps its
 distance from the event's first day — written the day before, it reminds the
 day before every time. The system only holds so many alarms (Android 500 per
-app, iOS 64), and a rule never ends, so Niman keeps **the next two weeks**
+app, of which Niman keeps to 400; iOS 64), and a rule never ends, so Niman keeps **the next two weeks**
 scheduled — every occurrence of each event in those fourteen days — and works
 that window out again whenever the app runs: at start, on every return to it, when
 a file changes and, on a desktop, each time a reminder is shown. Skipping an
@@ -489,6 +489,11 @@ the field grows downward, a few lines at most, then scrolls; it is still
 one line of `todo.txt`, so Enter saves and a pasted line break becomes a
 space. On a wide window the dialog is wider.
 
+The **New todo** command opens the add-task dialog from anywhere: it goes
+to the Todo tab first. It is in the command palette, on `Ctrl+T` (`⌘T` on
+a Mac) and, on Android and iOS, among the launcher's quick actions (see
+[shortcuts](shortcuts.md)).
+
 The **Repeat** row under the reminder sets how the task repeats — **Never**,
 **Every day**, **Every weekday**, **Every week on** the due date's weekday,
 **Every month** and **Every year** from the due date, or **Custom**: every N
@@ -511,7 +516,8 @@ choose.
 ## Settings
 
 Per library (`.niman/settings.json`): `reminderShowTokens` (default
-false). Global debug log (last 5 000 lines, exportable, survives
+false), shown in **Settings → Reminders** as **Tags in reminder
+notifications**. Global debug log (last 5 000 lines, exportable, survives
 reboots) helps diagnose missed reminders.
 
 A reminder whose time has passed gets a `todo reminders: overdue` line

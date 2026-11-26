@@ -2,7 +2,7 @@
 
 One note per day, made the first time you open that day.
 
-The journal is one of the [Features](features.md). Switched off, entries stay ordinary notes and Settings has no Journal area.
+The journal is one of the [Features](features.md). Switched off, entries stay ordinary notes and Settings has no Journal area. The day's events need the Calendar feature and the day's due tasks the Todo feature.
 
 An entry is an ordinary note: it lives in the library like any other,
 syncs, is found by search and links to and from other notes. What makes
@@ -75,6 +75,10 @@ entry*.
 
 ## The day's events
 
+The **Events** section, event reminders and **Add event** need the Calendar
+[feature](features.md) on; the day's **Due** tasks need Todo. With one off,
+what it shows leaves the day, and the files stay as they are.
+
 A `calendar.txt` at the library root (the plain-text calendar
 [terokarvinen.com/2021/calendar-txt](https://terokarvinen.com/2021/calendar-txt/))
 has its events shown where the day is read: in the dock's journal pane and
@@ -90,7 +94,8 @@ Each event reads as it is written: its time (`9-12`, `08:15`, `0600Z`),
 its text with `+project`, `@context` and `#tag` picked out and a
 `( … )` aside dimmed, and a bell with the time of its `rem:`. On the
 calendar itself a day with events wears a second dot, amber beside the
-entry's. Tapping an event opens `calendar.txt` at that line.
+entry's. Tapping an event in the dock or on a desktop window opens `calendar.txt`
+at that line; on a phone it opens the event's sheet.
 
 **Add event**, beside Today in the dock (a second row of the day card on
 a phone), opens a form for the day: a start time and an optional end, the
@@ -231,9 +236,10 @@ one device and its skips on another is two edits, and both events are kept.
 A reminder (`rem:`) on an event that repeats goes off on each occurrence, at
 the same time of day (`rem:16:30`) or, for a full `rem:2026-10-20T08:00`, the
 same number of days before or after it. Niman schedules the next two weeks of
-them — at most four occurrences of each event — and renews them every time the
-app runs, so open it at least once every two weeks for them to go on. A
-skipped day (`except:`) has no reminder. How it works is in
+them — every occurrence in that window, with no count per event; only the
+system's cap on alarms, for the whole app, trims the set, soonest first — and
+renews them every time the app runs, so open it at least once every two weeks
+for them to go on. A skipped day (`except:`) has no reminder. How it works is in
 [tasks](tasks.md#reminders).
 
 Another tool that reads `calendar.txt` sees the event only on its first

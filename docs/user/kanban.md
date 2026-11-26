@@ -26,12 +26,17 @@ type: kanban
 - [x] Pick the date
 ```
 
-This is the format of the Obsidian Kanban plugin: a board made there opens
-here, and the other way round. Obsidian's `%% kanban:settings %%` footer is
-kept untouched at the end of the file.
+The body is the format of the Obsidian Kanban plugin, but what makes a note
+a board is different: here it is `type: kanban` in the frontmatter, while
+Obsidian marks its boards with `kanban-plugin: board`, which Niman does not
+read. A board made in Obsidian opens here as a board once `type: kanban` is
+added to its frontmatter. A board made here carries no `kanban-plugin` key,
+so Obsidian shows it as a plain note until that key is added there.
+Obsidian's `%% kanban:settings %%` footer is kept untouched at the end of
+the file.
 
-Create one with **New kanban board** in the Files FAB, the New menu of the
-tree, **New kanban board here** on a folder, or the command palette. A new
+Create one with **New Kanban board** in the Files FAB, the New menu of the
+tree, **New Kanban board here** on a folder, or the command palette. A new
 board has three empty columns: *To do*, *Doing* and *Done*.
 
 ## How the file is read
