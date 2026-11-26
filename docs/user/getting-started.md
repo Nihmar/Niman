@@ -13,10 +13,10 @@ disk; the app's SQLite database is only a rebuildable index.
   the files. Never edit the `.niman/` or `.history/` folders by hand,
   but everything else is yours.
 - **Notes are UTF-8.** A note from elsewhere that is not — a Latin-1 file
-  from an old vault — still opens, searches and exports with its accents:
-  each byte UTF-8 has no place for is read as the Windows-1252 character
-  it stands for there (`café`, not `caf�`). Saving writes the note as
-  UTF-8, so its words stay and its encoding becomes the app's.
+  from an older app's folder — still opens, searches and exports with its
+  accents: each byte UTF-8 has no place for is read as the Windows-1252
+  character it stands for there (`café`, not `caf�`). Saving writes the
+  note as UTF-8, so its words stay and its encoding becomes the app's.
 - **Multiple libraries:** open several folders from a remembered list and
   switch anytime. Each library has its own settings. On a wide window the
   layers button at the foot of the rail opens the library window: the
@@ -84,5 +84,5 @@ any step; nothing of it is left in your library.
 - [Tasks and reminders](tasks.md) — todo.txt plus `rem:` alarms.
 - [Themes](themes.md) — the shipped palettes, and a theme of your own.
 - [Home-screen widgets](widgets.md) — todo and note widgets (Android).
-- [Platforms](platforms.md) — Android / Linux / Windows notes.
+- [Platforms](platforms.md) — Android / iOS / Linux / macOS / Windows notes.
 - [Sync](sync.md) — moving a library between machines today.

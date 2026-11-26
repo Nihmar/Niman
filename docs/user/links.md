@@ -189,8 +189,9 @@ notes that **link to it**, each with the line it says the link on. It is in
 two places, one list, and a count on a wide window:
 
 - **in the side panel** on a wide window (beside the note from 1000 px up,
-  over it below), the *Links* pane beside Outline, Tags and History,
-  following the note in the focused pane;
+  over it below), the *Links to this note* pane beside Outline, Tags,
+  Tasks, Spelling, History and Journal (Tasks and Journal while those
+  [features](features.md) are on), following the note in the focused pane;
 - **as a sheet on a phone**, from the note's ⋮ menu — *Links to this note* —
   as the Outline and Tags are (see [platforms](platforms.md));
 - **the count**, on a wide window: a link icon and a number at the right of
@@ -267,11 +268,11 @@ Markdown forms. A note outside the library is not in the index and so is
 not a link target. `\` in a path is `/`.
 
 Moving a note, or a folder of them, moves what its relative links name: the
-backlinks and dead links follow the new folder at once, without opening or
-editing the note. A link that names another note by its name only
-(`[[a]]`) does not care where either note is. A link written with a path
-*to* a note that moved, from a note that did not, is read again when that
-note is next indexed.
+links to this note and its dead links follow the new folder at once,
+without opening or editing the note. A link that names another note by its
+name only (`[[a]]`) does not care where either note is. A link written
+with a path *to* a note that moved, from a note that did not, is read
+again when that note is next indexed.
 
 ### Updating the links to what moved
 

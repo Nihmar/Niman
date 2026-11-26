@@ -17,15 +17,16 @@ one file:
   inside it as `data:` URIs, its formulas drawn as SVG, and a style that
   follows the reader's light or dark system. Nothing else is needed to
   open it — a mail attachment or a USB stick is enough. The picture
-  types it can carry are PNG, JPEG, GIF, WebP and BMP; a picture of
-  another type (an SVG, say) stays as the note wrote it rather than
-  breaking the page.
+  types it can carry are PNG, JPEG, GIF, WebP, BMP and SVG (an SVG goes
+  in as a `data:image/svg+xml` URI); a picture of another type stays as
+  the note wrote it rather than breaking the page.
 - **PDF** — the same page printed: on the paper picked in **Settings →
   Export** (A4 unless another is), its paper style, its formulas and
   pictures in place. The machine prints it with its own browser — Edge on
   Windows, a Chromium-family browser on Linux (Chromium, Chrome, Brave,
-  Vivaldi, Helium), the system WebView on Android — so the text stays
-  real: it can be selected, searched and copied. On a desktop that has
+  Vivaldi, Helium), the system WebView on Android, WebKit on a Mac or an
+  iPhone, with nothing to install — so the text stays real: it can be
+  selected, searched and copied. On a desktop that has
   none of those browsers the note is drawn instead: a picture of its
   pages, which cannot be selected. That is not what everyone asked for,
   so Niman says it *before* it starts drawing and lets you stop there,
@@ -41,7 +42,8 @@ one file:
   being drawn one by one — and can be stopped from the same dialog: a
   long note is minutes of work, not a hang.
 - **EPUB** — the note as a book, for an e-reader: the same page
-  (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file.
+  (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file (an
+  SVG as an `images/img-N.svg` entry).
   A `cover:` key in the note's frontmatter names a picture the book opens
   on. A wikilink out has nothing to point at, exactly as on a single HTML
   page.
@@ -121,11 +123,14 @@ description: What the book is.
 publisher: Niman Press
 published: 2026-09-25
 rights: Public domain
+identifier: 978-3-16-148410-0
 ---
 ```
 
 `title` and `language` override the export's own (the note's display name
-and the app's language), `tags` become the book's subjects, `cover:`
+and the app's language), `authors:` is read as `author:` and `lang:` as
+`language:`, `identifier:` — or `isbn:` — is the book's identifier,
+`tags` become the book's subjects, `cover:`
 names the picture the book opens on, and `published:` — not `date:`,
 which is the note's own — the book's date. The Markdown cheatsheet
 carries the same example, under **EPUB metadata**.
@@ -153,8 +158,8 @@ one zip:
   note's pictures inside it. Links between notes point at the other
   PDFs, and a link to another file of the folder at its copy. Printing a
   folder needs something to print with, as a note's PDF does; where the
-  machine has neither a browser nor Android's WebView, the format is not
-  offered.
+  machine has neither a browser nor a system WebView (Android's, or
+  WebKit on a Mac or an iPhone), the format is not offered.
 - **EPUB** — the folder (or the library) as **one book**: every Markdown
   note is a chapter, in the tree's own order, with a table of contents
   and links between the chapters. The pictures the chapters show travel
