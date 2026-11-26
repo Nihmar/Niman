@@ -9,6 +9,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:niman/src/diagrams/layered_box.dart';
+import 'package:niman/src/diagrams/layered_cluster.dart';
 import 'package:niman/src/diagrams/layered_edge.dart';
 import 'package:niman/src/diagrams/layered_graph.dart';
 import 'package:niman/src/diagrams/layered_node.dart';
@@ -25,30 +26,73 @@ import 'package:niman/src/diagrams/layered_position_y.dart';
 LayeredBox positionLayered(LayeredGraph graph, LayeredOptions options) {
   positionRanks(graph, options);
   positionAcross(graph, options);
-  for (final cluster in graph.clusters) {
-    var left = double.infinity;
-    var right = double.negativeInfinity;
-    for (final node in cluster.borderLeft) {
-      left = math.min(left, node.x);
+  // Inside out, so a cluster can hug the boxes of the clusters in it.
+  final labels = <LayeredCluster, List<LayeredNode>>{};
+  for (final node in graph.nodes) {
+    final parent = node.parent;
+    if (node.kind == LayeredNodeKind.edgeLabel && parent != null) {
+      (labels[parent] ??= []).add(node);
     }
-    for (final node in cluster.borderRight) {
-      right = math.max(right, node.x);
-    }
-    cluster.box = LayeredBox(
-      left,
-      cluster.borderTop.y,
-      right,
-      cluster.borderBottom.y,
-    );
-    // The top and the bottom float: they are where an edge to the cluster
-    // ends, which is anchored on the outline in _route, and the middle is
-    // as good a place as any for what is read from them otherwise.
-    final middle = (cluster.box.left + cluster.box.right) / 2;
-    cluster.borderTop.x = middle;
-    cluster.borderBottom.x = middle;
+  }
+  final inside = [...graph.clusters]..sort((a, b) => b.depth - a.depth);
+  for (final cluster in inside) {
+    _box(cluster, labels[cluster] ?? const []);
   }
   graph.edges.forEach(_route);
   return _bounds(graph);
+}
+
+/// Gives [cluster] its box: from its left side to its right, and from the
+/// top of what it holds less its pad to the bottom of it plus its pad. What it
+/// holds is its boxes, the label stand-ins on its edges and the boxes of the
+/// clusters in it — whose own boxes must be made. The stand-ins of other
+/// edges, passing through, do not hold it open, so a cluster in a row that a
+/// tall box outside it made tall is no taller than its own content. The box
+/// is never taller than the band from the cluster's top rank to its bottom
+/// rank, which is as it was when the box was drawn from them, and an empty
+/// cluster keeps the band.
+void _box(LayeredCluster cluster, List<LayeredNode> labels) {
+  var left = double.infinity;
+  var right = double.negativeInfinity;
+  for (final node in cluster.borderLeft) {
+    left = math.min(left, node.x);
+  }
+  for (final node in cluster.borderRight) {
+    right = math.max(right, node.x);
+  }
+  var top = double.infinity;
+  var bottom = double.negativeInfinity;
+  void hold(double from, double to) {
+    top = math.min(top, from);
+    bottom = math.max(bottom, to);
+  }
+
+  for (final node in cluster.nodes) {
+    hold(node.y - node.height / 2, node.y + node.height / 2);
+  }
+  for (final inner in cluster.clusters) {
+    hold(inner.box.top, inner.box.bottom);
+  }
+  for (final node in labels) {
+    hold(node.y - node.height / 2, node.y + node.height / 2);
+  }
+  final band = (top: cluster.borderTop.y, bottom: cluster.borderBottom.y);
+  if (top.isFinite) {
+    cluster.borderTop.y = math.max(band.top, top - cluster.padTop);
+    cluster.borderBottom.y = math.min(band.bottom, bottom + cluster.padBottom);
+  }
+  cluster.box = LayeredBox(
+    left,
+    cluster.borderTop.y,
+    right,
+    cluster.borderBottom.y,
+  );
+  // The top and the bottom float: they are where an edge to the cluster
+  // ends, which is anchored on the outline in _route, and the middle is
+  // as good a place as any for what is read from them otherwise.
+  final middle = (left + right) / 2;
+  cluster.borderTop.x = middle;
+  cluster.borderBottom.x = middle;
 }
 
 /// Sets [edge]'s points and label centre.

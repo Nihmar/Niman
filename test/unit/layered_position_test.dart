@@ -463,6 +463,60 @@ void main() {
       }
     });
 
+    test('a cluster is as tall as what it holds, whatever shares its rank', () {
+      // The row of the cluster's only box is made 170 high by a tall box
+      // outside it: the cluster is its content's height and its pads, not
+      // the band from its top rank to its bottom rank.
+      final graph = LayeredGraph()
+        ..addCluster('S', padTop: 16, padBottom: 6, padLeft: 8, padRight: 8)
+        ..addNode('a', width: 40, height: 30, parent: 'S')
+        ..addNode('tall', width: 40, height: 170)
+        ..addNode('src', width: 40, height: 20)
+        ..addNode('x', width: 40, height: 20)
+        ..addNode('y', width: 40, height: 20)
+        ..addEdge('src', 'a')
+        ..addEdge('src', 'tall')
+        ..addEdge('x', 'S')
+        ..addEdge('S', 'y');
+      layOutLayered(graph);
+      final a = graph.node('a')!;
+      final tall = graph.node('tall')!;
+      expect(a.rank, tall.rank);
+      final box = graph.cluster('S')!.box;
+      expect(box.height, closeTo(16 + 30 + 6, _eps));
+      expect(box.top, closeTo(a.y - 15 - 16, _eps));
+      expect(box.bottom, closeTo(a.y + 15 + 6, _eps));
+      // An edge that names the cluster ends on the outline it has now.
+      expect(graph.edges[2].points.last.y, closeTo(box.top, _eps));
+      expect(graph.edges[3].points.first.y, closeTo(box.bottom, _eps));
+      expect(graph.cluster('S')!.borderTop.y, box.top);
+      expect(graph.cluster('S')!.borderBottom.y, box.bottom);
+    });
+
+    test(
+      'a nested cluster is held by its parent, and an empty one keeps its band',
+      () {
+        final graph = LayeredGraph()
+          ..addCluster(
+            'outer',
+            padTop: 20,
+            padBottom: 8,
+            padLeft: 8,
+            padRight: 8,
+          )
+          ..addCluster('inner', parent: 'outer', padTop: 14, padBottom: 5)
+          ..addCluster('empty', padTop: 12, padBottom: 12)
+          ..addNode('a', width: 40, height: 30, parent: 'inner')
+          ..addNode('tall', width: 40, height: 150);
+        layOutLayered(graph);
+        final outer = graph.cluster('outer')!.box;
+        final inner = graph.cluster('inner')!.box;
+        expect(inner.height, closeTo(14 + 30 + 5, _eps));
+        expect(outer.height, closeTo(20 + inner.height + 8, _eps));
+        expect(graph.cluster('empty')!.box.height, greaterThanOrEqualTo(24));
+      },
+    );
+
     test('an edge to a cluster arrives straight where the box allows', () {
       final graph = LayeredGraph()
         ..addCluster('S', padTop: 16, padLeft: 8, padRight: 8)
