@@ -14,8 +14,6 @@
 /// The strings it writes are `epub_package.dart`'s; this file is the zip.
 library;
 
-import 'dart:io';
-
 import 'package:archive/archive_io.dart';
 import 'package:niman/src/export/epub_identifier.dart';
 import 'package:niman/src/export/epub_nav.dart';
@@ -104,7 +102,7 @@ final class EpubBook {
     if (type == null) return;
     final extension = p.extension(absolutePath).toLowerCase();
     final href = '$epubImageDir/cover$extension';
-    await _encoder.addFile(File(absolutePath), href);
+    await _store(absolutePath, href);
     _cover = (id: 'cover-image', href: href, path: absolutePath);
   }
 
@@ -126,8 +124,23 @@ final class EpubBook {
     final picture = (id: 'img-$at', href: href, path: absolutePath);
     _pictures[absolutePath] = picture;
     _picturesInOrder.add(picture);
-    await _encoder.addFile(File(absolutePath), href);
+    await _store(absolutePath, href);
     return p.posix.relative(href, from: fromDir);
+  }
+
+  /// Writes the picture at [absolutePath] into the container as [href],
+  /// stored, not deflated (#1305): a PNG, a JPEG, a GIF or a WebP is
+  /// compressed already, and deflating it again costs the time it takes and
+  /// saves nothing. Text entries stay deflated.
+  Future<void> _store(String absolutePath, String href) async {
+    final input = InputFileStream(absolutePath);
+    try {
+      _encoder.addArchiveFile(
+        ArchiveFile.stream(href, input)..compression = CompressionType.none,
+      );
+    } finally {
+      await input.close();
+    }
   }
 
   /// Adds one chapter, in spine order. [href] is container-relative (its

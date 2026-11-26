@@ -190,6 +190,16 @@ demands; the container is `mimetype` (stored, first),
   library-relative path (`epub_identifier.dart`, namespace v5 of the
   project's address), never random: the same export twice is one book to a
   reader. A second `dc:identifier` is not written (#1307).
+- [x] A note's book is written off the UI isolate (#1305,
+  `epub_note_writer.dart`): the UI side resolves the cover and the pictures
+  against the link index — the one thing only it can do — and sends plain
+  strings and maps; the isolate stores the pictures, typesets the page,
+  cuts the chapters, closes the zip and reads it back, handing the bytes
+  over without a copy. A stop is asked for over a port and seen between the
+  writer's stages, as the folder export's is. Pictures are stored
+  (`CompressionType.none`, they are compressed already), `mimetype` first
+  and stored, text entries deflated — for the folder export too
+  (`EpubBook`).
 - [x] A folder's walk is the tree's own order (`nameSortKey`, folders first,
   the name breaking a tie), shared by every format; a book's chapters are
   that order with the root `index.md` first, and the nav nests by folder
