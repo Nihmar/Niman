@@ -190,7 +190,11 @@ demands; the container is `mimetype` (stored, first),
   library-relative path (`epub_identifier.dart`, namespace v5 of the
   project's address), never random: the same export twice is one book to a
   reader. A second `dc:identifier` is not written (#1307).
-- [ ] Nav folded by folder (a flat, tree-ordered list for now).
+- [x] A folder's walk is the tree's own order (`nameSortKey`, folders first,
+  the name breaking a tie), shared by every format; a book's chapters are
+  that order with the root `index.md` first, and the nav nests by folder
+  (`epub_nav.dart`): a folder's chapters under its entry, its own `00 …`
+  first note as the entry's target (#1308).
 
 ## Open questions
 

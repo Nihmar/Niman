@@ -450,23 +450,22 @@ Future<void> _exportTree(TreeExportRequest request) async {
   // entry is too late, and the archive it wrote is the whole export.
   var stopped = false;
   try {
-    // A book's progress counts chapters, not the tree: a folder's
-    // attachments and its empty folders never enter the container (E10).
-    final total = book == null
-        ? tree.entries.length
-        : tree.files.where(ExportTreePages.isNote).length;
+    // A book carries its chapters and the pictures they cite, not the
+    // tree: a folder's attachments and its empty folders never enter the
+    // container, and its progress counts chapters (E10). Its chapters are
+    // the notes in reading order, `index.md` first (#1308): the tree's
+    // order, but for that one page.
+    final entries = book == null ? tree.entries : ExportTreeBook.chapters(tree);
+    final total = entries.length;
     var formulaCount = 0;
     var sourceCount = 0;
     var done = 0;
-    for (final entry in tree.entries) {
+    for (final entry in entries) {
       // Between entries, where the zip is never half-written.
       if (cancelled) {
         stopped = true;
         break;
       }
-      // A book carries its chapters and the pictures they cite, not the
-      // tree: an attachment nobody cites would only weigh the book down.
-      if (book != null && !ExportTreePages.isNote(entry.rel)) continue;
       // Every format keeps the tree's folders, empty ones included: a
       // folder in the Markdown zip and not in the HTML one is a support
       // question waiting to happen (L8).

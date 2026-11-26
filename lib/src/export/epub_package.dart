@@ -18,8 +18,17 @@ const String epubOpfDir = 'OEBPS';
 /// Where the pictures live, inside the package directory.
 const String epubImageDir = '$epubOpfDir/images';
 
-/// One chapter, as it was added.
-typedef EpubChapterEntry = ({String id, String href, String title, bool svg});
+/// One chapter, as it was added: `folder` is where the chapter was in the
+/// exported tree (`/`-separated, empty at the top), and `opensFolder` says
+/// it is that folder's own page (#1308).
+typedef EpubChapterEntry = ({
+  String id,
+  String href,
+  String title,
+  bool svg,
+  String folder,
+  bool opensFolder,
+});
 
 /// One picture, as it was copied in.
 typedef EpubPictureEntry = ({String id, String href, String path});
@@ -119,7 +128,8 @@ EpubMetadata epubMetadataOf(String text) {
 /// name: one path segment at a time, because a space or a `#` in a note's
 /// name is not a URL character. The zip entries keep the note's own name;
 /// only the references to them are escaped (E5).
-String _iri(String href) => href.split('/').map(Uri.encodeComponent).join('/');
+String epubIri(String href) =>
+    href.split('/').map(Uri.encodeComponent).join('/');
 
 /// The page that shows the cover: a spine item in front of the chapters,
 /// so a reader opens on the picture, not on the first chapter.
@@ -128,7 +138,7 @@ String epubCoverXhtml({
   required String title,
   required String language,
 }) {
-  final src = _iri(p.posix.relative(coverHref, from: epubOpfDir));
+  final src = epubIri(p.posix.relative(coverHref, from: epubOpfDir));
   return '<?xml version="1.0" encoding="utf-8"?>\n'
       '<!DOCTYPE html>\n'
       '<html xmlns="http://www.w3.org/1999/xhtml" '
@@ -177,40 +187,6 @@ String epubChapterXhtml({
       '</html>\n';
 }
 
-/// The navigation document, one entry per chapter in spine order.
-String epubNavXhtml({
-  required List<EpubChapterEntry> chapters,
-  required String title,
-  required String language,
-}) {
-  final entries = StringBuffer();
-  for (final chapter in chapters) {
-    final href = _iri(p.posix.relative(chapter.href, from: epubOpfDir));
-    entries.write(
-      '      <li><a href="${escapeAttribute(href)}">'
-      '${escapeHtml(chapter.title)}</a></li>\n',
-    );
-  }
-  return '<?xml version="1.0" encoding="utf-8"?>\n'
-      '<!DOCTYPE html>\n'
-      '<html xmlns="http://www.w3.org/1999/xhtml" '
-      'xmlns:epub="http://www.idpf.org/2007/ops" '
-      'xml:lang="${escapeAttribute(language)}" '
-      'lang="${escapeAttribute(language)}">\n'
-      '<head>\n'
-      '  <meta charset="utf-8" />\n'
-      '  <title>${escapeHtml(title)}</title>\n'
-      '</head>\n'
-      '<body>\n'
-      '  <nav epub:type="toc" id="toc">\n'
-      '    <h1>${escapeHtml(title)}</h1>\n'
-      '    <ol>\n$entries'
-      '    </ol>\n'
-      '  </nav>\n'
-      '</body>\n'
-      '</html>\n';
-}
-
 /// The package: metadata, manifest and spine.
 String epubContentOpf({
   required String title,
@@ -233,7 +209,7 @@ String epubContentOpf({
       '    <item id="cover-page" href="cover.xhtml" '
       'media-type="application/xhtml+xml" />\n',
     );
-    final href = _iri(p.posix.relative(cover.href, from: epubOpfDir));
+    final href = epubIri(p.posix.relative(cover.href, from: epubOpfDir));
     final type = epubPictureMime(p.extension(cover.path).toLowerCase());
     manifest.write(
       '    <item id="cover-image" href="${escapeAttribute(href)}" '
@@ -241,7 +217,7 @@ String epubContentOpf({
     );
   }
   for (final chapter in chapters) {
-    final href = _iri(p.posix.relative(chapter.href, from: epubOpfDir));
+    final href = epubIri(p.posix.relative(chapter.href, from: epubOpfDir));
     manifest.write(
       '    <item id="${chapter.id}" href="${escapeAttribute(href)}" '
       'media-type="application/xhtml+xml"'
@@ -249,7 +225,7 @@ String epubContentOpf({
     );
   }
   for (final picture in pictures) {
-    final href = _iri(p.posix.relative(picture.href, from: epubOpfDir));
+    final href = epubIri(p.posix.relative(picture.href, from: epubOpfDir));
     final type = epubPictureMime(p.extension(picture.path).toLowerCase());
     manifest.write(
       '    <item id="${picture.id}" href="${escapeAttribute(href)}" '

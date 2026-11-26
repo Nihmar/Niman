@@ -74,8 +74,8 @@ abstract final class ExportTreeBook {
   /// else. Why travels in the answer's `warnings`, for the caller to log
   /// where its logger lives (E3).
   static ExportTreeFrontmatter frontmatter(ExportTreeWalk tree) {
-    final rel = tree.notes['index.md'];
-    if (rel == null || p.dirname(rel) != '.') {
+    final rel = _rootIndex(tree);
+    if (rel == null) {
       const warning =
           'the exported folder has no index.md at its root: the book carries '
           "the folder's name and no metadata";
@@ -90,6 +90,32 @@ abstract final class ExportTreeBook {
       );
     }
     return (metadata: epubMetadataOf(text), warnings: warnings);
+  }
+
+  /// The notes of [tree] a book holds, in reading order (#1308): the
+  /// tree's own order — a folder's notes together, the folders before the
+  /// notes beside them, as the tree lists them — with `index.md` at the
+  /// exported folder's root first. That page is the book's title, its cover
+  /// and its contents: a book converted into notes and exported again opens
+  /// on it, wherever its name sorts.
+  static List<ExportTreeEntry> chapters(ExportTreeWalk tree) {
+    final notes = [
+      for (final entry in tree.entries)
+        if (!entry.isDir && ExportTreePages.isNote(entry.rel)) entry,
+    ];
+    final index = _rootIndex(tree);
+    final at = index == null
+        ? -1
+        : notes.indexWhere((entry) => entry.rel == index);
+    if (at <= 0) return notes;
+    return [notes[at], ...notes.sublist(0, at), ...notes.sublist(at + 1)];
+  }
+
+  /// The `index.md` at the exported folder's root, or null: the book's
+  /// metadata source, and its first page.
+  static String? _rootIndex(ExportTreeWalk tree) {
+    final rel = tree.notes['index.md'];
+    return rel == null || p.dirname(rel) != '.' ? null : rel;
   }
 
   /// Adds one note of [tree] to [book] as a chapter (#303), answering how
@@ -134,6 +160,8 @@ abstract final class ExportTreeBook {
       fontFaces: html.fontFaces,
       hasSvg: html.usesSvg,
       hasBoard: html.boardSheet != null,
+      folder: noteDir == '.' ? '' : noteDir,
+      opensFolder: _ownPage.hasMatch(p.basenameWithoutExtension(rel)),
     );
     return (
       formulas: _count(body, '<svg'),
@@ -141,6 +169,10 @@ abstract final class ExportTreeBook {
     );
   }
 }
+
+/// A folder's own page, the note a part opens on: its number is zero
+/// (`00 Part One.md`), as a converted book names it (#1138).
+final RegExp _ownPage = RegExp('^0+(?![0-9])');
 
 /// How many times [needle] appears in [text]; a diagnostic count, not a
 /// parser.

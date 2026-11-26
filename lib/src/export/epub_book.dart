@@ -18,6 +18,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:niman/src/export/epub_identifier.dart';
+import 'package:niman/src/export/epub_nav.dart';
 import 'package:niman/src/export/epub_package.dart';
 import 'package:niman/src/export/html_page.dart';
 import 'package:niman/src/export/kanban_style.dart';
@@ -137,6 +138,11 @@ final class EpubBook {
   /// once for the whole book; [hasSvg] says the chapter embeds inline SVG
   /// (a formula), which the package must declare; [hasBoard] says it is a
   /// kanban board, whose style the book then carries (#1170).
+  ///
+  /// [folder] is the folder of the tree the chapter was in, `/`-separated
+  /// and empty at the top: the nav nests a folder's chapters under its entry
+  /// (#1308). [opensFolder] says the chapter is the folder's own page, which
+  /// the nav then makes the folder's entry.
   void addChapter({
     required String href,
     required String title,
@@ -144,6 +150,8 @@ final class EpubBook {
     String? fontFaces,
     bool hasSvg = false,
     bool hasBoard = false,
+    String folder = '',
+    bool opensFolder = false,
   }) {
     _fonts ??= fontFaces;
     _hasBoard = _hasBoard || hasBoard;
@@ -155,7 +163,14 @@ final class EpubBook {
       language: _language,
     );
     _encoder.addArchiveFile(ArchiveFile.string(href, xhtml));
-    _chapters.add((id: id, href: href, title: title, svg: hasSvg));
+    _chapters.add((
+      id: id,
+      href: href,
+      title: title,
+      svg: hasSvg,
+      folder: folder,
+      opensFolder: opensFolder,
+    ));
   }
 
   /// Writes the styles, the nav, the package, and closes the container.

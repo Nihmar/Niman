@@ -10,6 +10,7 @@ library;
 
 import 'dart:io';
 
+import 'package:niman/src/core/name_sort_key.dart';
 import 'package:niman/src/export/export_anchors.dart';
 import 'package:niman/src/export/export_sources.dart';
 import 'package:niman/src/export/html_page.dart';
@@ -41,9 +42,15 @@ typedef ExportTreeWalk = ({
 
 /// One subtree, walked once, and the pages built from it.
 abstract final class ExportTreePages {
-  /// The subtree of [dir] in path order: every file and folder whose name
-  /// does not start with a dot (settings, trash and history are not part of
-  /// an export).
+  /// The subtree of [dir] in the tree's own order: every file and folder
+  /// whose name does not start with a dot (settings, trash and history are
+  /// not part of an export).
+  ///
+  /// A folder's children are listed as the library's tree lists them
+  /// (#1308): the folders first, then each by its name key — `Chapter 2`
+  /// before `Chapter 10`, a capital with a small letter — and the name
+  /// breaking a tie. The Markdown, HTML and PDF zips list
+  /// their entries in it too: one order for every format.
   static ExportTreeWalk walk(String dir) {
     final entries = <ExportTreeEntry>[];
     void visit(Directory current, String rel) {
@@ -52,10 +59,9 @@ abstract final class ExportTreePages {
       // nothing and is never walked into — content outside the exported
       // tree stays out, and a link cycle cannot recurse (every other walker
       // sets this too).
-      final children = current.listSync(followLinks: false)
-        ..sort((a, b) => a.path.compareTo(b.path));
-      for (final child in children) {
-        final name = p.basename(child.path);
+      for (final (child, name) in _inTreeOrder(
+        current.listSync(followLinks: false),
+      )) {
         if (name.startsWith('.')) continue;
         final childRel = rel.isEmpty ? name : '$rel/$name';
         if (child is Directory) {
@@ -69,6 +75,32 @@ abstract final class ExportTreePages {
 
     visit(Directory(dir), '');
     return index(dir, entries);
+  }
+
+  /// [children] with their names, in the order the tree lists siblings in
+  /// (`notes_tree`: folders first, then `name_key`, then `name`, #1070).
+  /// Each key is made once, not at every comparison, and names compare by
+  /// code unit — SQLite's byte order but for the characters above the Basic
+  /// Multilingual Plane.
+  static List<(FileSystemEntity, String)> _inTreeOrder(
+    List<FileSystemEntity> children,
+  ) {
+    final keyed =
+        [
+          for (final child in children)
+            (
+              entity: child,
+              name: p.basename(child.path),
+              key: nameSortKey(p.basename(child.path)),
+            ),
+        ]..sort((a, b) {
+          if ((a.entity is Directory) != (b.entity is Directory)) {
+            return a.entity is Directory ? -1 : 1;
+          }
+          final keys = a.key.compareTo(b.key);
+          return keys != 0 ? keys : a.name.compareTo(b.name);
+        });
+    return [for (final item in keyed) (item.entity, item.name)];
   }
 
   /// The tree of [entries] under [root], in the order given: the lookups

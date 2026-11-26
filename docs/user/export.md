@@ -171,15 +171,28 @@ one zip:
   machine has neither a browser nor a system WebView (Android's, or
   WebKit on a Mac or an iPhone), the format is not offered.
 - **EPUB** — the folder (or the library) as **one book**: every Markdown
-  note is a chapter, in the tree's own order, with a table of contents
-  and links between the chapters. The pictures the chapters show travel
+  note is a chapter, in the tree's own order (below), with a table of
+  contents — nested by folder: a folder is an entry with its chapters
+  under it, and a folder's `00 …` note, the page a part opens on, is that
+  entry — and links between the chapters. The pictures the chapters show travel
   inside the book, each one once; an attachment no chapter shows is left
   out. The book's metadata and cover are the `index.md` frontmatter at the
-  exported folder's root. One EPUB, not one per note — a folder is a book,
+  exported folder's root, and that note is also the book's first chapter,
+  after the cover page, wherever its name sorts: the page with the title
+  and the contents opens the book. One EPUB, not one per note — a folder is a book,
   and the format is what its reader expects. It is the way back from
   [converting a book into notes](organization.md#converting-a-book-into-notes):
   the converted folder's `index.md`, numbered chapters and pictures make
   the book again, with its metadata and cover.
+
+**The order** of a folder's contents is the tree's own, in every format:
+the folders first, then the names — compared as the tree compares them,
+without telling capitals from small letters or accents, and numbers by
+their value, so `Chapter 2` comes before `Chapter 10`. In a book that is
+the order of the chapters, the contents and the spine: a book you convert
+into notes (and so number its chapters) reads in order when you export
+it again. A folder is listed before the notes beside it, as the tree lists
+it: a loose chapter written next to a part comes after the part.
 
 Anything whose name starts with a dot (`.niman`, `.trash`, `.history`,
 `.draft.md`) is not part of an export, folders and files alike: those
