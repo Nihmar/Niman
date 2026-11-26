@@ -17,6 +17,7 @@ import 'package:niman/src/diagrams/layered_node.dart';
 import 'package:niman/src/diagrams/layered_options.dart';
 import 'package:niman/src/diagrams/layered_segments.dart';
 import 'package:niman/src/diagrams/layered_separation.dart';
+import 'package:niman/src/diagrams/layered_straighten.dart';
 
 /// Whether [node] floats: the top or the bottom of a cluster's box, which
 /// an edge that names the cluster ends at. It is not aligned with that edge,
@@ -85,6 +86,20 @@ void positionAcross(LayeredGraph graph, LayeredOptions options) {
     if (floats[i] == 1) continue;
     final around = [for (final x in alignments) x[i]]..sort();
     node.x = (around[1] + around[2]) / 2;
+  }
+  final balanced = Float64List(count);
+  for (final node in graph.nodes) {
+    balanced[node.index] = node.x;
+  }
+  straightenStandIns(
+    layers,
+    graph.nodes,
+    segments,
+    context.separation,
+    balanced,
+  );
+  for (final node in graph.nodes) {
+    if (floats[node.index] == 0) node.x = balanced[node.index];
   }
 }
 

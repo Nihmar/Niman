@@ -260,6 +260,34 @@ void main() {
       expect(bounds.left, lessThanOrEqualTo(label.x - 30 + _eps));
     });
 
+    test('two opposite edges between neighbours run side by side', () {
+      // One edge has the joins of the alignment and the other would be left
+      // to the nearest constraint, out at the side of a cluster that a wide
+      // box in another rank made broad.
+      final graph = LayeredGraph()
+        ..addCluster('E', padTop: 20, padBottom: 6, padLeft: 8, padRight: 8)
+        ..addNode('c', width: 150, height: 33, parent: 'E')
+        ..addNode('a', width: 233, height: 33, parent: 'E')
+        ..addNode('b', width: 212, height: 33, parent: 'E')
+        ..addEdge('c', 'a')
+        ..addEdge('a', 'b');
+      final back = graph.addEdge('b', 'a', labelWidth: 100, labelHeight: 20);
+      const options = LayeredOptions(rankGap: 60, nodeGap: 40);
+      layOutLayered(graph, options);
+      final forward = graph.edges[1];
+      final label = back.labelNode!;
+      final stand = forward.chain.single;
+      expect(stand.rank, label.rank);
+      expect(
+        (stand.x - label.x).abs() - label.width / 2,
+        closeTo(options.edgeGap, _eps),
+      );
+      final box = graph.cluster('E')!.box;
+      for (final x in [stand.x, label.x - 50, label.x + 50]) {
+        expect(x, inInclusiveRange(box.left + 8, box.right - 8));
+      }
+    });
+
     test('an edge without a label has no label centre', () {
       final graph = _graph(['a', 'b'], ['a>b']);
       layOutLayered(graph);
