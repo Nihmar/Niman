@@ -91,7 +91,7 @@ final class EpubBook {
   ///
   /// A type an EPUB cannot carry is no cover, not a failed book.
   Future<void> _addCover(String absolutePath) async {
-    final type = pictureMime(p.extension(absolutePath).toLowerCase());
+    final type = epubPictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return;
     final extension = p.extension(absolutePath).toLowerCase();
     final href = '$epubImageDir/cover$extension';
@@ -109,7 +109,7 @@ final class EpubBook {
     if (existing != null) {
       return p.posix.relative(existing.href, from: fromDir);
     }
-    final type = pictureMime(p.extension(absolutePath).toLowerCase());
+    final type = epubPictureMime(p.extension(absolutePath).toLowerCase());
     if (type == null) return null;
     final at = _picturesInOrder.length + 1;
     final extension = p.extension(absolutePath).toLowerCase();

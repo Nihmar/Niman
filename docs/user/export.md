@@ -43,7 +43,9 @@ one file:
   long note is minutes of work, not a hang.
 - **EPUB** — the note as a book, for an e-reader: the same page
   (`NoteHtml`) as XHTML, formulas as vectors, pictures inside the file (an
-  SVG as an `images/img-N.svg` entry).
+  SVG as an `images/img-N.svg` entry). A book carries the picture types
+  EPUB itself does — PNG, JPEG, GIF, WebP and SVG — so a BMP is left out
+  of it, though the HTML page still shows it.
   A `cover:` key in the note's frontmatter names a picture the book opens
   on. A wikilink out has nothing to point at, exactly as on a single HTML
   page.

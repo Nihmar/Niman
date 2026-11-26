@@ -234,7 +234,7 @@ String epubContentOpf({
       'media-type="application/xhtml+xml" />\n',
     );
     final href = _iri(p.posix.relative(cover.href, from: epubOpfDir));
-    final type = pictureMime(p.extension(cover.path).toLowerCase());
+    final type = epubPictureMime(p.extension(cover.path).toLowerCase());
     manifest.write(
       '    <item id="cover-image" href="${escapeAttribute(href)}" '
       'media-type="$type" properties="cover-image" />\n',
@@ -250,7 +250,7 @@ String epubContentOpf({
   }
   for (final picture in pictures) {
     final href = _iri(p.posix.relative(picture.href, from: epubOpfDir));
-    final type = pictureMime(p.extension(picture.path).toLowerCase());
+    final type = epubPictureMime(p.extension(picture.path).toLowerCase());
     manifest.write(
       '    <item id="${picture.id}" href="${escapeAttribute(href)}" '
       'media-type="$type" />\n',
