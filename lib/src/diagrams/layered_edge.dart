@@ -3,6 +3,9 @@ library;
 
 import 'package:niman/src/diagrams/layered_node.dart';
 
+/// A point of the layout.
+typedef LayeredPoint = ({double x, double y});
+
 /// How the ranking treats an edge.
 enum LayeredEdgeFlow {
   /// As the caller gave it: it points from a lower rank to a higher one.
@@ -36,6 +39,8 @@ final class LayeredEdge {
     required this.weight,
     this.labelWidth = 0,
     this.labelHeight = 0,
+    this.tailRoom = 0,
+    this.headRoom = 0,
     this.source = -1,
     this.clusterEnd = false,
     this.nesting = false,
@@ -69,6 +74,13 @@ final class LayeredEdge {
   /// The height of its label, 0 if it has none.
   final double labelHeight;
 
+  /// The room along the edge it needs next to its tail: for an arrow cap
+  /// or a text at that end.
+  final double tailRoom;
+
+  /// The room along the edge it needs next to its head.
+  final double headRoom;
+
   /// The caller's index for it, or -1 if it is the layout's own.
   final int source;
 
@@ -95,6 +107,16 @@ final class LayeredEdge {
 
   /// The stand-in that holds the room for its label, once it is normalised.
   LayeredNode? labelNode;
+
+  /// Where it goes once the layout is done: its tail's anchor, each stand-in's
+  /// centre, its head's anchor, running as the caller drew it whichever way
+  /// it was ranked. An end that is a cluster is anchored on the outline of
+  /// the cluster's box. Empty for a self loop, a flat edge or one no rank
+  /// could honour: they are the caller's to draw.
+  List<LayeredPoint> points = const [];
+
+  /// The centre of its label's stand-in, or null if it has no label.
+  LayeredPoint? labelCenter;
 
   /// Whether it is turned against the caller's direction.
   bool get reversed => flow == LayeredEdgeFlow.reversed;

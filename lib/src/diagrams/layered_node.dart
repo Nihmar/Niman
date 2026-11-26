@@ -84,6 +84,13 @@ final class LayeredNode {
   /// Its place in its rank, counted from the left. Set by the ordering.
   int order = 0;
 
+  /// Where its centre is across the ranks, once the layout is done. For a
+  /// cluster's top or bottom border, where its box's outline is.
+  double x = 0;
+
+  /// Where its centre is along the ranks, once the layout is done.
+  double y = 0;
+
   /// The edge a stand-in is on, or null for any other node.
   LayeredEdge? edge;
 

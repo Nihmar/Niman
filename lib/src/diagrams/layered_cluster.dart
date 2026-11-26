@@ -2,6 +2,7 @@
 /// layout keeps together in a box.
 library;
 
+import 'package:niman/src/diagrams/layered_box.dart';
 import 'package:niman/src/diagrams/layered_node.dart';
 
 /// A group of nodes and clusters, itself in one cluster at most.
@@ -16,6 +17,10 @@ final class LayeredCluster {
     required this.index,
     required this.depth,
     this.parent,
+    this.padTop = 0,
+    this.padBottom = 0,
+    this.padLeft = 0,
+    this.padRight = 0,
   });
 
   /// The caller's name for it, unique in the graph (nodes included).
@@ -29,6 +34,23 @@ final class LayeredCluster {
 
   /// The cluster it is inside, or null at the top level.
   final LayeredCluster? parent;
+
+  /// The room between the top of its box and what is in it. The caller puts
+  /// a title band in the side it is drawn on.
+  final double padTop;
+
+  /// The room between the bottom of its box and what is in it.
+  final double padBottom;
+
+  /// The room between the left of its box and what is in it.
+  final double padLeft;
+
+  /// The room between the right of its box and what is in it.
+  final double padRight;
+
+  /// Where its box is, once the layout is done: from its left border nodes
+  /// and its right ones, and from its top and bottom.
+  LayeredBox box = LayeredBox.zero;
 
   /// The nodes the caller put in it directly, in the order they were added.
   /// The layout's own stand-ins and border nodes are not listed.

@@ -81,9 +81,17 @@ final class LayeredGraph {
   }
 
   /// Adds the cluster [id], inside the cluster [parent] if one is named.
-  /// Its two border nodes are made with it. Throws if [id] is taken or
+  /// Its two border nodes are made with it. The pads are the room between
+  /// its box and what is in it on each side. Throws if [id] is taken or
   /// [parent] does not exist.
-  LayeredCluster addCluster(String id, {String? parent}) {
+  LayeredCluster addCluster(
+    String id, {
+    String? parent,
+    double padTop = 0,
+    double padBottom = 0,
+    double padLeft = 0,
+    double padRight = 0,
+  }) {
     _checkFree(id);
     final outer = _parentOf(parent);
     final cluster = LayeredCluster(
@@ -91,6 +99,10 @@ final class LayeredGraph {
       index: _clusters.length,
       depth: outer == null ? 0 : outer.depth + 1,
       parent: outer,
+      padTop: padTop,
+      padBottom: padBottom,
+      padLeft: padLeft,
+      padRight: padRight,
     );
     _clusters.add(cluster);
     _clusterById[id] = cluster;
@@ -133,7 +145,8 @@ final class LayeredGraph {
 
   /// Adds an edge from [from] to [to], each the id of a node or of a
   /// cluster. An edge to a cluster arrives at its top, one from a cluster
-  /// leaves from its bottom. [source] is the caller's index for it.
+  /// leaves from its bottom. [source] is the caller's index for it, and
+  /// [tailRoom] and [headRoom] the room it needs along itself next to each end.
   ///
   /// Throws if an end does not exist, or [minlen] or [weight] is negative.
   LayeredEdge addEdge(
@@ -143,6 +156,8 @@ final class LayeredGraph {
     double weight = 1,
     double labelWidth = 0,
     double labelHeight = 0,
+    double tailRoom = 0,
+    double headRoom = 0,
     int source = -1,
   }) {
     if (minlen < 0) throw ArgumentError.value(minlen, 'minlen');
@@ -157,6 +172,8 @@ final class LayeredGraph {
       weight: weight,
       labelWidth: labelWidth,
       labelHeight: labelHeight,
+      tailRoom: tailRoom,
+      headRoom: headRoom,
       source: source,
       clusterEnd:
           _clusterById.containsKey(from) || _clusterById.containsKey(to),
