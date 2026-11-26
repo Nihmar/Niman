@@ -132,6 +132,16 @@ final class LaidOutEdge {
         path[i + 3] * (s * s * s);
   }
 
+  /// This edge moved by [by], its labels with it.
+  LaidOutEdge shifted(Offset by) => LaidOutEdge.along(
+    edge: edge,
+    path: [for (final point in path) point + by],
+    label: label,
+    labelBox: labelBox?.shift(by),
+    startLabelBox: startLabelBox?.shift(by),
+    endLabelBox: endLabelBox?.shift(by),
+  );
+
   /// This edge with its label put in [box].
   LaidOutEdge withLabelBox(Rect box) => LaidOutEdge.along(
     edge: edge,

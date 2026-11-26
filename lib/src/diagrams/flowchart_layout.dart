@@ -24,13 +24,29 @@ import 'package:niman/src/diagrams/flow_model.dart';
 import 'package:niman/src/diagrams/flow_node_size.dart';
 import 'package:niman/src/diagrams/flow_orientation.dart';
 import 'package:niman/src/diagrams/flow_subgraph_boxes.dart';
+import 'package:niman/src/diagrams/flow_subgraph_direction.dart';
 import 'package:niman/src/diagrams/layered_layout.dart';
 
-/// The room kept round the whole drawing.
-const double _margin = 12;
-
 /// Lays [chart] out with [style].
+///
+/// An isolated subgraph that declares a direction of its own is laid out
+/// apart ([FlowDirectionSplit]) and placed as one box in the rest.
 DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
+  final split = FlowDirectionSplit.of(
+    chart,
+    (apart) => layoutFlowchart(apart, style),
+  );
+  if (split == null) return _layOut(chart, style, const {});
+  return split.merge(_layOut(split.outer, style, split.sizes));
+}
+
+/// Lays [chart] out in its own direction; [fixed] are the sizes, as drawn,
+/// of the nodes whose size is not their label's.
+DiagramLayout _layOut(
+  Flowchart chart,
+  DiagramStyle style,
+  Map<String, Size> fixed,
+) {
   if (chart.nodes.isEmpty) {
     return const DiagramLayout(
       size: Size.zero,
@@ -46,7 +62,7 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
   for (final node in chart.nodes) {
     final labelLines = DiagramMetrics.lines(node.label);
     lines[node.id] = labelLines;
-    final size = flowNodeSize(node, labelLines, style);
+    final size = fixed[node.id] ?? flowNodeSize(node, labelLines, style);
     // The layout runs top-down and is turned at the end: a chart drawn
     // across lays its nodes out on their sides, so the turn stands them up.
     // A bar is the one laid out as it is: it lies across the flow, and the
@@ -108,10 +124,10 @@ DiagramLayout layoutFlowchart(Flowchart chart, DiagramStyle style) {
       include(Rect.fromCircle(center: point, radius: 0));
     }
   }
-  minX -= _margin;
-  minY -= _margin;
-  maxX += _margin;
-  maxY += _margin;
+  minX -= flowLayoutMargin;
+  minY -= flowLayoutMargin;
+  maxX += flowLayoutMargin;
+  maxY += flowLayoutMargin;
 
   final transformer = FlowOrientation(
     direction: chart.direction,
