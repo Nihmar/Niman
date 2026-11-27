@@ -554,7 +554,8 @@ other names keep the old text — it becomes a separate copy.
 **UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
 order mark — what Windows Notepad's *Unicode* writes — opens as the text it
 holds, in any script, and is saved in the same encoding with its mark, so a
-one-character change is a one-character change of the file. Only the mark
+one-character change is a one-character change of the file, and an emptied
+note keeps its mark, its history and its place in the search. Only the mark
 tells such a file apart: a UTF-16 file without one is not recognised as text,
 and neither is one cut in the middle of a character (an odd number of bytes).
 A note that is not valid UTF-8 — an old Latin-1 file, say — is read with
