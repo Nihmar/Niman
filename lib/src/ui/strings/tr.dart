@@ -4718,4 +4718,8 @@ final class TurkishStrings extends Strings {
   String get dictionaryLicense =>
       "Metinler Wiktionary'den, CC BY-SA 4.0 ve GFDL, wiktextract ile "
       'çıkarıldı.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Dizin oluşturulamadı: $reason';
 }

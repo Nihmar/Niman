@@ -4767,4 +4767,8 @@ final class CzechStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Texty z Wiktionary, CC BY-SA 4.0 a GFDL, získané pomocí wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Index se nepodařilo vytvořit: $reason';
 }

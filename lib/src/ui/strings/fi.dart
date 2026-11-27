@@ -4795,4 +4795,8 @@ final class FinnishStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Tekstit Wiktionarysta, CC BY-SA 4.0 ja GFDL, poimittu wiktextractilla.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Hakemiston rakentaminen epäonnistui: $reason';
 }

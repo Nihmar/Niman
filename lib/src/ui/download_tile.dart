@@ -28,6 +28,7 @@ final class DownloadTile extends StatelessWidget {
     required this.onCancel,
     required this.onDelete,
     this.installedLeading,
+    this.onRetryInstalled,
     this.onTap,
     super.key,
   });
@@ -67,6 +68,11 @@ final class DownloadTile extends StatelessWidget {
 
   /// The leading widget once installed; a check when null.
   final Widget? installedLeading;
+
+  /// Tries again what an installed file still needs (a dictionary's index
+  /// that would not build): a Retry beside delete, key `-retry-`; none when
+  /// null.
+  final VoidCallback? onRetryInstalled;
 
   /// The tap on the whole row, if any.
   final VoidCallback? onTap;
@@ -135,11 +141,22 @@ final class DownloadTile extends StatelessWidget {
     };
 
     final trailing = switch (state) {
-      Downloaded() => IconButton(
-        key: Key('$keyPrefix-delete-$id'),
-        tooltip: AppStrings.actionDelete,
-        icon: const Icon(Icons.delete_outline),
-        onPressed: () => unawaited(_confirmDelete(context, size)),
+      Downloaded() => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (onRetryInstalled case final retry?)
+            TextButton(
+              key: Key('$keyPrefix-retry-$id'),
+              onPressed: retry,
+              child: Text(AppStrings.actionRetry),
+            ),
+          IconButton(
+            key: Key('$keyPrefix-delete-$id'),
+            tooltip: AppStrings.actionDelete,
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => unawaited(_confirmDelete(context, size)),
+          ),
+        ],
       ),
       Downloading() => IconButton(
         key: Key('$keyPrefix-cancel-$id'),

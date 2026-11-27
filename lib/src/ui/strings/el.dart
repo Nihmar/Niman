@@ -4916,4 +4916,8 @@ final class GreekStrings extends Strings {
   String get dictionaryLicense =>
       'Κείμενα από το Wiktionary, CC BY-SA 4.0 και GFDL, που εξήχθησαν με το '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Δεν ήταν δυνατή η δημιουργία του ευρετηρίου: $reason';
 }

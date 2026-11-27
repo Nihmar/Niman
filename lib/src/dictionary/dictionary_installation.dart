@@ -10,6 +10,7 @@ import 'package:niman/src/dictionary/dictionary_disk.dart';
 import 'package:niman/src/dictionary/dictionary_pack.dart';
 import 'package:niman/src/dictionary/dictionary_pack_info.dart';
 import 'package:niman/src/dictionary/dictionary_preparation.dart';
+import 'package:niman/src/dictionary/dictionary_prepare_result.dart';
 import 'package:niman/src/dictionary/dictionary_service.dart';
 
 /// What dictionaries this device has, and the downloads on their way
@@ -68,6 +69,8 @@ final class DictionaryInstallation extends ChangeNotifier {
   final Map<String, DownloadState> _states = {};
   final Map<String, DictionaryPreparation> _preparing = {};
   final Map<String, Future<void>> _installing = {};
+  final Map<String, Future<void>> _indexing = {};
+  final Map<String, String> _failures = {};
   List<InstalledDictionary> _installed = const [];
   Future<void>? _loading;
   Future<void>? _rescanning;
@@ -96,6 +99,11 @@ final class DictionaryInstallation extends ChangeNotifier {
   /// Where the pack [id] is on its way to being usable once downloaded, or
   /// null when it is not on that way.
   DictionaryPreparation? preparationOf(String id) => _preparing[id];
+
+  /// Why the index of the pack [id] could not be built, or null when it
+  /// could, or has not been tried: the pack is in the folder all the same,
+  /// and [retryIndex] tries again.
+  String? indexFailureOf(String id) => _failures[id];
 
   /// Whether the folder holds the pack [id].
   bool isInstalled(String id) => _installed.any((entry) => entry.pack.id == id);
@@ -130,6 +138,7 @@ final class DictionaryInstallation extends ChangeNotifier {
     _installed = installed;
     final pending = _apply(scan);
     _loaded = true;
+    _indexMissing();
     _log.info(
       'loaded in ${clock.elapsedMilliseconds} ms: '
       '${installed.map((entry) => entry.pack.id).join(', ')} installed, '
@@ -165,6 +174,31 @@ final class DictionaryInstallation extends ChangeNotifier {
     _installed = installed;
     _apply(scan);
     notifyListeners();
+    _indexMissing();
+  }
+
+  /// Starts the index of every usable pack in the folder that has none: one
+  /// whose build was interrupted or failed, or whose index was deleted (it
+  /// rebuilds itself). A failure is kept on the pack, so the list shows it
+  /// instead of the first look-up finding it.
+  void _indexMissing() {
+    for (final entry in _installed) {
+      final id = entry.pack.id;
+      if (!entry.pack.isAvailable || entry.indexed) continue;
+      if (_installing.containsKey(id) || _indexing.containsKey(id)) continue;
+      unawaited(
+        _index(id, entry.pack.languages.first).then((_) => _refresh(id)),
+      );
+    }
+  }
+
+  /// Tries again to build the index of the pack [id], which failed: its row
+  /// shows the progress, and the failure again if it fails again.
+  Future<void> retryIndex(String id) async {
+    final entry = _installed.where((e) => e.pack.id == id).firstOrNull;
+    if (entry == null || !entry.pack.isAvailable) return;
+    await _index(id, entry.pack.languages.first);
+    await _refresh(id);
   }
 
   /// Sets each pack's download state from [scan] and returns those whose
@@ -226,6 +260,7 @@ final class DictionaryInstallation extends ChangeNotifier {
       return error;
     }
     _log.info('$id removed');
+    _failures.remove(id);
     await _refresh(id);
     return null;
   }
@@ -267,22 +302,51 @@ final class DictionaryInstallation extends ChangeNotifier {
       throw FormatException('could not unpack: $error');
     }
     _log.info('${pack.id}: unpacked in ${clock.elapsedMilliseconds} ms');
-    _prepare(pack.id, const DictionaryPreparation.indexing(0));
-    final progress = service.indexProgress.listen((report) {
-      if (report.packId == pack.id) {
-        _prepare(pack.id, DictionaryPreparation.indexing(report.fraction));
-      }
-    });
-    try {
-      await service.installedPacks(refresh: true);
-      // The look-up reports a pack that cannot be indexed, with its reason:
-      // the pack is installed either way, and the list says if it is usable.
-      await service.prepare(pack.languages.first);
-    } finally {
-      await progress.cancel();
-    }
+    await _index(pack.id, pack.languages.first);
     _log.info('${pack.id}: installed in ${clock.elapsedMilliseconds} ms');
     await _refresh(pack.id);
+  }
+
+  /// Builds the index of the pack [id] that serves [language], with its
+  /// progress, once however many ask; a failure is kept on the pack, not
+  /// thrown. The pack stays in the folder: it is for the list to say it
+  /// cannot be used, with the reason and a way to try again.
+  Future<void> _index(String id, String language) {
+    final running = _indexing[id];
+    if (running != null) return running;
+    final indexing = _buildIndex(id, language);
+    _indexing[id] = indexing;
+    return indexing.whenComplete(() => _indexing.remove(id));
+  }
+
+  Future<void> _buildIndex(String id, String language) async {
+    _failures.remove(id);
+    _prepare(id, const DictionaryPreparation.indexing(0));
+    final DictionaryPrepareResult result;
+    try {
+      final service = await _service();
+      final progress = service.indexProgress.listen((report) {
+        if (report.packId == id) {
+          _prepare(id, DictionaryPreparation.indexing(report.fraction));
+        }
+      });
+      try {
+        await service.installedPacks(refresh: true);
+        result = await service.prepare(language);
+      } finally {
+        await progress.cancel();
+      }
+    } on Object catch (error) {
+      _failures[id] = '$error';
+      _log.warning('$id: index failed: $error');
+      _prepare(id, null);
+      return;
+    }
+    if (result.isFailed) {
+      _failures[id] = result.reason ?? '?';
+      _log.warning('$id: index failed: ${result.reason}');
+    }
+    _prepare(id, null);
   }
 
   /// Reads the folder again for the pack [id] after it was installed or

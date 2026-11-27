@@ -2440,4 +2440,6 @@ final class AppStrings {
   static String get dictionaryPdfLanguageNote => _s.dictionaryPdfLanguageNote;
   static String get dictionaryNotice => _s.dictionaryNotice;
   static String get dictionaryLicense => _s.dictionaryLicense;
+  static String dictionaryIndexFailed(String reason) =>
+      _s.dictionaryIndexFailed(reason);
 }

@@ -4736,4 +4736,8 @@ final class DanishStrings extends Strings {
   String get dictionaryLicense =>
       'Tekster fra Wiktionary, CC BY-SA 4.0 og GFDL, udtrukket med '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indekset kunne ikke opbygges: $reason';
 }

@@ -4817,4 +4817,8 @@ final class DutchStrings extends Strings {
   String get dictionaryLicense =>
       'Teksten van Wiktionary, CC BY-SA 4.0 en GFDL, geëxtraheerd met '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'De index kon niet worden opgebouwd: $reason';
 }

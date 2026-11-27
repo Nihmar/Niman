@@ -15,6 +15,7 @@ import 'package:niman/src/dictionary/dictionary_result.dart';
 import 'package:niman/src/dictionary/dictionary_service.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../tool/dictionary_pack/pack_archive.dart';
 import 'pack_tar.dart';
 
 void main() {
@@ -283,6 +284,78 @@ void main() {
       );
       expect(await dictionaries.remove('niman-it'), isNotNull);
       expect(dictionaries.isInstalled('niman-it'), isTrue);
+    });
+  });
+
+  group('a pack whose index cannot be built', () {
+    late Uint8List brokenTar;
+    late List<int> goodIdx;
+
+    setUp(() {
+      // The fixture pack with its .idx cut inside the last record: it
+      // unpacks, and cannot be indexed.
+      final source = Directory(p.join(dir.path, 'source', 'niman-it'));
+      final copy = Directory(p.join(dir.path, 'broken', 'niman-it'))
+        ..createSync(recursive: true);
+      for (final file in source.listSync().whereType<File>()) {
+        file.copySync(p.join(copy.path, p.basename(file.path)));
+      }
+      final idx = File(p.join(copy.path, 'niman-it.idx'));
+      goodIdx = idx.readAsBytesSync();
+      idx.writeAsBytesSync(goodIdx.sublist(0, goodIdx.length - 3));
+      final tarFile = File(p.join(dir.path, 'broken', 'niman-it.tar'));
+      writePackTar(copy, 'niman-it', tarFile);
+      brokenTar = tarFile.readAsBytesSync();
+      served['/niman-it.tar'] = brokenTar;
+    });
+
+    test('is installed, says why it cannot be used, and tries again when '
+        'asked', () async {
+      final dictionaries = installation([info(bytes: brokenTar)]);
+      await dictionaries.load();
+      await dictionaries.download(dictionaries.packs.single);
+      // On the device, with the reason, and not on its way any more.
+      expect(dictionaries.isInstalled('niman-it'), isTrue);
+      expect(dictionaries.preparationOf('niman-it'), isNull);
+      expect(
+        dictionaries.indexFailureOf('niman-it'),
+        contains('ends inside a record'),
+      );
+      expect(dictionaries.installed.single.indexed, isFalse);
+
+      // A retry that fails again says so again.
+      await dictionaries.retryIndex('niman-it');
+      expect(dictionaries.indexFailureOf('niman-it'), isNotNull);
+
+      // Mended, it is built, and the failure is gone.
+      File(p.join(root.path, 'niman-it', 'niman-it.idx'))
+          .writeAsBytesSync(goodIdx);
+      await dictionaries.retryIndex('niman-it');
+      expect(dictionaries.indexFailureOf('niman-it'), isNull);
+      expect(dictionaries.installed.single.indexed, isTrue);
+      expect((await service.lookUp('caminetto', 'it')).isFound, isTrue);
+    });
+
+    test(
+      'is found again at the next start, not by the first look-up',
+      () async {
+        final first = installation([info(bytes: brokenTar)]);
+        await first.load();
+        await first.download(first.packs.single);
+        final restarted = installation([info(bytes: brokenTar)]);
+        await restarted.load();
+        await until(() => restarted.indexFailureOf('niman-it') != null);
+        expect(restarted.preparationOf('niman-it'), isNull);
+      },
+    );
+
+    test('a failure goes with the pack when it is removed', () async {
+      final dictionaries = installation([info(bytes: brokenTar)]);
+      await dictionaries.load();
+      await dictionaries.download(dictionaries.packs.single);
+      expect(await dictionaries.remove('niman-it'), isNull);
+      expect(dictionaries.indexFailureOf('niman-it'), isNull);
+      expect(dictionaries.installed, isEmpty);
     });
   });
 

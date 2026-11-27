@@ -67,7 +67,11 @@ final class DictionaryPackTile extends StatelessWidget {
       );
     }
     final bytes = installed?.bytes ?? pack?.bytes ?? 0;
+    // A pack this app cannot read, or whose index would not build: either
+    // way it is on the device and cannot be used, and says why.
     final unusable = installed?.pack.unavailableReason;
+    final indexFailure = installation.indexFailureOf(id);
+    final broken = unusable != null || indexFailure != null;
     return DownloadTile(
       key: ValueKey('dictionary-tile-$id'),
       id: id,
@@ -75,11 +79,14 @@ final class DictionaryPackTile extends StatelessWidget {
       state: installed == null ? state : Downloaded(bytes),
       bytes: bytes,
       title: Text(title),
-      idle: _detail(installed, pack, bytes, unusable),
+      idle: _detail(installed, pack, bytes, unusable, indexFailure),
       installedLeading: Icon(
-        unusable == null ? Icons.menu_book_outlined : Icons.error_outline,
-        color: unusable == null ? null : Theme.of(context).colorScheme.error,
+        broken ? Icons.error_outline : Icons.menu_book_outlined,
+        color: broken ? Theme.of(context).colorScheme.error : null,
       ),
+      onRetryInstalled: indexFailure == null
+          ? null
+          : () => unawaited(installation.retryIndex(id)),
       deleteTitle: AppStrings.dictionaryDeleteTitle(title),
       deleteBody: AppStrings.dictionaryDeleteBody,
       onDownload: () {
@@ -102,6 +109,7 @@ final class DictionaryPackTile extends StatelessWidget {
     DictionaryPack? pack,
     int bytes,
     String? unusable,
+    String? indexFailure,
   ) {
     final ifo = installed?.pack.ifo;
     final definitions = ifo?.definitions ?? pack?.info.definitions ?? '';
@@ -115,6 +123,9 @@ final class DictionaryPackTile extends StatelessWidget {
       if (ifo != null && ifo.license.isNotEmpty) ifo.license,
       AppStrings.byteSize(bytes),
       ?(unusable == null ? null : AppStrings.dictionaryUnusable(unusable)),
+      ?(indexFailure == null
+          ? null
+          : AppStrings.dictionaryIndexFailed(indexFailure)),
     ].join(' · ');
   }
 }

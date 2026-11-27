@@ -4702,4 +4702,8 @@ final class EnglishStrings extends Strings {
   String get dictionaryLicense =>
       'Texts from Wiktionary, CC BY-SA 4.0 and GFDL, extracted with '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'The index could not be built: $reason';
 }

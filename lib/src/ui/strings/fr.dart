@@ -4900,4 +4900,8 @@ final class FrenchStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textes de Wiktionary, CC BY-SA 4.0 et GFDL, extraits avec wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      "Impossible de créer l'index : $reason";
 }

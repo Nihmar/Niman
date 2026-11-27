@@ -4786,4 +4786,8 @@ final class BulgarianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Текстове от Wiktionary, CC BY-SA 4.0 и GFDL, извлечени с wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Индексът не можа да бъде изграден: $reason';
 }

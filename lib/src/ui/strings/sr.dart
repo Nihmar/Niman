@@ -4784,4 +4784,8 @@ final class SerbianStrings extends Strings {
   String get dictionaryLicense =>
       'Текстови са Wiktionary-ја, CC BY-SA 4.0 и GFDL, издвојени алатом '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Индекс није било могуће направити: $reason';
 }

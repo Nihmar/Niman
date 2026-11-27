@@ -4791,4 +4791,8 @@ final class PortugueseStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textos do Wiktionary, CC BY-SA 4.0 e GFDL, extraídos com o wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Não foi possível criar o índice: $reason';
 }

@@ -4815,4 +4815,8 @@ final class UkrainianStrings extends Strings {
   String get dictionaryLicense =>
       'Тексти з Wiktionary, CC BY-SA 4.0 і GFDL, вилучені за допомогою '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Не вдалося створити індекс: $reason';
 }

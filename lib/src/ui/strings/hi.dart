@@ -4705,4 +4705,8 @@ final class HindiStrings extends Strings {
   String get dictionaryLicense =>
       'Wiktionary से लिए गए पाठ, CC BY-SA 4.0 और GFDL, wiktextract से निकाले '
       'गए।';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'इंडेक्स नहीं बनाया जा सका: $reason';
 }

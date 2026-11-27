@@ -4755,4 +4755,8 @@ final class IcelandicStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textar frá Wiktionary, CC BY-SA 4.0 og GFDL, unnir út með wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Ekki tókst að búa til vísinn: $reason';
 }

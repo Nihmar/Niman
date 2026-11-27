@@ -4828,4 +4828,8 @@ final class SpanishStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textos de Wiktionary, CC BY-SA 4.0 y GFDL, extraídos con wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'No se pudo crear el índice: $reason';
 }

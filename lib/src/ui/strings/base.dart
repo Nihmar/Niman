@@ -2519,4 +2519,5 @@ abstract base class Strings {
   String get dictionaryPdfLanguageNote;
   String get dictionaryNotice;
   String get dictionaryLicense;
+  String dictionaryIndexFailed(String reason);
 }

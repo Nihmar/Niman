@@ -4704,4 +4704,8 @@ final class EstonianStrings extends Strings {
   String get dictionaryLicense =>
       'Tekstid Wiktionaryst, CC BY-SA 4.0 ja GFDL, välja võetud '
       'wiktextractiga.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeksi loomine ebaõnnestus: $reason';
 }

@@ -4792,4 +4792,8 @@ final class CroatianStrings extends Strings {
   String get dictionaryLicense =>
       'Tekstovi iz Wiktionaryja, CC BY-SA 4.0 i GFDL, izdvojeni alatom '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeks nije bilo moguće izraditi: $reason';
 }

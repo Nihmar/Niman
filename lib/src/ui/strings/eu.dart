@@ -4820,4 +4820,8 @@ final class BasqueStrings extends Strings {
   String get dictionaryLicense =>
       'Wiktionary-ko testuak, CC BY-SA 4.0 eta GFDL, wiktextract-ekin atera '
       'direnak.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Ezin izan da indizea eraiki: $reason';
 }

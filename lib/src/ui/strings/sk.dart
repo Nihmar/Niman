@@ -4785,4 +4785,8 @@ final class SlovakStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Texty z Wiktionary, CC BY-SA 4.0 a GFDL, získané pomocou wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Index sa nepodarilo vytvoriť: $reason';
 }

@@ -4768,4 +4768,8 @@ final class LatvianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Teksti no Wiktionary, CC BY-SA 4.0 un GFDL, iegūti ar wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Neizdevās izveidot indeksu: $reason';
 }

@@ -4796,4 +4796,8 @@ final class MacedonianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Текстови од Wiktionary, CC BY-SA 4.0 и GFDL, извлечени со wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Индексот не можеше да се изгради: $reason';
 }

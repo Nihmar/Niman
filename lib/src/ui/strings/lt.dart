@@ -4826,4 +4826,8 @@ final class LithuanianStrings extends Strings {
   String get dictionaryLicense =>
       'Tekstai iš Wiktionary, CC BY-SA 4.0 ir GFDL, išgauti naudojant '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Nepavyko sukurti indekso: $reason';
 }

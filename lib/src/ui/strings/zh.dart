@@ -4275,4 +4275,7 @@ final class ChineseStrings extends Strings {
   @override
   String get dictionaryLicense =>
       '文本来自 Wiktionary（CC BY-SA 4.0 和 GFDL），由 wiktextract 提取。';
+
+  @override
+  String dictionaryIndexFailed(String reason) => '无法建立索引：$reason';
 }

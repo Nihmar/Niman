@@ -4779,4 +4779,8 @@ final class SwedishStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Texter från Wiktionary, CC BY-SA 4.0 och GFDL, utvunna med wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Det gick inte att bygga indexet: $reason';
 }

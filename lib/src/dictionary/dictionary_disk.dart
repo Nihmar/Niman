@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:niman/src/dictionary/dictionary_index.dart';
 import 'package:niman/src/dictionary/installed_pack.dart';
 import 'package:niman/src/dictionary/installed_packs.dart';
 import 'package:niman/src/dictionary/tar_unpacker.dart';
 import 'package:path/path.dart' as p;
 
-/// A pack in the dictionaries folder, with what it takes on disk.
-typedef InstalledDictionary = ({InstalledPack pack, int bytes});
+/// A pack in the dictionaries folder, with what it takes on disk and
+/// whether its sidecar index is there (a pack without one has still to be
+/// indexed, or its index would not build).
+typedef InstalledDictionary = ({InstalledPack pack, int bytes, bool indexed});
 
 /// The dictionaries folder's file work, all of it on an isolate of its
 /// own: reading what is installed, unpacking a download into place, and
@@ -69,7 +72,13 @@ Future<List<InstalledDictionary>> _scan(String root, bool sweep) async {
   if (sweep) _sweep(root);
   final packs = await InstalledPacks.scan(root);
   return [
-    for (final pack in packs) (pack: pack, bytes: _bytesIn(pack.directory)),
+    for (final pack in packs)
+      (
+        pack: pack,
+        bytes: _bytesIn(pack.directory),
+        indexed: File(DictionaryIndex.pathOf(pack.directory, pack.id))
+            .existsSync(),
+      ),
   ];
 }
 

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/download/downloader.dart';
+import 'package:niman/src/dictionary/dictionary_disk.dart';
 import 'package:niman/src/dictionary/dictionary_installation.dart';
 import 'package:niman/src/dictionary/dictionary_pack_info.dart';
 import 'package:niman/src/dictionary/dictionary_preparation.dart';
@@ -17,6 +18,7 @@ import 'package:niman/src/ui/settings.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../unit/dictionary/fixture_packs.dart';
@@ -99,6 +101,15 @@ void main() {
         startDownload: startDownload,
       );
       await installation.load();
+      // Packs with no index start building it at load: wait for that to be
+      // over, so the screen is looked at in a state that holds still.
+      bool settled(InstalledDictionary e) =>
+          !e.pack.isAvailable ||
+          installation.preparationOf(e.pack.id) == null &&
+              (e.indexed || installation.indexFailureOf(e.pack.id) != null);
+      for (var i = 0; i < 200 && !installation.installed.every(settled); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+      }
     });
     tester.view.physicalSize = const Size(900, 3200);
     tester.view.devicePixelRatio = 1;
@@ -329,6 +340,53 @@ void main() {
     await until(tester, () => installation.installed.isEmpty);
     // Back among the offer, since the catalog still lists it.
     expect(find.byKey(const Key('dictionary-download-niman-fr')), findsOne);
+  });
+
+  testWidgets('a pack whose index cannot be built says why, and offers Retry '
+      'and delete', (tester) async {
+    late List<int> whole;
+    final idx = File(p.join(root.path, 'niman-fr', 'niman-fr.idx'));
+    await real(tester, () async {
+      await writePack(
+        root.path,
+        code: 'fr',
+        entries: [(headword: 'maison', html: '<p>house</p>')],
+      );
+      whole = idx.readAsBytesSync();
+      idx.writeAsBytesSync(whole.sublist(0, whole.length - 3));
+    });
+    await open(tester, catalog: catalog, installed: false);
+    final reason = installation.indexFailureOf('niman-fr')!;
+    expect(reason, contains('ends inside a record'));
+    final tile = find.byKey(const Key('dictionary-tile-niman-fr'));
+    final detail = tester
+        .widget<Text>(
+          find.descendant(
+            of: tile,
+            matching: find.textContaining('Wiktionary'),
+          ),
+        )
+        .data!;
+    expect(detail, contains(AppStrings.dictionaryIndexFailed(reason)));
+    expect(find.byIcon(Icons.error_outline), findsOne);
+    expect(find.byKey(const Key('dictionary-retry-niman-fr')), findsOne);
+    expect(find.byKey(const Key('dictionary-delete-niman-fr')), findsOne);
+    // An installed pack that is fine has no Retry.
+    expect(find.byKey(const Key('dictionary-retry-niman-it')), findsNothing);
+
+    // Mended, Retry builds the index and the row is a plain one again.
+    await real(tester, () async => idx.writeAsBytesSync(whole));
+    await tester.tap(find.byKey(const Key('dictionary-retry-niman-fr')));
+    await until(
+      tester,
+      () =>
+          installation.indexFailureOf('niman-fr') == null &&
+          installation.preparationOf('niman-fr') == null &&
+          installation.installed.every((e) => e.indexed),
+    );
+    expect(find.byKey(const Key('dictionary-retry-niman-fr')), findsNothing);
+    expect(find.byKey(const Key('dictionary-delete-niman-fr')), findsOne);
+    expect(find.byIcon(Icons.error_outline), findsNothing);
   });
 
   testWidgets('a removal that fails says so, and the pack stays', (

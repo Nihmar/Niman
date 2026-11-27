@@ -4381,4 +4381,7 @@ final class JapaneseStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'テキストは Wiktionary（CC BY-SA 4.0 と GFDL）から、wiktextract で抽出したものです。';
+
+  @override
+  String dictionaryIndexFailed(String reason) => 'インデックスを作成できませんでした: $reason';
 }

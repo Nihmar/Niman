@@ -4862,4 +4862,8 @@ final class GermanStrings extends Strings {
   String get dictionaryLicense =>
       'Texte aus Wiktionary, CC BY-SA 4.0 und GFDL, extrahiert mit '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Der Index konnte nicht erstellt werden: $reason';
 }

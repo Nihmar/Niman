@@ -4832,4 +4832,8 @@ final class PolishStrings extends Strings {
   String get dictionaryLicense =>
       'Teksty z Wiktionary, CC BY-SA 4.0 i GFDL, wyodrębnione za pomocą '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Nie udało się utworzyć indeksu: $reason';
 }

@@ -4837,4 +4837,8 @@ final class CatalanStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textos del Wiktionary, CC BY-SA 4.0 i GFDL, extrets amb wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      "No s'ha pogut crear l'índex: $reason";
 }

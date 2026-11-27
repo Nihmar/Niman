@@ -4837,6 +4837,10 @@ final class RomanianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Texte din Wiktionary, CC BY-SA 4.0 și GFDL, extrase cu wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indexul nu a putut fi construit: $reason';
 }
 
 /// The "de" Romanian puts between a number from 20 up and what it counts:

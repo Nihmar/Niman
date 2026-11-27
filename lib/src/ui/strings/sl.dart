@@ -4809,4 +4809,8 @@ final class SlovenianStrings extends Strings {
   String get dictionaryLicense =>
       'Besedila iz Wiktionary, CC BY-SA 4.0 in GFDL, pridobljena z '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Kazala ni bilo mogoče zgraditi: $reason';
 }

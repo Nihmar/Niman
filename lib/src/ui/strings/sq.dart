@@ -4799,4 +4799,8 @@ final class AlbanianStrings extends Strings {
   String get dictionaryLicense =>
       'Tekste nga Wiktionary, CC BY-SA 4.0 dhe GFDL, të nxjerra me '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeksi nuk u ndërtua dot: $reason';
 }

@@ -4798,4 +4798,8 @@ final class ItalianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Testi da Wiktionary, CC BY-SA 4.0 e GFDL, estratti con wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      "Impossibile creare l'indice: $reason";
 }

@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/dictionary/dictionary_prepare_result.dart';
 import 'package:niman/src/dictionary/dictionary_result.dart';
 import 'package:niman/src/dictionary/dictionary_service.dart';
 import 'package:path/path.dart' as p;
@@ -337,14 +338,70 @@ void main() {
     });
 
     test('prepare builds and opens the pack of a language', () async {
-      await service.prepare('it');
+      final result = await service.prepare('it');
+      expect(result.status, DictionaryPrepareStatus.ready);
+      expect(result.isReady, isTrue);
+      expect(result.packId, 'niman-it');
       expect(
         File(p.join(root.path, 'niman-it', 'niman-it.niman-index'))
             .existsSync(),
         isTrue,
       );
-      await service.prepare('de');
     });
+
+    test('prepare says when no pack serves the language', () async {
+      final result = await service.prepare('de');
+      expect(result.status, DictionaryPrepareStatus.noPack);
+      expect(result.isReady, isFalse);
+      expect(result.isFailed, isFalse);
+      expect(result.packId, isNull);
+    });
+
+    test('prepare reports a pack whose index cannot be built, and tries '
+        'again when asked', () async {
+      await writePack(
+        root.path,
+        code: 'de',
+        entries: [(headword: 'Haus', html: '<p>house</p>')],
+      );
+      final idx = File(p.join(root.path, 'niman-de', 'niman-de.idx'));
+      final whole = idx.readAsBytesSync();
+      // Cut inside the last record: the pack is there, and cannot be indexed.
+      idx.writeAsBytesSync(whole.sublist(0, whole.length - 3));
+      final failed = await service.prepare('de');
+      expect(failed.status, DictionaryPrepareStatus.failed);
+      expect(failed.isFailed, isTrue);
+      expect(failed.packId, 'niman-de');
+      expect(failed.reason, contains('ends inside a record'));
+      expect(
+        File(p.join(root.path, 'niman-de', 'niman-de.niman-index'))
+            .existsSync(),
+        isFalse,
+      );
+      // The look-up says the same, with the same reason.
+      final lookUp = await service.lookUp('Haus', 'de');
+      expect(lookUp.outcome, DictionaryOutcome.unavailable);
+      expect(lookUp.reason, failed.reason);
+      // Mended, the next prepare succeeds: a failure is not kept.
+      idx.writeAsBytesSync(whole);
+      expect((await service.prepare('de')).isReady, isTrue);
+    });
+
+    test(
+      'prepare reports a pack this app cannot read, with its reason',
+      () async {
+        await writePack(
+          root.path,
+          code: 'xx',
+          entries: [(headword: 'a', html: 'b')],
+          nimanPack: 2,
+        );
+        final result = await service.prepare('xx');
+        expect(result.status, DictionaryPrepareStatus.failed);
+        expect(result.packId, 'niman-xx');
+        expect(result.reason, contains('niman-pack'));
+      },
+    );
 
     test('installedPacks lists the folder and refreshes on request', () async {
       expect((await service.installedPacks()).length, 2);

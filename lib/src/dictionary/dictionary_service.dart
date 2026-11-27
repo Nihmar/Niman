@@ -3,6 +3,7 @@ import 'dart:collection';
 
 import 'package:niman/src/dictionary/dictionary_exception.dart';
 import 'package:niman/src/dictionary/dictionary_index_job.dart';
+import 'package:niman/src/dictionary/dictionary_prepare_result.dart';
 import 'package:niman/src/dictionary/dictionary_result.dart';
 import 'package:niman/src/dictionary/dictionary_worker.dart';
 import 'package:niman/src/dictionary/installed_pack.dart';
@@ -59,15 +60,38 @@ final class DictionaryService {
 
   /// Builds the index of the pack that serves [language] and opens it, so
   /// the first look-up is as quick as the rest: for after a download.
-  /// Completes without error when there is no such pack.
-  Future<void> prepare(String language) async {
+  ///
+  /// Never throws for a pack: the result says it is ready, that no pack
+  /// serves the language, or that one does and could not be made ready, with
+  /// the reason. A failure is not kept, so calling again tries again.
+  Future<DictionaryPrepareResult> prepare(String language) async {
     final pack = await packFor(language);
-    if (pack == null) return;
+    if (pack == null) {
+      final broken = (await installedPacks())
+          .where((p) => p.serves(language))
+          .firstOrNull;
+      if (broken == null) {
+        return const DictionaryPrepareResult(DictionaryPrepareStatus.noPack);
+      }
+      return DictionaryPrepareResult(
+        DictionaryPrepareStatus.failed,
+        packId: broken.id,
+        reason: broken.unavailableReason,
+      );
+    }
     try {
       await _ensureOpen(pack);
-    } on DictionaryException {
-      // The look-up reports it, with the pack's reason.
+    } on DictionaryException catch (error) {
+      return DictionaryPrepareResult(
+        DictionaryPrepareStatus.failed,
+        packId: pack.id,
+        reason: error.reason,
+      );
     }
+    return DictionaryPrepareResult(
+      DictionaryPrepareStatus.ready,
+      packId: pack.id,
+    );
   }
 
   /// Looks [selection] up in the language [language] (a code as a book or
@@ -188,11 +212,15 @@ final class DictionaryService {
     if (running != null) return running;
     final opening = _open(pack);
     _opening[pack.id] = opening;
-    // A failure is not kept: the next look-up tries again.
+    // A failure is not kept: the next look-up tries again. The handler must
+    // not return what `remove` does, which is `opening` itself, failed: the
+    // derived future would adopt the failure and nobody listens to it.
     unawaited(
       opening.then<void>(
         (_) {},
-        onError: (Object _) => _opening.remove(pack.id),
+        onError: (Object _) {
+          unawaited(_opening.remove(pack.id));
+        },
       ),
     );
     return opening;

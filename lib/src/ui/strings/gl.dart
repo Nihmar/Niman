@@ -4794,4 +4794,8 @@ final class GalicianStrings extends Strings {
   @override
   String get dictionaryLicense =>
       'Textos do Wiktionary, CC BY-SA 4.0 e GFDL, extraídos con wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Non se puido crear o índice: $reason';
 }

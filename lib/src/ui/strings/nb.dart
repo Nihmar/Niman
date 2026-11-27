@@ -4742,4 +4742,8 @@ final class NorwegianStrings extends Strings {
   String get dictionaryLicense =>
       'Tekster fra Wiktionary, CC BY-SA 4.0 og GFDL, hentet ut med '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeksen kunne ikke bygges: $reason';
 }

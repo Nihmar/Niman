@@ -4822,4 +4822,8 @@ final class BelarusianStrings extends Strings {
   String get dictionaryLicense =>
       'Тэксты з Wiktionary, CC BY-SA 4.0 і GFDL, атрыманыя з дапамогай '
       'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Не ўдалося стварыць індэкс: $reason';
 }

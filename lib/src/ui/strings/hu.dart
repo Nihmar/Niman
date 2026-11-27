@@ -4781,4 +4781,8 @@ final class HungarianStrings extends Strings {
   String get dictionaryLicense =>
       'A szövegek a Wiktionaryből származnak, CC BY-SA 4.0 és GFDL, a '
       'wiktextract nyerte ki őket.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Az indexet nem sikerült felépíteni: $reason';
 }
