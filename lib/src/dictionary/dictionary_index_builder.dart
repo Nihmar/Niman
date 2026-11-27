@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:niman/src/dictionary/byte_sink.dart';
 import 'package:niman/src/dictionary/dict_source.dart';
@@ -64,7 +65,7 @@ final class DictionaryIndexBuilder {
       bytes: keyBytes.clamp(0, fileBytes),
     );
     final entries = ByteSink(
-      (8 * (ifo.wordCount ?? 0)).clamp(1 << 16, 8 * (idxBytes ~/ 9 + 1)),
+      min(max(8 * (ifo.wordCount ?? 0), 64), 8 * (idxBytes ~/ 9 + 1)),
     );
     await StardictIdx.scan(
       idxPath,
