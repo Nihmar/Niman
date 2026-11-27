@@ -357,6 +357,80 @@ whole-selection-first rule (decision 11) lets a reader drag over a longer
 word; Japanese conjugations reach their lemma only through the forms the
 pipeline carries, measured in phase 2.
 
+### As built (#1380, 2026-11-27)
+
+**The facade is `DictionaryService(directory:)`.** Its calls:
+- `lookUp(selection, language)` returns a `DictionaryResult` and never
+  throws for a pack. The result's outcome is *found*, *not found*, *no
+  pack* or *unavailable*, and it carries the candidate that matched, the
+  entries and the suggestions.
+- `installedPacks()`, `packFor(language)` and `prepare(language)`, which
+  builds a pack's index and opens it, for after a download.
+- `forget(packId)`, for a pack that was replaced or removed.
+- `indexProgress`, a stream reporting how far an index build has got.
+- `dispose()`, which closes the files first, so Windows can delete the
+  folder.
+
+The files differ from the list above: `stardict_idx.dart`,
+`stardict_syn.dart` and `dictzip_file.dart`.
+
+**The sidecar, `<id>.niman-index`, needed no SQLite.**
+- **Keys:** every `.idx` headword and `.syn` form, NFC, case kept, sorted
+  in byte order. Each key's value is its entry and whether it came from
+  `.syn`.
+- **Layout:**
+  - a 96-byte header: the format, the counts, and the size and mtime of
+    each pack file;
+  - an entry table of offset and size, so a look-up never reads the
+    `.idx`;
+  - in memory, the first key of every 64-key block;
+  - the blocks themselves, front-coded.
+- **A look-up** is a binary search over the in-memory keys, one block
+  read, one entry-table read and one or two dictzip chunks.
+- **A rebuild** happens when a stamp differs or the file is damaged. The
+  build writes to a temporary file and renames it, and a rebuild is
+  byte-identical.
+
+**Measured** on a Windows 11 desktop, under the test runner's JIT, with a
+synthetic pack of 1,000,000 headwords and 1,000,000 forms
+(`test/perf/dictionary_lookup_perf_test.dart`):
+
+| Measure | Result |
+|---|---|
+| Sidecar build | 1.1 s, about 45 MB of memory |
+| Sidecar size | 27.6 MB (13.8 bytes per key) |
+| Opening the pack in the worker | 20 ms |
+| Look-up of a headword | median 0.38 ms, p99 1.75 ms |
+| Look-up through a form | median 0.34 ms, p99 1.42 ms |
+| A miss, with the nearest keys | median 0.30 ms, p99 1.0 ms |
+
+`NIMAN_PERF=1` holds the build to 30 s and a look-up to a 2 ms median and
+a 10 ms p99. The English pack (about 5 million keys) is still to be
+measured on a phone.
+
+**The candidates go beyond the list above:**
+- a capitalized form after the lowercase one, so *POLISH* finds *Polish*
+  and a German noun in capitals is found;
+- a word hyphenated at a line's end, tried joined, then as written
+  (*well-known*);
+- the raw text last, for headwords with punctuation (*etc.*);
+- typographic apostrophes straightened, and the Greek final sigma handled;
+- a selection longer than eight words is not tried whole.
+
+**Other details:**
+- **NFC** is composed without a dependency, from a table of 781 pairs
+  generated from Python's `unicodedata`. It covers the Latin, Greek,
+  Cyrillic and Vietnamese ranges; Hangul and Indic marks are left as
+  they are.
+- **Limits:** offsets and sizes are 32-bit, so a pack whose `.dict`
+  passes 4 GB is refused.
+- **The cache** of recent results lives in the service, on the UI side,
+  not in the worker.
+
+**The two halves meet** in `test/unit/dictionary/pack_round_trip_test.dart`:
+packs the pipeline builds from the wiktextract sample, looked up by the
+engine.
+
 ## The pipeline — `tool/dictionary_pack.dart`
 
 - Reads wiktextract JSONL as a stream (the English edition's 24.8 GB never
@@ -447,6 +521,8 @@ holding the four files:
   form. Cyrillic to Latin is exact. The reverse is ambiguous (*nj*, *lj*,
   *dž*), and a wrong key could reach the wrong lemma, so a Latin headword
   reaches the Cyrillic script only through Wiktionary's own pages.
+  - When both scripts are headwords that list each other as forms, a
+    look-up returns both entries. The panel (#1383) shows them as one.
 
 **What the schema turned up.**
 - The other editions carry `raw_tags` on senses and forms; the English
