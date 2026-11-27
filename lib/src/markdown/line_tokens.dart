@@ -42,7 +42,10 @@ abstract final class LineTokens {
   /// in three rather than lying on top of it.
   static List<Token> fence(Block block, int line, String text) {
     final whole = <Token>[Token(TokenKind.codeFence, 0, text.length)];
-    if (line != block.startLine) {
+    // A fence opened on an item's marker line (`- ```js`) was open when the
+    // block's first line came: that line is already code, and the opener is
+    // the item's ([fenceOpening]).
+    if (line != block.startLine || block.entering?.fence != null) {
       // The code itself, unless this is the fence that closes the block.
       final closing =
           line == block.endLine - 1 && _closesFence(text.trimLeft());
@@ -60,6 +63,33 @@ abstract final class LineTokens {
       Token(TokenKind.codeLanguage, at, end),
       if (end < text.length) Token(TokenKind.codeFence, end, text.length),
     ];
+  }
+
+  /// The fence [text] opens past the marks that end at [from] — an item's
+  /// marker — if it opens one, added to [out] as a fence's line is: the
+  /// fence and what follows its language, and the language. The scanner
+  /// puts that line in the item, and the fence's block starts under it.
+  static void fenceOpening(String text, int from, List<InlinePiece> out) {
+    final rest = from == 0 ? text : text.substring(from);
+    final marker = LineSyntax.fenceOpen(rest);
+    if (marker == null) return;
+    final info = rest
+        .substring(marker.indent + marker.length)
+        .trim()
+        .split(RegExp(r'\s+'))
+        .first;
+    final at = info.isEmpty
+        ? text.length
+        : text.indexOf(info, from + marker.indent + marker.length);
+    final end = at + info.length;
+    InlinePiece piece(TokenKind kind, int start, int to) =>
+        InlinePiece(kind, start, to, structural);
+    out.add(piece(TokenKind.codeFence, from, at));
+    if (info.isEmpty) return;
+    out.add(piece(TokenKind.codeLanguage, at, end));
+    if (end < text.length) {
+      out.add(piece(TokenKind.codeFence, end, text.length));
+    }
   }
 
   /// Whether [text], a code block's last line trimmed, is its closing fence

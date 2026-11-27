@@ -85,6 +85,51 @@ void main() {
     });
   });
 
+  group('a fence opened on a list marker line is coloured where it is '
+      '(#1328)', () {
+    const text = '- ```js\n  a\n  b\n  ```';
+
+    test('the marker line holds the fence and its language', () {
+      expect(_line(text, 0), [
+        'listMarker[-]',
+        'codeFence[```]',
+        'codeLanguage[js]',
+      ]);
+    });
+
+    test('the first code line is code, not a fence', () {
+      expect(_line(text, 1), ['codeBlock[  a]']);
+      expect(_line(text, 2), ['codeBlock[  b]']);
+    });
+
+    test('the closing fence is a fence', () {
+      expect(_line(text, 3), ['codeFence[  ```]']);
+    });
+
+    test('a fence on a later line of the item is as it was', () {
+      const later = '1. x\n   ```sh\n   y\n   ```';
+      expect(_line(later, 1), ['codeFence[   ```]', 'codeLanguage[sh]']);
+      expect(_line(later, 2), ['codeBlock[   y]']);
+    });
+
+    test('a tilde fence, no language, and a nested item', () {
+      expect(_line('- ~~~\n  a\n  ~~~', 0), [
+        'listMarker[-]',
+        'codeFence[~~~]',
+      ]);
+      expect(_line('- a\n  - ```py\n    b', 1).last, 'codeLanguage[py]');
+      expect(_line('- ```py\n  b', 1), ['codeBlock[  b]']);
+    });
+
+    test('a line that only looks like one is not a fence', () {
+      expect(_line('- ``` a`b', 0), isNot(contains(startsWith('codeFence'))));
+      expect(
+        _line('- text ```js', 0),
+        isNot(contains(startsWith('codeFence'))),
+      );
+    });
+  });
+
   group('a block over the inline limit is not joined per line (#1326)', () {
     final long = 'word ' * 20;
     // Each is over 64 KB: a paragraph, a quote, a table.

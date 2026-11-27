@@ -496,6 +496,9 @@ final class SourceStyler implements Reclaimable {
     final structural = quoteMarks != null
         ? quoteMarks.on(line - block.startLine, text, tokens)
         : LineTokens.structure(block, line, text, prefix, tokens);
+    if (block.kind == BlockKind.listItem && line == block.startLine) {
+      LineTokens.fenceOpening(text, structural, tokens);
+    }
     if (parsed != null) {
       tokens.addAll(parsed.inlines.piecesOn(line - block.startLine));
     }
