@@ -264,9 +264,13 @@ order but StarDict's.
 - the other script of a Serbo-Croatian entry.
 
 Each record points at the `.idx` entry of its lemma. A form shared by two
-lemmas (*ancora*) has one record per lemma. A form that is itself a
-headword has no record: its own entry lists its lemma under `form_of`
-(below).
+lemmas has one record per lemma.
+
+A form that is also a headword keeps its record. *Ancora* is an adverb and
+a noun, and also a form of *ancorare*, whose entry the headword does not
+always name. The record is left out only when the form's own entry
+already names that lemma in a `form-of` paragraph (below). A look-up then
+returns the headword's entry and the lemma's, headword first.
 
 **An entry** is UTF-8 HTML. The grammar is closed. Text is escaped (`&amp;`
 `&lt;` `&gt;` `&quot;`), and nothing outside it is written.
