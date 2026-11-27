@@ -110,6 +110,13 @@ final class SourceCaretMotion {
   /// Moves the caret by [motion], the logical motions the key table calls.
   void moveBy(CaretMotion motion, {bool extend = false}) {
     final selection = _selection();
+    // A range left by an arrow goes to its edge, which is where it stops.
+    final collapsed = collapseTarget(selection, motion, extend: extend);
+    if (collapsed != null) {
+      final into = motion == CaretMotion.characterLeft ? -1 : 1;
+      _apply(SelectionModel.at(inCell(collapsed, into)), reveal: true);
+      return;
+    }
     var next = moveCaret(
       selection,
       motion,

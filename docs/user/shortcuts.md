@@ -94,6 +94,9 @@ the two have always shared.
 
 Moving and selecting in the source editor, on Windows and Linux:
 
+- `←` / `→` — one character; on a selection, without `Shift`, they close it
+  to its left or right edge (select a word, press `→`, and the caret is
+  right after it)
 - `Ctrl+←` / `Ctrl+→` — jump a word; at the head of a line `Ctrl+←` goes to
   the end of the line above, and at the end of a line `Ctrl+→` to the head
   of the line below (past its indentation and any list marker)

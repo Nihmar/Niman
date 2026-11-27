@@ -161,6 +161,8 @@ SelectionModel moveCaret(
   bool extend = false,
   int? Function(int line)? verbatimQuotes,
 }) {
+  final collapsed = collapseTarget(selection, motion, extend: extend);
+  if (collapsed != null) return SelectionModel.at(collapsed);
   final from = selection.extent;
   int body(int line) =>
       lineBodyStart(buffer, line, verbatim: verbatimQuotes?.call(line));
@@ -178,6 +180,25 @@ SelectionModel moveCaret(
   return extend
       ? SelectionModel(anchor: selection.anchor, extent: to)
       : SelectionModel.at(to);
+}
+
+/// Where [motion] collapses a range [selection] to, or null when it moves.
+///
+/// Left and Right, without Shift, on a range leave it for its left or right
+/// edge rather than step from the end the caret was dragged to: select a
+/// word and press an arrow to get out of it (#1349). Every other motion
+/// moves from the extent, as it does on a caret.
+int? collapseTarget(
+  SelectionModel selection,
+  CaretMotion motion, {
+  required bool extend,
+}) {
+  if (extend || selection.isCollapsed) return null;
+  return switch (motion) {
+    CaretMotion.characterLeft => selection.start,
+    CaretMotion.characterRight => selection.end,
+    _ => null,
+  };
 }
 
 /// One grapheme cluster left of [at].
