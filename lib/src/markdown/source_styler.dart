@@ -223,10 +223,11 @@ final class SourceStyler implements Reclaimable {
 
   static const int _parseCacheSize = 4096;
 
-  /// A block past this many characters is not inline-parsed: its lines get
-  /// their structure and nothing more. A block is read whole whenever it
-  /// changes, and a pasted table of this size is one block: a keystroke in
-  /// it would read more than a frame affords.
+  /// A block whose lines take more than this many characters of the note
+  /// is not inline-parsed: its lines get their structure and nothing more.
+  /// A block is read whole whenever it changes, and a pasted table of this
+  /// size is one block: a keystroke in it would read more than a frame
+  /// affords.
   static const int _inlineLimit = 64 * 1024;
 
   /// The note's footnotes, in the order they are cited: the section the
@@ -510,10 +511,20 @@ final class SourceStyler implements Reclaimable {
         cached.block.sameShape(block)) {
       return cached;
     }
+    // Too long by the size of its lines in the note — two lookups — and not
+    // by its text joined, which is the cost a limit is there to avoid: a
+    // block that is over it was joined on every call, for none of them to
+    // keep (#1326).
+    if (buffer.offsetOfLine(block.endLine) -
+            buffer.offsetOfLine(block.startLine) >
+        _inlineLimit) {
+      return null;
+    }
     _blockTextReads++;
-    final raw = BlockParser.blockText(block, buffer);
-    if (raw.length > _inlineLimit) return null;
-    // The items' indents too: what the reading makes of a block in a list
+    final raw = BlockParser.blockText(
+      block,
+      buffer,
+    ); // The items' indents too: what the reading makes of a block in a list
     // depends on them (`BlockParser.linePrefix`); and whether a table goes
     // on with one above, whose head it then has none of.
     final key =
