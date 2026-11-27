@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:niman/src/editor/toolbar.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/editor/toolbar_layout.dart';
@@ -385,9 +386,15 @@ final class NoteToolbarBar extends StatelessWidget {
     required this.active,
     required this.layout,
     this.menus = const {},
+    this.history,
     this.dense = false,
     super.key,
   });
+
+  /// Undo and redo, the bar's first two buttons (#1336): what each does, or
+  /// null when there is nothing to undo or redo — the button is greyed and
+  /// stays in its place. No record leaves them out.
+  final ({VoidCallback? undo, VoidCallback? redo})? history;
 
   /// The desktop's dense bar, divided by kind (#173).
   final bool dense;
@@ -410,6 +417,27 @@ final class NoteToolbarBar extends StatelessWidget {
     child: EditorToolbar(
       dense: dense,
       buttons: [
+        if (history case final history?) ...[
+          EditorToolbarButton(
+            key: const Key('toolbar-undo'),
+            icon: Icons.undo,
+            tooltip: tooltipWithKeys(AppStrings.shortcutUndo, _undoKeys()),
+            group: _historyGroup,
+            enabled: history.undo != null,
+            onPressed: history.undo ?? () {},
+          ),
+          EditorToolbarButton(
+            key: const Key('toolbar-redo'),
+            icon: Icons.redo,
+            tooltip: tooltipWithKeys(
+              AppStrings.shortcutRedo,
+              _undoKeys(shift: true),
+            ),
+            group: _historyGroup,
+            enabled: history.redo != null,
+            onPressed: history.redo ?? () {},
+          ),
+        ],
         for (final item in layout.visible)
           EditorToolbarButton(
             key: item.widgetKey,
@@ -427,3 +455,15 @@ final class NoteToolbarBar extends StatelessWidget {
     ),
   );
 }
+
+/// The group of the undo and redo buttons: the dense toolbar divides them
+/// from the formats (#173).
+const Object _historyGroup = 'history';
+
+/// The keys that undo, or with [shift] redo, as this host presses them.
+SingleActivator _undoKeys({bool shift = false}) => SingleActivator(
+  LogicalKeyboardKey.keyZ,
+  control: !platformModifierIsMeta,
+  meta: platformModifierIsMeta,
+  shift: shift,
+);

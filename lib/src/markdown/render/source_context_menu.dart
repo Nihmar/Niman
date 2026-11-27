@@ -6,6 +6,7 @@ import 'package:niman/src/editor/context_menu_items.dart';
 import 'package:niman/src/editor/editor_context_menu.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/links/link_path.dart';
+import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
@@ -32,6 +33,9 @@ final class SourceContextMenu extends ChangeNotifier {
     required this._copy,
     required this._paste,
     required this._selectAll,
+    required this._history,
+    required this._undo,
+    required this._redo,
     required this._replace,
     required this._spellCheck,
     required this._spellRanges,
@@ -79,6 +83,12 @@ final class SourceContextMenu extends ChangeNotifier {
 
   /// Selects the whole note.
   final VoidCallback _selectAll;
+
+  /// The note's undo history, and undo and redo: what the touch toolbar's
+  /// overflow offers a phone with no keys to press (#1336).
+  final EditHistory Function() _history;
+  final bool Function() _undo;
+  final bool Function() _redo;
 
   /// Replaces a range of the note as one undoable edit.
   final void Function(int start, int end, String text) _replace;
@@ -305,6 +315,28 @@ final class SourceContextMenu extends ChangeNotifier {
                   }
                 },
         ),
+      // By touch, where there is no key to undo with: after the clipboard's,
+      // in the overflow, greyed rather than left out so nothing moves.
+      if (touch) ...[
+        ContextMenuButtonItem(
+          label: AppStrings.shortcutUndo,
+          onPressed: _history().canUndo
+              ? () {
+                  dismiss();
+                  _undo();
+                }
+              : null,
+        ),
+        ContextMenuButtonItem(
+          label: AppStrings.shortcutRedo,
+          onPressed: _history().canRedo
+              ? () {
+                  dismiss();
+                  _redo();
+                }
+              : null,
+        ),
+      ],
     ];
   }
 
