@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart';
 
+import 'package:niman/src/editor/list_item_head.dart';
 import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/list_tree.dart';
 import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart' show MarkdownEdit;
+import 'package:niman/src/editor/touched_lines.dart';
 
 /// Indents (or outdents, with [outdent] true) every line the [selection]
 /// touches.
@@ -25,8 +27,7 @@ MarkdownEdit indentLines({
   final lines = text.split('\n');
   final base = _locate(lines, selection.baseOffset);
   final extent = _locate(lines, selection.extentOffset);
-  final startLine = base.line < extent.line ? base.line : extent.line;
-  final endLine = base.line < extent.line ? extent.line : base.line;
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final window = listIndentWindow(
     (at) => lines[at],
     lines.length,
@@ -79,11 +80,40 @@ List<String> indentListLines(
   required int last,
   required int width,
   required bool outdent,
-}) => _ListIndent(lines, width).run(first, last, outdent: outdent);
+}) => indentListLinesWithin(
+  lines,
+  first: first,
+  last: last,
+  width: width,
+  outdent: outdent,
+).lines;
+
+/// [indentListLines] over [lines] that may be the top of a longer block, as
+/// the window `listIndentWindowBelow` reads: with it, whether the answer is
+/// only right when more lines below are read — the subtree of an item moved
+/// ran to the last line, or the run of siblings renumbered did. When it is
+/// not, the lines are the answer the whole block gives.
+({List<String> lines, bool needsMore}) indentListLinesWithin(
+  List<String> lines, {
+  required int first,
+  required int last,
+  required int width,
+  required bool outdent,
+}) {
+  final indent = _ListIndent(lines, width);
+  final out = indent.run(first, last, outdent: outdent);
+  return (lines: out, needsMore: indent.needsMore);
+}
 
 /// Where the items moved together went: the column of the sublist, and the
-/// number its next item takes (null when the marker stays).
-typedef _Sublist = ({int indent, int? number, String? delimiter});
+/// number its next item takes (null when the marker stays) in the style of
+/// the item `like` — its delimiter and the zeros it is padded with.
+typedef _Sublist = ({
+  int indent,
+  int? number,
+  String? delimiter,
+  ListItemHead? like,
+});
 
 final class _ListIndent {
   new(this.lines, this.width) {
@@ -124,11 +154,21 @@ final class _ListIndent {
   late final List<bool> counted;
   late final List<bool> grouped;
 
+  /// Whether something the rows say — the end of a subtree, of a run of
+  /// siblings counted on — is only known with the rows below them.
+  bool needsMore = false;
+
   List<String> run(int first, int last, {required bool outdent}) {
     for (var at = first; at <= last; at++) {
       if (moved[at]) continue;
       if (rows[at].head == null) {
-        out[at] = outdent ? _strip(lines[at]) : '${' ' * width}${lines[at]}';
+        // A blank line is left blank: indenting it would only leave spaces
+        // at the end of the line (#1345).
+        if (outdent) {
+          out[at] = _strip(lines[at]);
+        } else if (!rows[at].blank) {
+          out[at] = '${' ' * width}${lines[at]}';
+        }
       } else if (outdent) {
         _outdent(at);
       } else {
@@ -168,6 +208,7 @@ final class _ListIndent {
     var indent = row.indent + width;
     int? take;
     String? delimiter;
+    var like = row.head;
     if (above >= 0) {
       final sibling = placed[above];
       if (sibling != null) {
@@ -176,6 +217,7 @@ final class _ListIndent {
         indent = sibling.indent;
         take = number == null ? null : sibling.number;
         delimiter = take == null ? null : sibling.delimiter;
+        like = sibling.like;
         group[at] = group[above] + 1;
         counted[at] = counted[above] && _follows(above, at);
         grouped[above] = true;
@@ -188,12 +230,13 @@ final class _ListIndent {
           final count = joined?.head!.number;
           take = count == null ? 1 : count + 1;
           delimiter = count == null ? row.delimiter : joined!.delimiter;
+          if (count != null) like = joined!.head;
         }
         group[at] = 1;
         counted[at] = _follows(above, at);
       }
     }
-    _place(at, indent, take, delimiter);
+    _place(at, indent, take, delimiter, like);
   }
 
   /// Whether the item [at] is numbered right after the item [above].
@@ -210,7 +253,7 @@ final class _ListIndent {
     final parent = tree.parent[at];
     if (parent < 0) {
       final spaces = row.indent < width ? row.indent : width;
-      _place(at, row.indent - spaces, null, null);
+      _place(at, row.indent - spaces, null, null, null);
       return;
     }
     final up = rows[parent];
@@ -222,28 +265,36 @@ final class _ListIndent {
       delimiter = up.delimiter;
       backTo[parent] = take + 1;
     }
-    _place(at, up.indent, take, delimiter);
+    _place(at, up.indent, take, delimiter, up.head);
   }
 
   /// Puts the item [at] on [indent] under [number] and [delimiter] (the
   /// number null: the marker stays), its subtree moving by as much as its
   /// content column did.
-  void _place(int at, int indent, int? number, String? delimiter) {
+  void _place(
+    int at,
+    int indent,
+    int? number,
+    String? delimiter,
+    ListItemHead? like,
+  ) {
     final row = rows[at];
     final head = row.head!;
     final next = number == null || delimiter == null
         ? head.marker
-        : '$number$delimiter';
+        : (like ?? head).markerFor(number);
     delta[at] = indent - row.indent;
     marker[at] = next == head.marker ? null : next;
     placed[at] = (
       indent: indent,
       number: number == null || delimiter == null ? null : number + 1,
       delimiter: delimiter,
+      like: like,
     );
     final shift = delta[at] + next.length - head.marker.length;
     final inside = row.contentColumn;
-    for (var below = at + 1; below < rows.length; below++) {
+    var below = at + 1;
+    for (; below < rows.length; below++) {
       final line = rows[below];
       if (line.depth != row.depth) break;
       if (line.blank) continue;
@@ -251,6 +302,8 @@ final class _ListIndent {
       delta[below] += shift;
       moved[below] = true;
     }
+    // The subtree ran to the last row: more of it may be below.
+    if (below == rows.length) needsMore = true;
   }
 
   /// The siblings after [parent] make room for the items moved back to it.
@@ -262,19 +315,15 @@ final class _ListIndent {
   /// Adds [by] to the numbers of the siblings after [at] that count on from
   /// it one by one: a list numbered by hand stays as it was written.
   void _renumberAfter(int at, int by) {
-    final head = rows[at].head!;
-    final number = head.number;
+    final number = rows[at].head!.number;
     if (number == null || by == 0) return;
+    final counting = tree.countingAfter(at);
+    // The run still held at the last row: the next siblings are below it.
+    if (counting.open) needsMore = true;
     var expected = number;
-    var sibling = tree.next[at];
-    while (sibling >= 0) {
-      final row = rows[sibling];
+    for (final sibling in counting.run) {
       expected += 1;
-      if (row.head!.number != expected || row.delimiter != rows[at].delimiter) {
-        return;
-      }
-      marker[sibling] = '${expected + by}${row.delimiter}';
-      sibling = tree.next[sibling];
+      marker[sibling] = rows[sibling].head!.markerFor(expected + by);
     }
   }
 }

@@ -619,6 +619,22 @@ Pressed on lines that are all tasks already, it takes the boxes off and
 leaves their text. Blank lines in a selection are left alone, and the
 whole change is one undo step. On a task line the button reads as on.
 
+The other buttons that mark lines toggle the same way, from the toolbar,
+the editor's menu and the keys. The **bulleted list**, the **numbered list**
+and the **quote** put their mark on each selected line, and pressed on lines
+that all have it already they take it off again, so a button that reads as
+on takes its mark away. A numbered item pressed with the bullet button
+swaps its number for a bullet, a task its box for nothing, and a bulleted
+item pressed with the numbered one swaps in a number (a task keeps its box);
+a quote adds one level only to lines that have none and takes one level off
+at a time. The marks go behind a line's own indent and quote marks, and blank
+lines among several lines are left alone. **Bold**, **italic**, **strike** and
+the other wrapping buttons work on the text the same way: with the selection
+wrapped in their marks — inside it or right outside it — or the caret in a
+wrapped word, they take the marks off instead of adding another pair. A
+selection counted in asterisks is read as Markdown reads them: `**a**` is bold
+and not italic, so Italic over it wraps it again, and `***a***` is both.
+
 The **table** button writes an empty table — two columns, a header and
 one row — on lines of its own, with the caret in its first header cell:
 it takes the place of a blank line the caret is on, goes above a line
@@ -695,11 +711,22 @@ writes its definition under the paragraph, the caret on it to write the
 note.
 
 Enter inside a list carries the list on, in both editors: the next line
-starts with the same marker, a numbered list counts on, and a task item
-gives you a fresh empty box. Enter on an item you have not typed
-anything into ends the list instead — the usual second Enter. On an empty
+starts with the same marker, a numbered list counts on (keeping the
+zeros of `01.`, which goes on as `02.`), and a task item gives you a
+fresh empty box. Enter in the middle of a numbered list renumbers, in
+the same step, the items after the new one that counted on from the
+item you were on (`1.` `2.` `3.` becomes `1.` `2.` `3.` `4.`); a list
+numbered any other way, `1.` `1.` `1.` or by hand, is left as written.
+Enter on an item you have not typed anything into —
+`- [ ]` with the box and no text included, with or without the space
+after it — ends the list instead, the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
-does, and only at the margin removes the marker. Inside a fenced code
+does, and only at the margin removes the marker. A rule written with
+spaces, `- - -` or `* * *`, is a rule and not a list: Enter after it adds
+nothing. Enter on a line that goes on an item's text — indented to where
+the text starts, under `- ` two spaces, under `10. ` four — starts the next
+line at that indent, so a long item stays one item; a line at the margin
+(a lazy continuation) gets the plain line break. Inside a fenced code
 block, a math block or the frontmatter it does nothing: a dash there is a
 dash.
 
@@ -708,7 +735,8 @@ marks, and a list inside the quote goes on behind them: `> - milk` and
 Enter gives `> - `, `> > x` gives `> > `, and the first line of a callout,
 `> [!note]`, gives `> ` for its body. Enter on a line with nothing after
 its marks, `> `, takes them off and leaves the quote; on an empty list
-item in a quote it takes the marker, and the next Enter the quote. Enter
+item in a quote it takes the marker, and the next Enter the quote. The
+marks are carried as you wrote them: `>- milk` goes on as `>- `. Enter
 and Tab read the line the same way, behind the `>`.
 
 Brackets come in pairs, in both editors and on every platform: `(`
@@ -1067,11 +1095,25 @@ for `- ` or `- [ ] `.
   siblings make room. An item with no parent loses up to the indent width of
   its own indent.
 - The first item of a list has nothing to nest under, so it moves by the
-  indent width (Settings, 2–8). So does every line that is not a list item.
+  indent width (Settings, 2–8). So does every line that is not a list item,
+  but for a blank line among several selected lines, which is left blank rather
+  than given trailing spaces.
 - On several selected lines, each item is placed by the same rule; items
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the
   `>`.
+- A selection that ends at the very start of a line — a triple click, or
+  Shift+Down from the start of a line — does not include that line, here and
+  in every command that works on the lines of the selection (the list, quote,
+  numbered-list, checklist, heading and Body commands).
+- With the caret on a line that is not a list item, Tab puts the indent at the
+  caret and Shift+Tab takes back the spaces right before it, so one undoes the
+  other wherever the caret is; with none before it, Shift+Tab takes up to the
+  indent width of the line's leading spaces. Only spaces are ever taken.
+- In a fenced code block, a math block or the frontmatter a line is text
+  whatever it says: Tab and Shift+Tab only add and take spaces — at the caret,
+  or at the start of each selected line — and nothing is nested or renumbered.
+  The same holds for a selection that reaches into code from the lines above.
 
 ### Move to tasks
 

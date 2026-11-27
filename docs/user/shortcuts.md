@@ -108,8 +108,9 @@ Moving and selecting in the source editor, on Windows and Linux:
   — there and for `Ctrl+←` / `Ctrl+→` alike
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
 - `Tab` / `Shift+Tab` — indent and outdent the line (a list item nests under
-  the item above it and back, see [editing](editing.md)); in a table in live
-  mode, the next and the previous cell instead
+  the item above it and back, see [editing](editing.md); on any other line the
+  two undo each other, and in code, maths or the frontmatter they only add and
+  take spaces); in a table in live mode, the next and the previous cell instead
 
 Reading a note in the read view (Markdown notes, with the unified
 engine), which takes the keyboard when you switch to it or click it:

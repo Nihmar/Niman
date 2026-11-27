@@ -1,5 +1,7 @@
 import 'package:niman/src/editor/list_row.dart';
+import 'package:niman/src/markdown/edit/item_continuation.dart';
 import 'package:niman/src/markdown/edit/list_indent_edit.dart';
+import 'package:niman/src/markdown/edit/numbered_enter.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -29,6 +31,10 @@ typedef EnterEdit = ({
 /// * an empty list item at the margin loses its marker (keeping the quote
 ///   marks, which the next Enter takes), and an empty *nested* one goes back
 ///   one level, the edit Shift+Tab makes — [indentWidth] is the one it uses;
+/// * a line that goes on the text of a list item, indented to its content,
+///   starts the next one at that indent (`- a` / `  more` goes on as two
+///   spaces), and a line at the margin, a lazy continuation, is the
+///   platform's;
 /// * a caret inside the marks, or inside a list marker, is the platform's.
 ///
 /// Line-local: the caller knows whether the line is inside a code fence, a
@@ -49,7 +55,23 @@ EnterEdit? enterEdit(
   // separates them from the text.
   final prefix = marks.isEmpty || marks.endsWith(' ') ? marks : '$marks ';
   if (head == null) {
-    if (marks.isEmpty || column < marks.length) return null;
+    // A line that goes on the text of a list item, indented to its content:
+    // the next one starts at that indent, not at the margin (#1344).
+    final inside =
+        row.blank || row.indent == 0 || column <= marks.length + row.lead
+        ? null
+        : continuationIndent(buffer, line, row);
+    if (marks.isEmpty) {
+      if (inside == null) return null;
+      return (
+        start: offset,
+        end: offset,
+        text: '\n${' ' * inside}',
+        caret: null,
+        verbatim: false,
+      );
+    }
+    if (column < marks.length) return null;
     if (row.blank) {
       // Nothing after the marks: leaving the quote.
       return (
@@ -63,7 +85,7 @@ EnterEdit? enterEdit(
     return (
       start: offset,
       end: offset,
-      text: '\n$prefix',
+      text: '\n$prefix${' ' * (inside ?? 0)}',
       caret: null,
       verbatim: false,
     );
@@ -100,11 +122,31 @@ EnterEdit? enterEdit(
   // A caret inside the marker is not "in the item": leave it to the platform.
   if (column < text.length - head.content.length) return null;
   // One edit, not a line break and then a marker: one undo step, and no frame
-  // where the marker is missing.
+  // where the marker is missing. The quote marks are the writer's own: `>- a`
+  // goes on as `>- `, not `> - ` (#1342).
+  if (head.number != null) {
+    // The items after it that counted on from it are one number up, in the
+    // same edit (#1343).
+    final renumbered = numberedEnter(
+      buffer,
+      line: line,
+      offset: offset,
+      continuation: '$marks${head.continuation}',
+    );
+    if (renumbered != null) {
+      return (
+        start: renumbered.start,
+        end: renumbered.end,
+        text: renumbered.text,
+        caret: renumbered.caret,
+        verbatim: true,
+      );
+    }
+  }
   return (
     start: offset,
     end: offset,
-    text: '\n$prefix${head.continuation}',
+    text: '\n$marks${head.continuation}',
     caret: null,
     verbatim: false,
   );

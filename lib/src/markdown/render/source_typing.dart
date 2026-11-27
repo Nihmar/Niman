@@ -3,11 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/list_row.dart';
+import 'package:niman/src/editor/touched_lines.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/bracket_pairs.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/list_indent_edit.dart';
+import 'package:niman/src/markdown/edit/plain_indent_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/live_tables.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -259,34 +261,35 @@ final class SourceTyping {
   /// Tab: moves the lines the selection touches in — a list item to where its
   /// list says (under the item above it), any other line by `indentWidth`
   /// spaces — or, on a plain line with a collapsed caret, inserts them at the
-  /// caret. The rule is the toolbar's indent (`indentLines`).
+  /// caret. The rule is the toolbar's indent (`indentLines`); on a line of
+  /// fenced code, display maths or the frontmatter it is just the spaces
+  /// ([plainIndentEdit]), never a list item nested or renumbered (#1335).
   ///
   /// The surface's own key: left to the app, Tab moves the focus to the next
   /// widget and takes the keyboard away from the note.
-  void indent() {
-    final buffer = _buffer();
-    final selection = _selection().clampTo(buffer.length);
-    final line = buffer.lineOf(selection.start);
-    if (selection.isCollapsed && ListRow(buffer.lineAt(line)).head == null) {
-      final pad = ' ' * _indentWidth();
-      _replace(selection.start, selection.end, pad);
-      return;
-    }
-    _indentLines(selection, outdent: false);
-  }
+  void indent() => _indentLines(outdent: false);
 
   /// Shift+Tab: the inverse — a list item goes back to its parent's indent,
   /// any other line out by up to `indentWidth` spaces, never taking anything
-  /// but spaces.
-  void outdent() {
-    _indentLines(_selection().clampTo(_buffer().length), outdent: true);
-  }
+  /// but spaces; with a caret on such a line, the spaces right before it.
+  void outdent() => _indentLines(outdent: true);
 
-  /// Indents or outdents the lines [selection] touches, as one edit
-  /// ([listIndentEdit]).
-  void _indentLines(SelectionModel selection, {required bool outdent}) {
-    final edit = listIndentEdit(
-      _buffer(),
+  /// Indents or outdents the lines the selection touches, as one edit: by
+  /// [listIndentEdit], or by [plainIndentEdit] where they are text.
+  void _indentLines({required bool outdent}) {
+    final buffer = _buffer();
+    final selection = _selection().clampTo(buffer.length);
+    final touched = touchedBufferLines(buffer, selection);
+    // A caret on a line that is no list item has no item to move: the
+    // spaces are the whole of it. A line of code is text whatever it says.
+    var text =
+        selection.isCollapsed &&
+        ListRow(buffer.lineAt(touched.first)).head == null;
+    for (var line = touched.first; !text && line <= touched.last; line++) {
+      text = !_isPlainLine(line);
+    }
+    final edit = (text ? plainIndentEdit : listIndentEdit)(
+      buffer,
       selection,
       width: _indentWidth(),
       outdent: outdent,

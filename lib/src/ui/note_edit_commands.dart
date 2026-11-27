@@ -169,12 +169,16 @@ final class NoteEditCommands {
       ),
       ToolbarItem.columns: insertColumnsAtCaret,
       ToolbarItem.heading: _showHeadingDialog,
-      ToolbarItem.list: () => _prefixLines(prefix: '- '),
+      ToolbarItem.list: () => run(
+        (text, selection) => toggleBulletList(text: text, selection: selection),
+      ),
       ToolbarItem.orderedList: _insertOrderedList,
       ToolbarItem.checklist: () => run(
         (text, selection) => toggleTaskList(text: text, selection: selection),
       ),
-      ToolbarItem.quote: () => _prefixLines(prefix: '> '),
+      ToolbarItem.quote: () => run(
+        (text, selection) => toggleQuote(text: text, selection: selection),
+      ),
       ToolbarItem.outdent: () => _indentLines(outdent: true),
       ToolbarItem.indent: () => _indentLines(outdent: false),
       ToolbarItem.tools: () => unawaited(_openTools()),
@@ -529,13 +533,6 @@ final class NoteEditCommands {
     run((text, selection) => codeBlock(text: text, selection: selection));
   }
 
-  void _prefixLines({required String prefix}) {
-    run(
-      (text, selection) =>
-          prefixLines(text: text, selection: selection, prefix: prefix),
-    );
-  }
-
   /// Inserts a link in the format chosen in settings (wikilink `[[…]]`
   /// or markdown `[…](…)`).
   void _insertLink() {
@@ -550,7 +547,8 @@ final class NoteEditCommands {
     );
   }
 
-  /// Numbers the selected line(s) as an ordered list.
+  /// Numbers the selected line(s) as an ordered list, or takes the numbers
+  /// off when they all have one.
   void _insertOrderedList() {
     run((text, selection) => orderedList(text: text, selection: selection));
   }
