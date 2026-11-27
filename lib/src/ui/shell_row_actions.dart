@@ -393,8 +393,10 @@ final class ShellRowActions {
       }
       if (!takeNotes) carry = const [];
     }
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     await guard(() async {
-      await deleteOpen(ops, sel);
+      if (!await deleteOpen(messenger, ops, sel)) return;
       onDeleted(sel);
       // Each note on its own (#775): one that will not go must not leave
       // the file and the notes before it in the trash with no Undo — the
@@ -403,7 +405,7 @@ final class ShellRowActions {
       (Object, StackTrace)? failure;
       for (final note in carry) {
         try {
-          await deleteOpen(ops, note);
+          if (!await deleteOpen(messenger, ops, note)) continue;
           onDeleted(note);
           taken.add(note);
         } on Object catch (error, stack) {
@@ -482,20 +484,46 @@ final class ShellRowActions {
   }
 
   /// Deletes the library-relative [path] after the open editors at or under
-  /// it dropped their pending saves (#1321): the text goes to the trash with
-  /// the file, and an editor's debounce firing after the delete would write
-  /// the note back to the old path. A delete that fails gives the editors
-  /// their saves back, their edits untouched.
-  Future<void> deleteOpen(NoteOperations ops, String path) async {
+  /// it wrote what they had not saved (#1321): the trash holds the latest
+  /// text, and Undo brings that back. What is left to write is then dropped,
+  /// since a save after the delete — an editor's debounce — would write the
+  /// note back to the old path. A note that will not save stops the delete
+  /// and says so: answers false, nothing deleted. A delete that fails gives
+  /// the editors their saves back, their edits untouched.
+  Future<bool> deleteOpen(
+    ScaffoldMessengerState messenger,
+    NoteOperations ops,
+    String path,
+  ) async {
     final root = controller.root;
     final abs = root == null ? null : p.join(root, path);
-    if (abs != null) await unsaved?.discardUnder(abs);
+    final tracker = unsaved;
+    if (abs != null && tracker != null) {
+      try {
+        await tracker.saveUnder(abs);
+      } on SaveUnderFailed catch (failure) {
+        if (messenger.mounted) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                AppStrings.noteHeldSaveFailed(
+                  p.basenameWithoutExtension(failure.path),
+                ),
+              ),
+            ),
+          );
+        }
+        return false;
+      }
+      await tracker.discardUnder(abs);
+    }
     try {
       await ops.delete(path);
     } on Object {
-      if (abs != null) unsaved?.restoreUnder(abs);
+      if (abs != null) tracker?.restoreUnder(abs);
       rethrow;
     }
+    return true;
   }
 
   /// The trash name of [sel]'s freshest deletion: what Undo restores.

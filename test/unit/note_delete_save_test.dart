@@ -119,18 +119,37 @@ void main() {
     return (pipeline: pipeline, buffer: buffer, abs: abs);
   }
 
-  test('a deleted note with edits is not written back', () async {
+  /// What the shell's delete does (`ShellRowActions.deleteOpen`): the open
+  /// editors write what they had, what is left is dropped, then the delete.
+  Future<void> deleteOpen(String rel) async {
+    final abs = p.join(root.path, rel);
+    await tracker.saveUnder(abs);
+    await tracker.discardUnder(abs);
+    await ops.delete(rel);
+  }
+
+  /// The text of the one note in the trash.
+  String trashed() {
+    final files = Directory(p.join(root.path, '.trash'))
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.md'));
+    return files.single.readAsStringSync();
+  }
+
+  test('a deleted note with edits sends the last typed text to the trash '
+      'and is not written back', () async {
     final note = await open('a.md', 'one');
     note.buffer.replaceRange(0, 3, 'edited');
     note.pipeline.edited();
 
-    await tracker.discardUnder(note.abs);
-    await ops.delete('a.md');
+    await deleteOpen('a.md');
     // The tab closes with the delete, and the debounce may fire after it.
     await note.pipeline.close();
     note.pipeline.saveInBackground();
     await pumpEventQueue();
 
+    expect(trashed(), 'edited', reason: 'Undo brings back the last typing');
     expect(File(note.abs).existsSync(), isFalse);
     expect(tracker.hasUnsaved, isFalse);
   });
@@ -140,12 +159,28 @@ void main() {
     note.buffer.replaceRange(0, 3, 'edited');
     note.pipeline.edited();
 
-    await tracker.discardUnder(p.join(root.path, 'Docs'));
-    await ops.delete('Docs');
+    await deleteOpen('Docs');
     await note.pipeline.close();
     await pumpEventQueue();
 
     expect(Directory(p.join(root.path, 'Docs')).existsSync(), isFalse);
+    expect(trashed(), 'edited');
+  });
+
+  test('a note that will not save stops the delete, and stays', () async {
+    final note = await open('a.md', 'one');
+    note.buffer.replaceRange(0, 3, 'edited');
+    note.pipeline.edited();
+    // The folder cannot be written: the file is made a directory.
+    File(note.abs).deleteSync();
+    Directory(note.abs).createSync();
+
+    await expectLater(
+      tracker.saveUnder(note.abs),
+      throwsA(isA<SaveUnderFailed>()),
+    );
+
+    expect(note.pipeline.dirty, isTrue, reason: 'the text is kept');
   });
 
   test('a delete that fails leaves the edits to be saved', () async {
@@ -153,12 +188,14 @@ void main() {
     note.buffer.replaceRange(0, 3, 'edited');
     note.pipeline.edited();
 
+    await tracker.saveUnder(note.abs);
     await tracker.discardUnder(note.abs);
     tracker.restoreUnder(note.abs);
-    await pumpEventQueue();
+    note.buffer.replaceRange(0, 6, 'edited more');
+    note.pipeline.edited();
     await note.pipeline.saveForClose();
 
-    expect(File(note.abs).readAsStringSync(), 'edited');
+    expect(File(note.abs).readAsStringSync(), 'edited more');
   });
 
   test('a note another program deleted is not created again', () async {

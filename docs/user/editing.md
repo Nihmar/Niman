@@ -464,8 +464,10 @@ program that rewrites a very long note while Niman is still writing its slices
 is kept in the history and announced the same way.
 
 **A note deleted while it is open.** Deleting a note (or a folder holding it)
-from the tree drops the edits an open editor had not saved yet: their text goes
-to the trash with the file, and nothing is written back to the old path. If
+from the tree first saves what an open editor had not saved yet, so the trash
+holds the latest text and Undo brings back everything you typed, and then
+nothing is written back to the old path. A note that cannot be saved stops the
+delete: a message names it and it stays where it is. If
 another program, a sync or a move takes the file away while you are typing,
 Niman does not create it again behind your back: the status row reads *Not on
 disk · save again*, a message says so, and your text stays in the editor.
