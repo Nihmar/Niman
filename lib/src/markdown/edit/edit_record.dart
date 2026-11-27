@@ -6,11 +6,10 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// chunks rather than as a new string (#1359).
 ///
 /// Select all and Delete on a 246 MB note would otherwise join the whole note
-/// into one string and keep it in the step. This keeps a
-/// [SourceBuffer.snapshot]
-/// taken before the edit — the lines and their index shared with the note, so
-/// only what the note edits afterwards is copied — and reads the text from it
-/// when an undo needs it.
+/// into one string and keep it in the step. This keeps the
+/// [SourceBuffer.snapshot] taken before the edit — the lines and their index
+/// shared with the note, so only what the note edits afterwards is copied —
+/// and reads the text from it when an undo needs it.
 final class HeldText {
   /// The stretch `[start, end)` of [_snapshot].
   const new _(this._snapshot, this.start, this.end);
