@@ -675,6 +675,9 @@ final class JapaneseStrings extends Strings {
   @override
   String get noteNotText => 'このファイルはテキストのノートではないため、Niman ではここに表示できません。';
   @override
+  String get noteReadAsWindows1252 =>
+      'このファイルは UTF-8 ではないため、Windows-1252 として読み込みました。保存すると UTF-8 で書き込まれます。';
+  @override
   String get noteLoadFailed => 'このノートを開けませんでした。';
   @override
   String get noteLoadMissing => 'このノートのファイルはディスク上にありません。';

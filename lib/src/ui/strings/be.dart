@@ -717,6 +717,10 @@ final class BelarusianStrings extends Strings {
   String get noteNotText =>
       'Гэты файл не тэкставая нататка, таму Niman не можа паказаць яго тут.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Гэты файл не ў UTF-8, таму ён прачытаны як Windows-1252. Пры '
+      'захаванні ён будзе запісаны ў UTF-8.';
+  @override
   String get noteLoadFailed => 'Не ўдалося адкрыць гэту нататку.';
   @override
   String get noteLoadMissing => 'Файла гэтай нататкі больш няма на дыску.';

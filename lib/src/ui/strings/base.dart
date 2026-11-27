@@ -385,6 +385,7 @@ abstract base class Strings {
   String get noteSaveFailedSnack;
   String get noteChangedOnDisk;
   String get noteNotText;
+  String get noteReadAsWindows1252;
   String get noteLoadFailed;
   String get noteLoadMissing;
   String get noteLoadDenied;

@@ -204,13 +204,47 @@ void main() {
       expect(await file('latin1.md').readAsBytes(), utf8.encode('dog café\n'));
     });
 
-    // The editor refuses a UTF-16 note as "not text" (`looksBinary`); the
-    // index and this run used to read it leniently all the same, and a
-    // replace wrote Windows-1252 mojibake back over it (#496).
+    // A UTF-16 note with its byte order mark is text (#1332): replaced in,
+    // and written back in the encoding it had.
+    test('a UTF-16 note is replaced in and stays UTF-16', () async {
+      await file('utf16.md').writeAsBytes(_utf16le('a cat\n'));
+      final report = await replace.replaceAll(
+        term: 'cat',
+        replacement: 'dog',
+        caseSensitive: false,
+        only: {'utf16.md'},
+      );
+      expect(report.notesChanged, 1);
+      expect(await file('utf16.md').readAsBytes(), _utf16le('a dog\n'));
+    });
+
+    test(
+      'a UTF-8 note keeps its byte order mark and its line endings',
+      () async {
+        await file('bom.md')
+            .writeAsBytes(utf8.encode('\u{FEFF}a cat\r\nb\r\n'));
+        final report = await replace.replaceAll(
+          term: 'cat',
+          replacement: 'dog',
+          caseSensitive: false,
+          only: {'bom.md'},
+        );
+        expect(report.notesChanged, 1);
+        expect(
+          await file('bom.md').readAsBytes(),
+          utf8.encode('\u{FEFF}a dog\r\nb\r\n'),
+        );
+      },
+    );
+
+    // The editor refuses a UTF-16 note with no byte order mark as "not text"
+    // (`looksBinary`); the index and this run used to read it leniently all
+    // the same, and a replace wrote Windows-1252 mojibake back over it
+    // (#496).
     test(
       'a note that looks binary is left alone and reported failed',
       () async {
-        final bytes = _utf16le('a cat\n');
+        final bytes = _utf16le('a cat\n').sublist(2);
         await file('utf16.md').writeAsBytes(bytes);
 
         final preview = await replace.previewMatches(

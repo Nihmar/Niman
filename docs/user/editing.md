@@ -453,7 +453,11 @@ Replace all, an outgoing write) or when nobody touched it at all. When the
 file's size and time match neither, its bytes are compared with what Niman
 last wrote: a file that only shows another time (Android's storage does not
 always report the one the write left) is still Niman's own and is not
-announced.
+announced. A file's time is only as fine as the file system's clock — two
+seconds on FAT, a few milliseconds elsewhere — so a program that rewrites the
+same number of bytes within that tick of the last write leaves the same size
+and time: when the file was last written that recently, its bytes are checked
+too, and such a change is seen like any other.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
@@ -462,7 +466,26 @@ with it, so changing one character of a note changes one character of the
 file — a version-control diff or a sync merge sees that character and not
 every line. A note that mixes endings is saved with the one most of its lines
 had (a tie goes to `LF`), so every line ends alike afterwards; a note of lone
-`CR` lines, as the oldest Mac programs wrote, stays that way.
+`CR` lines, as the oldest Mac programs wrote, stays that way. In a note whose
+lines end with `LF` or `CRLF`, a lone `CR` is a character of its line and is
+kept where it is, and `CR CR LF` is one line ending after a `CR` — neither is
+turned into a line break.
+
+**Links to a note.** A note that is a symbolic link is saved through the link:
+the link stays a link and the file it points to holds the new text. A note
+that has other hard links is saved as a new file under its own name, so the
+other names keep the old text — it becomes a separate copy.
+
+**UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
+order mark — what Windows Notepad's *Unicode* writes — opens as the text it
+holds, in any script, and is saved in the same encoding with its mark, so a
+one-character change is a one-character change of the file. Only the mark
+tells such a file apart: a UTF-16 file without one is not recognised as text,
+and neither is one cut in the middle of a character (an odd number of bytes).
+A note that is not valid UTF-8 — an old Latin-1 file, say — is read with
+every byte outside UTF-8 as the Windows-1252 character it most likely is, so
+no accent is lost, and it is saved as UTF-8: the file's encoding changes, its
+words do not. A message says so when the note opens, before you type anything.
 
 ## Markdown support
 

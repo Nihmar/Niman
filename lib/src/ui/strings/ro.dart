@@ -730,6 +730,10 @@ final class RomanianStrings extends Strings {
   String get noteNotText =>
       'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Acest fișier nu este UTF-8, așa că a fost citit ca Windows-1252. La '
+      'salvare va fi scris ca UTF-8.';
+  @override
   String get noteLoadFailed => 'Această notă nu a putut fi deschisă.';
   @override
   String get noteLoadMissing => 'Fișierul acestei note nu mai este pe disc.';

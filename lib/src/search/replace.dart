@@ -13,7 +13,6 @@
 /// pass without writing, for the screen's live before/after list.
 library;
 
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
@@ -27,6 +26,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
+import 'package:niman/src/markdown/note_framing.dart';
 import 'package:path/path.dart' as p;
 
 /// One replace run's outcome.
@@ -402,11 +402,12 @@ Future<List<(bool, int, String?, String?)>> replaceChunk(
     // Windows-1252 mojibake (#496).
     // The editor reads notes leniently, so a note it opens must be
     // replaceable too; strict UTF-8 here would silently drop it.
-    final original = decodeNoteTextIfText(bytes);
-    if (original == null) {
+    final decoded = decodeNoteBytes(bytes);
+    if (decoded == null) {
       out.add((false, 0, null, 'binary "$rel": left alone'));
       continue;
     }
+    final original = decoded.text;
     final result = replaceWholeWords(
       original,
       term,
@@ -427,7 +428,18 @@ Future<List<(bool, int, String?, String?)>> replaceChunk(
       }
     }
     try {
-      await writeFileAtomically(file, utf8.encode(result.$2));
+      // In the encoding the note had, with its byte order mark: a UTF-16 note
+      // stays UTF-16 and a UTF-8 one keeps its mark (#1332). The text keeps
+      // the line endings it was read with.
+      final framing = NoteFraming.of(
+        bytes: bytes,
+        text: original,
+        encoding: decoded.encoding,
+      );
+      await writeFileAtomically(
+        file,
+        framing.encode(framing.bom ? '﻿${result.$2}' : result.$2),
+      );
     } on Object catch (e) {
       // Read-only, full disk or locked: the file is left as it was. Count
       // nothing and report the failure.

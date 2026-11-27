@@ -22,15 +22,28 @@
 /// wants no text.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
+import 'package:niman/src/markdown/note_encoding.dart';
 
 /// [bytes] as a note's text: UTF-8, with every byte that is not part of a
 /// UTF-8 sequence read as its Windows-1252 character. This is the rule the
 /// editor loader, note ops, the index, the widget, export and replace all
 /// read by.
+///
+/// A file that begins with a UTF-16 or UTF-32 byte order mark is decoded as
+/// that ([NoteEncoding.wideOf]): read as UTF-8 it is NULs, or Windows-1252
+/// mojibake (#1332).
 String decodeNoteText(List<int> bytes) {
+  final wide = NoteEncoding.wideOf(bytes);
+  return wide != null ? wide.decode(bytes) : _decodeNarrow(bytes);
+}
+
+/// [decodeNoteText] for bytes that are not known to begin a file: UTF-8, any
+/// byte outside it as Windows-1252.
+String _decodeNarrow(List<int> bytes) {
   try {
     noteBytesNativeDecodes++;
     return utf8.decode(bytes);
@@ -42,15 +55,46 @@ String decodeNoteText(List<int> bytes) {
 /// [bytes] decoded by [decodeNoteText] as they arrive, for a reader that
 /// streams a note rather than holding it: a UTF-8 sequence cut between two
 /// chunks is decoded whole, once the rest of it has come.
+///
+/// A file with a UTF-16 or UTF-32 byte order mark ([NoteEncoding.wideOf]) is
+/// read whole before it is decoded: its encoding is known only from the first
+/// bytes and its units are two or four bytes wide, not cut at a UTF-8 lead.
 Stream<String> decodeNoteTextStream(Stream<List<int>> bytes) async* {
+  final chunks = StreamIterator<List<int>>(bytes);
   var carry = const <int>[];
-  await for (final chunk in bytes) {
-    final data = carry.isEmpty ? chunk : <int>[...carry, ...chunk];
-    final cut = utf8CompleteUpTo(data);
-    carry = data.sublist(cut);
-    if (cut > 0) yield decodeNoteText(data.sublist(0, cut));
+  var started = false;
+  try {
+    while (await chunks.moveNext()) {
+      final chunk = chunks.current;
+      final data = carry.isEmpty ? chunk : <int>[...carry, ...chunk];
+      if (!started) {
+        // A mark is up to four bytes: wait for them before judging.
+        if (data.length < 4) {
+          carry = data;
+          continue;
+        }
+        started = true;
+        if (NoteEncoding.hasWideMark(data)) {
+          final all = <int>[...data];
+          while (await chunks.moveNext()) {
+            all.addAll(chunks.current);
+          }
+          yield decodeNoteText(all);
+          return;
+        }
+      }
+      final cut = utf8CompleteUpTo(data);
+      carry = data.sublist(cut);
+      // Not [decodeNoteText]: a chunk is not the start of the file, and
+      // two Latin-1 letters in a row can look like a byte order mark.
+      if (cut > 0) yield _decodeNarrow(data.sublist(0, cut));
+    }
+  } finally {
+    await chunks.cancel();
   }
-  if (carry.isNotEmpty) yield decodeNoteText(carry);
+  if (carry.isNotEmpty) {
+    yield started ? _decodeNarrow(carry) : decodeNoteText(carry);
+  }
 }
 
 /// The share of a file's bytes that may be NULs, or belong to no UTF-8
@@ -84,8 +128,28 @@ int noteBytesWalks = 0;
 /// share of bytes in no UTF-8 sequence. The walk used to run on every note,
 /// twice, before the decode (seconds on the 246 MB stress note), and a lone
 /// U+0000 refused a note the index and replace accept.
-String? decodeNoteTextIfText(List<int> bytes) {
-  if (bytes.isEmpty) return '';
+String? decodeNoteTextIfText(List<int> bytes) => decodeNoteBytes(bytes)?.text;
+
+/// A note's bytes read: its `text`, the `encoding` its file is written in,
+/// and whether some of it was read as Windows-1252 (`lenient`).
+typedef DecodedNote = ({String text, NoteEncoding encoding, bool lenient});
+
+/// [bytes] as a `DecodedNote`, or null when they are a binary file:
+/// [decodeNoteTextIfText] with what the framing of the note needs to write
+/// it back (#1332) and to tell the reader its bytes were not UTF-8 (#1367).
+///
+/// A UTF-16 or UTF-32 file with its byte order mark is text whatever its
+/// share of NULs. Otherwise a file is UTF-8, and one that is not has its
+/// stray bytes read as Windows-1252 and says so in `lenient`;
+/// saving writes it as UTF-8.
+DecodedNote? decodeNoteBytes(List<int> bytes) {
+  if (bytes.isEmpty) {
+    return (text: '', encoding: NoteEncoding.utf8, lenient: false);
+  }
+  final wide = NoteEncoding.wideOf(bytes);
+  if (wide != null) {
+    return (text: wide.decode(bytes), encoding: wide, lenient: false);
+  }
   final String text;
   try {
     noteBytesNativeDecodes++;
@@ -109,14 +173,20 @@ String? decodeNoteTextIfText(List<int> bytes) {
         nuls / bytes.length > _binaryRatio) {
       return null;
     }
-    return _decodeMixed(bytes);
+    return (
+      text: _decodeMixed(bytes),
+      encoding: NoteEncoding.utf8,
+      lenient: true,
+    );
   }
-  if (!text.contains('\u0000')) return text;
-  var nuls = 0;
-  for (var at = 0; at < text.length; at++) {
-    if (text.codeUnitAt(at) == 0) nuls++;
+  if (text.contains('\u0000')) {
+    var nuls = 0;
+    for (var at = 0; at < text.length; at++) {
+      if (text.codeUnitAt(at) == 0) nuls++;
+    }
+    if (nuls / text.length > _binaryRatio) return null;
   }
-  return nuls / text.length > _binaryRatio ? null : text;
+  return (text: text, encoding: NoteEncoding.utf8, lenient: false);
 }
 
 /// Whether [bytes] are a binary file rather than a note's text: what

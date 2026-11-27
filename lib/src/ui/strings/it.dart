@@ -731,6 +731,10 @@ final class ItalianStrings extends Strings {
       'Questo file non è una nota di testo, quindi '
       'Niman non può mostrarlo qui.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Questo file non è UTF-8, quindi è stato letto come Windows-1252. '
+      'Salvandolo verrà scritto in UTF-8.';
+  @override
   String get noteLoadFailed => 'Impossibile aprire questa nota.';
   @override
   String get noteLoadMissing => 'Il file di questa nota non è più sul disco.';

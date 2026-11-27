@@ -724,6 +724,10 @@ final class BosnianStrings extends Strings {
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ova datoteka nije u UTF-8, pa je pročitana kao Windows-1252. Pri '
+      'spremanju bit će zapisana u UTF-8.';
+  @override
   String get noteLoadFailed => 'Ova bilješka se nije mogla otvoriti.';
   @override
   String get noteLoadMissing => 'Datoteke ove bilješke više nema na disku.';

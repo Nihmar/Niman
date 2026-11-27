@@ -22,7 +22,12 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
     if (!p.isWithin(root, path)) {
       return writeNoteOffIsolate(path, content).then(
         (written) => NoteSaveResult(
-          stamp: DiskStamp(size: written.bytes, modified: written.modified),
+          stamp: DiskStamp(
+            size: written.bytes,
+            modified: written.modified,
+            taken: DateTime.now(),
+            digest: written.sha256,
+          ),
         ),
       );
     }

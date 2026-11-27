@@ -717,6 +717,10 @@ final class LithuanianStrings extends Strings {
   String get noteNotText =>
       'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Šis failas nėra UTF-8, todėl jis perskaitytas kaip Windows-1252. '
+      'Išsaugant jis bus įrašytas UTF-8 formatu.';
+  @override
   String get noteLoadFailed => 'Šio užrašo atidaryti nepavyko.';
   @override
   String get noteLoadMissing => 'Šio užrašo failo diske nebėra.';

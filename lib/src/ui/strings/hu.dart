@@ -722,6 +722,10 @@ final class HungarianStrings extends Strings {
       'Ez a fájl nem szöveges jegyzet, ezért a '
       'Niman itt nem tudja megjeleníteni.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ez a fájl nem UTF-8, ezért Windows-1252-ként olvastuk be. Mentéskor '
+      'UTF-8-ként lesz kiírva.';
+  @override
   String get noteLoadFailed => 'Ezt a jegyzetet nem sikerült megnyitni.';
   @override
   String get noteLoadMissing => 'A jegyzet fájlja már nincs a lemezen.';

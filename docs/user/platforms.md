@@ -208,6 +208,16 @@ the two agree.
   three buttons are non-client for that, so the app no longer draws
   their hover highlight on Windows; the × still meets the unsaved-edits
   check.
+- **Shutting down, restarting or logging off** waits for the notes (#1364):
+  when Windows ends the session, the runner asks the app to write every note
+  with edits not yet on disk and lets Windows go once they are — Windows
+  shows *Niman is saving your notes* for as long as it waits, which is at
+  most 15 seconds. Ending the session is not a window close, so this is not
+  the unsaved-edits dialog: nothing is asked, the notes are saved. On macOS
+  a logout or shutdown goes through the quit the close guard already holds
+  and asks (see [macOS](#macos)); on Linux a session end that kills the app
+  without a close request is not handled yet, so the edits of the last
+  pause before it can be lost there — a gap, not a decision.
 - The installer can associate `.md` and `.markdown` files with Niman
   (a checkbox, on by default). Niman joins the files' *Open with* list;
   Windows leaves the choice of default app to you, so it becomes the

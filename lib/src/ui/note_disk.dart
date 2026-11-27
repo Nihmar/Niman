@@ -64,6 +64,12 @@ final class NoteDisk {
     return (content: ready.text, ready: ready);
   }
 
+  /// What the reader is told when the note opens, or null when there is
+  /// nothing to tell: a file that was not UTF-8 was read as Windows-1252 and
+  /// will be saved as UTF-8 (#1367).
+  String? get openNotice =>
+      framing.windows1252 ? AppStrings.noteReadAsWindows1252 : null;
+
   /// Takes the stamp and framing of the note [opened] read.
   void adoptOpened(NoteOpened opened) {
     // The test seam reads nothing, so it has no stamp to keep.

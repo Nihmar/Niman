@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/ui/close_to_tray.dart';
 import 'package:niman/src/ui/mac_quit.dart';
+import 'package:niman/src/ui/session_end.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
@@ -62,6 +63,10 @@ final class _CloseGuardState extends State<CloseGuard> {
   /// Set by the tray's Quit: this close is a real one (#209).
   bool _quitting = false;
 
+  /// Writes the unsaved notes when Windows ends the session, which asks no
+  /// close and takes no veto (#1364).
+  late final SessionEnd _sessionEnd = SessionEnd(tracker: widget.tracker);
+
   @override
   Widget build(BuildContext context) => widget.child;
 
@@ -73,6 +78,7 @@ final class _CloseGuardState extends State<CloseGuard> {
     CloseToTray.trayShown.addListener(_syncPrevent);
     CloseToTray.quitRequests.addListener(_onQuitRequested);
     MacQuit.listen(CloseToTray.quit);
+    _sessionEnd.listen();
     widget.window.onCloseRequested = _onCloseRequested;
     unawaited(_init());
   }
@@ -93,6 +99,7 @@ final class _CloseGuardState extends State<CloseGuard> {
   void dispose() {
     widget.window.onCloseRequested = null;
     MacQuit.stop();
+    _sessionEnd.stop();
     CloseToTray.enabled.removeListener(_syncPrevent);
     CloseToTray.trayShown.removeListener(_syncPrevent);
     CloseToTray.quitRequests.removeListener(_onQuitRequested);

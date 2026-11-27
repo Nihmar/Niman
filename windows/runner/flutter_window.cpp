@@ -2,7 +2,10 @@
 
 #include <dwmapi.h>
 
+#include <flutter/method_result_functions.h>
+
 #include <cmath>
+#include <memory>
 #include <optional>
 #include <shellapi.h>
 #include <string>
@@ -29,6 +32,15 @@ constexpr char kLeftKey[] = "left";
 constexpr char kTopKey[] = "top";
 constexpr char kRightKey[] = "right";
 constexpr char kBottomKey[] = "bottom";
+
+// Where the Dart side answers a session end (#1364): the `niman/session`
+// channel, one `flush` call. The runner waits for the answer for at most
+// kFlushDeadlineMs. Windows tells the user why the shutdown is waiting
+// (ShutdownBlockReasonCreate) for as long as it does; the deadline only keeps
+// a note that cannot be written from holding the machine for good.
+constexpr char kSessionChannelName[] = "niman/session";
+constexpr char kFlushMethod[] = "flush";
+constexpr ULONGLONG kFlushDeadlineMs = 15000;
 
 // Posted to the window when it is being hidden, so the hand-over of the
 // foreground runs once the hide is done.
@@ -180,6 +192,13 @@ bool FlutterWindow::OnCreate() {
         result->Success();
       });
 
+  // A session end (shutdown, restart, logoff) is asked of Dart over this one
+  // (#1364): see FlushPendingSaves.
+  session_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), kSessionChannelName,
+          &flutter::StandardMethodCodec::GetInstance());
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
@@ -198,6 +217,7 @@ void FlutterWindow::OnDestroy() {
     caption_channel_->SetMethodCallHandler(nullptr);
     caption_channel_ = nullptr;
   }
+  session_channel_ = nullptr;
   if (flutter_controller_) {
     // The drop target goes with the engine it talks through.
     RevokeDragDrop(GetHandle());
@@ -230,6 +250,23 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+
+    // Windows is shutting down, restarting or logging the user off (#1364).
+    // That is not a window close: no close request reaches the app's guard,
+    // and the edits of the last debounce were lost. Dart writes them first,
+    // and Windows is answered — TRUE, let the session end — once it has.
+    case WM_QUERYENDSESSION:
+      FlushPendingSaves();
+      return TRUE;
+
+    // The session is going: whatever the query did not get written (a
+    // forced end sends no query) is written now, which costs nothing when
+    // nothing is pending.
+    case WM_ENDSESSION:
+      if (wparam != FALSE) {
+        FlushPendingSaves();
+      }
+      return 0;
 
     // The app's own caption buttons (#169). Windows offers the Snap Layouts
     // flyout only to a window that answers HTMAXBUTTON over its maximize
@@ -302,6 +339,57 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
+}
+
+void FlutterWindow::FlushPendingSaves() {
+  if (!session_channel_ || flushing_) {
+    return;
+  }
+  flushing_ = true;
+  const HWND window = GetHandle();
+  // The reason Windows shows while it waits.
+  ::ShutdownBlockReasonCreate(window, L"Niman is saving your notes.");
+
+  // Shared with the callbacks: an answer that comes after the deadline must
+  // not write into a stack frame that has gone.
+  auto answered = std::make_shared<bool>(false);
+  session_channel_->InvokeMethod(
+      kFlushMethod, nullptr,
+      std::make_unique<flutter::MethodResultFunctions<flutter::EncodableValue>>(
+          [answered](const flutter::EncodableValue*) { *answered = true; },
+          [answered](const std::string&, const std::string&,
+                     const flutter::EncodableValue*) { *answered = true; },
+          // Nobody listens on the Dart side (it is not up, or already gone):
+          // nothing to wait for.
+          [answered]() { *answered = true; }));
+
+  // Dart answers on this very thread, from the message loop: it is pumped
+  // here until the answer comes or the deadline passes.
+  const ULONGLONG deadline = ::GetTickCount64() + kFlushDeadlineMs;
+  bool quit = false;
+  while (!*answered && !quit) {
+    const ULONGLONG now = ::GetTickCount64();
+    if (now >= deadline) {
+      break;
+    }
+    ::MsgWaitForMultipleObjects(0, nullptr, FALSE,
+                                static_cast<DWORD>(deadline - now),
+                                QS_ALLINPUT);
+    MSG message;
+    while (::PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) {
+      if (message.message == WM_QUIT) {
+        // Not ours to swallow: the loop that called this one gets it back.
+        ::PostQuitMessage(static_cast<int>(message.wParam));
+        quit = true;
+        break;
+      }
+      ::TranslateMessage(&message);
+      ::DispatchMessage(&message);
+    }
+  }
+
+  ::ShutdownBlockReasonDestroy(window);
+  flushing_ = false;
 }
 
 LRESULT FlutterWindow::CaptionButtonAt(HWND window, LPARAM lparam) const {

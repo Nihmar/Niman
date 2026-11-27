@@ -723,6 +723,10 @@ final class SlovenianStrings extends Strings {
   String get noteNotText =>
       'Ta datoteka ni besedilni zapisek, zato je Niman tu ne more prikazati.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ta datoteka ni v UTF-8, zato je bila prebrana kot Windows-1252. Ob '
+      'shranjevanju bo zapisana v UTF-8.';
+  @override
   String get noteLoadFailed => 'Tega zapiska ni bilo mogoče odpreti.';
   @override
   String get noteLoadMissing => 'Datoteke tega zapiska ni več na disku.';

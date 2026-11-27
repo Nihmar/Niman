@@ -715,6 +715,10 @@ final class EnglishStrings extends Strings {
   String get noteNotText =>
       'This file is not a text note, so Niman cannot show it here.';
   @override
+  String get noteReadAsWindows1252 =>
+      'This file is not UTF-8, so it was read as Windows-1252. Saving writes '
+      'it as UTF-8.';
+  @override
   String get noteLoadFailed => 'This note could not be opened.';
   @override
   String get noteLoadMissing => 'This note’s file is no longer on the disk.';
