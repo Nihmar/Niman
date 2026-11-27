@@ -55,6 +55,7 @@ final class SourceInput implements DeltaTextInputClient {
     this.onRecord,
     this.onNewline,
     this.onTyped,
+    this.onSelector,
     this.reach,
   });
 
@@ -89,6 +90,10 @@ final class SourceInput implements DeltaTextInputClient {
   /// surface made an edit of its own instead (a bracket's pair), in which
   /// case the platform's is not applied and it is told what the note says.
   final bool Function(int start, int end, String inserted)? onTyped;
+
+  /// Asked for what macOS and iOS ask of a text field by name — the text
+  /// system's `moveToBeginningOfLine:`, `deleteWordBackward:` (#1351).
+  final void Function(String selector)? onSelector;
 
   /// Where the caret is now.
   final SelectionModel Function() selection;
@@ -679,7 +684,7 @@ final class SourceInput implements DeltaTextInputClient {
   }
 
   @override
-  void performSelector(String selectorName) {}
+  void performSelector(String selectorName) => onSelector?.call(selectorName);
 
   @override
   void insertTextPlaceholder(Size size) {}

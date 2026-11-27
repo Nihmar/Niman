@@ -123,6 +123,22 @@ Moving and selecting in the source editor, on Windows and Linux:
   the item above it and back, see [editing](editing.md)); in a table in live
   mode, the next and the previous cell instead
 
+On a Mac, and on an iPad or iPhone with a hardware keyboard, the source
+editor takes the chords the system's own text fields take, since `Ctrl+←` is
+Mission Control there:
+
+- `⌥←` / `⌥→` — jump a word; `⌥↑` / `⌥↓` — to the start and end of the line;
+  with `Shift`, select
+- `⌘←` / `⌘→` — to the start (past the indentation and any list marker, as
+  `Home`) and the end of the line; `⌘↑` / `⌘↓` — to the start and end of the
+  note; with `Shift`, select
+- `⌥⌫` / `⌥⌦` — delete a word before and after the caret; `⌘⌫` / `⌘⌦` — delete
+  to the start and to the end of the line
+
+The same motions and deletions come from the system's own text commands
+(`moveToBeginningOfLine:`, `deleteWordBackward:` and the rest of what a Mac's
+key bindings can send), for a chord that is not bound here.
+
 Reading a note in the read view (Markdown notes, with the unified
 engine), which takes the keyboard when you switch to it or click it:
 
