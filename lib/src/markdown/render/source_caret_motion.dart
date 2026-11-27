@@ -2,6 +2,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/line_direction.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
@@ -107,9 +108,10 @@ final class SourceCaretMotion {
 
   int get _lineCount => _buffer().lineCount;
 
-  /// Moves the caret by [motion], the logical motions the key table calls.
-  void moveBy(CaretMotion motion, {bool extend = false}) {
+  /// Moves the caret by [pressed], the logical motions the key table calls.
+  void moveBy(CaretMotion pressed, {bool extend = false}) {
     final selection = _selection();
+    final motion = _visually(pressed, selection);
     // A range left by an arrow goes to its edge, which is where it stops.
     final collapsed = collapseTarget(selection, motion, extend: extend);
     if (collapsed != null) {
@@ -157,6 +159,33 @@ final class SourceCaretMotion {
           : SelectionModel.at(extent);
     }
     _apply(next, reveal: true);
+  }
+
+  /// [pressed], as the motion it is on the line the caret is on: on a line
+  /// drawn right to left (its first strong character's direction,
+  /// `lineDirection`) Left and Right are swapped, so that the key moves the
+  /// caret the way it points on the screen (#1352).
+  ///
+  /// The swap is the line's, not each run's: inside a run of the other
+  /// direction — a Latin word in a Hebrew line — the keys still go by the
+  /// line, which is the one thing left logical, and is written in
+  /// `docs/user/editing.md`.
+  CaretMotion _visually(CaretMotion pressed, SelectionModel selection) {
+    if (pressed != CaretMotion.characterLeft &&
+        pressed != CaretMotion.characterRight &&
+        pressed != CaretMotion.wordLeft &&
+        pressed != CaretMotion.wordRight) {
+      return pressed;
+    }
+    final buffer = _buffer();
+    final line = buffer.lineOf(selection.extent.clamp(0, buffer.length));
+    if (lineDirection(buffer.lineAt(line)) != TextDirection.rtl) return pressed;
+    return switch (pressed) {
+      CaretMotion.characterLeft => CaretMotion.characterRight,
+      CaretMotion.characterRight => CaretMotion.characterLeft,
+      CaretMotion.wordLeft => CaretMotion.wordRight,
+      _ => CaretMotion.wordLeft,
+    };
   }
 
   /// Whether line [line] is one `live` draws as nothing to stop on (#729):

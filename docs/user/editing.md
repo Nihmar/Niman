@@ -265,6 +265,25 @@ phone never shows a margin, and the reason the setting exists on
 Android as well: on a tablet, or a phone in landscape, it starts to
 count.
 
+### Right-to-left text
+
+Each line of the source editor takes the direction of its first strong
+character, not the app's language: a line that starts with Hebrew or
+Arabic is laid out from the right, a line of any other script from the
+left, and a line with no letter yet (a number, a bare marker, an empty
+line) follows the editor. Markers do not decide it — `## שלום` is a
+right-to-left heading — and a note can mix both, a line at a time.
+
+On a right-to-left line `←` and `→` (and `Ctrl+←` / `Ctrl+→`, `⌥←` /
+`⌥→`) move the caret the way they point on screen, so `→` goes to the
+right whichever way the characters run. What stays logical is what a run
+of the other direction inside the line does: a Latin word in a Hebrew
+line is still crossed by the line's keys, not its own, so inside it `→`
+moves backwards through the word. Home and End, selection by dragging
+and by double click, and deleting are unchanged. A list marker, a quote
+bar and the indentation stay on the left of the line; only its text is
+laid out from the right.
+
 ### Zen mode
 
 On Linux, Windows and macOS, `F11` (`⌃⌘F` on a Mac, where `F11` shows the

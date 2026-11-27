@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:niman/src/core/theme_tokens.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
+import 'package:niman/src/markdown/edit/line_direction.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/render/caret_painters.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
@@ -366,6 +367,10 @@ final class SourceLine extends StatelessWidget {
       ),
       key: paragraphKey,
       style: collapsed ?? lineStyle(revealed: revealed),
+      // The line's own direction, its first strong character's (#1352): a
+      // line of Hebrew or Arabic is drawn from the right, and the keys that
+      // move the caret sideways follow it (`SourceCaretMotion.moveBy`).
+      textDirection: lineDirection(styled.text),
       // A line that takes no room is held to it by a strut, not by its
       // glyphs alone. An empty one has no glyphs: the engine sizes it from
       // the font's metrics, which are nothing at a hundredth of a pixel, and
