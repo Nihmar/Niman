@@ -15,6 +15,7 @@ import 'package:niman/src/markdown/inline/inline_chars.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
 import 'package:niman/src/markdown/inline/inline_scanners.dart';
 import 'package:niman/src/markdown/inline/link_references.dart';
+import 'package:niman/src/markdown/inline/raw_html_memo.dart';
 import 'package:niman/src/markdown/inline/style_tags.dart';
 
 /// Reads one leaf's inline text.
@@ -52,6 +53,9 @@ final class InlineParser {
   /// none has failed yet ([_appConstruct]).
   late int _noInlineCloseFrom = text.length + 1;
   late int _noDisplayCloseFrom = text.length + 1;
+
+  /// Where the closers of the raw HTML first failed to be found.
+  late final RawHtmlMemo _rawHtml = RawHtmlMemo(text);
 
   int _pos = 0;
   late final InlineBuild _root = InlineBuild(
@@ -365,7 +369,7 @@ final class InlineParser {
       _pos = end;
       return;
     }
-    final html = InlineScanners.rawHtml(text, _pos);
+    final html = InlineScanners.rawHtml(text, _pos, _rawHtml);
     if (html != null) {
       _root.append(
         InlineBuild(
