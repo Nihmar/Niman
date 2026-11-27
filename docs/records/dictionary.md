@@ -1,4 +1,4 @@
-# Look up: a word's meaning, from dictionaries downloaded per language
+# Look up: a word's meaning, from dictionaries downloaded per language (#1379)
 
 Selecting a word in a book, a PDF, a scan's recognized line, a note's read
 view or the editor, and reading what it means. Written before the code
@@ -305,7 +305,7 @@ pipeline carries, measured in phase 2.
 - Icons are outline; nothing appears or disappears in a row as a state
   changes.
 
-## Not now
+## Not now (#1386)
 
 - **Flashcards**: *Create a flashcard* adding `- word :: definition` to a
   `type: flashcard` note of the book (`deck: Vocabulary/<book>`), which is
@@ -324,12 +324,12 @@ Each phase lands on Android, Linux, Windows, macOS and iOS together.
 
 | Phase | What | Size |
 |---|---|---|
-| 1 | The engine: StarDict, dictzip, the sidecar index and its perf test, the worker, the candidates; no UI | L |
-| 2 | The pipeline, the workflow and the first `dictionary-pack-1`; the catalog; the bar for own editions and the measured sizes written back here | L |
-| 3 | Settings → Dictionaries: the catalog, download, removal, the PDF language note | M |
-| 4 | The panel and the flow; *Significato* in books (first on a phone), the read view, the OCR Text pane and PDFs; the language and its chip; *Copy*, *Annotate with the definition*; no definition, no pack | L |
-| 5 | A scan's line: the menu entry and the chips | M |
-| 6 | The editor's context menu | S |
+| 1 (#1380) | The engine: StarDict, dictzip, the sidecar index and its perf test, the worker, the candidates; no UI | L |
+| 2 (#1381) | The pipeline, the workflow and the first `dictionary-pack-1`; the catalog; the bar for own editions and the measured sizes written back here | L |
+| 3 (#1382) | Settings → Dictionaries: the catalog, download, removal, the PDF language note | M |
+| 4 (#1383) | The panel and the flow; *Significato* in books (first on a phone), the read view, the OCR Text pane and PDFs; the language and its chip; *Copy*, *Annotate with the definition*; no definition, no pack | L |
+| 5 (#1384) | A scan's line: the menu entry and the chips | M |
+| 6 (#1385) | The editor's context menu | S |
 
 Phases 1 and 2 can run side by side (the pipeline's test fixture is a
 small pack for the engine's tests); 3 needs 1 and 2; 4 needs 1 and 3; 5

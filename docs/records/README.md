@@ -30,7 +30,7 @@ block-parser plans followed on 2026-11-26.
 | [workspace.md](workspace.md) | The open-note model — tabs and panes (#23) |
 | [epub-reader.md](epub-reader.md) | Reading an EPUB into Markdown (#280) |
 | [annotations.md](annotations.md) | Annotating a PDF or a book in a companion note (#284) |
-| [dictionary.md](dictionary.md) | Looking up a selected word's meaning in packs built from Wiktionary, downloaded per language: the sources weighed, the owner's decisions, the 35 packs, the engine, the pipeline, the phases |
+| [dictionary.md](dictionary.md) | Looking up a selected word's meaning in packs built from Wiktionary, downloaded per language: the sources weighed, the owner's decisions, the 35 packs, the engine, the pipeline, the phases (#1379) |
 | [sync.md](sync.md) | Note history and WebDAV sync: the decisions, settled before the code |
 | [history-store.md](history-store.md) | The history as objects, deltas and an append-only log, with nothing flushed on a save's path (#1148) |
 | [index-reconcile.md](index-reconcile.md) | The index scan, a directory at a time with bounded memory (#302) |
