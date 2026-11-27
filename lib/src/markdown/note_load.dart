@@ -20,6 +20,7 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/markdown/line_ending.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_read_failure.dart';
@@ -76,9 +77,21 @@ final class NoteTextRead {
 
 /// [text] with its line endings made `\n`, as the editor holds a note —
 /// and no pass over it when there is no `\r` to replace.
-String normalizedLineEndings(String text) => text.contains('\r')
-    ? text.replaceAll('\r\n', '\n').replaceAll('\r', '\n')
-    : text;
+///
+/// What a lone `\r` is depends on the note (#1366). In a note whose lines
+/// end with one (the classic Mac OS, [LineEnding.cr]) it is the line break.
+/// In any other it is a character of its line, kept as it is: `a\rb\n` is
+/// saved as it was read, and `\r\r\n` is one line ending after a `\r`, not
+/// two line breaks. A reader that does not know the note's [dominant]
+/// ending works it out from the text, so every reader sees the same lines
+/// the editor does.
+String normalizedLineEndings(String text, {LineEnding? dominant}) {
+  if (!text.contains('\r')) return text;
+  final lines = text.replaceAll('\r\n', '\n');
+  return (dominant ?? LineEnding.dominantOf(text)) == LineEnding.cr
+      ? lines.replaceAll('\r', '\n')
+      : lines;
+}
 
 /// Reads the note at [path] and makes it ready, in an isolate: a
 /// [LoadedNote], or a [NoteReadFailure] saying the file is not text.
@@ -144,7 +157,7 @@ Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
   if (read == null) return NoteReadFailure('$path: not text', notText: true);
   // Counted before the endings are made `\n`, or there is nothing to count.
   final framing = NoteFraming.of(bytes: bytes, text: read);
-  final text = normalizedLineEndings(read);
+  final text = normalizedLineEndings(read, dominant: framing.lineEnding);
   return LoadedNote(
     text: text,
     buffer: SourceBuffer.fromText(text),

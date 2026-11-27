@@ -3,6 +3,7 @@
 // changing one character of a CRLF note changes one character of the file.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/library/note_write_stream.dart';
@@ -40,6 +41,57 @@ void main() {
       expect(LineEnding.cr.apply('a\nb'), 'a\rb');
       const text = 'a\nb\n';
       expect(identical(LineEnding.lf.apply(text), text), isTrue);
+    });
+  });
+
+  group('normalizedLineEndings (#1366)', () {
+    test('a lone CR is a character of its line in an LF or CRLF note', () {
+      expect(normalizedLineEndings('a\rb\nc\nd\n'), 'a\rb\nc\nd\n');
+      expect(normalizedLineEndings('a\rb\r\nc\r\nd\r\n'), 'a\rb\nc\nd\n');
+    });
+
+    test('CR CR LF is one line ending after a CR', () {
+      expect(normalizedLineEndings('a\r\r\nb\r\n'), 'a\r\nb\n');
+    });
+
+    test('a note of lone-CR lines is read as lines', () {
+      expect(normalizedLineEndings('one\rtwo\rthree'), 'one\ntwo\nthree');
+    });
+
+    test('a note with no CR is the same string', () {
+      const text = 'one\ntwo\n';
+      expect(identical(normalizedLineEndings(text), text), isTrue);
+    });
+
+    test('property: a note written with one ending, lone CRs and all, '
+        'reads and writes back byte for byte', () {
+      final random = Random(1366);
+      var checked = 0;
+      for (var round = 0; round < 500; round++) {
+        final ending = random.nextBool() ? LineEnding.lf : LineEnding.crlf;
+        final out = StringBuffer();
+        for (var i = 0, n = random.nextInt(24); i < n; i++) {
+          switch (random.nextInt(4)) {
+            case 0:
+              out.write('\r');
+              // A lone CR right before an LF would be a CRLF line.
+              if (ending == LineEnding.lf) out.write('x');
+            case 1:
+              out.write(ending.sequence);
+            default:
+              out.write('ab'[random.nextInt(2)]);
+          }
+        }
+        final disk = out.toString();
+        // The note's own ending decides, as the loader does: a note with
+        // more lone CRs than line endings is a lone-CR note, not this one.
+        final dominant = LineEnding.dominantOf(disk);
+        if (dominant == LineEnding.cr) continue;
+        checked++;
+        final held = normalizedLineEndings(disk, dominant: dominant);
+        expect(dominant.apply(held), disk, reason: 'note: ${jsonEncode(disk)}');
+      }
+      expect(checked, greaterThan(200));
     });
   });
 
@@ -151,6 +203,18 @@ void main() {
         typed: '2',
       );
       expect(saved, bytes('one\rtwo2\rthree\r'));
+    });
+
+    test('a lone CR inside an LF note stays a lone CR (#1366)', () async {
+      const original = 'a\rb\nc\nd\n';
+      final saved = await editAndSave(bytes(original), after: 'c', typed: 'X');
+      expect(saved, bytes('a\rb\ncX\nd\n'));
+    });
+
+    test('CR CR LF in a CRLF note stays one CR CR LF (#1366)', () async {
+      const original = 'a\r\nb\r\r\nc\r\n';
+      final saved = await editAndSave(bytes(original), after: 'c', typed: 'X');
+      expect(saved, bytes('a\r\nb\r\r\ncX\r\n'));
     });
 
     test('a mixed note is saved with its dominant ending', () async {

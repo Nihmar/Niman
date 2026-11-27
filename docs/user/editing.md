@@ -462,7 +462,10 @@ with it, so changing one character of a note changes one character of the
 file — a version-control diff or a sync merge sees that character and not
 every line. A note that mixes endings is saved with the one most of its lines
 had (a tie goes to `LF`), so every line ends alike afterwards; a note of lone
-`CR` lines, as the oldest Mac programs wrote, stays that way.
+`CR` lines, as the oldest Mac programs wrote, stays that way. In a note whose
+lines end with `LF` or `CRLF`, a lone `CR` is a character of its line and is
+kept where it is, and `CR CR LF` is one line ending after a `CR` — neither is
+turned into a line break.
 
 ## Markdown support
 

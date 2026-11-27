@@ -21,7 +21,7 @@ void main() {
 
   test('a note comes back ready: its text and its buffer', () async {
     final file = File(p.join(dir.path, 'note.md'))
-      ..writeAsStringSync('# Title\r\n\r\nsome words here\rand more\n');
+      ..writeAsStringSync('# Title\r\n\r\nsome words here\r\nand more\r\n');
     final loaded = await loadNote(file.path);
     expect(loaded, isA<LoadedNote>());
     final note = loaded as LoadedNote;
@@ -192,7 +192,10 @@ void main() {
   });
 
   test('line endings are made LF, and an LF note is left as it is', () {
-    expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\nc\n');
+    expect(normalizedLineEndings('a\r\nb\nc\n'), 'a\nb\nc\n');
+    // A lone CR is a line break only in a note of lone-CR lines (#1366).
+    expect(normalizedLineEndings('a\rb\rc\r'), 'a\nb\nc\n');
+    expect(normalizedLineEndings('a\r\nb\rc\n'), 'a\nb\rc\n');
     const lf = 'a\nb\n';
     expect(identical(normalizedLineEndings(lf), lf), isTrue);
   });
