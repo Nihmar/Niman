@@ -231,6 +231,22 @@ final class UnsavedTracker extends ChangeNotifier {
       if (note is DetachedSave && p.equals(note.path, path)) note.settled,
   ]);
 
+  final Map<String, DateTime> _restored = <String, DateTime>{};
+
+  /// A version was just restored into the note at the absolute [path] (#1361).
+  /// The open editor of it, asked to re-read the file next, shows the restored
+  /// text even if it holds edits ([takeRestored]).
+  void restored(String path) =>
+      _restored[p.canonicalize(path)] = DateTime.now();
+
+  /// Whether a restore into the note at [path] was announced in the last few
+  /// seconds, taken once: what is left over is not a later reload's.
+  bool takeRestored(String path) {
+    final at = _restored.remove(p.canonicalize(path));
+    return at != null &&
+        DateTime.now().difference(at) < const Duration(seconds: 10);
+  }
+
   final Map<String, int> _landed = <String, int>{};
 
   /// How many held writes of the note at [path] have landed so far: an editor

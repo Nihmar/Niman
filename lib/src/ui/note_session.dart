@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show TextSelection;
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/markdown/note_load.dart';
@@ -52,6 +53,7 @@ final class NoteSession extends ChangeNotifier {
     required this.alive,
     this.writesSettled,
     this.landings,
+    this.restored,
   });
 
   static const AppLogger _log = AppLogger(name: 'editor');
@@ -84,6 +86,11 @@ final class NoteSession extends ChangeNotifier {
   /// read across which the count moved read the file around a write, and is
   /// made again.
   final int Function(String path)? landings;
+
+  /// Whether a version was just restored into the note at a path, taken once
+  /// (`UnsavedTracker.takeRestored`): the file is then what the editor shows
+  /// even where it holds edits, which a reload otherwise keeps (#1361).
+  final bool Function(String path)? restored;
 
   /// Whether the view is still up.
   final bool Function() alive;
@@ -157,6 +164,8 @@ final class NoteSession extends ChangeNotifier {
   Future<void> open(String path, {int caret = 0}) async {
     _path = path;
     final generation = ++_generation;
+    // A restore the editor never saw is not the next reload's to apply.
+    restored?.call(path);
     saves.markClean();
     _surface = null;
     text.text = '';
@@ -256,6 +265,9 @@ final class NoteSession extends ChangeNotifier {
     // A note that failed to open has nothing on screen to protect: the next
     // trigger — a resume, a sync that touched it — is a new try (#1059).
     if (_error != null && !_notText) return retry(path);
+    if (!_loading && (restored?.call(path) ?? false)) {
+      if (saves.dirty || saves.busy) return await _adoptRestored(path);
+    }
     if (_loading || saves.busy) {
       _log.debug('reload skipped (busy): $path');
       return;
@@ -296,6 +308,38 @@ final class NoteSession extends ChangeNotifier {
     _loading = false;
     _notify(NoteEvent.reread);
     _log.info('note reloaded: $path (external change, ${body.length} chars)');
+  }
+
+  /// A version was restored into the note at [path] while the editor holds
+  /// edits (#1361): the editor shows the restored text, as one edit that undo
+  /// takes back, so the restore is not silently written over by the editor's
+  /// next save and the edits can still come back.
+  Future<void> _adoptRestored(String path) async {
+    final generation = _generation;
+    final read = await disk.reread(path);
+    if (read == null || !alive() || _path != path) return;
+    if (generation != _generation || _loading) return;
+    final surface = _surface;
+    if (surface == null) return;
+    final body = normalizedLineEndings(read.content);
+    disk.adoptReread(read);
+    if (body == text.text) return;
+    final caret = surface.selection;
+    surface.applyEdit(
+      body,
+      TextSelection(
+        baseOffset: caret.anchor.clamp(0, body.length),
+        extentOffset: caret.extent.clamp(0, body.length),
+      ),
+    );
+    // The disk holds this text: nothing is owed, until an undo brings the
+    // edits back.
+    saves
+      ..markClean()
+      ..newSession();
+    _kind = frontmatterTypeOf(body);
+    _notify(NoteEvent.reread);
+    _log.info('note restored over its edits: $path (${body.length} chars)');
   }
 
   /// Whether a reload begun for [path] at [generation] still speaks for the

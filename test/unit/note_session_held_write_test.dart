@@ -59,6 +59,7 @@ void main() {
       takeOver: tracker.takeOver,
       writesSettled: tracker.writesSettled,
       landings: tracker.landings,
+      restored: tracker.takeRestored,
       alive: () => true,
     );
     session = made;
@@ -130,5 +131,62 @@ void main() {
     await session.open(path);
     expect(session.surface!.buffer.text, 'old');
     expect(saves.dirty, isFalse);
+  });
+
+  group('a version restored into an edited note (#1361)', () {
+    /// The note open with 'old' and the reader's edit on top of it.
+    Future<void> openEdited() async {
+      await session.open(path);
+      session.surface!.replaceRange(3, 3, ' and mine');
+      saves.edited();
+      expect(saves.dirty, isTrue);
+    }
+
+    test('is what the editor shows, and the next save keeps it', () async {
+      await openEdited();
+      files[path] = 'restored';
+
+      tracker.restored(path);
+      await session.reload(path, checkStamp: false);
+
+      expect(session.surface!.buffer.text, 'restored');
+      expect(saves.dirty, isFalse, reason: 'the disk holds this text');
+    });
+
+    test('is one undo step, so the edits can come back', () async {
+      await openEdited();
+      files[path] = 'restored';
+      tracker.restored(path);
+      await session.reload(path, checkStamp: false);
+
+      final surface = session.surface!;
+      expect(surface.history.undo(surface.buffer), isNotNull);
+      expect(surface.buffer.text, 'old and mine');
+    });
+
+    test('a reload that is not a restore still keeps the edits', () async {
+      await openEdited();
+      files[path] = 'changed outside';
+
+      await session.reload(path, checkStamp: false);
+
+      expect(session.surface!.buffer.text, 'old and mine');
+      expect(saves.dirty, isTrue);
+    });
+
+    test('an announcement of no use is not kept for a later reload', () async {
+      await session.open(path);
+      tracker.restored(path);
+      // The note was clean: the ordinary reload adopted it.
+      files[path] = 'restored';
+      await session.reload(path, checkStamp: false);
+      expect(session.surface!.buffer.text, 'restored');
+
+      session.surface!.replaceRange(8, 8, '!');
+      saves.edited();
+      files[path] = 'changed outside';
+      await session.reload(path, checkStamp: false);
+      expect(session.surface!.buffer.text, 'restored!');
+    });
   });
 }

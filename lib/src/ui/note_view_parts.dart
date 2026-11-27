@@ -118,6 +118,8 @@ final class NoteViewParts {
     writesSettled: (path) =>
         view.services.unsavedTracker?.writesSettled(path) ?? Future.value(),
     landings: (path) => view.services.unsavedTracker?.landings(path) ?? 0,
+    restored: (path) =>
+        view.services.unsavedTracker?.takeRestored(path) ?? false,
     alive: mounted,
   );
 

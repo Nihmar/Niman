@@ -90,7 +90,11 @@ gone since) — the same comparison the version opens on. Open one to see what c
 the current note (removed lines in red, added in green; tap a folded
 row to show the unchanged lines) or to read its whole text. **Restore
 this version** keeps the current text as a version first, then puts the
-old one back — the snackbar's **Undo** swaps them again.
+old one back — the snackbar's **Undo** swaps them again. When the note is
+open with edits you typed after the history was opened, the editor shows the
+restored version as one change of its own: **Undo** in the editor (`Ctrl+Z`)
+brings your edits back, and the restore is not written over by the editor's
+next save.
 
 On a desktop with room for the dock, **History** on the note on screen
 opens the dock's **History** pane instead, and a version there opens

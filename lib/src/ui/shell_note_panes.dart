@@ -512,7 +512,13 @@ final class ShellNotePanes {
                   context(),
                   controller,
                   onRestored: () {
-                    if (mounted()) selection.reload();
+                    final path = selection.path;
+                    final root = controller.root;
+                    if (!mounted()) return;
+                    if (path != null && root != null) {
+                      unsaved.restored(p.join(root, path));
+                    }
+                    selection.reload();
                   },
                 ),
               // A study beside the deck (#533): over the pane's notes too.
