@@ -4759,4 +4759,82 @@ final class CatalanStrings extends Strings {
   String get recurFromDueDate => 'Des del venciment';
   @override
   String get recurFromCompletion => 'Des de la finalització';
+
+  @override
+  String get settingsSectionDictionaries => 'Diccionaris';
+
+  @override
+  String get dictionariesIntro =>
+      'Els significats es busquen en diccionaris guardats en aquest '
+      'dispositiu, un per llengua. Una cerca no va mai a la xarxa.';
+
+  @override
+  String get dictionariesInstalled => 'Instal·lats';
+
+  @override
+  String get dictionariesDownload => 'Baixa un diccionari';
+
+  @override
+  String get dictionariesSearchHint => 'Cerca una llengua';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Encara no hi ha cap diccionari instal·lat.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Encara no hi ha diccionaris per baixar.';
+
+  @override
+  String get dictionariesNoMatch => 'Cap llengua coincideix amb la cerca.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Tots els diccionaris disponibles estan instal·lats.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definicions: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Per a $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Vols suprimir el diccionari de $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Allibera $size. Podràs tornar-lo a baixar.';
+
+  @override
+  String get dictionaryUnpacking => 'Descomprimint…';
+
+  @override
+  String dictionaryIndexing(int percent) => "Creant l'índex… $percent %";
+
+  @override
+  String dictionaryUnusable(String reason) => 'No es pot fer servir: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      "No s'ha pogut suprimir el diccionari de $language: $reason";
+
+  @override
+  String get dictionaryPdfLanguageTitle => "Llengua d'un PDF";
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      "Un PDF no diu en quina llengua està: s'utilitza la primera llengua "
+      "d'ortografia de la biblioteca fins que la canviïs al panell de "
+      "significats. L'elecció es guarda per a aquest fitxer.";
+
+  @override
+  String get dictionaryNotice =>
+      "Els diccionaris són a la carpeta de dades de l'app, no a la "
+      "biblioteca: no se sincronitzen i no són notes. L'índex d'un "
+      'diccionari es reconstrueix sol si se suprimeix.';
+
+  @override
+  String get dictionaryLicense =>
+      'Textos del Wiktionary, CC BY-SA 4.0 i GFDL, extrets amb wiktextract.';
 }

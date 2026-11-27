@@ -301,6 +301,12 @@ final class DictionaryInstallation extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Shows the pack [id] at [preparation] (null: not preparing), as if the
+  /// install were there: a screen test cannot hold a real one half way.
+  @visibleForTesting
+  void debugPrepare(String id, DictionaryPreparation? preparation) =>
+      _prepare(id, preparation);
+
   void _prepare(String id, DictionaryPreparation? preparation) {
     if (_disposed) return;
     if (preparation == null) {

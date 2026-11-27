@@ -4754,4 +4754,82 @@ final class PolishStrings extends Strings {
   String get recurFromDueDate => 'Od terminu';
   @override
   String get recurFromCompletion => 'Od wykonania';
+
+  @override
+  String get settingsSectionDictionaries => 'Słowniki';
+
+  @override
+  String get dictionariesIntro =>
+      'Znaczenia wyszukuje się w słownikach przechowywanych na tym '
+      'urządzeniu, po jednym na język. Wyszukiwanie nigdy nie łączy się z '
+      'siecią.';
+
+  @override
+  String get dictionariesInstalled => 'Zainstalowane';
+
+  @override
+  String get dictionariesDownload => 'Pobierz słownik';
+
+  @override
+  String get dictionariesSearchHint => 'Szukaj języka';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Nie zainstalowano jeszcze żadnego słownika.';
+
+  @override
+  String get dictionariesUnavailable => 'Nie ma jeszcze słowników do pobrania.';
+
+  @override
+  String get dictionariesNoMatch => 'Żaden język nie pasuje do wyszukiwania.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Wszystkie dostępne słowniki są zainstalowane.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definicje: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Dla: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => 'Usunąć słownik: $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Zwalnia $size. Możesz go pobrać ponownie.';
+
+  @override
+  String get dictionaryUnpacking => 'Rozpakowywanie…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Tworzenie indeksu… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nie można użyć: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Nie udało się usunąć słownika ($language): $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Język pliku PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Plik PDF nie podaje swojego języka, więc używany jest pierwszy język '
+      'pisowni biblioteki, dopóki nie zmienisz go w panelu znaczeń. Wybór '
+      'jest zapamiętywany dla tego pliku.';
+
+  @override
+  String get dictionaryNotice =>
+      'Słowniki są w folderze danych aplikacji, nie w bibliotece: nie '
+      'synchronizują się i nie są notatkami. Indeks słownika odtwarza się '
+      'sam, jeśli zostanie usunięty.';
+
+  @override
+  String get dictionaryLicense =>
+      'Teksty z Wiktionary, CC BY-SA 4.0 i GFDL, wyodrębnione za pomocą '
+      'wiktextract.';
 }

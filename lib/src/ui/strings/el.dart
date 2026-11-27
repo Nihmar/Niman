@@ -4835,4 +4835,85 @@ final class GreekStrings extends Strings {
   String get recurFromDueDate => 'Από την προθεσμία';
   @override
   String get recurFromCompletion => 'Από την ολοκλήρωση';
+
+  @override
+  String get settingsSectionDictionaries => 'Λεξικά';
+
+  @override
+  String get dictionariesIntro =>
+      'Οι σημασίες αναζητούνται σε λεξικά που φυλάσσονται σε αυτή τη '
+      'συσκευή, ένα ανά γλώσσα. Μια αναζήτηση δεν γίνεται ποτέ μέσω δικτύου.';
+
+  @override
+  String get dictionariesInstalled => 'Εγκατεστημένα';
+
+  @override
+  String get dictionariesDownload => 'Λήψη λεξικού';
+
+  @override
+  String get dictionariesSearchHint => 'Αναζήτηση γλώσσας';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Δεν έχει εγκατασταθεί ακόμη κανένα λεξικό.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Δεν υπάρχουν ακόμη λεξικά διαθέσιμα για λήψη.';
+
+  @override
+  String get dictionariesNoMatch =>
+      'Καμία γλώσσα δεν ταιριάζει με την αναζήτηση.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Όλα τα διαθέσιμα λεξικά είναι εγκατεστημένα.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Ορισμοί: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Για: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Διαγραφή του λεξικού $language;';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Ελευθερώνει $size. Μπορείτε να το κατεβάσετε ξανά.';
+
+  @override
+  String get dictionaryUnpacking => 'Αποσυμπίεση…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Δημιουργία ευρετηρίου… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) =>
+      'Δεν μπορεί να χρησιμοποιηθεί: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Δεν ήταν δυνατή η διαγραφή του λεξικού $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Γλώσσα ενός PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Ένα PDF δεν λέει σε ποια γλώσσα είναι: χρησιμοποιείται η πρώτη γλώσσα '
+      'ορθογραφίας της βιβλιοθήκης, μέχρι να την αλλάξετε στον πίνακα της '
+      'σημασίας. Η επιλογή διατηρείται για το αρχείο αυτό.';
+
+  @override
+  String get dictionaryNotice =>
+      'Τα λεξικά βρίσκονται στον φάκελο δεδομένων της εφαρμογής, όχι στη '
+      'βιβλιοθήκη: δεν συγχρονίζονται και δεν είναι σημειώσεις. Το ευρετήριο '
+      'ενός λεξικού ξαναχτίζεται από μόνο του αν διαγραφεί.';
+
+  @override
+  String get dictionaryLicense =>
+      'Κείμενα από το Wiktionary, CC BY-SA 4.0 και GFDL, που εξήχθησαν με το '
+      'wiktextract.';
 }

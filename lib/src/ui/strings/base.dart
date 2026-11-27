@@ -2496,4 +2496,27 @@ abstract base class Strings {
   String get recurUnitYears;
   String get recurFromDueDate;
   String get recurFromCompletion;
+
+  // Settings: dictionaries (#1382).
+  String get settingsSectionDictionaries;
+  String get dictionariesIntro;
+  String get dictionariesInstalled;
+  String get dictionariesDownload;
+  String get dictionariesSearchHint;
+  String get dictionariesNoneInstalled;
+  String get dictionariesUnavailable;
+  String get dictionariesNoMatch;
+  String get dictionariesAllInstalled;
+  String dictionaryDefinitions(String language);
+  String dictionaryServes(String languages);
+  String dictionaryDeleteTitle(String language);
+  String dictionaryDeleteBody(String size);
+  String get dictionaryUnpacking;
+  String dictionaryIndexing(int percent);
+  String dictionaryUnusable(String reason);
+  String dictionaryRemoveFailed(String language, String reason);
+  String get dictionaryPdfLanguageTitle;
+  String get dictionaryPdfLanguageNote;
+  String get dictionaryNotice;
+  String get dictionaryLicense;
 }

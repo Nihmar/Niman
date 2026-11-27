@@ -4714,4 +4714,82 @@ final class CroatianStrings extends Strings {
   String get recurFromDueDate => 'Od roka';
   @override
   String get recurFromCompletion => 'Od dovršetka';
+
+  @override
+  String get settingsSectionDictionaries => 'Rječnici';
+
+  @override
+  String get dictionariesIntro =>
+      'Značenja se traže u rječnicima pohranjenima na ovom uređaju, po jedan '
+      'za svaki jezik. Pretraživanje nikad ne ide na mrežu.';
+
+  @override
+  String get dictionariesInstalled => 'Instalirani';
+
+  @override
+  String get dictionariesDownload => 'Preuzmi rječnik';
+
+  @override
+  String get dictionariesSearchHint => 'Traži jezik';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Još nije instaliran nijedan rječnik.';
+
+  @override
+  String get dictionariesUnavailable => 'Još nema rječnika za preuzimanje.';
+
+  @override
+  String get dictionariesNoMatch => 'Nijedan jezik ne odgovara pretrazi.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Svi dostupni rječnici su instalirani.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definicije: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Za: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Izbrisati rječnik $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Oslobađa $size. Možete ga ponovno preuzeti.';
+
+  @override
+  String get dictionaryUnpacking => 'Raspakiravanje…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Izrada indeksa… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ne može se koristiti: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Rječnik $language nije bilo moguće izbrisati: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Jezik PDF-a';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF ne kaže kojim je jezikom pisan pa se koristi prvi jezik provjere '
+      'pravopisa biblioteke dok ga ne promijenite u ploči značenja. Odabir '
+      'se pamti za tu datoteku.';
+
+  @override
+  String get dictionaryNotice =>
+      'Rječnici su u mapi podataka aplikacije, ne u biblioteci: ne '
+      'sinkroniziraju se i nisu bilješke. Indeks rječnika sam se ponovno '
+      'izgradi ako se izbriše.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekstovi iz Wiktionaryja, CC BY-SA 4.0 i GFDL, izdvojeni alatom '
+      'wiktextract.';
 }

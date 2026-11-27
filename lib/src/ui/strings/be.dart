@@ -4743,4 +4743,83 @@ final class BelarusianStrings extends Strings {
   String get recurFromDueDate => 'Ад тэрміну';
   @override
   String get recurFromCompletion => 'Ад выканання';
+
+  @override
+  String get settingsSectionDictionaries => 'Слоўнікі';
+
+  @override
+  String get dictionariesIntro =>
+      'Значэнні шукаюцца ў слоўніках, якія захоўваюцца на гэтай прыладзе, па '
+      'адным на мову. Пошук ніколі не выходзіць у сетку.';
+
+  @override
+  String get dictionariesInstalled => 'Усталяваныя';
+
+  @override
+  String get dictionariesDownload => 'Спампаваць слоўнік';
+
+  @override
+  String get dictionariesSearchHint => 'Пошук мовы';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Ніводнага слоўніка яшчэ не ўсталявана.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Слоўнікаў для спампоўвання пакуль няма.';
+
+  @override
+  String get dictionariesNoMatch => 'Ніводная мова не адпавядае пошуку.';
+
+  @override
+  String get dictionariesAllInstalled => 'Усе даступныя слоўнікі ўсталяваны.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Вызначэнні: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Для: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Выдаліць слоўнік $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Вызваліць $size. Яго можна спампаваць зноў.';
+
+  @override
+  String get dictionaryUnpacking => 'Распакоўка…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Стварэнне індэкса… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) =>
+      'Немагчыма выкарыстоўваць: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Не ўдалося выдаліць слоўнік $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Мова PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF не паказвае, на якой мове ён, таму выкарыстоўваецца першая мова '
+      'праверкі правапісу бібліятэкі, пакуль вы не зменіце яе ў панэлі '
+      'значэнняў. Выбар запамінаецца для гэтага файла.';
+
+  @override
+  String get dictionaryNotice =>
+      'Слоўнікі знаходзяцца ў тэчцы даных праграмы, а не ў бібліятэцы: яны '
+      "не сінхранізуюцца і не з'яўляюцца нататкамі. Індэкс слоўніка "
+      'адбудоўваецца сам, калі яго выдаліць.';
+
+  @override
+  String get dictionaryLicense =>
+      'Тэксты з Wiktionary, CC BY-SA 4.0 і GFDL, атрыманыя з дапамогай '
+      'wiktextract.';
 }

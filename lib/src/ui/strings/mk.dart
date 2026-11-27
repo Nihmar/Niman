@@ -4719,4 +4719,81 @@ final class MacedonianStrings extends Strings {
   String get recurFromDueDate => 'Од рокот';
   @override
   String get recurFromCompletion => 'Од завршувањето';
+
+  @override
+  String get settingsSectionDictionaries => 'Речници';
+
+  @override
+  String get dictionariesIntro =>
+      'Значењата се бараат во речници зачувани на овој уред, по еден за '
+      'секој јазик. Пребарувањето никогаш не оди на мрежа.';
+
+  @override
+  String get dictionariesInstalled => 'Инсталирани';
+
+  @override
+  String get dictionariesDownload => 'Преземи речник';
+
+  @override
+  String get dictionariesSearchHint => 'Побарај јазик';
+
+  @override
+  String get dictionariesNoneInstalled => 'Сè уште нема инсталиран речник.';
+
+  @override
+  String get dictionariesUnavailable => 'Сè уште нема речници за преземање.';
+
+  @override
+  String get dictionariesNoMatch =>
+      'Ниту еден јазик не одговара на пребарувањето.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Сите достапни речници се инсталирани.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Дефиниции: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'За: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Да се избрише речникот $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Ослободува $size. Можете повторно да го преземете.';
+
+  @override
+  String get dictionaryUnpacking => 'Распакување…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Изградба на индексот… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Не може да се користи: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Речникот $language не можеше да се избрише: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Јазик на PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF не кажува на кој јазик е, па се користи првиот јазик за правопис '
+      'на библиотеката додека не го смените во панелот за значења. Изборот '
+      'се помни за таа датотека.';
+
+  @override
+  String get dictionaryNotice =>
+      'Речниците се во папката со податоци на апликацијата, а не во '
+      'библиотеката: не се синхронизираат и не се белешки. Индексот на '
+      'речникот сам се обновува ако се избрише.';
+
+  @override
+  String get dictionaryLicense =>
+      'Текстови од Wiktionary, CC BY-SA 4.0 и GFDL, извлечени со wiktextract.';
 }

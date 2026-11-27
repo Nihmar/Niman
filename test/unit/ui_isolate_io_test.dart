@@ -32,6 +32,10 @@ const Map<String, String> _offTheUiIsolate = {
   'core/temp_sweep_blocking.dart': "the sweep's walk, in Isolate.run",
   'db/index_note_content.dart': 'the note reads of the reader isolate',
   'db/index_scan.dart': 'the walk, the listing and the probes, in isolates',
+  'dictionary/dictionary_disk.dart':
+      'the scan, the install and the removal, in Isolate.run',
+  'dictionary/tar_unpacker.dart':
+      "unpackSync, in DictionaryDisk.install's Isolate.run",
   'epub/epub_document.dart': 'readEpub, in its Isolate.run',
   'epub/epub_picture_cache.dart':
       "the pictures' writes and the pruning, in"

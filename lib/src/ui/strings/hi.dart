@@ -4627,4 +4627,82 @@ final class HindiStrings extends Strings {
   String get recurFromDueDate => 'नियत तिथि से';
   @override
   String get recurFromCompletion => 'पूरा होने से';
+
+  @override
+  String get settingsSectionDictionaries => 'शब्दकोश';
+
+  @override
+  String get dictionariesIntro =>
+      'अर्थ इस डिवाइस पर रखे शब्दकोशों में खोजे जाते हैं, हर भाषा के लिए एक। '
+      'खोज कभी इंटरनेट पर नहीं जाती।';
+
+  @override
+  String get dictionariesInstalled => 'इंस्टॉल किए गए';
+
+  @override
+  String get dictionariesDownload => 'शब्दकोश डाउनलोड करें';
+
+  @override
+  String get dictionariesSearchHint => 'भाषा खोजें';
+
+  @override
+  String get dictionariesNoneInstalled => 'अभी कोई शब्दकोश इंस्टॉल नहीं है।';
+
+  @override
+  String get dictionariesUnavailable =>
+      'डाउनलोड के लिए अभी कोई शब्दकोश उपलब्ध नहीं है।';
+
+  @override
+  String get dictionariesNoMatch => 'कोई भाषा खोज से मेल नहीं खाती।';
+
+  @override
+  String get dictionariesAllInstalled => 'उपलब्ध सभी शब्दकोश इंस्टॉल हैं।';
+
+  @override
+  String dictionaryDefinitions(String language) => 'परिभाषाएँ: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'इनके लिए: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => '$language शब्दकोश हटाएँ?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'इससे $size जगह खाली होगी। आप इसे फिर से डाउनलोड कर सकते हैं।';
+
+  @override
+  String get dictionaryUnpacking => 'खोला जा रहा है…';
+
+  @override
+  String dictionaryIndexing(int percent) =>
+      'इंडेक्स बनाया जा रहा है… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) =>
+      'उपयोग नहीं किया जा सकता: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      '$language शब्दकोश हटाया नहीं जा सका: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF की भाषा';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF यह नहीं बताता कि वह किस भाषा में है, इसलिए जब तक आप अर्थ पैनल में '
+      'इसे बदलते नहीं, लाइब्रेरी की पहली वर्तनी भाषा इस्तेमाल होती है। यह '
+      'चुनाव उस फ़ाइल के लिए याद रखा जाता है।';
+
+  @override
+  String get dictionaryNotice =>
+      'शब्दकोश ऐप के डेटा फ़ोल्डर में रखे जाते हैं, लाइब्रेरी में नहीं: वे '
+      'सिंक नहीं होते और नोट नहीं हैं। किसी शब्दकोश का इंडेक्स हटा दिए जाने '
+      'पर अपने आप दोबारा बन जाता है।';
+
+  @override
+  String get dictionaryLicense =>
+      'Wiktionary से लिए गए पाठ, CC BY-SA 4.0 और GFDL, wiktextract से निकाले '
+      'गए।';
 }

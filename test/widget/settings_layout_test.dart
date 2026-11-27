@@ -2,11 +2,13 @@
 // now grouped under headings, and every setting with more than two
 // choices is a row showing its current value, changed in a dialog.
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/features.dart';
 import 'package:niman/src/core/settings/library_config.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
+import 'package:niman/src/dictionary/dictionary_providers.dart';
 import 'package:niman/src/library/new_item_folder.dart';
 import 'package:niman/src/ui/keyboard_shortcuts.dart';
 import 'package:niman/src/ui/settings.dart';
@@ -16,6 +18,7 @@ import 'package:niman/src/ui/settings_search.dart';
 import 'package:niman/src/ui/strings.dart';
 
 import '../fakes/fake_library_session.dart';
+import '../fakes/idle_dictionary_installation.dart';
 
 void main() {
   late FakeLibrarySession controller;
@@ -30,9 +33,17 @@ void main() {
     tester.view.physicalSize = const Size(900, 2800);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    final dictionaries = idleDictionaryInstallation();
+    addTearDown(dictionaries.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(body: SettingsBody(controller: controller)),
+      // The Dictionaries area reads its installation from the providers.
+      ProviderScope(
+        overrides: [
+          dictionaryInstallationProvider.overrideWithValue(dictionaries),
+        ],
+        child: MaterialApp(
+          home: Scaffold(body: SettingsBody(controller: controller)),
+        ),
       ),
     );
     await tester.pumpAndSettle();

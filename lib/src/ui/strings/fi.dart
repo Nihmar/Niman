@@ -4717,4 +4717,82 @@ final class FinnishStrings extends Strings {
   String get recurFromDueDate => 'Eräpäivästä';
   @override
   String get recurFromCompletion => 'Valmistumisesta';
+
+  @override
+  String get settingsSectionDictionaries => 'Sanakirjat';
+
+  @override
+  String get dictionariesIntro =>
+      'Merkitykset haetaan tälle laitteelle tallennetuista sanakirjoista, '
+      'yksi kieltä kohden. Haku ei koskaan käy verkossa.';
+
+  @override
+  String get dictionariesInstalled => 'Asennetut';
+
+  @override
+  String get dictionariesDownload => 'Lataa sanakirja';
+
+  @override
+  String get dictionariesSearchHint => 'Etsi kieltä';
+
+  @override
+  String get dictionariesNoneInstalled => 'Sanakirjoja ei ole vielä asennettu.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Ladattavia sanakirjoja ei ole vielä saatavilla.';
+
+  @override
+  String get dictionariesNoMatch => 'Mikään kieli ei vastaa hakua.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Kaikki saatavilla olevat sanakirjat on asennettu.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Määritelmät: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Kielille: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Poistetaanko $language-sanakirja?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Vapauttaa $size. Voit ladata sen uudelleen.';
+
+  @override
+  String get dictionaryUnpacking => 'Puretaan…';
+
+  @override
+  String dictionaryIndexing(int percent) =>
+      'Rakennetaan hakemistoa… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ei käytettävissä: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Sanakirjan ($language) poistaminen epäonnistui: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF:n kieli';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF ei kerro kieltään, joten käytetään kirjaston ensimmäistä '
+      'oikolukukieltä, kunnes vaihdat sen merkityspaneelissa. Valinta säilyy '
+      'kyseiselle tiedostolle.';
+
+  @override
+  String get dictionaryNotice =>
+      'Sanakirjat ovat sovelluksen datakansiossa, eivät kirjastossa: ne '
+      'eivät synkronoidu eivätkä ole muistiinpanoja. Sanakirjan hakemisto '
+      'rakentuu uudelleen itsestään, jos se poistetaan.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekstit Wiktionarysta, CC BY-SA 4.0 ja GFDL, poimittu wiktextractilla.';
 }

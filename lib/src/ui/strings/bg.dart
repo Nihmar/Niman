@@ -4710,4 +4710,80 @@ final class BulgarianStrings extends Strings {
   String get recurFromDueDate => 'От крайния срок';
   @override
   String get recurFromCompletion => 'От изпълнението';
+
+  @override
+  String get settingsSectionDictionaries => 'Речници';
+
+  @override
+  String get dictionariesIntro =>
+      'Значенията се търсят в речници, съхранявани на това устройство, по '
+      'един за всеки език. Търсенето никога не излиза в мрежата.';
+
+  @override
+  String get dictionariesInstalled => 'Инсталирани';
+
+  @override
+  String get dictionariesDownload => 'Изтегляне на речник';
+
+  @override
+  String get dictionariesSearchHint => 'Търсене на език';
+
+  @override
+  String get dictionariesNoneInstalled => 'Все още няма инсталиран речник.';
+
+  @override
+  String get dictionariesUnavailable => 'Все още няма речници за изтегляне.';
+
+  @override
+  String get dictionariesNoMatch => 'Никой език не съвпада с търсенето.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Всички налични речници са инсталирани.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Дефиниции: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'За: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Да се изтрие ли речникът за $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Освобождава $size. Можете да го изтеглите отново.';
+
+  @override
+  String get dictionaryUnpacking => 'Разархивиране…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Изграждане на индекса… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Не може да се използва: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Речникът за $language не можа да бъде изтрит: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Език на PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF не посочва езика си, затова се използва първият език за правопис '
+      'на библиотеката, докато не го смените в панела със значения. Изборът '
+      'се запазва за този файл.';
+
+  @override
+  String get dictionaryNotice =>
+      'Речниците са в папката с данни на приложението, а не в библиотеката: '
+      'не се синхронизират и не са бележки. Индексът на речника се изгражда '
+      'отново сам, ако бъде изтрит.';
+
+  @override
+  String get dictionaryLicense =>
+      'Текстове от Wiktionary, CC BY-SA 4.0 и GFDL, извлечени с wiktextract.';
 }

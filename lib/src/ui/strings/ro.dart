@@ -4759,6 +4759,84 @@ final class RomanianStrings extends Strings {
   String get recurFromDueDate => 'De la termen';
   @override
   String get recurFromCompletion => 'De la finalizare';
+
+  @override
+  String get settingsSectionDictionaries => 'Dicționare';
+
+  @override
+  String get dictionariesIntro =>
+      'Sensurile se caută în dicționare păstrate pe acest dispozitiv, câte '
+      'unul pentru fiecare limbă. O căutare nu merge niciodată online.';
+
+  @override
+  String get dictionariesInstalled => 'Instalate';
+
+  @override
+  String get dictionariesDownload => 'Descarcă un dicționar';
+
+  @override
+  String get dictionariesSearchHint => 'Caută o limbă';
+
+  @override
+  String get dictionariesNoneInstalled => 'Niciun dicționar instalat încă.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Nu există încă dicționare de descărcat.';
+
+  @override
+  String get dictionariesNoMatch => 'Nicio limbă nu corespunde căutării.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Toate dicționarele disponibile sunt instalate.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definiții: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Pentru $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Ștergi dicționarul $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Eliberează $size. Îl poți descărca din nou.';
+
+  @override
+  String get dictionaryUnpacking => 'Se dezarhivează…';
+
+  @override
+  String dictionaryIndexing(int percent) =>
+      'Se construiește indexul… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nu poate fi folosit: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Dicționarul $language nu a putut fi șters: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Limba unui PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Un PDF nu spune în ce limbă este: se folosește prima limbă de '
+      'ortografie a bibliotecii, până o schimbi în panoul de sensuri. '
+      'Alegerea se păstrează pentru acel fișier.';
+
+  @override
+  String get dictionaryNotice =>
+      'Dicționarele sunt în folderul de date al aplicației, nu în '
+      'bibliotecă: nu se sincronizează și nu sunt notițe. Indexul unui '
+      'dicționar se reconstruiește singur dacă este șters.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texte din Wiktionary, CC BY-SA 4.0 și GFDL, extrase cu wiktextract.';
 }
 
 /// The "de" Romanian puts between a number from 20 up and what it counts:

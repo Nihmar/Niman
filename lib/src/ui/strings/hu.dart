@@ -4704,4 +4704,81 @@ final class HungarianStrings extends Strings {
   String get recurFromDueDate => 'A határidőtől';
   @override
   String get recurFromCompletion => 'A teljesítéstől';
+
+  @override
+  String get settingsSectionDictionaries => 'Szótárak';
+
+  @override
+  String get dictionariesIntro =>
+      'A jelentéseket az ezen az eszközön tárolt szótárakban keresi, '
+      'nyelvenként egyben. A keresés sosem megy az internetre.';
+
+  @override
+  String get dictionariesInstalled => 'Telepítve';
+
+  @override
+  String get dictionariesDownload => 'Szótár letöltése';
+
+  @override
+  String get dictionariesSearchHint => 'Nyelv keresése';
+
+  @override
+  String get dictionariesNoneInstalled => 'Még nincs telepített szótár.';
+
+  @override
+  String get dictionariesUnavailable => 'Még nincs letölthető szótár.';
+
+  @override
+  String get dictionariesNoMatch => 'Egy nyelv sem felel meg a keresésnek.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Minden elérhető szótár telepítve van.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Meghatározások: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Ehhez: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Törlöd a(z) $language szótárt?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      '$size szabadul fel. Később újra letöltheted.';
+
+  @override
+  String get dictionaryUnpacking => 'Kicsomagolás…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Index építése… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nem használható: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'A(z) $language szótár törlése nem sikerült: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'A PDF nyelve';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'A PDF nem árulja el a nyelvét, ezért a könyvtár első helyesírási '
+      'nyelvét használja, amíg a jelentés panelen meg nem változtatod. A '
+      'választás megmarad az adott fájlhoz.';
+
+  @override
+  String get dictionaryNotice =>
+      'A szótárak az alkalmazás adatmappájában vannak, nem a könyvtárban: '
+      'nem szinkronizálódnak, és nem jegyzetek. A szótár indexe magától '
+      'újraépül, ha törlik.';
+
+  @override
+  String get dictionaryLicense =>
+      'A szövegek a Wiktionaryből származnak, CC BY-SA 4.0 és GFDL, a '
+      'wiktextract nyerte ki őket.';
 }

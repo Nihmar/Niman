@@ -4624,4 +4624,82 @@ final class EnglishStrings extends Strings {
   String get recurFromDueDate => 'From the due date';
   @override
   String get recurFromCompletion => 'From completion';
+
+  @override
+  String get settingsSectionDictionaries => 'Dictionaries';
+
+  @override
+  String get dictionariesIntro =>
+      'Meanings are looked up in dictionaries kept on this device, one per '
+      'language. A look-up never goes online.';
+
+  @override
+  String get dictionariesInstalled => 'Installed';
+
+  @override
+  String get dictionariesDownload => 'Download a dictionary';
+
+  @override
+  String get dictionariesSearchHint => 'Search for a language';
+
+  @override
+  String get dictionariesNoneInstalled => 'No dictionary is installed yet.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'No dictionary is available to download yet.';
+
+  @override
+  String get dictionariesNoMatch => 'No language matches your search.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Every available dictionary is installed.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definitions: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'For $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Delete the $language dictionary?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'It frees $size. You can download it again.';
+
+  @override
+  String get dictionaryUnpacking => 'Unpacking…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Building the index… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Cannot be used: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Could not delete the $language dictionary: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Language of a PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'A PDF does not say what language it is in, so the first spelling '
+      'language of the library is used until you change it in the look-up '
+      'panel. The choice is kept for that file.';
+
+  @override
+  String get dictionaryNotice =>
+      "Dictionaries are kept in the app's data folder, not in the library: "
+      "they do not sync and are not notes. A dictionary's index rebuilds "
+      'itself if it is deleted.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texts from Wiktionary, CC BY-SA 4.0 and GFDL, extracted with '
+      'wiktextract.';
 }

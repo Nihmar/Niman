@@ -4750,4 +4750,80 @@ final class LithuanianStrings extends Strings {
   String get recurFromDueDate => 'Nuo termino';
   @override
   String get recurFromCompletion => 'Nuo atlikimo';
+
+  @override
+  String get settingsSectionDictionaries => 'Žodynai';
+
+  @override
+  String get dictionariesIntro =>
+      'Reikšmių ieškoma šiame įrenginyje saugomuose žodynuose, po vieną '
+      'kiekvienai kalbai. Paieška niekada nesikreipia į tinklą.';
+
+  @override
+  String get dictionariesInstalled => 'Įdiegti';
+
+  @override
+  String get dictionariesDownload => 'Atsisiųsti žodyną';
+
+  @override
+  String get dictionariesSearchHint => 'Ieškoti kalbos';
+
+  @override
+  String get dictionariesNoneInstalled => 'Dar neįdiegtas joks žodynas.';
+
+  @override
+  String get dictionariesUnavailable => 'Atsisiųsti skirtų žodynų dar nėra.';
+
+  @override
+  String get dictionariesNoMatch => 'Jokia kalba neatitinka paieškos.';
+
+  @override
+  String get dictionariesAllInstalled => 'Visi prieinami žodynai įdiegti.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Apibrėžimai: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Kalboms: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Ištrinti žodyną: $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Atlaisvins $size. Galėsite jį atsisiųsti iš naujo.';
+
+  @override
+  String get dictionaryUnpacking => 'Išpakuojama…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Kuriamas indeksas… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Negalima naudoti: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Nepavyko ištrinti žodyno ($language): $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF kalba';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF nenurodo, kokia kalba jis parašytas, todėl naudojama pirmoji '
+      'bibliotekos rašybos kalba, kol pakeisite ją reikšmių skydelyje. '
+      'Pasirinkimas įsimenamas tam failui.';
+
+  @override
+  String get dictionaryNotice =>
+      'Žodynai yra programos duomenų aplanke, o ne bibliotekoje: jie '
+      'nesinchronizuojami ir nėra užrašai. Žodyno indeksas pats atsikuria, '
+      'jei jis ištrinamas.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekstai iš Wiktionary, CC BY-SA 4.0 ir GFDL, išgauti naudojant '
+      'wiktextract.';
 }

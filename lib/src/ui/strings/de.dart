@@ -4784,4 +4784,82 @@ final class GermanStrings extends Strings {
   String get recurFromDueDate => 'Ab Fälligkeitsdatum';
   @override
   String get recurFromCompletion => 'Ab Erledigung';
+
+  @override
+  String get settingsSectionDictionaries => 'Wörterbücher';
+
+  @override
+  String get dictionariesIntro =>
+      'Bedeutungen werden in Wörterbüchern nachgeschlagen, die auf diesem '
+      'Gerät liegen, eines pro Sprache. Ein Nachschlagen geht nie ins Netz.';
+
+  @override
+  String get dictionariesInstalled => 'Installiert';
+
+  @override
+  String get dictionariesDownload => 'Wörterbuch herunterladen';
+
+  @override
+  String get dictionariesSearchHint => 'Sprache suchen';
+
+  @override
+  String get dictionariesNoneInstalled => 'Noch kein Wörterbuch installiert.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Noch sind keine Wörterbücher zum Herunterladen verfügbar.';
+
+  @override
+  String get dictionariesNoMatch => 'Keine Sprache passt zur Suche.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Alle verfügbaren Wörterbücher sind installiert.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definitionen: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Für $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Wörterbuch $language löschen?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Das gibt $size frei. Es lässt sich erneut herunterladen.';
+
+  @override
+  String get dictionaryUnpacking => 'Wird entpackt…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Index wird erstellt… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nicht verwendbar: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Das Wörterbuch $language konnte nicht gelöscht werden: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Sprache eines PDFs';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Ein PDF gibt seine Sprache nicht an: Es gilt die erste '
+      'Rechtschreibsprache der Bibliothek, bis sie im Bedeutungsfeld '
+      'geändert wird. Die Wahl bleibt für diese Datei erhalten.';
+
+  @override
+  String get dictionaryNotice =>
+      'Wörterbücher liegen im Datenordner der App, nicht in der Bibliothek: '
+      'Sie werden nicht synchronisiert und sind keine Notizen. Der Index '
+      'eines Wörterbuchs baut sich selbst neu auf, wenn er gelöscht wird.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texte aus Wiktionary, CC BY-SA 4.0 und GFDL, extrahiert mit '
+      'wiktextract.';
 }

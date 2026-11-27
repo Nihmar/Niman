@@ -4721,4 +4721,81 @@ final class ItalianStrings extends Strings {
   String get recurFromDueDate => 'Dalla scadenza';
   @override
   String get recurFromCompletion => 'Dal completamento';
+
+  @override
+  String get settingsSectionDictionaries => 'Dizionari';
+
+  @override
+  String get dictionariesIntro =>
+      'I significati si cercano in dizionari tenuti su questo dispositivo, '
+      'uno per lingua. Una ricerca non va mai in rete.';
+
+  @override
+  String get dictionariesInstalled => 'Installati';
+
+  @override
+  String get dictionariesDownload => 'Scarica un dizionario';
+
+  @override
+  String get dictionariesSearchHint => 'Cerca una lingua';
+
+  @override
+  String get dictionariesNoneInstalled => 'Nessun dizionario installato.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Non ci sono ancora dizionari da scaricare.';
+
+  @override
+  String get dictionariesNoMatch => 'Nessuna lingua corrisponde alla ricerca.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Tutti i dizionari disponibili sono installati.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definizioni: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Per $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Eliminare il dizionario $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Libera $size. Potrai scaricarlo di nuovo.';
+
+  @override
+  String get dictionaryUnpacking => 'Estrazione in corso…';
+
+  @override
+  String dictionaryIndexing(int percent) => "Creazione dell'indice… $percent%";
+
+  @override
+  String dictionaryUnusable(String reason) => 'Non utilizzabile: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Impossibile eliminare il dizionario $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Lingua di un PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Un PDF non dice in che lingua è: si usa la prima lingua del controllo '
+      'ortografico della libreria, finché non la cambi nel riquadro del '
+      'significato. La scelta resta per quel file.';
+
+  @override
+  String get dictionaryNotice =>
+      "I dizionari stanno nella cartella dei dati dell'app, non nella "
+      "libreria: non si sincronizzano e non sono note. L'indice di un "
+      'dizionario si ricostruisce da solo se viene cancellato.';
+
+  @override
+  String get dictionaryLicense =>
+      'Testi da Wiktionary, CC BY-SA 4.0 e GFDL, estratti con wiktextract.';
 }

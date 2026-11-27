@@ -4642,4 +4642,80 @@ final class TurkishStrings extends Strings {
   String get recurFromDueDate => 'Bitiş tarihinden';
   @override
   String get recurFromCompletion => 'Tamamlanma tarihinden';
+
+  @override
+  String get settingsSectionDictionaries => 'Sözlükler';
+
+  @override
+  String get dictionariesIntro =>
+      'Anlamlar, bu cihazda saklanan sözlüklerde aranır; her dil için bir '
+      'tane. Bir arama asla ağa çıkmaz.';
+
+  @override
+  String get dictionariesInstalled => 'Yüklü';
+
+  @override
+  String get dictionariesDownload => 'Sözlük indir';
+
+  @override
+  String get dictionariesSearchHint => 'Dil ara';
+
+  @override
+  String get dictionariesNoneInstalled => 'Henüz yüklü sözlük yok.';
+
+  @override
+  String get dictionariesUnavailable => 'İndirilebilecek sözlük henüz yok.';
+
+  @override
+  String get dictionariesNoMatch => 'Hiçbir dil aramayla eşleşmiyor.';
+
+  @override
+  String get dictionariesAllInstalled => 'Kullanılabilir tüm sözlükler yüklü.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Tanımlar: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Şunlar için: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      '$language sözlüğü silinsin mi?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      '$size yer açar. Yeniden indirebilirsiniz.';
+
+  @override
+  String get dictionaryUnpacking => 'Açılıyor…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Dizin oluşturuluyor… %$percent';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Kullanılamıyor: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      '$language sözlüğü silinemedi: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => "Bir PDF'in dili";
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Bir PDF hangi dilde olduğunu söylemez; siz anlam panelinde '
+      'değiştirene kadar kütüphanenin ilk yazım denetimi dili kullanılır. '
+      'Seçim o dosya için saklanır.';
+
+  @override
+  String get dictionaryNotice =>
+      'Sözlükler kütüphanede değil, uygulamanın veri klasöründe tutulur: '
+      'eşitlenmez ve not değildir. Bir sözlüğün dizini silinirse kendi '
+      'kendine yeniden oluşur.';
+
+  @override
+  String get dictionaryLicense =>
+      "Metinler Wiktionary'den, CC BY-SA 4.0 ve GFDL, wiktextract ile "
+      'çıkarıldı.';
 }
