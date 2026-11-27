@@ -369,30 +369,46 @@ final class SourceInput implements DeltaTextInputClient {
   /// Applies `[start, end)` → [inserted] to the note, and says whether the
   /// note now holds exactly what the platform does (it does not when a line
   /// break was stored as the note's own line ending).
-  bool _replace(int from, int to, String inserted, SelectionModel caret) {
+  ///
+  /// [composing] says the edit is an IME's composition at work: the history
+  /// folds it into the step of the composition (#1337).
+  bool _replace(
+    int from,
+    int to,
+    String inserted,
+    SelectionModel caret, {
+    bool composing = false,
+  }) {
     // The platform addresses the whole text, line endings included, and an
     // edit that starts between a `\r` and its `\n` would split the pair.
     final start = buffer.snapOutOfTerminator(from);
     final end = buffer.snapOutOfTerminator(to, forward: true);
     final before = buffer.length;
-    final removed = buffer.substring(start, end);
+    final selectionBefore = selection();
+    final removed = removalOf(buffer, start, end, inserted);
     final edit = buffer.replaceRange(start, end, inserted);
     onTokenizer(edit, buffer);
     final stored = buffer.length - before + (end - start);
+    final exact = start == from && end == to && stored == inserted.length;
+    // A caret the platform computed against its own copy is off by what the
+    // note stored differently; the note's own arithmetic is not.
+    final landed = (exact ? caret : SelectionModel.at(start + stored)).clampTo(
+      buffer.length,
+    );
     // The history gets what the note *stored* — a line break as the note's
     // own `\r\n` — or an undo takes away the wrong number of characters.
     onRecord?.call(
       EditRecord(
         start: start,
-        removed: removed,
+        removed: removed.text,
+        held: removed.held,
         inserted: buffer.substring(start, start + stored),
+        selectionBefore: selectionBefore,
+        selectionAfter: landed,
+        composing: composing,
       ),
     );
-    final exact = start == from && end == to && stored == inserted.length;
-    // A caret the platform computed against its own copy is off by what the
-    // note stored differently; the note's own arithmetic is not.
-    final landed = exact ? caret : SelectionModel.at(start + stored);
-    onSelection(landed.clampTo(buffer.length));
+    onSelection(landed);
     onEdited(edit);
     return exact;
   }
@@ -449,6 +465,12 @@ final class SourceInput implements DeltaTextInputClient {
         start + ours.length - suffix,
         theirs.substring(prefix, theirs.length - suffix),
         _caretOf(value.selection, start),
+        composing: _composesAt(
+          start + prefix,
+          start + ours.length - suffix,
+          composesAfter:
+              value.composing.isValid && !value.composing.isCollapsed,
+        ),
       );
     } else {
       _reportSelection(
@@ -552,7 +574,13 @@ final class SourceInput implements DeltaTextInputClient {
           (onTyped?.call(start, end, inserted) ?? false)) {
         known = false;
       } else {
-        _replace(start, end, inserted, _caretOf(delta.selection, origin));
+        _replace(
+          start,
+          end,
+          inserted,
+          _caretOf(delta.selection, origin),
+          composing: _composesAt(start, end, composesAfter: _composes(delta)),
+        );
       }
       _composing = _shifted(delta.composing, origin);
       if (known) value = delta.apply(value);
@@ -582,6 +610,15 @@ final class SourceInput implements DeltaTextInputClient {
       selection.isValid &&
       selection.start == 0 &&
       selection.end == length;
+
+  /// Whether an edit of `[start, end)` is the IME's composition at work: it
+  /// leaves text composing ([composesAfter]), or it replaces text the last
+  /// update left composing — the commit of a word (#1337).
+  bool _composesAt(int start, int end, {required bool composesAfter}) =>
+      composesAfter ||
+      (!_composing.isCollapsed &&
+          start >= _composing.start &&
+          end <= _composing.end);
 
   /// Whether [delta] is part of a composition, which an IME may still
   /// change: a bracket in it is not typed yet.

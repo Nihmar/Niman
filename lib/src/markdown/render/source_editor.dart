@@ -9,6 +9,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/edit_step.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
@@ -282,10 +283,7 @@ final class SourceEditor extends ChangeNotifier {
     _ownSelection = initial;
     input = _makeInput();
     typing.brackets.clear();
-    styling.restyle();
-    folds.clear();
-    layout.rows.rebuild();
-    _seenRevision = next.revision;
+    _resync();
     // Another note to check: the first answer is read off it, not off the
     // one it replaced.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -301,14 +299,22 @@ final class SourceEditor extends ChangeNotifier {
   /// read from the text that went, so the panel goes with them (#494).
   void _editedBehind() {
     controls.suggest.dropInUpdate();
+    _resync();
+    controls.hints.schedule();
+    // And the platform's copy is now of a note that is not there any more.
+    input.sendSelection();
+  }
+
+  /// Reads the note again, whole: for a change with no [SourceEdit] to follow
+  /// (another note, an edit made behind this editor's back, a reload). The
+  /// colours are read afresh, the folds and the rows start over, and the
+  /// caret is brought inside what is there.
+  void _resync() {
     styling.restyle();
     folds.clear();
     layout.rows.rebuild();
     _seenRevision = buffer.revision;
     _ownSelection = _ownSelection.clampTo(buffer.length);
-    controls.hints.schedule();
-    // And the platform's copy is now of a note that is not there any more.
-    input.sendSelection();
   }
 
   @override
@@ -339,6 +345,9 @@ final class SourceEditor extends ChangeNotifier {
     },
     selection: () => selection,
     onSelection: (next) {
+      // A caret the platform moved on its own, away from where the typing
+      // step left it, ends the step (an edit's own landing is where it is).
+      _history.selectionMoved(next);
       _ownSelection = next;
       rebuild();
       onSelection?.call(next);
@@ -488,11 +497,7 @@ final class SourceEditor extends ChangeNotifier {
     _history.clear();
     // The panel holds offsets into the text that went (#494).
     controls.suggest.close();
-    styling.restyle();
-    folds.clear();
-    layout.rows.rebuild();
-    _seenRevision = buffer.revision;
-    _ownSelection = _ownSelection.clampTo(buffer.length);
+    _resync();
     rebuild();
     input.sendSelection();
     controls.hints.run();
@@ -506,10 +511,13 @@ final class SourceEditor extends ChangeNotifier {
   bool redo() => _applyHistory(_history.redo(buffer));
 
   /// Rebuilds what an undo or a redo changed, the same way a platform edit
-  /// does; [caret] is where the history put the caret, null when it had
+  /// does; [restored] is the selection the history put back, null when it had
   /// nothing to do.
-  bool _applyHistory(int? caret) {
-    if (caret == null) return false;
+  bool _applyHistory(SelectionModel? restored) {
+    if (restored == null) return false;
+    // The closers the editor wrote were tracked against the text before:
+    // that text is what is back, or gone.
+    typing.brackets.clear();
     // An undo is an edit like any other: the buffer says which lines it
     // touched, and the tokenizer and the map follow those lines.
     final edit = _history.lastEdit;
@@ -519,9 +527,10 @@ final class SourceEditor extends ChangeNotifier {
       styling.restyle();
     }
     _syncLines(edit);
-    // Undo puts the caret after what it restored (where it was before a
-    // deletion, at the start of typing it took back); redo after what it did.
-    _ownSelection = selection.collapsedTo(caret).clampTo(buffer.length);
+    // Undo puts the selection back as it was before the step, redo as it was
+    // after it (#1338): the word a bold was applied to, the caret a forward
+    // Delete left.
+    _ownSelection = restored.clampTo(buffer.length);
     rebuild();
     onSelection?.call(_ownSelection);
     input.sendSelection();
@@ -548,6 +557,13 @@ final class SourceEditor extends ChangeNotifier {
   /// The last [closing] characters of [text] are closers written ahead of the
   /// caret — the `)` of a `(` — which the history keeps in the step of the
   /// typing inside the pair.
+  ///
+  /// An [alone] edit — a paste, a cut — is a step of its own, which the typing
+  /// before it and after it does not join (#1339).
+  ///
+  /// A caller that knows what changed hands the step as [hunks] (with
+  /// [verbatim] text of the length they add up to): the history keeps those,
+  /// and neither reads nor copies the span (#1359).
   void replaceRange(
     int start,
     int end,
@@ -556,25 +572,41 @@ final class SourceEditor extends ChangeNotifier {
     bool verbatim = false,
     bool follow = true,
     int closing = 0,
+    bool alone = false,
+    List<EditHunk>? hunks,
   }) {
     if (start < 0 || end < start || end > buffer.length) return;
     controls.touch.hide();
     final before = buffer.length;
-    final removed = buffer.substring(start, end);
+    final selectionBefore = selection.clampTo(before);
+    final known = hunks != null && verbatim;
+    final removed = known
+        ? (text: '', held: null)
+        : removalOf(buffer, start, end, text);
     final edit = buffer.replaceRange(start, end, text, verbatim: verbatim);
     final stored = buffer.length - before + (end - start);
-    _history.record(
-      EditRecord(
-        start: start,
-        removed: removed,
-        inserted: buffer.substring(start, start + stored),
-      ),
-      closing: closing,
-    );
-    styling.edited(edit);
     final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
+    if (known) {
+      _history.recordStep(
+        EditStep(start, hunks, before: selectionBefore, after: next),
+      );
+    } else {
+      _history.record(
+        EditRecord(
+          start: start,
+          removed: removed.text,
+          held: removed.held,
+          inserted: buffer.substring(start, start + stored),
+          selectionBefore: selectionBefore,
+          selectionAfter: next,
+        ),
+        closing: closing,
+        alone: alone,
+      );
+    }
+    styling.edited(edit);
     _syncLines(edit);
     _ownSelection = next;
     rebuild();

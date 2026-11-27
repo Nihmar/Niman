@@ -91,6 +91,10 @@ final class NoteInserts {
 
   /// Replaces the [pasted] text with [text], when the note still holds it
   /// where it went.
+  ///
+  /// When the paste is the last thing done to the note it is undone, and
+  /// [text] pasted where the selection was: the history holds the plain paste
+  /// alone, as if the table had never been (#1376).
   void replacePasted(PastedText pasted, String text) {
     final surface = this.surface();
     if (surface == null) return;
@@ -98,7 +102,12 @@ final class NoteInserts {
     final end = pasted.start + pasted.text.length;
     if (end > buffer.length) return;
     if (buffer.substring(pasted.start, end) != pasted.text) return;
-    surface.replaceRange(pasted.start, end, text);
+    if (surface.history.lastStepInserted(pasted.start, pasted.text) &&
+        surface.undo()) {
+      surface.replaceSelection(text);
+    } else {
+      surface.replaceRange(pasted.start, end, text);
+    }
     focus();
   }
 }

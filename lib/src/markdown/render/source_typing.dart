@@ -15,7 +15,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// Replaces `[start, end)` of the note with [text] as one undoable edit:
 /// the caret at [caret], or after what the note stored; with [verbatim] the
 /// text's own line endings kept; the last [closing] characters closers
-/// written ahead of the caret.
+/// written ahead of the caret; an [alone] edit is a step of its own.
 typedef SourceReplace = void Function(
   int start,
   int end,
@@ -23,6 +23,7 @@ typedef SourceReplace = void Function(
   SelectionModel? caret,
   bool verbatim,
   int closing,
+  bool alone,
 });
 
 /// What the source view's typing means beyond the characters typed: a
@@ -369,7 +370,8 @@ final class SourceTyping {
     if (text == null) return;
     await Clipboard.setData(ClipboardData(text: text));
     final selection = _selection();
-    _replace(selection.start, selection.end, '');
+    // A cut is a decision: not a step of the deleting before it (#1339).
+    _replace(selection.start, selection.end, '', alone: true);
   }
 
   /// Inserts the clipboard's text at the caret, replacing the selection —
@@ -384,6 +386,7 @@ final class SourceTyping {
     final selection = _selection();
     // The caret goes after what the note *stored*: a Windows clipboard's
     // `\r\n` pasted into an LF note is shorter than the text that was copied.
-    _replace(selection.start, selection.end, text);
+    // A paste is a step of its own, not typing the next keys go on with.
+    _replace(selection.start, selection.end, text, alone: true);
   }
 }

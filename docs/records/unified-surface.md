@@ -10135,10 +10135,11 @@ has to carry is the **arithmetic** — one code unit stands for a source range �
 while measuring the child so those dimensions are right stays the surface's job.
 
 The model is `lib/src/markdown/edit/selection_model.dart`: source offsets, the
-two ends and how they normalize, and the atomic motion above. The arithmetic
-around a drawn span is `lib/src/markdown/edit/placeholder_map.dart` — the
-identity for every block of `source` mode, and the table only for blocks with a
-formula, an image or a checkbox drawn in them. The seam itself is
+two ends and how they normalize, and the atomic motion above. (The arithmetic
+around a drawn span, a `placeholder_map.dart` — the identity for every block of
+`source` mode, and a table for blocks with a formula, an image or a checkbox
+drawn in them — was a design the render never used, and is gone, #1376.) The
+seam itself is
 `lib/src/markdown/edit/caret_geometry.dart`: given a block's laid-out painter and
 the document's selection, it answers the caret's rectangle, a selection's boxes
 and the offset a tap lands on — every one of them asked of the painter, none
