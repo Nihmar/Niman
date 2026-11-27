@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -10,6 +9,7 @@ import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/note_encoding.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -493,6 +493,7 @@ final class NoteSavePipeline {
     final stream = _takeStreamSave();
     final plain = stream == null ? text() : null;
     final joined = plain == null ? null : framing().apply(plain);
+    final encoding = framing().encoding;
     var first = true;
 
     Future<void> write() async {
@@ -522,7 +523,14 @@ final class NoteSavePipeline {
             expected: expected,
           );
         } else {
-          await _write(target, joined!, session, expected, create: true);
+          await _write(
+            target,
+            joined!,
+            session,
+            expected,
+            create: true,
+            encoding: encoding,
+          );
         }
         _landed(target, revision);
         _log.info(
@@ -560,7 +568,8 @@ final class NoteSavePipeline {
     // The full-text join (O(n)) happens here only — the save path, never
     // the keystroke path.
     final joinClock = Stopwatch()..start();
-    final joined = framing().apply(text());
+    final note = framing();
+    final joined = note.apply(text());
     final expected = diskStamp?.call();
     final joinMs = joinClock.elapsedMilliseconds;
     // Read with the text, before the first await: a note switch that
@@ -579,6 +588,7 @@ final class NoteSavePipeline {
         session,
         expected,
         create: create,
+        encoding: note.encoding,
       );
       _saved(target, revision, saved);
       _log.info(
@@ -717,7 +727,8 @@ final class NoteSavePipeline {
     // Building the first slice is what starts the save; the gap the frames
     // need is the one after it, not before it.
     if (index > 0) await Future<void>.delayed(Duration.zero);
-    return utf8.encode(slice);
+    // Encoded once, here: the writers take bytes (#1332).
+    return stream.framing.encode(slice);
   }
 
   /// Lines one slice of a streaming save asks for, and the character count
@@ -739,13 +750,34 @@ final class NoteSavePipeline {
     }
   }
 
+  /// Writes the whole text of the note at [path]: [content] is what
+  /// [NoteFraming.apply] made, and it is turned into bytes **once**, here, in
+  /// the note's [encoding] (#1332). The library's joined writer takes UTF-8
+  /// text, so a note in another encoding goes to the library as the bytes —
+  /// through the writer of slices, as one — and keeps its history and its
+  /// index entry; a writer that takes text takes UTF-8 notes alone.
   Future<NoteSaveResult?> _write(
     String path,
     String content,
     int editSession,
     DiskStamp? expected, {
     required bool create,
+    required NoteEncoding encoding,
   }) async {
+    if (encoding != NoteEncoding.utf8) {
+      final streamer =
+          (create ? createNoteStream?.call() : null) ?? saveNoteStream();
+      if (streamer != null) {
+        final bytes = encoding.encode(content);
+        return await streamer(
+          path,
+          (index) async => index == 0 ? bytes : null,
+          editSession: editSession,
+          expected: expected,
+        );
+      }
+      return await _writeText(path, content, encoding);
+    }
     final saver = (create ? createNote?.call() : null) ?? saveNote();
     if (saver != null) {
       return await saver(
@@ -760,12 +792,22 @@ final class NoteSavePipeline {
       await seam(path, content);
       return null;
     }
-    // Encode + atomic write off the UI isolate: the utf8 encode is an O(n)
-    // string pass and the write the FUSE round trips — neither may touch
-    // the UI frame.
-    final (bytes, encodeMs, writeMs, stamp) = await Isolate.run(() async {
+    // Encode + atomic write off the UI isolate: the encode is an O(n) string
+    // pass and the write the FUSE round trips — neither may touch the UI
+    // frame.
+    return await _writeText(path, content, encoding);
+  }
+
+  /// The atomic write of a file with no library behind it: [content]
+  /// encoded as [encoding], off the UI isolate.
+  Future<NoteSaveResult?> _writeText(
+    String path,
+    String content,
+    NoteEncoding encoding,
+  ) async {
+    final (size, encodeMs, writeMs, stamp) = await Isolate.run(() async {
       final encodeClock = Stopwatch()..start();
-      final encoded = utf8.encode(content);
+      final encoded = encoding.encode(content);
       final encodeMs = encodeClock.elapsedMilliseconds;
       final writeClock = Stopwatch()..start();
       await writeFileAtomically(File(path), encoded);
@@ -773,7 +815,7 @@ final class NoteSavePipeline {
       return (encoded.length, encodeMs, writeMs, DiskStamp.of(path));
     });
     _log.debug(
-      'save write: $bytes bytes (encode $encodeMs ms, write $writeMs ms, '
+      'save write: $size bytes (encode $encodeMs ms, write $writeMs ms, '
       'off-isolate)',
     );
     return NoteSaveResult(stamp: stamp);

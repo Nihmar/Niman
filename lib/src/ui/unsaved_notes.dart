@@ -195,10 +195,35 @@ final class UnsavedTracker extends ChangeNotifier {
     return text;
   }
 
-  /// Drops the pending writes of every note at [path] or under it (an open
-  /// editor, a write held for a note switched away from), before [path] is
-  /// deleted (#1321). Completes when the writes already running have ended.
-  /// A failed delete calls [restoreUnder].
+  /// Writes the pending edits of every note at [path] or under it — an open
+  /// editor, a write held for a note switched away from — and completes when
+  /// they are on disk, so a delete of [path] sends the latest text to the
+  /// trash and loses none of it (#1321). Edits typed while it waits are
+  /// written too. Throws [SaveUnderFailed] for the first note that will not
+  /// save: nothing is to be deleted then.
+  Future<void> saveUnder(String path) async {
+    while (true) {
+      final dirty = [
+        for (final note in _notes.toList())
+          if (note.unsaved && _isAt(note, path)) note,
+      ];
+      if (dirty.isEmpty) return;
+      for (final note in dirty) {
+        try {
+          await note.save();
+        } on Object catch (error) {
+          throw SaveUnderFailed(note.path, error);
+        }
+      }
+    }
+  }
+
+  /// Drops what is left of the pending writes of every note at [path] or
+  /// under it (an open editor, a write held for a note switched away from),
+  /// once [saveUnder] has written them and just before [path] is deleted
+  /// (#1321): after the delete nothing may write the path again. Completes
+  /// when the writes already running have ended. A failed delete calls
+  /// [restoreUnder].
   Future<void> discardUnder(String path) async {
     final ended = <Future<void>>[
       for (final note in _notes.toList())
@@ -283,6 +308,21 @@ final class UnsavedTracker extends ChangeNotifier {
     _published = paths;
     notifyListeners();
   }
+}
+
+/// A note about to be deleted would not save ([UnsavedTracker.saveUnder]).
+final class SaveUnderFailed implements Exception {
+  /// The note at the absolute [path] failed to save with [error].
+  const new(this.path, this.error);
+
+  /// The note that would not save.
+  final String path;
+
+  /// What the write threw.
+  final Object error;
+
+  @override
+  String toString() => 'SaveUnderFailed: "$path" ($error)';
 }
 
 /// The single tracker for the app session.

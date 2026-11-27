@@ -357,4 +357,76 @@ void main() {
       expect(told, isEmpty);
     });
   });
+
+  group('a delete writes what is pending first (#1321)', () {
+    test('the notes under the path, and no others', () async {
+      final tracker = UnsavedTracker();
+      final inside = _FakeNote('/lib/Docs/a.md', unsaved: true);
+      final other = _FakeNote('/lib/b.md', unsaved: true);
+      final clean = _FakeNote('/lib/Docs/c.md');
+      [inside, other, clean].forEach(tracker.register);
+
+      await tracker.saveUnder('/lib/Docs');
+
+      expect([inside.saveCalls, other.saveCalls, clean.saveCalls], [1, 0, 0]);
+      expect(inside.unsaved, isFalse);
+    });
+
+    test('edits typed while it waits are written too', () async {
+      final tracker = UnsavedTracker();
+      final note = _TypingNote('/lib/a.md');
+      tracker.register(note);
+      await tracker.saveUnder('/lib/a.md');
+      expect(note.saveCalls, 2);
+      expect(note.unsaved, isFalse);
+    });
+
+    test('a note that will not save stops it, naming the note', () async {
+      final tracker = UnsavedTracker();
+      final note = _FakeNote('/lib/Docs/a.md', unsaved: true)
+        ..failWith = StateError('disk full');
+      tracker.register(note);
+      await expectLater(
+        tracker.saveUnder('/lib/Docs'),
+        throwsA(
+          isA<SaveUnderFailed>().having((f) => f.path, 'path', note.path),
+        ),
+      );
+    });
+
+    test('a failed write held for a note switched away from stops it', () {
+      fakeAsync((async) {
+        final tracker = UnsavedTracker();
+        Object? failure;
+        unawaited(
+          tracker
+              .hold('/lib/Docs/a.md', () => 'held', () async {
+                throw StateError('disk full');
+              })
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        unawaited(
+          tracker.saveUnder('/lib/Docs').catchError((Object e) => failure = e),
+        );
+        async.flushMicrotasks();
+        expect(failure, isA<SaveUnderFailed>());
+        // Dropped for good once the delete is going ahead.
+        unawaited(tracker.discardUnder('/lib/Docs'));
+        async.flushMicrotasks();
+        expect(tracker.hasUnsaved, isFalse);
+      });
+    });
+  });
+}
+
+/// A note whose first save lands while the reader types again.
+final class _TypingNote extends _FakeNote {
+  new(super.path) : super(unsaved: true);
+
+  @override
+  Future<void> save() async {
+    saveCalls++;
+    unsaved = saveCalls == 1;
+  }
 }

@@ -523,8 +523,10 @@ program that rewrites a very long note while Niman is still writing its slices
 is kept in the history and announced the same way.
 
 **A note deleted while it is open.** Deleting a note (or a folder holding it)
-from the tree drops the edits an open editor had not saved yet: their text goes
-to the trash with the file, and nothing is written back to the old path. If
+from the tree first saves what an open editor had not saved yet, so the trash
+holds the latest text and Undo brings back everything you typed, and then
+nothing is written back to the old path. A note that cannot be saved stops the
+delete: a message names it and it stays where it is. If
 another program, a sync or a move takes the file away while you are typing,
 Niman does not create it again behind your back: the status row reads *Not on
 disk · save again*, a message says so, and your text stays in the editor.
@@ -552,7 +554,8 @@ other names keep the old text — it becomes a separate copy.
 **UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
 order mark — what Windows Notepad's *Unicode* writes — opens as the text it
 holds, in any script, and is saved in the same encoding with its mark, so a
-one-character change is a one-character change of the file. Only the mark
+one-character change is a one-character change of the file, and an emptied
+note keeps its mark, its history and its place in the search. Only the mark
 tells such a file apart: a UTF-16 file without one is not recognised as text,
 and neither is one cut in the middle of a character (an odd number of bytes).
 A note that is not valid UTF-8 — an old Latin-1 file, say — is read with

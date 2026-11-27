@@ -148,8 +148,22 @@ void main() {
 
     await rowMenu(tester, 'alpha.md', 'delete');
 
-    expect(open.discards, 1);
+    expect(open.log, ['save', 'discard'], reason: 'written, then dropped');
     expect(open.restores, 0);
+  });
+
+  testWidgets('a note that will not save is not deleted', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    final open = _DiscardNote('/fake/library/alpha.md')..failSave = true;
+    unsaved.register(open);
+
+    await rowMenu(tester, 'alpha.md', 'delete');
+
+    expect(open.log, ['save'], reason: 'nothing dropped');
+    expect(noteRow('alpha.md'), findsOne, reason: 'the note stays');
+    expect(find.textContaining('Could not save "alpha"'), findsOne);
   });
 
   testWidgets('a delete of a folder drops those of the notes in it', (
@@ -168,8 +182,8 @@ void main() {
 
     await rowMenu(tester, 'Docs', 'delete');
 
-    expect(inside.discards, 1);
-    expect(outside.discards, 0);
+    expect(inside.log, ['save', 'discard']);
+    expect(outside.log, isEmpty);
   });
 
   testWidgets('a delete that fails gives the saves back', (tester) async {
@@ -182,7 +196,7 @@ void main() {
 
     await rowMenu(tester, 'alpha.md', 'delete');
 
-    expect(open.discards, 1);
+    expect(open.log, ['save', 'discard']);
     expect(open.restores, 1);
     expect(open.unsaved, isTrue, reason: 'the edits were never dropped');
   });
@@ -260,8 +274,12 @@ final class _DiscardNote implements UnsavedNote, UnsavedNoteDiscard {
   @override
   final String path;
 
-  int discards = 0;
+  /// What was done to it, in order: `save`, `discard`.
+  final List<String> log = [];
   int restores = 0;
+
+  /// Whether its save fails, as a full disk's would.
+  bool failSave = false;
 
   @override
   bool unsaved = true;
@@ -270,11 +288,15 @@ final class _DiscardNote implements UnsavedNote, UnsavedNoteDiscard {
   String get text => '';
 
   @override
-  Future<void> save() async => unsaved = false;
+  Future<void> save() async {
+    log.add('save');
+    if (failSave) throw const FileSystemException('disk full');
+    unsaved = false;
+  }
 
   @override
   Future<void> discard() async {
-    discards++;
+    log.add('discard');
     unsaved = false;
   }
 

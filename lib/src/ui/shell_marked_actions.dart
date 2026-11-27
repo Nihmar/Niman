@@ -191,9 +191,10 @@ final class ShellMarkedActions {
       if (sure != true || !context.mounted) return;
     }
     final gone = <String>[];
+    final messenger = ScaffoldMessenger.of(context);
     await rows.guard(() async {
       for (final path in treeOutermost(paths)) {
-        await rows.deleteOpen(ops, path);
+        if (!await rows.deleteOpen(messenger, ops, path)) return;
         rows.onDeleted(path);
         gone.add(path);
       }
