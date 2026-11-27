@@ -629,6 +629,10 @@ the caret is at the start of, and below one the caret is anywhere else
 in, with a blank line kept from the text around it. One undo step takes
 it away. Rows and columns are added from the table itself in live mode.
 
+A table row is split at its pipes before anything inside it is read, as
+GitHub reads it: a `|` in a formula or a code span is written `\|`, so
+`$a\|b$` is one cell and `$a|b$` is two.
+
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
 changeable in Settings → Keyboard shortcuts → Formatting (see
