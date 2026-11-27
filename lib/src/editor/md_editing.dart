@@ -6,6 +6,7 @@ library;
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/line_selection.dart';
 import 'package:niman/src/editor/list_item_head.dart';
+import 'package:niman/src/editor/selection_unwrap.dart';
 import 'package:niman/src/editor/touched_lines.dart';
 
 export 'package:niman/src/editor/line_marks.dart';
@@ -27,12 +28,24 @@ final class MarkdownEdit {
 /// strike '~~', sup '<sup>…</sup>', underline '<u>…</u>', link '[[…]]').
 /// A collapsed selection inserts the markers at the caret and leaves the
 /// caret between them; a non-empty selection keeps the inner text selected.
+///
+/// A selection that is wrapped in the markers already — they are inside it or
+/// right outside it, or around the word the caret is in — has them taken off
+/// instead, which is what a second press of the button does ([unwrapSelection],
+/// #1340).
 MarkdownEdit wrapSelection({
   required String text,
   required TextSelection selection,
   required String left,
   required String right,
 }) {
+  final unwrapped = unwrapSelection(
+    text: text,
+    selection: selection,
+    left: left,
+    right: right,
+  );
+  if (unwrapped != null) return unwrapped;
   final start = selection.start;
   final end = selection.end;
   final selected = text.substring(start, end);

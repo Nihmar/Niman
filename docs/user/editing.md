@@ -628,7 +628,12 @@ swaps its number for a bullet, a task its box for nothing, and a bulleted
 item pressed with the numbered one swaps in a number (a task keeps its box);
 a quote adds one level only to lines that have none and takes one level off
 at a time. The marks go behind a line's own indent and quote marks, and blank
-lines among several lines are left alone.
+lines among several lines are left alone. **Bold**, **italic**, **strike** and
+the other wrapping buttons work on the text the same way: with the selection
+wrapped in their marks — inside it or right outside it — or the caret in a
+wrapped word, they take the marks off instead of adding another pair. A
+selection counted in asterisks is read as Markdown reads them: `**a**` is bold
+and not italic, so Italic over it wraps it again, and `***a***` is both.
 
 The **table** button writes an empty table — two columns, a header and
 one row — on lines of its own, with the caret in its first header cell:
