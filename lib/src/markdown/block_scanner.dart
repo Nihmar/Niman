@@ -500,7 +500,7 @@ final class BlockScanner {
             Block(kind: BlockKind.paragraph, startLine: line, endLine: next),
           );
         }
-      } else if (block.startLine >= line) {
+      } else if (_startsAt(index, block, line, tailStart)) {
         keepFrom = index;
       } else {
         rebuilt.add(block.cutFrom(line, end));
@@ -566,13 +566,23 @@ final class BlockScanner {
     if (edit == null || touched < headEnd || touched < 0) return (-1, null, 0);
     final block = _at(touched);
     final end = block.endLine + edit.lineDelta;
-    if (block.endLine < edit.firstUntouchedLine ||
-        line >= end ||
-        block.startLine >= line) {
+    // Not the block's start against [line]: the start is where the block
+    // began *before* the edit, [line] is where the rebuild is now, and an
+    // edit that removes more lines than it adds puts one past the other. A
+    // touched block starts above [line] whichever it is — the rebuild only
+    // asks about lines past the edit's own, and the block began at or
+    // before them ([_startsAt]).
+    if (block.endLine < edit.firstUntouchedLine || line >= end) {
       return (-1, null, 0);
     }
     return (touched, block, end);
   }
+
+  /// Whether the old block at [index], one of the hints [_hintAt] gave, is
+  /// one a fresh scan starts at [line] or after: only a kept block can be;
+  /// the one the edit touched began above any line the rebuild asks about.
+  bool _startsAt(int index, Block block, int line, int tailStart) =>
+      index >= tailStart && block.startLine >= line;
 
   /// Whether the rebuild can stop before [line] — whose entering state is
   /// the one it had, as is the line before it — and, when it can, the index
@@ -607,7 +617,7 @@ final class BlockScanner {
     if (old == null || old.kind == BlockKind.blank) return -1;
     final open = builder.open;
     final goesOn = open != null && _blockRules.mergesInto(open, line);
-    if (old.startLine == line) {
+    if (index >= tailStart && old.startLine == line) {
       if (goesOn) return -1;
       if (old.kind == BlockKind.listItem &&
           _blockRules.ordinalOf(
