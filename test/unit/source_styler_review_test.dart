@@ -20,7 +20,71 @@ String _token(String text, Token token) {
   return '${token.kind.name}$mark[${text.substring(token.start, token.end)}]';
 }
 
+/// Line [line] of [document], as `kind[text]` tokens.
+List<String> _line(String document, int line) =>
+    _describe(SourceStyler(SourceBuffer.fromText(document)), line);
+
+/// How many of line [line]'s tokens are of [kind].
+int _count(String document, int line, String kind) =>
+    _line(document, line).where((token) => token.startsWith('$kind[')).length;
+
 void main() {
+  group("a quote's marks are the tree's, not the lines' look (#1327)", () {
+    // Each: what a quote holds that is no heading, list or quote, the kind of
+    // mark its lines look as if they carried, and the line they are on.
+    for (final (name, text, kind, line) in [
+      ('a fence', '> ```sh\n> # comment\n> ```', 'headingMarker', 1),
+      ('code with a list in it', '> ```md\n> - a\n> ```', 'listMarker', 1),
+      ('code with an ordered list', '> ```md\n> 1. b\n> ```', 'listMarker', 1),
+      ('indented code', '>     - x', 'listMarker', 0),
+      ('a paragraph with a 2.', '> foo\n> 2. bar', 'listMarker', 1),
+      ('a setext underline', '> foo\n> -', 'listMarker', 1),
+      ('a math block', '> \$\$\n> - a\n> \$\$', 'listMarker', 1),
+    ]) {
+      test(name, () {
+        expect(_count(text, line, kind), 0, reason: _line(text, line).join());
+      });
+    }
+
+    test('a quote inside a fence in a quote is no quote mark', () {
+      expect(_count('> ```md\n> > c\n> ```', 1, 'blockquote'), 1);
+    });
+
+    test('what is a heading, a list and a nested quote still is', () {
+      expect(_line('> # h', 0).take(2), ['blockquote[>]', 'headingMarker[#]']);
+      expect(_line('> - a', 0).take(2), ['blockquote[>]', 'listMarker[-]']);
+      expect(_count('> > b', 0, 'blockquote'), 2);
+      expect(_line('> 1. one\n> 2. two', 1), contains('listMarker[2.]'));
+      expect(
+        _line('> - [ ] todo', 0),
+        containsAll(['listMarker[-]', 'taskBox[[ ]]']),
+      );
+      expect(_line('> text\n> ## h2 ##', 1), contains('headingMarker[##]'));
+    });
+
+    test('a list inside a nested quote is marked at its own column', () {
+      expect(_line('> > - a', 0).take(3), [
+        'blockquote[>]',
+        'blockquote[>]',
+        'listMarker[-]',
+      ]);
+    });
+
+    test('a callout body: its marks, its code left alone', () {
+      const text = '> [!note] T\n> - a\n> ```\n> - not\n> ```';
+      expect(_line(text, 1), contains('listMarker[-]'));
+      expect(_count(text, 3, 'listMarker'), 0);
+    });
+
+    test('a block too long to parse is matched as it looks', () {
+      final text = [
+        '> - a',
+        for (var i = 0; i < 900; i++) '> ${'word ' * 20}$i',
+      ].join('\n');
+      expect(_line(text, 0), contains('listMarker[-]'));
+    });
+  });
+
   group('a block over the inline limit is not joined per line (#1326)', () {
     final long = 'word ' * 20;
     // Each is over 64 KB: a paragraph, a quote, a table.

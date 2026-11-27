@@ -92,32 +92,10 @@ abstract final class LineTokens {
         out.add(InlinePiece(TokenKind.blockquote, at, at + 1, structural));
       }
     }
-    var from = marks;
-    final rest = marks == 0 ? text : text.substring(marks);
     final opensItem =
         (block.kind == BlockKind.listItem && line == block.startLine) ||
         block.kind == BlockKind.quote;
-    final marker = opensItem ? LineSyntax.listMarkerOf(rest) : null;
-    if (marker != null) {
-      final (start, width, content) = marker;
-      out.add(
-        InlinePiece(
-          TokenKind.listMarker,
-          prefix + start,
-          prefix + start + width,
-          structural,
-        ),
-      );
-      from = prefix + content;
-      if (from + 3 <= text.length &&
-          text.codeUnitAt(from) == 0x5B &&
-          _isBoxMark(text.codeUnitAt(from + 1)) &&
-          text.codeUnitAt(from + 2) == 0x5D &&
-          (from + 3 == text.length || _isSpace(text.codeUnitAt(from + 3)))) {
-        out.add(InlinePiece(TokenKind.taskBox, from, from + 3, structural));
-        from += 3;
-      }
-    }
+    var from = opensItem ? listMarker(text, marks, out) : marks;
     // A heading block is one the scanner decided; a quote's inside is not,
     // and a `#` four spaces into it is code, not a heading.
     final heading = LineSyntax.headingMarkerOf(
@@ -138,6 +116,32 @@ abstract final class LineTokens {
         ),
       );
       from += start + hashes;
+    }
+    return from;
+  }
+
+  /// The list marker at [at] of [text], if one stands there, and its task
+  /// box, added to [out]; answers where they end: [at] when there is none.
+  static int listMarker(String text, int at, List<InlinePiece> out) {
+    final marker = LineSyntax.listMarkerOf(at == 0 ? text : text.substring(at));
+    if (marker == null) return at;
+    final (start, width, content) = marker;
+    out.add(
+      InlinePiece(
+        TokenKind.listMarker,
+        at + start,
+        at + start + width,
+        structural,
+      ),
+    );
+    var from = at + content;
+    if (from + 3 <= text.length &&
+        text.codeUnitAt(from) == 0x5B &&
+        _isBoxMark(text.codeUnitAt(from + 1)) &&
+        text.codeUnitAt(from + 2) == 0x5D &&
+        (from + 3 == text.length || _isSpace(text.codeUnitAt(from + 3)))) {
+      out.add(InlinePiece(TokenKind.taskBox, from, from + 3, structural));
+      from += 3;
     }
     return from;
   }

@@ -42,6 +42,7 @@ import 'package:niman/src/markdown/line_tokens.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_reference_cache.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/quote_marks.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/read_parser.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -486,8 +487,15 @@ final class SourceStyler implements Reclaimable {
       block.quoteDepth,
       BlockParser.itemPrefixLength(block, text),
     );
-    final structural = LineTokens.structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
+    // A quote's marks are the tree's; a block too long to parse has no tree,
+    // and its lines are matched as they look.
+    final quoteMarks = block.kind == BlockKind.quote
+        ? parsed?.quoteMarks
+        : null;
+    final structural = quoteMarks != null
+        ? quoteMarks.on(line - block.startLine, text, tokens)
+        : LineTokens.structure(block, line, text, prefix, tokens);
     if (parsed != null) {
       tokens.addAll(parsed.inlines.piecesOn(line - block.startLine));
     }
@@ -682,4 +690,10 @@ final class _Parsed {
   final Block block;
   final ReadBlock read;
   final LiveInlines inlines;
+
+  /// The marks of the lines, when the block is a quote.
+  late final QuoteMarks quoteMarks = QuoteMarks.of(
+    read.node,
+    read.block.startLine,
+  );
 }
