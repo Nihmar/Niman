@@ -14,8 +14,10 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/frontmatter/parser.dart';
 import 'package:niman/src/links/block_anchors.dart';
 import 'package:niman/src/links/parser.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/note_bytes.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:path/path.dart' as p;
 
 /// One note's content after a read on the index isolate: the digest, the
@@ -246,7 +248,11 @@ NoteContent _extractContent(
   // Read by the unified engine, and only where a tag or a link can be: a
   // whole-note tokenize was two minutes of a first index on a 247 MB note
   // (`docs/records/huge-notes.md`, item 8).
-  references ??= noteReferencesOf(text);
+  // One scan of the note serves the references and the headings: the block
+  // scan the editor, the read view and the outline read it with.
+  final buffer = SourceBuffer.fromText(text);
+  final scan = BlockScanner(buffer).index;
+  references ??= noteReferencesOfBuffer(buffer, blocks: scan.blocks);
   final fm = parseFrontmatter(text);
   return NoteContent(
     rel: rel,
@@ -258,10 +264,9 @@ NoteContent _extractContent(
     aliases: fm?.aliases ?? const [],
     links: references.links,
     embeds: references.embeds,
-    // The headings and the block ids come off the block state machine, not
-    // the inline scan: a few milliseconds on a long note, which the pass is
-    // already reading whole (the outline's own rule, `outlineOfText`).
-    headings: outlineOfText(text),
+    // The headings come off the scan the pass already made (the outline's own
+    // reading, `outlineOfBlocks`), the block ids off the lines.
+    headings: outlineOfBlocks(scan, buffer.lineAt),
     blocks: blockAnchorsOfText(text),
     fields: fm?.fields ?? const {},
     date: fm?.date,

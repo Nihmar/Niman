@@ -1,15 +1,14 @@
-/// Wikilink and Markdown link parsing (design.md: links/parser.dart).
-///
-/// The parser is a *reader* over the shared tokenizer
-/// (`editor/highlighting.dart`): link tokens are exactly the
-/// [TokenKind.wikilink] / [TokenKind.link] ranges the editor paints, so the
-/// indexer, the editor Ctrl+click and the preview agree on what is a link —
-/// and links inside code fences, math blocks, inline code or the frontmatter
-/// are never links, everywhere.
+/// Wikilink and Markdown link parsing (design.md: links/parser.dart): what a
+/// link is made of. Which pieces of a note are links is the unified engine's
+/// to say (`parseLinks`, in `document_links.dart`), so the indexer, the
+/// editor Ctrl+click, the preview and a rename agree on it — and a link in
+/// code, an HTML block or comment, math or the frontmatter is never one,
+/// everywhere.
 library;
 
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/links/block_id.dart';
+
+export 'package:niman/src/links/document_links.dart' show parseLinks;
 
 /// A parsed link occurrence in a document; [start]..[end] are absolute
 /// offsets into the source text (`[`, `(`… or `[[`…`]]`).
@@ -155,121 +154,15 @@ int headingLevelAt(String heading) {
   return before.trim().isEmpty ? 0 : last + 1;
 }
 
-/// All links in [text], in document order, with absolute offsets.
-///
-/// Skips fenced code, math blocks, inline code and the leading frontmatter
-/// (via the shared tokenizer), so only links the user would see as links are
-/// returned. Markdown images (`![alt](src)`) and embeds (`![[…]]`) are not
-/// links and are skipped; [includeEmbeds] returns them too, marked so a
-/// caller that has to carry them on a move (#507) can tell them apart.
-List<ParsedLink> parseLinks(String text, {bool includeEmbeds = false}) {
-  return linksInDocument(
-    HighlightDocument.fromText(text),
-    includeEmbeds: includeEmbeds,
-  );
-}
-
-/// The links of an already-tokenized [doc], in document order.
-///
-/// Same rules as [parseLinks]; callers that need the tokens anyway (the
-/// indexer: links + inline tags from one tokenization pass) pass their
-/// document in and avoid a second one.
-List<ParsedLink> linksInDocument(
-  HighlightDocument doc, {
-  bool includeEmbeds = false,
-}) {
-  final out = <ParsedLink>[];
-  var lineStart = 0;
-  for (final line in doc.lines) {
-    final src = line.text;
-    for (final token in line.tokens) {
-      if (token.kind == TokenKind.wikilink) {
-        // `[[]]` / `[[|]]` / `[[#]]` carry nothing to resolve or display.
-        final precededByBang =
-            token.start > 0 && src.codeUnitAt(token.start - 1) == 0x21;
-        final ref = parseWikiRef(src.substring(token.start + 2, token.end - 2));
-        if (precededByBang) {
-          // `![[…]]` is an embed, shown rather than linked; it is a reference
-          // a move must still carry, so it is only skipped unless asked for.
-          if (!includeEmbeds || ref.target.isEmpty) continue;
-          out.add(
-            WikiLink(
-              start: token.start - 1 + lineStart,
-              end: token.end + lineStart,
-              ref: ref,
-              embed: true,
-            ),
-          );
-          continue;
-        }
-        if (ref.target.isEmpty && ref.fragment == null && ref.alias == null) {
-          continue;
-        }
-        out.add(
-          WikiLink(
-            start: token.start + lineStart,
-            end: token.end + lineStart,
-            ref: ref,
-          ),
-        );
-      } else if (token.kind == TokenKind.link) {
-        out.add(
-          _parseMarkdown(src, token.start, token.end, token.start + lineStart),
-        );
-      } else if (token.kind == TokenKind.image && includeEmbeds) {
-        out.add(
-          _parseImage(src, token.start, token.end, token.start + lineStart),
-        );
-      }
-    }
-    lineStart += line.text.length + 1;
-  }
-  return out;
-}
-
-MarkdownLink _parseMarkdown(String src, int start, int end, int absStart) {
-  // The tokenizer guarantees `[text](href)`: text holds no `[`/`]`, so the
-  // first `]` closes the text, and href holds no parens, so the last `)`
-  // closes the href.
-  final close = src.indexOf(']', start);
-  final text = close == -1 ? '' : src.substring(start + 1, close).trim();
-  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
-  return MarkdownLink(
-    start: absStart,
-    end: absStart + (end - start),
-    text: text,
-    href: href,
-    angled: angled,
-    title: title,
-  );
-}
-
-MarkdownLink _parseImage(String src, int start, int end, int absStart) {
-  // The tokenizer guarantees `![alt](href)`: the token starts at `!`, the
-  // first `]` closes the alt text, and the last `)` closes the href.
-  final close = src.indexOf(']', start);
-  final text = close == -1 ? '' : src.substring(start + 2, close).trim();
-  final (href, angled, title) = _destination(src.substring(close + 2, end - 1));
-  return MarkdownLink(
-    start: absStart,
-    end: absStart + (end - start),
-    text: text,
-    href: href,
-    embed: true,
-    angled: angled,
-    title: title,
-  );
-}
-
-/// What sits between a link's parentheses, split as CommonMark splits it:
-/// the destination, whether it was written between angle brackets, and the
-/// title after it, if any.
+/// What sits between a link's parentheses, [written], split as CommonMark
+/// splits it: the destination, whether it was written between angle
+/// brackets, and the title after it, if any.
 ///
 /// The destination is without the angle brackets (`<a b.md>` is `a b.md`),
 /// which allow spaces. A title is `"…"`, `'…'` or `(…)`, kept with its
 /// delimiters. What follows a destination and is no title leaves the whole
 /// text as the destination, as it was always read.
-(String, bool, String?) _destination(String written) {
+(String, bool, String?) linkDestinationOf(String written) {
   final trimmed = written.trim();
   if (trimmed.startsWith('<')) {
     final close = trimmed.indexOf('>');

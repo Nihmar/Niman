@@ -2,18 +2,20 @@
 /// heading line, in line order, used for the outline panel, fold anchors and
 /// "outline click → jump".
 ///
-/// The outline is derived from the tokenizer (T-M2-02) via its
-/// [TokenKind.headingMarker] token, so it matches the highlighted headings
-/// exactly — in particular a `#` line inside a code fence, a math block or
-/// the frontmatter is not a heading.
+/// The outline is read off the block scan ([outlineOfBlocks]), the engine
+/// the editor, the read view and the index all read a note with, so a `#`
+/// line is a heading wherever they say it is one: not in a code fence or
+/// indented code, a math block, an HTML block or comment, or the frontmatter
+/// (#1373).
 library;
 
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/links/block_anchors.dart' show withoutTrailingBlockId;
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_index.dart';
 import 'package:niman/src/markdown/block_list.dart';
+import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// One heading in the outline.
 final class OutlineEntry {
@@ -34,48 +36,34 @@ final class OutlineEntry {
 
 /// [heading], the text after a heading's `#`s, as an [OutlineEntry] holds it:
 /// trimmed, the trailing block id off — the one rule every outline path
-/// ([outlineOfText], [outlineOfBlocks], [outlineOf]) shares with the block
-/// scanner (`withoutTrailingBlockId`), so a heading reads the same whichever
-/// way it was found.
+/// ([outlineOfText], [outlineOfBlocks]) shares with the block scanner
+/// (`withoutTrailingBlockId`), so a heading reads the same whichever way it
+/// was found.
 String _headingText(String heading) =>
     withoutTrailingBlockId(heading.trim()).trim();
 
-/// The headings of [text], without tokenizing it.
+/// The headings of [text], read off its block scan ([outlineOfBlocks]).
 ///
-/// Same answer as [outlineOf] over `HighlightDocument.fromText(text).lines`
-/// — `outline_test` pins them together — but it walks only the block state
-/// machine, skipping the inline scan. That scan is the whole cost on a
-/// maths-dense note: collecting 84 headings from a 931K one took ~1 s
-/// through the tokenizer and a few ms this way (device report,
-/// 2026-09-11).
-///
-/// For a caller that already holds a tokenized document, [outlineOf] is
-/// free — use that instead of re-walking the text.
+/// The answer the editor's outline and the index's headings share: the
+/// engine's own, whatever a heading is inside — a quote's or an item's `#`
+/// line is no heading of the note's outline, as it never was.
 List<OutlineEntry> outlineOfText(String text) {
-  final out = <OutlineEntry>[];
-  HighlightDocument.forEachHeading(
-    text,
-    (line, level, heading) => out.add(
-      OutlineEntry(line: line, level: level, text: _headingText(heading)),
-    ),
-  );
-  return out;
+  final buffer = SourceBuffer.fromText(text);
+  return outlineOfBlocks(BlockScanner(buffer).index, buffer.lineAt);
 }
 
 /// The headings of a scanned note, one per heading block, in line order.
 ///
-/// The answer [outlineOfText] gives, read off the [index] the editor's own
-/// scan already produced instead of walking the text again: on a 246 MB note
-/// that walk is most of a second per refresh, and the blocks are on screen
-/// already (0.0.9 stress test). A heading is an ATX block, which is what the
-/// scanner calls [BlockKind.heading]; the level is its `#` count, and the
-/// text is the rest of its line, trimmed — the same three things the
-/// tokenizer reports.
+/// Read off the [index] the editor's own scan already produced, instead of
+/// scanning the text again: on a 246 MB note that is most of a second per
+/// refresh, and the blocks are on screen already (0.0.9 stress test). A
+/// heading is an ATX block, which is what the scanner calls
+/// [BlockKind.heading]; the level is its `#` count, and the text is the rest
+/// of its line, trimmed.
 ///
 /// A setext heading is a heading block too, but its paragraph's lines and
-/// an underline, with no marker to count, and [outlineOfText] reads `#`s
-/// only: it is left out here
-/// rather than listed by this path and not the other (#361).
+/// an underline, with no marker to count: it is left out of the outline, as
+/// it always was, rather than listed by one path and not the other (#361).
 ///
 /// [line] reads a line's text by its index; the caller holds the buffer.
 List<OutlineEntry> outlineOfBlocks(
@@ -108,35 +96,6 @@ List<OutlineEntry> outlineOfBlocks(
         text: _headingText(text.substring(after)),
       ),
     );
-  }
-  return out;
-}
-
-/// The headings of a tokenized document, one per heading line, in line order.
-///
-/// [lines] is the tokenizer's styled lines (e.g. `HighlightDocument.lines`),
-/// index `i` being logical line `i`.
-List<OutlineEntry> outlineOf(Iterable<StyledLine> lines) {
-  final out = <OutlineEntry>[];
-  var line = 0;
-  for (final l in lines) {
-    final tokens = l.tokens;
-    if (tokens.isNotEmpty &&
-        tokens.first.kind == TokenKind.headingMarker &&
-        tokens.first.start == 0) {
-      final marker = tokens.first;
-      out.add(
-        OutlineEntry(
-          line: line,
-          // The level is the marker's length (number of `#`), not its end
-          // offset — the two only coincide because the marker starts at 0
-          // (checked above).
-          level: marker.end - marker.start,
-          text: _headingText(l.text.substring(marker.end)),
-        ),
-      );
-    }
-    line++;
   }
   return out;
 }

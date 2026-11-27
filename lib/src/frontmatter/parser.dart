@@ -19,7 +19,6 @@
 library;
 
 import 'package:meta/meta.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:yaml/yaml.dart';
 
@@ -91,7 +90,7 @@ final class Frontmatter {
 ///
 /// The block must start at the very first line with `---` (trimmed) and
 /// close with a line that is `---` or `...` (trimmed) — the same rule the
-/// editor tokenizer applies ([TokenKind.frontmatter]), so the editor, the
+/// block scanner applies (`LineSyntax.frontmatterEnd`), so the editor, the
 /// preview and the indexer agree on what is frontmatter. An unclosed
 /// block is not frontmatter at all: it is a horizontal rule and the text
 /// under it.
@@ -282,31 +281,6 @@ String normalizeTag(String raw) {
   var t = raw.trim();
   if (t.startsWith('#')) t = t.substring(1);
   return t.toLowerCase();
-}
-
-/// The inline `#tags` of [text] (normalized, deduplicated, in order).
-///
-/// Scans the shared tokenizer's tag tokens, so tags inside code fences,
-/// math blocks, inline code and the frontmatter itself are never tags —
-/// exactly what the editor paints as tags.
-List<String> inlineTags(String text) {
-  return inlineTagsOf(HighlightDocument.fromText(text));
-}
-
-/// The inline tags of an already-tokenized [doc].
-///
-/// Same rules as [inlineTags]; indexer callers that tokenize anyway (links
-/// + tags from one pass) pass their document in.
-List<String> inlineTagsOf(HighlightDocument doc) {
-  final out = <String>[];
-  for (final line in doc.lines) {
-    for (final token in line.tokens) {
-      if (token.kind == TokenKind.tag) {
-        out.add(normalizeTag(line.text.substring(token.start, token.end)));
-      }
-    }
-  }
-  return _dedupe(out);
 }
 
 /// Writes [value] into [out] under [prefix]-scoped keys.

@@ -4,7 +4,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/export/export_anchors.dart';
 import 'package:niman/src/export/export_note.dart';
@@ -29,15 +28,15 @@ void main() {
       expect(_texts(outlineOfText(_note)), ['Note', 'Title', 'Other']);
     });
 
-    test('outlineOf (the tokenizer) and outlineOfBlocks agree', () {
-      final tokenized = outlineOf(HighlightDocument.fromText(_note).lines);
+    test('outlineOfText and outlineOfBlocks agree', () {
+      final text = outlineOfText(_note);
       final buffer = SourceBuffer.fromText(_note);
       final index = BlockIndex(
         blocks: BlockScanner(buffer).index.blocks,
         revision: buffer.revision,
       );
       final blocks = outlineOfBlocks(index, buffer.lineAt);
-      expect(_texts(tokenized), ['Note', 'Title', 'Other']);
+      expect(_texts(text), ['Note', 'Title', 'Other']);
       expect(_texts(blocks), ['Note', 'Title', 'Other']);
     });
 

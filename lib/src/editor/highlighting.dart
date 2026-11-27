@@ -49,11 +49,9 @@ final class _Line {
 
 /// A walk over a note's lines in order that says which are prose.
 ///
-/// The block state machine of [HighlightDocument] (which
-/// [HighlightDocument.forEachHeading] shares) without the inline scan, made a
-/// value a caller steps one line at a time: it can pause between two lines —
-/// yield to the UI on a long note — which a callback over the whole text
-/// cannot.
+/// The block state machine of [HighlightDocument] without the inline scan,
+/// made a value a caller steps one line at a time: it can pause between two
+/// lines, to yield to the UI on a long note.
 final class ProseLineWalker {
   /// A walker at the top of a note.
   new();
@@ -359,36 +357,10 @@ final class HighlightDocument {
     return BlockState.initial;
   }
 
-  /// Calls [onHeading] for each heading line of [text], in line order, with
-  /// the line index, the level, and the heading's text (markers stripped).
-  ///
-  /// Walks the block state machine ([_stateAfter]) and nothing else: no
-  /// inline scanning, which is where a maths-heavy note spends its time.
-  /// Collecting the 84 headings of a 931K note by tokenizing it whole cost
-  /// ~1 s on device; this way it is a few ms. `outline_test` holds the two
-  /// to the same answer over the cases the block context decides.
-  static void forEachHeading(
-    String text,
-    void Function(int line, int level, String heading) onHeading,
-  ) {
-    final raw = text.isEmpty ? const <String>[''] : text.split('\n');
-    var state = BlockState.initial;
-    for (var i = 0; i < raw.length; i++) {
-      final line = raw[i];
-      final heading = LineTokenizer.headingIn(line, state, i);
-      if (heading != null) {
-        final (start, level) = heading;
-        onHeading(i, level, line.substring(start + level).trim());
-      }
-      state = _stateAfter(line, state, i);
-    }
-  }
-
   /// Whether the line [text] at [lineIndex], entered in [walker]'s state, is
   /// prose — not a fence, a fence's code, display maths, the frontmatter —
   /// and moves the walker on to the next line. A caller that visits every
-  /// line in order (and may pause between two, which [forEachHeading]'s
-  /// loop cannot) asks this of each.
+  /// line in order, and may pause between two, asks this of each.
   static bool _walkLine(ProseLineWalker walker, int lineIndex, String text) {
     final state = walker._state;
     final prose =
