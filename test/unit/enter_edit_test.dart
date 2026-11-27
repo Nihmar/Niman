@@ -123,6 +123,16 @@ void main() {
     });
   });
 
+  group('a thematic break written with spaces is not a list (#1341)', () {
+    for (final marked in <String>['- - -|', '* * *|', '_ _ _|', '-  -  -|']) {
+      test(marked, () => expect(_enter(marked), isNull));
+    }
+
+    test("inside a quote only the quote's marks are carried on", () {
+      expect(_enter('> - - -|'), '> - - -\n> |');
+    });
+  });
+
   test('a CRLF note keeps its line endings through a quote', () {
     final buffer = SourceBuffer.fromText('> a\r\n> b');
     final edit = enterEdit(buffer, buffer.length, indentWidth: 2)!;

@@ -699,9 +699,10 @@ starts with the same marker, a numbered list counts on, and a task item
 gives you a fresh empty box. Enter on an item you have not typed
 anything into ends the list instead — the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
-does, and only at the margin removes the marker. Inside a fenced code
-block, a math block or the frontmatter it does nothing: a dash there is a
-dash.
+does, and only at the margin removes the marker. A rule written with
+spaces, `- - -` or `* * *`, is a rule and not a list: Enter after it adds
+nothing. Inside a fenced code block, a math block or the frontmatter it
+does nothing: a dash there is a dash.
 
 Enter in a quote or a callout starts the next line with the same `>`
 marks, and a list inside the quote goes on behind them: `> - milk` and

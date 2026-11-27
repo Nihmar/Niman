@@ -53,6 +53,11 @@ final RegExp _listItem = RegExp(
   r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]+(\[[ xX]\][ \t]+)?(.*)$',
 );
 
+/// A thematic break written with spaces — `- - -`, `*  *  *` — which
+/// CommonMark reads as a rule, never as a list item with a marker in it
+/// (#1341).
+final RegExp _thematicBreak = RegExp(r'^[ \t]*([-*_])(?:[ \t]*\1){2,}[ \t]*$');
+
 /// A list item with a marker and nothing after it (`- `, `1.`), which
 /// the pattern above cannot match because it wants the space.
 final RegExp _bareListItem = RegExp(r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]*$');
@@ -90,10 +95,14 @@ int? taskBoxOffset(String line) {
 ListItemHead? listItemHead(String line) {
   final match = _listItem.firstMatch(line) ?? _bareListItem.firstMatch(line);
   if (match == null) return null;
+  final marker = match.group(2)!;
+  if ((marker == '-' || marker == '*') && _thematicBreak.hasMatch(line)) {
+    return null;
+  }
   final digits = match.group(3);
   return ListItemHead(
     indent: match.group(1)!,
-    marker: match.group(2)!,
+    marker: marker,
     number: digits == null ? null : int.tryParse(digits),
     box: match.groupCount >= 5 && match.group(5) != null,
     content: match.groupCount >= 6 ? match.group(6) ?? '' : '',
