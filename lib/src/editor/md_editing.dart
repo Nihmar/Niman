@@ -187,17 +187,22 @@ MarkdownEdit toggleTaskList({
     if (!(listItemHead(lines[i])?.box ?? false)) allTasks = false;
   }
   for (var i = startLine; i <= endLine; i++) {
-    final line = lines[i];
-    if (skipped(line)) continue;
+    if (skipped(lines[i])) continue;
+    // A CRLF note's line still ends in its `\r`: the terminator, kept as it
+    // was and no part of the item (#1374).
+    final cr = lines[i].endsWith('\r') ? '\r' : '';
+    final line = cr.isEmpty
+        ? lines[i]
+        : lines[i].substring(0, lines[i].length - 1);
     final head = listItemHead(line);
     if (allTasks) {
-      newLines[i] = '${head!.indent}${head.content}';
+      newLines[i] = '${head!.indent}${head.content}$cr';
     } else if (head == null) {
       final indent = line.length - line.trimLeft().length;
       newLines[i] =
-          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}';
+          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}$cr';
     } else if (!head.box) {
-      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}';
+      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}$cr';
     }
   }
   final newText = newLines.join('\n');

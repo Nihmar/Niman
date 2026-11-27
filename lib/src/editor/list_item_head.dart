@@ -62,6 +62,7 @@ final class ListItemHead {
 /// (#1342).
 final RegExp _listItem = RegExp(
   r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]+(\[[ xX]\](?:[ \t]+|$))?(.*)$',
+  dotAll: true,
 );
 
 /// A thematic break written with spaces — `- - -`, `*  *  *` — which
@@ -101,13 +102,18 @@ int? taskBoxOffset(String line) {
 
 /// The head of the list item on [line], or null when it is not one.
 ///
+/// A line of a CRLF note may still end in its `\r`, as the lines the
+/// commands are handed do: it is the line's terminator and no part of the
+/// item, so it is left out of the head (#1374).
+///
 /// Line-local on purpose: the caller knows whether the line is inside a
 /// code fence, and this does not.
 ListItemHead? listItemHead(String line) {
-  final match = _listItem.firstMatch(line) ?? _bareListItem.firstMatch(line);
+  final text = line.endsWith('\r') ? line.substring(0, line.length - 1) : line;
+  final match = _listItem.firstMatch(text) ?? _bareListItem.firstMatch(text);
   if (match == null) return null;
   final marker = match.group(2)!;
-  if ((marker == '-' || marker == '*') && _thematicBreak.hasMatch(line)) {
+  if ((marker == '-' || marker == '*') && _thematicBreak.hasMatch(text)) {
     return null;
   }
   final digits = match.group(3);

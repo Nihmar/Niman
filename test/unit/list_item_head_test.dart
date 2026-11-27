@@ -28,6 +28,28 @@ void main() {
     });
   });
 
+  group('the terminator of a CRLF line is no part of the item (#1374)', () {
+    for (final (line, marker, content, box) in <(String, String, String, bool)>[
+      ('- a\r', '-', 'a', false),
+      ('  1. b\r', '1.', 'b', false),
+      ('- [ ] c\r', '-', 'c', true),
+      ('- [x]\r', '-', '', true),
+      ('-\r', '-', '', false),
+      ('3.\r', '3.', '', false),
+    ]) {
+      test(line.replaceAll('\r', r'\r'), () {
+        final head = listItemHead(line)!;
+        expect(head.marker, marker);
+        expect(head.content, content);
+        expect(head.box, box);
+      });
+    }
+
+    test('a rule is still no item', () {
+      expect(listItemHead('- - -\r'), isNull);
+    });
+  });
+
   group('a task box at the end of the line is an empty task (#1342)', () {
     test('with and without the space after it', () {
       for (final line in <String>['- [ ]', '- [ ] ', '- [x]', '1. [X]\t']) {

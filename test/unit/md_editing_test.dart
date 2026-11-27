@@ -150,6 +150,16 @@ void main() {
       expect(toggle('a\n\nb', _sel(2)).text, 'a\n- [ ] \nb');
     });
 
+    test('a CRLF note keeps its line endings, and the second press undoes '
+        'the first (#1374)', () {
+      const note = '- a\r\n- b\r\n';
+      final tasks = toggle(note, _sel(0, 9));
+      expect(tasks.text, '- [ ] a\r\n- [ ] b\r\n');
+      expect(toggle(tasks.text, tasks.selection).text, 'a\r\nb\r\n');
+      expect(toggle('plain\r\n', _sel(0)).text, '- [ ] plain\r\n');
+      expect(toggle('  1. one\r\n', _sel(0)).text, '  1. [ ] one\r\n');
+    });
+
     test('Enter on a task carries an unticked box on', () {
       expect(listItemHead('- [x] done')!.continuation, '- [ ] ');
       expect(listItemHead('  - [ ] todo')!.continuation, '  - [ ] ');
