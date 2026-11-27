@@ -115,6 +115,9 @@ final class NoteViewParts {
             edit: edit,
           ),
     takeOver: (path) => view.services.unsavedTracker?.takeOver(path),
+    writesSettled: (path) =>
+        view.services.unsavedTracker?.writesSettled(path) ?? Future.value(),
+    landings: (path) => view.services.unsavedTracker?.landings(path) ?? 0,
     alive: mounted,
   );
 

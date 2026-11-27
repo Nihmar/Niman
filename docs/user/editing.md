@@ -440,7 +440,10 @@ is said as it is for the one that is: a message names the note (*Could not save
 "name"*), once for the run of failures. If you open that note again meanwhile, it opens with
 those edits in it, as unsaved changes of its own — not with the older text the
 disk still has — and the held write is dropped, so nothing old is ever written
-over what you type next.
+over what you type next. A note
+you come back to while its own write is still running is read after that write
+has landed, so it opens with the text you left, not the older text the write was
+about to replace.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you

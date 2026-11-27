@@ -50,6 +50,8 @@ final class NoteSession extends ChangeNotifier {
     required this.newSurface,
     required this.takeOver,
     required this.alive,
+    this.writesSettled,
+    this.landings,
   });
 
   static const AppLogger _log = AppLogger(name: 'editor');
@@ -71,6 +73,17 @@ final class NoteSession extends ChangeNotifier {
   /// Text the app still owes the note at a path, an earlier write the disk
   /// would not take (#1054), taken once.
   final String? Function(String path) takeOver;
+
+  /// Completes when the writes the app still has running for the note at a
+  /// path — the note was switched away from a moment ago — have ended. The
+  /// file is read after it, not before: a read that begins first can return
+  /// the text from before a write that lands while it runs (#1360).
+  final Future<void> Function(String path)? writesSettled;
+
+  /// How many of those writes have landed so far (see [writesSettled]): a
+  /// read across which the count moved read the file around a write, and is
+  /// made again.
+  final int Function(String path)? landings;
 
   /// Whether the view is still up.
   final bool Function() alive;
@@ -154,7 +167,7 @@ final class NoteSession extends ChangeNotifier {
     _kind = null;
     _notify(NoteEvent.loading);
     try {
-      final opened = await disk.open(path);
+      final opened = await _read(path);
       final ready = opened.ready;
       if (!alive() || generation != _generation) return;
       // The buffer uses LF: normalize line endings on load.
@@ -203,6 +216,22 @@ final class NoteSession extends ChangeNotifier {
       _error = NoteDisk.failureMessage(reason);
       _log.error('note load failed: $path ($error)');
       _notify(NoteEvent.failed);
+    }
+  }
+
+  /// Reads the note at [path] with nothing the app still owes it in flight:
+  /// the held writes of an earlier visit to it are waited for first, and a
+  /// read that one of them landed during is made again (#1360). What is still
+  /// owed after that is [takeOver]'s.
+  Future<NoteOpened> _read(String path) async {
+    final settled = writesSettled;
+    final landed = landings;
+    if (settled == null || landed == null) return await disk.open(path);
+    while (true) {
+      await settled(path);
+      final before = landed(path);
+      final opened = await disk.open(path);
+      if (landed(path) == before) return opened;
     }
   }
 

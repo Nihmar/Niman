@@ -162,7 +162,11 @@ final class UnsavedTracker extends ChangeNotifier {
       path: path,
       textOf: text,
       write: write,
-      onWritten: unregister,
+      onWritten: (save) {
+        final key = p.canonicalize(path);
+        _landed[key] = (_landed[key] ?? 0) + 1;
+        unregister(save);
+      },
       onFailed: (save) => _heldFailures.add(save.path),
     );
     register(save);
@@ -217,6 +221,21 @@ final class UnsavedTracker extends ChangeNotifier {
 
   static bool _isAt(UnsavedNote note, String path) =>
       p.equals(note.path, path) || p.isWithin(path, note.path);
+
+  /// Completes when the writes held for the note at [path] that are running
+  /// have ended: what an editor opening the note waits for before it reads the
+  /// file, so a read cannot see the text from before a write that is about to
+  /// land (#1360).
+  Future<void> writesSettled(String path) => Future.wait([
+    for (final note in _notes.toList())
+      if (note is DetachedSave && p.equals(note.path, path)) note.settled,
+  ]);
+
+  final Map<String, int> _landed = <String, int>{};
+
+  /// How many held writes of the note at [path] have landed so far: an editor
+  /// whose read of the file spans a change of it reads again (#1360).
+  int landings(String path) => _landed[p.canonicalize(path)] ?? 0;
 
   /// Tracks [note]; it reads its dirty state live until [unregister].
   /// Registering the same note twice is a no-op.

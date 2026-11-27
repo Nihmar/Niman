@@ -86,10 +86,7 @@ final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
   @override
   Future<void> discard() {
     supersede();
-    final running = _running;
-    return running == null
-        ? Future<void>.value()
-        : running.then<void>((_) {}, onError: (_) {});
+    return settled;
   }
 
   @override
@@ -100,6 +97,15 @@ final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
 
   @override
   String get text => textOf();
+
+  /// Completes when the write running now has ended, landed or failed; at once
+  /// when none is.
+  Future<void> get settled {
+    final running = _running;
+    return running == null
+        ? Future<void>.value()
+        : running.then<void>((_) {}, onError: (_) {});
+  }
 
   /// Starts the write; completes when it lands, or with its error.
   Future<void> start() => _attempt();
