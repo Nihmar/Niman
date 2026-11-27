@@ -11,6 +11,8 @@
 /// `encode`).
 library;
 
+import 'dart:typed_data';
+
 import 'package:niman/src/markdown/line_ending.dart';
 import 'package:niman/src/markdown/note_encoding.dart';
 
@@ -84,5 +86,5 @@ final class NoteFraming {
 
   /// [text] — what [apply] or [applyToSlice] made — as the bytes of the
   /// file, in its encoding.
-  List<int> encode(String text) => encoding.encode(text);
+  Uint8List encode(String text) => encoding.encode(text);
 }

@@ -113,7 +113,7 @@ enum NoteEncoding {
 
   /// [text] as the bytes of a file in this encoding. A byte order mark is
   /// part of the text (U+FEFF), where there is one to write.
-  List<int> encode(String text) {
+  Uint8List encode(String text) {
     switch (this) {
       case utf8:
         return const Utf8Encoder().convert(text);
