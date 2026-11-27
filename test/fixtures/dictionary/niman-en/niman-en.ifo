@@ -1,0 +1,17 @@
+StarDict's dict ifo file
+version=3.0.0
+bookname=Niman en
+wordcount=6
+synwordcount=4
+idxfilesize=84
+idxoffsetbits=32
+sametypesequence=h
+author=Niman test
+website=https://example.invalid
+description=A pack written by a test.
+date=2026-11-27
+niman-pack=1
+languages=en
+definitions=en
+source=en.wiktionary
+license=CC BY-SA 4.0; GFDL

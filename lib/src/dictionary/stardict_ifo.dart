@@ -16,7 +16,7 @@ final class StardictIfo {
 
   /// Reads [text], or null when it is not an `.ifo` at all (no magic line).
   static StardictIfo? parse(String text) {
-    final lines = text.replaceFirst('﻿', '').split(RegExp(r'\r?\n'));
+    final lines = text.replaceFirst('\u{FEFF}', '').split(RegExp(r'\r?\n'));
     if (lines.first.trim() != magic) return null;
     final values = <String, String>{};
     for (final line in lines.skip(1)) {
