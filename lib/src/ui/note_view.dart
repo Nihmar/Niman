@@ -6,13 +6,10 @@ import 'package:niman/src/core/frame_log.dart';
 import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/core/settings/library_features.dart';
 import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/note_column.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/task_items.dart';
 import 'package:niman/src/editor/task_items_edit.dart';
-import 'package:niman/src/editor/toolbar_item.dart';
-import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/ui/hidden_slot.dart';
@@ -27,7 +24,7 @@ import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_session.dart';
 import 'package:niman/src/ui/note_source_pane.dart';
 import 'package:niman/src/ui/note_stats.dart';
-import 'package:niman/src/ui/note_tags.dart';
+import 'package:niman/src/ui/note_toolbar.dart';
 import 'package:niman/src/ui/note_top_bar.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/note_view_chrome.dart';
@@ -283,16 +280,7 @@ final class _NoteViewState extends State<NoteView>
   String get currentText => _parts.text.text;
 
   @override
-  Future<List<String>> currentTags() {
-    final buffer = _parts.unifiedSurfaceBuffer;
-    if (buffer == null) return Future.value(noteTagsOf(_parts.text.text));
-    // A long note's scan keeps its tags block by block for the save to
-    // hand the index: the same answer, with nothing of the note read again.
-    return noteTagsOfBuffer(
-      buffer,
-      references: _parts.sourceViewKey.currentState?.references(),
-    );
-  }
+  Future<List<String>> currentTags() => _parts.currentTags();
 
   @override
   String get selectedText => _parts.inserts.selectedText;
@@ -311,41 +299,20 @@ final class _NoteViewState extends State<NoteView>
   void jumpToHeading(int line) => _parts.links.jumpToHeading(line);
 
   @override
-  void setNoteKind(String? type) {
-    // Once: a long note's text is joined for each ask (see [NoteTextCache]).
-    final current = _parts.text.text;
-    final text = type == null
-        ? removeFrontmatterKey(current, 'type')
-        : setFrontmatterKey(current, 'type', type);
-    if (text == current) return;
-    _parts.applyKindEdit(text);
-  }
+  void setNoteKind(String? type) => _parts.setNoteKind(type);
 
   @override
   void applyKindEdit(String newText) => _parts.applyKindEdit(newText);
 
   @override
-  void insertAtCaret(String markdown) {
-    if (!canInsert) return;
-    _parts.commands.run(
-      (text, selection) =>
-          insertSnippet(text: text, selection: selection, snippet: markdown),
-      // A block keeps a blank line from the lines either side.
-      context: 1,
-    );
-  }
+  void insertAtCaret(String markdown) =>
+      _parts.commands.insertSnippetAtCaret(markdown);
 
   @override
-  void insertColumns() {
-    if (!canInsert) return;
-    _parts.commands.insertColumnsAtCaret();
-  }
+  void insertColumns() => _parts.commands.insertColumnsAtCaret();
 
   @override
-  void insertEisenhower() {
-    if (!canInsert) return;
-    _parts.commands.insertEisenhowerMatrixAtCaret();
-  }
+  void insertEisenhower() => _parts.commands.insertEisenhowerMatrixAtCaret();
 
   @override
   Future<bool> attachFiles(List<String> paths) =>
@@ -359,7 +326,7 @@ final class _NoteViewState extends State<NoteView>
       _parts.inserts.replacePasted(pasted, text);
 
   @override
-  void convertListToMindMap() => _parts.commands.convertListToMindMap();
+  void convertListToMindMap() => _parts.mindMap.convert();
 
   @override
   List<TaskItem> get taskItems => _parts.taskItems.selected();
@@ -389,7 +356,7 @@ final class _NoteViewState extends State<NoteView>
 
   @override
   SpellReview? get spellReview =>
-      _parts.commands.spellReview(edited: _parts.stats);
+      _parts.spelling.spellReview(edited: _parts.stats);
 
   /// Keeps the note where it was read when it moves between `source`,
   /// `live` and the read view ([NotePlace.keepAcrossModes]).
@@ -860,7 +827,7 @@ final class _NoteViewState extends State<NoteView>
                 statusText: _parts.status,
                 onStatusTap: _parts.saves.failure.value == null
                     ? null
-                    : _parts.saves.saveInBackground,
+                    : _parts.saves.retry,
                 statusActions: widget.statusActions,
                 related: widget.onShowRelated == null
                     ? null
@@ -874,7 +841,7 @@ final class _NoteViewState extends State<NoteView>
                       ),
                 onOutline: _parts.links.openOutline,
                 onFind: () => _parts.sourceFind.open(),
-                onSpellCheck: _parts.commands.openSpellCheck,
+                onSpellCheck: _parts.spelling.openSpellCheck,
                 onToggleEditorKind: _parts.toggleEditorKind,
                 typewriter: widget.options.typewriter,
                 onToggleTypewriter: widget.onToggleTypewriter,
@@ -888,25 +855,13 @@ final class _NoteViewState extends State<NoteView>
     );
   }
 
-  /// The formatting toolbar (T-UI-08): pure markdown commands applied
-  /// through the surface; the image button keeps the file-picker flow
-  /// (T-M2-09) it already had in the status row.
-  Widget _toolbar(BuildContext context, {bool dense = false}) {
-    final actions = _parts.commands.toolbarActions();
-    final menus = _parts.commands.toolbarMenus();
-    Widget bar(Set<ToolbarItem> active) => NoteToolbarBar(
-      dense: dense,
-      actions: actions,
-      menus: menus,
-      active: active,
-      layout: widget.options.toolbarLayout,
-    );
-    // The surface publishes the formats at the caret into one notifier, read
-    // off the caret's line, so a pressed button stays pressed until it is
-    // toggled off (T-WYS-06, #246).
-    return ValueListenableBuilder<Set<ToolbarItem>>(
-      valueListenable: _parts.activeFormats,
-      builder: (context, active, _) => bar(active),
-    );
-  }
+  /// The formatting toolbar (T-UI-08).
+  Widget _toolbar(BuildContext context, {bool dense = false}) => NoteToolbar(
+    commands: _parts.commands,
+    surface: _parts.session.surface,
+    activeFormats: _parts.activeFormats,
+    layout: widget.options.toolbarLayout,
+    refocus: _parts.refocus,
+    dense: dense,
+  );
 }

@@ -713,11 +713,25 @@ final class SlovakStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku sa nepodarilo uložiť. Niman to skúsi znova.';
   @override
+  String get noteStatusGone => 'Nie je na disku · uložiť znova';
+  @override
+  String get noteGoneSnack =>
+      'Táto poznámka už na disku nie je. Jej text zostáva tu – ťuknutím '
+      'na stav ju uložíte znova.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Poznámku „$name“ sa nepodarilo uložiť. Jej text zostáva v '
+      'pamäti.';
+  @override
   String get noteChangedOnDisk =>
       'Iný program túto poznámku zmenil. Tá verzia je uložená v histórii.';
   @override
   String get noteNotText =>
       'Tento súbor nie je textová poznámka, preto ho Niman nemôže zobraziť tu.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Tento súbor nie je v UTF-8, preto bol prečítaný ako Windows-1252. Pri '
+      'uložení bude zapísaný v UTF-8.';
   @override
   String get noteLoadFailed => 'Túto poznámku sa nepodarilo otvoriť.';
   @override

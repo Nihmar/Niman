@@ -5,13 +5,18 @@
 /// frontmatter is text. It is read from where it is and written back
 /// there, as it is — the editor is the same one, the file is simply not
 /// a note.
+///
+/// The file's bytes are the editor's business, as a library note's are: it is
+/// read and written by the same code (`loadNote`, the framing a note keeps,
+/// the stamp of the file), so a byte order mark, line endings and an
+/// encoding round-trip as they do there, and a change made outside is seen
+/// by its stamp (#1334). This class only says where the file is and listens
+/// for it.
 library;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:niman/src/core/files.dart';
 import 'package:path/path.dart' as p;
 
 /// The files opened on their own: the ones a Markdown editor opens —
@@ -34,13 +39,6 @@ base class EditorOnlyDocument {
 
   /// The folder it sits in, as the bar shows it.
   String get folder => p.dirname(filePath);
-
-  /// Its text.
-  Future<String> read() => File(filePath).readAsString();
-
-  /// Writes [content] back, whole or not at all.
-  Future<void> write(String content) =>
-      writeFileAtomically(File(filePath), utf8.encode(content));
 
   /// Fires when something else changes the file on disk, so an open
   /// editor can take the change in (and keep its own unsaved edits when

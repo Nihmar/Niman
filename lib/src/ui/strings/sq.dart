@@ -712,12 +712,25 @@ final class AlbanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Shënimi nuk u ruajt. Niman do të provojë sërish.';
   @override
+  String get noteStatusGone => 'Nuk është në disk · ruaje përsëri';
+  @override
+  String get noteGoneSnack =>
+      'Kjo shënim nuk është më në disk. Teksti i tij ruhet këtu — '
+      'prekni statusin për ta ruajtur përsëri.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nuk u ruajt "$name". Teksti i tij ruhet në memorie.';
+  @override
   String get noteChangedOnDisk =>
       'Një program tjetër e ndryshoi këtë shënim. Ajo version ruhet në '
       'histori.';
   @override
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Ky skedar nuk është UTF-8, kështu që u lexua si Windows-1252. Kur '
+      'ruhet, do të shkruhet si UTF-8.';
   @override
   String get noteLoadFailed => 'Ky shënim nuk mund të hapej.';
   @override

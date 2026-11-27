@@ -12,8 +12,10 @@ import 'package:niman/src/core/settings/library_settings.dart';
 import 'package:niman/src/editor/editor_shortcuts.dart';
 import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
+import 'package:niman/src/frontmatter/edit.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/attachment_store.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
@@ -40,6 +42,7 @@ import 'package:niman/src/ui/note_frontmatter_panel.dart';
 import 'package:niman/src/ui/note_inserts.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
+import 'package:niman/src/ui/note_mind_map.dart';
 import 'package:niman/src/ui/note_paste.dart';
 import 'package:niman/src/ui/note_place.dart';
 import 'package:niman/src/ui/note_read_snapshot.dart';
@@ -47,7 +50,9 @@ import 'package:niman/src/ui/note_read_tasks.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_services.dart';
 import 'package:niman/src/ui/note_session.dart';
+import 'package:niman/src/ui/note_spelling.dart';
 import 'package:niman/src/ui/note_stats.dart';
+import 'package:niman/src/ui/note_tags.dart';
 import 'package:niman/src/ui/note_task_items.dart';
 import 'package:niman/src/ui/note_text_cache.dart';
 import 'package:niman/src/ui/note_todo_blocks.dart';
@@ -114,6 +119,11 @@ final class NoteViewParts {
             edit: edit,
           ),
     takeOver: (path) => view.services.unsavedTracker?.takeOver(path),
+    writesSettled: (path) =>
+        view.services.unsavedTracker?.writesSettled(path) ?? Future.value(),
+    landings: (path) => view.services.unsavedTracker?.landings(path) ?? 0,
+    restored: (path) =>
+        view.services.unsavedTracker?.takeRestored(path) ?? false,
     alive: mounted,
   );
 
@@ -276,8 +286,27 @@ final class NoteViewParts {
     focus.requestFocus();
   }
 
+  /// The list-to-mind-map conversion: the palette's and the Tools sheet's.
+  late final NoteMindMap mindMap = NoteMindMap(
+    surface: () => session.surface,
+    canInsert: () => canInsert,
+    context: context,
+    focus: refocus,
+    sourceView: () => sourceViewKey.currentState,
+  );
+
+  /// The spelling review: the dock's pane and the phone's sheet.
+  late final NoteSpelling spelling = NoteSpelling(
+    surface: () => session.surface,
+    context: context,
+    spellCheck: () => view.services.spellCheck,
+    onSpellChecked: () {
+      if (mounted()) update(() {});
+    },
+  );
+
   /// The note's editing commands: the toolbar's, the format keys', the
-  /// context menu's, the Tools sheet's and the spelling review's.
+  /// context menu's and the Tools sheet's.
   late final NoteEditCommands commands = NoteEditCommands(
     surface: () => session.surface,
     focus: refocus,
@@ -315,10 +344,7 @@ final class NoteViewParts {
       stats.refresh();
       refreshPreview();
     },
-    spellCheck: () => view.services.spellCheck,
-    onSpellChecked: () {
-      if (mounted()) update(() {});
-    },
+    mindMap: mindMap,
   );
 
   /// The note's file: reading it off the UI isolate, and what it looked like
@@ -416,6 +442,9 @@ final class NoteViewParts {
     saveForClose: saves.saveForClose,
     bufferText: () => text.text,
     bufferHead: text.head,
+    discardWrites: () => saves.discard(),
+    restoreWrites: () => saves.undiscard(),
+    discarded: () => saves.discarded,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an
@@ -425,6 +454,7 @@ final class NoteViewParts {
     ready: () => session.ready,
     text: () => text.text,
     buffer: () => unifiedSurfaceBuffer,
+    history: () => session.surface?.history,
     references: () => sourceViewKey.currentState?.references(),
     framing: () => disk.framing,
     saveNote: () => view.services.saveNote,
@@ -439,6 +469,8 @@ final class NoteViewParts {
     },
     hold: view.services.unsavedTracker?.hold,
     diskStamp: () => disk.stamp,
+    createNote: () => view.services.createNote,
+    createNoteStream: () => view.services.createNoteStream,
     onExternalKept: (_) {
       if (!mounted()) return;
       ScaffoldMessenger.maybeOf(context())
@@ -453,8 +485,16 @@ final class NoteViewParts {
     final failure = saves.failure.value;
     update(() {});
     if (failure == null || failure.attempts != 1) return;
-    ScaffoldMessenger.maybeOf(context())
-        ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
+    // A note gone from disk is not a disk that would not take its text: the
+    // text is kept and the way back is said (#1321).
+    final gone = failure.error is NoteGoneException;
+    ScaffoldMessenger.maybeOf(context())?.showSnackBar(
+      SnackBar(
+        content: Text(
+          gone ? AppStrings.noteGoneSnack : AppStrings.noteSaveFailedSnack,
+        ),
+      ),
+    );
   }
 
   /// The library's features, or every one on with no library.
@@ -474,7 +514,10 @@ final class NoteViewParts {
       // which is the whole point of keeping it per line.
       session.surface?.words.edited(edit, session.surface!.buffer);
     }
-    saves.edited();
+    // An undo may have brought the note back to the text the disk holds.
+    saves
+      ..edited()
+      ..cleanIfSaved();
     unsaved?.noteChanged();
     lastCaretLine = caretLine;
     stats.schedule();
@@ -646,12 +689,37 @@ final class NoteViewParts {
   String get status {
     if (session.error != null) return AppStrings.noteStatusError;
     if (session.loading) return AppStrings.noteStatusLoading;
-    if (saves.failure.value != null && !saves.saving) {
-      return AppStrings.noteStatusSaveFailed;
+    if (saves.failure.value case final failure? when !saves.saving) {
+      return failure.error is NoteGoneException
+          ? AppStrings.noteStatusGone
+          : AppStrings.noteStatusSaveFailed;
     }
     if (saves.saving) return AppStrings.noteStatusSaving;
     if (saves.dirty) return AppStrings.noteStatusUnsaved;
     return AppStrings.noteStatusSaved;
+  }
+
+  /// The note's tags, for the kind GUIs and the shell.
+  Future<List<String>> currentTags() {
+    final buffer = unifiedSurfaceBuffer;
+    if (buffer == null) return Future.value(noteTagsOf(text.text));
+    // A long note's scan keeps its tags block by block for the save to
+    // hand the index: the same answer, with nothing of the note read again.
+    return noteTagsOfBuffer(
+      buffer,
+      references: sourceViewKey.currentState?.references(),
+    );
+  }
+
+  /// Sets the note's kind (the frontmatter `type`), or removes it.
+  void setNoteKind(String? type) {
+    // Once: a long note's text is joined for each ask (see [NoteTextCache]).
+    final current = text.text;
+    final next = type == null
+        ? removeFrontmatterKey(current, 'type')
+        : setFrontmatterKey(current, 'type', type);
+    if (next == current) return;
+    applyKindEdit(next);
   }
 
   /// A kind GUI's byte-stable edit: the buffer takes the new text (the
@@ -749,7 +817,9 @@ final class NoteViewParts {
   /// asked for.
   void opened() {
     final path = view.path;
-    final length = text.text.length;
+    // The buffer's own length: the text joined for it was a copy of the whole
+    // note on this isolate, kept for a log line and a callback (#1357).
+    final length = unifiedSurfaceBuffer?.length ?? text.text.length;
     update(() {});
     // Opened straight into the preview: the IME has no target here.
     dismissKeyboardForPreview();
@@ -791,6 +861,12 @@ final class NoteViewParts {
           sourceFind.openFinding(terms);
         }
       });
+    }
+    // A note read as Windows-1252 is saved as UTF-8: said before the first
+    // keystroke, not after the save (#1367).
+    if (disk.openNotice case final notice?) {
+      ScaffoldMessenger.maybeOf(context())
+          ?.showSnackBar(SnackBar(content: Text(notice)));
     }
     landOnAnchor();
     view.onLoaded?.call(path, length);

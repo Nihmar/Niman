@@ -127,4 +127,36 @@ void main() {
     expect(editor(tester).widget.buffer.text, 'Hello, world.\nYes, again.');
     expect(find.text(AppStrings.pastedAsTable), findsNothing);
   });
+
+  testWidgets('Paste as text is the undo of the table paste (#1376)', (
+    tester,
+  ) async {
+    await open(tester, 'Stock: ');
+    await pasteAt(tester, 'Stock: '.length);
+    await tester.tap(find.text(AppStrings.pasteAsText));
+    await tester.pumpAndSettle();
+    // One undo takes the text out, not the table back in.
+    expect(editor(tester).undo(), isTrue);
+    expect(editor(tester).widget.buffer.text, 'Stock: ');
+    expect(editor(tester).undo(), isFalse, reason: 'and nothing else is left');
+  });
+
+  testWidgets('the clipboard is read once for a paste of plain text (#1356)', (
+    tester,
+  ) async {
+    clipboard = 'Hello, world.\nYes, again.';
+    var reads = 0;
+    await open(tester, '');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method != 'Clipboard.getData') return null;
+        reads++;
+        return <String, dynamic>{'text': clipboard};
+      },
+    );
+    await pasteAt(tester, 0);
+    expect(editor(tester).widget.buffer.text, 'Hello, world.\nYes, again.');
+    expect(reads, 1);
+  });
 }

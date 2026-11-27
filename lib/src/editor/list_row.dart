@@ -89,6 +89,10 @@ final class ListRow {
     return indent + head.marker.length + (gap == 0 || gap >= 5 ? 1 : gap);
   }
 
+  /// The line as it was written: its quote marks, what follows them, and its
+  /// carriage return, if it has one.
+  String get line => '$marks$body$cr';
+
   /// The line with its indent moved by [delta] columns (never below zero),
   /// and the item's marker replaced by [marker] when one is given. A line that
   /// would not change is returned as it was written.

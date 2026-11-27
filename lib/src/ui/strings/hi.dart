@@ -702,11 +702,24 @@ final class HindiStrings extends Strings {
   String get noteSaveFailedSnack =>
       'यह नोट सहेजा नहीं जा सका। Niman फिर कोशिश करेगा।';
   @override
+  String get noteStatusGone => 'डिस्क पर नहीं है · फिर से सहेजें';
+  @override
+  String get noteGoneSnack =>
+      'यह नोट अब डिस्क पर नहीं है। इसका टेक्स्ट यहाँ सुरक्षित है — इसे '
+      'फिर से सहेजने के लिए स्थिति पर टैप करें।';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      '"$name" सहेजा नहीं जा सका। इसका टेक्स्ट मेमोरी में सुरक्षित है।';
+  @override
   String get noteChangedOnDisk =>
       'किसी दूसरे प्रोग्राम ने यह नोट बदला। वह संस्करण इतिहास में रखा गया है।';
   @override
   String get noteNotText =>
       'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
+  @override
+  String get noteReadAsWindows1252 =>
+      'यह फ़ाइल UTF-8 में नहीं है, इसलिए इसे Windows-1252 के रूप में पढ़ा '
+      'गया। सहेजने पर यह UTF-8 में लिखी जाएगी।';
   @override
   String get noteLoadFailed => 'यह नोट खोला नहीं जा सका।';
   @override

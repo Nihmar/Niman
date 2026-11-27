@@ -4,6 +4,13 @@
 library;
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/editor/line_selection.dart';
+import 'package:niman/src/editor/list_item_head.dart';
+import 'package:niman/src/editor/selection_unwrap.dart';
+import 'package:niman/src/editor/touched_lines.dart';
+
+export 'package:niman/src/editor/line_marks.dart';
+export 'package:niman/src/editor/list_item_head.dart';
 
 /// The result of a Markdown editing command.
 final class MarkdownEdit {
@@ -21,12 +28,24 @@ final class MarkdownEdit {
 /// strike '~~', sup '<sup>…</sup>', underline '<u>…</u>', link '[[…]]').
 /// A collapsed selection inserts the markers at the caret and leaves the
 /// caret between them; a non-empty selection keeps the inner text selected.
+///
+/// A selection that is wrapped in the markers already — they are inside it or
+/// right outside it, or around the word the caret is in — has them taken off
+/// instead, which is what a second press of the button does ([unwrapSelection],
+/// #1340).
 MarkdownEdit wrapSelection({
   required String text,
   required TextSelection selection,
   required String left,
   required String right,
 }) {
+  final unwrapped = unwrapSelection(
+    text: text,
+    selection: selection,
+    left: left,
+    right: right,
+  );
+  if (unwrapped != null) return unwrapped;
   final start = selection.start;
   final end = selection.end;
   final selected = text.substring(start, end);
@@ -72,32 +91,6 @@ MarkdownEdit codeBlock({
   );
 }
 
-/// Prefixes every line the [selection] touches with [prefix] ('- ' for
-/// lists, '> ' for quotes), one pass per line. The selection shifts by the
-/// total inserted length, keeping the caret in place.
-MarkdownEdit prefixLines({
-  required String text,
-  required TextSelection selection,
-  required String prefix,
-}) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
-  final lines = text.split('\n');
-  final newLines = <String>[...lines];
-  for (var i = startLine; i <= endLine; i++) {
-    newLines[i] = '$prefix${newLines[i]}';
-  }
-  final newText = newLines.join('\n');
-  final shift = prefix.length * (endLine - startLine + 1);
-  return MarkdownEdit(
-    text: newText,
-    selection: TextSelection(
-      baseOffset: selection.start + shift,
-      extentOffset: selection.end + shift,
-    ),
-  );
-}
-
 /// Sets the heading [level] (1..6) of every line the [selection] touches.
 ///
 /// A line already carrying that level is de-headed (toggled off); any
@@ -107,8 +100,7 @@ MarkdownEdit setHeading({
   required TextSelection selection,
   required int level,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {
@@ -121,33 +113,7 @@ MarkdownEdit setHeading({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
-      oldText: text,
-      newText: newText,
-      selection: selection,
-      startLine: startLine,
-      endLine: endLine,
-    ),
-  );
-}
-
-/// Numbers every line the [selection] touches as an ordered list, starting
-/// at 1 for the first touched line (`1. `, `2. `, …).
-MarkdownEdit orderedList({
-  required String text,
-  required TextSelection selection,
-}) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
-  final lines = text.split('\n');
-  final newLines = <String>[...lines];
-  for (var i = startLine; i <= endLine; i++) {
-    newLines[i] = '${i - startLine + 1}. ${newLines[i]}';
-  }
-  final newText = newLines.join('\n');
-  return MarkdownEdit(
-    text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -169,8 +135,7 @@ MarkdownEdit toggleTaskList({
   required String text,
   required TextSelection selection,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   final several = endLine > startLine;
@@ -181,23 +146,28 @@ MarkdownEdit toggleTaskList({
     if (!(listItemHead(lines[i])?.box ?? false)) allTasks = false;
   }
   for (var i = startLine; i <= endLine; i++) {
-    final line = lines[i];
-    if (skipped(line)) continue;
+    if (skipped(lines[i])) continue;
+    // A CRLF note's line still ends in its `\r`: the terminator, kept as it
+    // was and no part of the item (#1374).
+    final cr = lines[i].endsWith('\r') ? '\r' : '';
+    final line = cr.isEmpty
+        ? lines[i]
+        : lines[i].substring(0, lines[i].length - 1);
     final head = listItemHead(line);
     if (allTasks) {
-      newLines[i] = '${head!.indent}${head.content}';
+      newLines[i] = '${head!.indent}${head.content}$cr';
     } else if (head == null) {
       final indent = line.length - line.trimLeft().length;
       newLines[i] =
-          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}';
+          '${line.substring(0, indent)}- [ ] ${line.substring(indent)}$cr';
     } else if (!head.box) {
-      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}';
+      newLines[i] = '${head.indent}${head.marker} [ ] ${head.content}$cr';
     }
   }
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -318,7 +288,7 @@ String _tableCell(String label) => label.replaceAll('|', r'\|');
 /// writer leave, which is the one a second run meets.
 int _afterTable(String text, int offset) {
   final lines = text.split('\n');
-  final at = _lineIndexOf(text, offset);
+  final at = lineIndexOf(text, offset);
   if (!_startsTableRow(lines[at])) return offset;
   var first = at;
   while (first > 0 && _startsTableRow(lines[first - 1])) {
@@ -331,7 +301,7 @@ int _afterTable(String text, int offset) {
   while (last < lines.length - 1 && _startsTableRow(lines[last + 1])) {
     last++;
   }
-  return _lineStart(text, last) + lines[last].length;
+  return lineStartOf(text, last) + lines[last].length;
 }
 
 /// Whether [line] looks like one of a table's rows: it starts with a pipe.
@@ -358,8 +328,8 @@ MarkdownEdit insertBlock({
 }) {
   final lines = text.split('\n');
   final at0 = selection.extentOffset;
-  final line = _lineIndexOf(text, at0);
-  final column = at0 - _lineStart(text, line);
+  final line = lineIndexOf(text, at0);
+  final column = at0 - lineStartOf(text, line);
   final blank = lines[line].trim().isEmpty;
   final at = blank || column == 0 ? line : line + 1;
   final remove = blank ? 1 : 0;
@@ -372,7 +342,7 @@ MarkdownEdit insertBlock({
   final target = caret ?? (line: block.length - 1, column: block.last.length);
   final newText = newLines.join('\n');
   final offset =
-      _lineStart(newText, at + (before ? 1 : 0) + target.line) + target.column;
+      lineStartOf(newText, at + (before ? 1 : 0) + target.line) + target.column;
   return MarkdownEdit(
     text: newText,
     selection: TextSelection.collapsed(offset: offset),
@@ -409,8 +379,7 @@ MarkdownEdit removeHeading({
   required String text,
   required TextSelection selection,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {
@@ -420,7 +389,7 @@ MarkdownEdit removeHeading({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -447,14 +416,14 @@ MarkdownEdit insertFootnote({
   final reference = '[^$label]';
   final withReference = text.replaceRange(caret, caret, reference);
   final lines = withReference.split('\n');
-  var end = _lineIndexOf(withReference, caret + reference.length);
+  var end = lineIndexOf(withReference, caret + reference.length);
   while (end + 1 < lines.length && lines[end + 1].trim().isNotEmpty) {
     end++;
   }
   final definition = '[^$label]: ';
   final newLines = <String>[...lines]..insertAll(end + 1, ['', definition]);
   final newText = newLines.join('\n');
-  final at = _lineStart(newText, end + 2) + definition.length;
+  final at = lineStartOf(newText, end + 2) + definition.length;
   return MarkdownEdit(
     text: newText,
     selection: TextSelection.collapsed(offset: at),
@@ -475,184 +444,3 @@ String nextFootnoteLabel(Iterable<String> labels) {
 /// A leading run of `#` (1..6) and the one following space — an ATX
 /// heading prefix.
 final RegExp _headingPrefix = RegExp('^(#{1,6}) ?');
-
-/// Recomputes [selection] against the text after a line-level edit: the
-/// touched lines (startLine..endLine) changed length at their starts, so
-/// each endpoint lands on the same line, shifted by the lines at and
-/// before it (clamped so an offset never goes negative).
-TextSelection _shiftSelectionForLines({
-  required String oldText,
-  required String newText,
-  required TextSelection selection,
-  required int startLine,
-  required int endLine,
-}) {
-  return TextSelection(
-    baseOffset: _mapEndpoint(
-      oldText,
-      newText,
-      selection.baseOffset,
-      startLine,
-      endLine,
-    ),
-    extentOffset: _mapEndpoint(
-      oldText,
-      newText,
-      selection.extentOffset,
-      startLine,
-      endLine,
-    ),
-  );
-}
-
-int _mapEndpoint(
-  String oldText,
-  String newText,
-  int offset,
-  int startLine,
-  int endLine,
-) {
-  final (line, off) = _lineAndOffset(oldText, offset);
-  if (line < startLine || line > endLine) {
-    return _lineStart(newText, line) + off;
-  }
-  final delta =
-      newText.split('\n')[line].length - oldText.split('\n')[line].length;
-  final newOff = off + delta;
-  return _lineStart(newText, line) + (newOff < 0 ? 0 : newOff);
-}
-
-/// The head of a list item: everything on the line before its content.
-///
-/// What Enter needs in order to carry a list on (#142): the indent to
-/// keep, the marker to repeat or count on, and whether the writer is
-/// standing on an item with nothing in it — which is how every editor
-/// spells "I am done with this list".
-final class ListItemHead {
-  /// Creates a head; use [listItemHead], not this constructor.
-  const new({
-    required this.indent,
-    required this.marker,
-    required this.content,
-    this.number,
-    this.box = false,
-  });
-
-  /// The item's leading whitespace, kept by the line that follows.
-  final String indent;
-
-  /// The marker as written: `-`, `*`, `+`, or `3.` / `3)`.
-  final String marker;
-
-  /// The item's number, for an ordered item; null for a bulleted one.
-  final int? number;
-
-  /// Whether the item carries a task box.
-  final bool box;
-
-  /// What the item says, after the marker and the box.
-  final String content;
-
-  /// Whether the item is empty — marker, maybe a box, and nothing else.
-  bool get isEmpty => content.trim().isEmpty;
-
-  /// What a line continuing this item starts with.
-  ///
-  /// An ordered item counts on, because a writer numbering by hand
-  /// expects the next number even though Markdown renumbers for them. A
-  /// ticked item does not pass its tick along: a new item is a new
-  /// thing to do.
-  String get continuation {
-    final number = this.number;
-    final next = number == null
-        ? marker
-        : '${number + 1}${marker[marker.length - 1]}';
-    return '$indent$next ${box ? '[ ] ' : ''}';
-  }
-}
-
-/// A list marker at the start of a line, with the task box that may
-/// follow it.
-final RegExp _listItem = RegExp(
-  r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]+(\[[ xX]\][ \t]+)?(.*)$',
-);
-
-/// A list item with a marker and nothing after it (`- `, `1.`), which
-/// the pattern above cannot match because it wants the space.
-final RegExp _bareListItem = RegExp(r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]*$');
-
-/// A task box's state character, anywhere a list marker is followed by one:
-/// the space of `- [ ] `, the `x` of `- [x] `, without needing the trailing
-/// space `_listItem` wants — behind any quote marks the line opens with, each
-/// `>` with up to three spaces before it and one after.
-final RegExp _taskBoxState = RegExp(
-  r'^(?: {0,3}> ?)*[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+\[([ xX])\]',
-);
-
-/// The offset of the state character of the task box on [line] — the space
-/// of `- [ ] `, the `x` of `- [x] ` — or null when the line is not a task
-/// item.
-///
-/// The line's quote marks are passed over: a task item in a quote or a
-/// callout has its box behind them, and every caller — the read view's tick,
-/// the checklist cascade — hands over the raw line.
-///
-/// Line-local, like [listItemHead]: the caller knows whether the line is
-/// inside a code fence.
-int? taskBoxOffset(String line) {
-  final match = _taskBoxState.firstMatch(line);
-  if (match == null) return null;
-  // The box's `[` is the only bracket the pattern can match, so its
-  // offset inside the match is where the state character sits, minus one.
-  return match.start + match[0]!.indexOf('[') + 1;
-}
-
-/// The head of the list item on [line], or null when it is not one.
-///
-/// Line-local on purpose: the caller knows whether the line is inside a
-/// code fence, and this does not.
-ListItemHead? listItemHead(String line) {
-  final match = _listItem.firstMatch(line) ?? _bareListItem.firstMatch(line);
-  if (match == null) return null;
-  final digits = match.group(3);
-  return ListItemHead(
-    indent: match.group(1)!,
-    marker: match.group(2)!,
-    number: digits == null ? null : int.tryParse(digits),
-    box: match.groupCount >= 5 && match.group(5) != null,
-    content: match.groupCount >= 6 ? match.group(6) ?? '' : '',
-  );
-}
-
-/// The absolute offset where [line] starts in [text].
-int _lineStart(String text, int line) {
-  var index = 0;
-  for (var current = 0; current < line; current++) {
-    final nl = text.indexOf('\n', index);
-    if (nl < 0) return text.length;
-    index = nl + 1;
-  }
-  return index;
-}
-
-/// The (line, offset-within-line) for the absolute [offset] in [text].
-(int, int) _lineAndOffset(String text, int offset) {
-  var line = 0;
-  var lineStart = 0;
-  for (var i = 0; i < offset && i < text.length; i++) {
-    if (text.codeUnitAt(i) == 0x0A) {
-      line++;
-      lineStart = i + 1;
-    }
-  }
-  return (line, offset - lineStart);
-}
-
-/// The 0-based line index containing [offset].
-int _lineIndexOf(String text, int offset) {
-  var line = 0;
-  for (var i = 0; i < offset && i < text.length; i++) {
-    if (text.codeUnitAt(i) == 0x0A) line++;
-  }
-  return line;
-}

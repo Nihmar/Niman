@@ -265,6 +265,25 @@ phone never shows a margin, and the reason the setting exists on
 Android as well: on a tablet, or a phone in landscape, it starts to
 count.
 
+### Right-to-left text
+
+Each line of the source editor takes the direction of its first strong
+character, not the app's language: a line that starts with Hebrew or
+Arabic is laid out from the right, a line of any other script from the
+left, and a line with no letter yet (a number, a bare marker, an empty
+line) follows the editor. Markers do not decide it — `## שלום` is a
+right-to-left heading — and a note can mix both, a line at a time.
+
+On a right-to-left line `←` and `→` (and `Ctrl+←` / `Ctrl+→`, `⌥←` /
+`⌥→`) move the caret the way they point on screen, so `→` goes to the
+right whichever way the characters run. What stays logical is what a run
+of the other direction inside the line does: a Latin word in a Hebrew
+line is still crossed by the line's keys, not its own, so inside it `→`
+moves backwards through the word. Home and End, selection by dragging
+and by double click, and deleting are unchanged. A list marker, a quote
+bar and the indentation stay on the left of the line; only its text is
+laid out from the right.
+
 ### Zen mode
 
 On Linux, Windows and macOS, `F11` (`⌃⌘F` on a Mac, where `F11` shows the
@@ -340,10 +359,19 @@ the way to it.
 The find bar searches the note a line at a time, without making a copy of
 it, so a very long note can have it open: the matches arrive in a moment
 after you stop typing the query. **Replace** swaps the current match and
-moves on, keeping the matches it already found; **Replace all** is one undo
-step and leaves the caret where it was in the text (moved by the
-replacements before it) instead of taking it to the first match. A query
-that contains a line break is searched over the whole note.
+moves on, keeping the matches it already found; **Replace all** replaces
+every match in the note — however many — as one undo step and leaves the caret
+where it was in the text (moved by the replacements before it) instead of
+taking it to the first match. The bar lists at most 100 000 matches and counts
+no further, but Replace all goes on to the end of the note. The matches are
+always those of the query in the bar: pressing Next, Replace or Replace all
+right after changing the query, on a note long enough that its matches arrive
+a moment late, searches again first rather than acting on the old ones.
+
+What the bar does and does not do: the query and the replacement are plain
+text, one line each — a line break cannot be typed or pasted into either, so a
+query never spans lines — matched letter by letter, ignoring case unless the
+case button is on. There is no regular expression and no whole-word option.
 
 ### Copy and paste
 
@@ -362,9 +390,13 @@ Cells copied from a spreadsheet (Excel, LibreOffice Calc, Numbers, Google
 Sheets) paste as a **Markdown table**, on lines of their own, the first
 row its header. So do the lines of a CSV file, separated by commas or
 semicolons, when every line has the same number of cells. A snackbar says
-so, and its **Paste as text** puts the clipboard's text in place of the
-table. Text that is not a clean table, a single row, and a paste into a
-code block stay text. On every platform.
+so, and its **Paste as text** takes the table paste back — undoes it — and
+puts the clipboard's text in its place, so the undo history holds the plain
+paste alone. Text that is not a clean table, a single row, a paste into a
+code block, and a copy of more than 2 MB (a spreadsheet's copy does not reach
+that) stay text; the text is refused as a table at the first line that is not
+shaped like one, so a long article costs a paste nothing extra. On every
+platform.
 
 Files copied in a file manager — Finder, Explorer, Nautilus, Dolphin, the
 Files app — and pasted into a note are **attached**: each is copied into
@@ -392,13 +424,30 @@ one thing done rather than one key pressed. Typing is a step, and so is a
 run of Backspace or Delete in one direction: a held Backspace is undone with
 one `Ctrl/⌘+Z`, not one character per press.
 
+Undo and redo are the first two buttons of the editor's toolbar on every
+platform — the only way to undo on a phone or a tablet with no keyboard — and
+are greyed, in their place, when there is nothing to undo or redo. On a phone
+they are also at the end of the overflow of the toolbar over a selection, once
+there is something to undo or redo. They are not
+among the buttons Settings → Editor can hide or reorder. Undo puts the
+selection back as it was before the step — the word a bold was applied to is
+selected again, and the caret goes back where a forward Delete began — and redo
+as it was after it.
+
 A step ends when you:
 
 - stop for about a second;
 - start a new word — the word you type after a space is a step of its own,
   so undo takes words back one at a time;
-- press Enter, or move the caret;
-- change from typing to deleting, or from Backspace to Delete.
+- press Enter, or move the caret — also when the keyboard moves it;
+- change from typing to deleting, or from Backspace to Delete;
+- paste or cut: a paste, a cut and an edit a command makes — a link inserted,
+  a format applied — are steps of their own, never joined to the typing or the
+  deleting next to them.
+
+On a keyboard that composes — an on-screen keyboard's word suggestions, an
+input method for Chinese, Japanese or Korean — the word being composed is one
+step however many times the keyboard rewrites it as you type.
 
 A bracket or quote that closes itself belongs to the step of what you type
 inside it: `(like this)` is undone whole, and typing the closing `)` over the
@@ -406,8 +455,14 @@ one the editor wrote does not end the step.
 
 Each open note keeps its last 200 steps, as long as the text they hold fits
 in about 32 MB; past that the oldest go first, and the latest step always
-stays. A change over a long stretch of the note — Replace All, Tidy — keeps
-only the lines it changed, so a big note does not weigh down its own undo.
+stays. A change over a long stretch of the note keeps only what it changed:
+Replace All one piece per match, Tidy the lines that differ, a format command
+the words it touched rather than their line, and a long deletion — the whole
+note selected and deleted — the note's own text where it stands, not a copy.
+
+A note undone back to the text on the disk is the saved text: it is not marked
+unsaved and is not written again, and an outside change to it is adopted as it
+is for any saved note.
 
 ### Opening and saving a note
 
@@ -435,10 +490,15 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost. If you open that note again meanwhile, it opens with
+the last edits lost. A write that fails for a note that is no longer on screen
+is said as it is for the one that is: a message names the note (*Could not save
+"name"*), once for the run of failures. If you open that note again meanwhile, it opens with
 those edits in it, as unsaved changes of its own — not with the older text the
 disk still has — and the held write is dropped, so nothing old is ever written
-over what you type next.
+over what you type next. A note
+you come back to while its own write is still running is read after that write
+has landed, so it opens with the text you left, not the older text the write was
+about to replace.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
@@ -446,14 +506,33 @@ have not changed — the tabs behind the one on screen too — shows the new fil
 at once. A note with edits of yours keeps them: your text wins and is saved
 over the file — but before it is, the version the other program wrote is kept
 in the note's [history](organization.md) (*changed outside Niman*), and a
-message says so. The comparison is of the file with the one the editor last
+message says so. That holds with history turned off too: the other program's
+version is then the one entry such a note has. The comparison is of the file with the one the editor last
 read or wrote **and** with the one Niman's own writer last left, so nothing is
 kept or announced when the other writer was the app itself (a second editor,
 Replace all, an outgoing write) or when nobody touched it at all. When the
 file's size and time match neither, its bytes are compared with what Niman
 last wrote: a file that only shows another time (Android's storage does not
 always report the one the write left) is still Niman's own and is not
-announced.
+announced. A file's time is only as fine as the file system's clock — two
+seconds on FAT, a few milliseconds elsewhere — so a program that rewrites the
+same number of bytes within that tick of the last write leaves the same size
+and time: when the file was last written that recently, its bytes are checked
+too, and such a change is seen like any other. The file is looked at again just before a save replaces it, so a
+program that rewrites a very long note while Niman is still writing its slices
+is kept in the history and announced the same way.
+
+**A note deleted while it is open.** Deleting a note (or a folder holding it)
+from the tree first saves what an open editor had not saved yet, so the trash
+holds the latest text and Undo brings back everything you typed, and then
+nothing is written back to the old path. A note that cannot be saved stops the
+delete: a message names it and it stays where it is. If
+another program, a sync or a move takes the file away while you are typing,
+Niman does not create it again behind your back: the status row reads *Not on
+disk · save again*, a message says so, and your text stays in the editor.
+Tapping the status (or saving again) writes the note afresh at the same place.
+A note you close while it is in that state is written back, so closing it never
+loses the text.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is
@@ -462,7 +541,27 @@ with it, so changing one character of a note changes one character of the
 file — a version-control diff or a sync merge sees that character and not
 every line. A note that mixes endings is saved with the one most of its lines
 had (a tie goes to `LF`), so every line ends alike afterwards; a note of lone
-`CR` lines, as the oldest Mac programs wrote, stays that way.
+`CR` lines, as the oldest Mac programs wrote, stays that way. In a note whose
+lines end with `LF` or `CRLF`, a lone `CR` is a character of its line and is
+kept where it is, and `CR CR LF` is one line ending after a `CR` — neither is
+turned into a line break.
+
+**Links to a note.** A note that is a symbolic link is saved through the link:
+the link stays a link and the file it points to holds the new text. A note
+that has other hard links is saved as a new file under its own name, so the
+other names keep the old text — it becomes a separate copy.
+
+**UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
+order mark — what Windows Notepad's *Unicode* writes — opens as the text it
+holds, in any script, and is saved in the same encoding with its mark, so a
+one-character change is a one-character change of the file, and an emptied
+note keeps its mark, its history and its place in the search. Only the mark
+tells such a file apart: a UTF-16 file without one is not recognised as text,
+and neither is one cut in the middle of a character (an odd number of bytes).
+A note that is not valid UTF-8 — an old Latin-1 file, say — is read with
+every byte outside UTF-8 as the Windows-1252 character it most likely is, so
+no accent is lost, and it is saved as UTF-8: the file's encoding changes, its
+words do not. A message says so when the note opens, before you type anything.
 
 ## Markdown support
 
@@ -471,7 +570,10 @@ yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting — and, in the read view and in live mode, a **copy**
 button at a code block's top right that puts its code on the clipboard;
 down a block taller than the screen it stays at the top of the part you
-see. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
+see. Math via `$…$` and `$$…$$` (KaTeX); a line that starts with `$$`
+and closes it on the same line, then goes on with text (`$$x$$ tail`), is a
+paragraph with the formula in it, while one that opens with `$$` and does not
+close it starts a block that runs to the next `$$` line. Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 The read view reads a note as GitHub does — GitHub Flavored Markdown, as
@@ -619,12 +721,32 @@ Pressed on lines that are all tasks already, it takes the boxes off and
 leaves their text. Blank lines in a selection are left alone, and the
 whole change is one undo step. On a task line the button reads as on.
 
+The other buttons that mark lines toggle the same way, from the toolbar,
+the editor's menu and the keys. The **bulleted list**, the **numbered list**
+and the **quote** put their mark on each selected line, and pressed on lines
+that all have it already they take it off again, so a button that reads as
+on takes its mark away. A numbered item pressed with the bullet button
+swaps its number for a bullet, a task its box for nothing, and a bulleted
+item pressed with the numbered one swaps in a number (a task keeps its box);
+a quote adds one level only to lines that have none and takes one level off
+at a time. The marks go behind a line's own indent and quote marks, and blank
+lines among several lines are left alone. **Bold**, **italic**, **strike** and
+the other wrapping buttons work on the text the same way: with the selection
+wrapped in their marks — inside it or right outside it — or the caret in a
+wrapped word, they take the marks off instead of adding another pair. A
+selection counted in asterisks is read as Markdown reads them: `**a**` is bold
+and not italic, so Italic over it wraps it again, and `***a***` is both.
+
 The **table** button writes an empty table — two columns, a header and
 one row — on lines of its own, with the caret in its first header cell:
 it takes the place of a blank line the caret is on, goes above a line
 the caret is at the start of, and below one the caret is anywhere else
 in, with a blank line kept from the text around it. One undo step takes
 it away. Rows and columns are added from the table itself in live mode.
+
+A table row is split at its pipes before anything inside it is read, as
+GitHub reads it: a `|` in a formula or a code span is written `\|`, so
+`$a\|b$` is one cell and `$a|b$` is two.
 
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all
@@ -695,11 +817,22 @@ writes its definition under the paragraph, the caret on it to write the
 note.
 
 Enter inside a list carries the list on, in both editors: the next line
-starts with the same marker, a numbered list counts on, and a task item
-gives you a fresh empty box. Enter on an item you have not typed
-anything into ends the list instead — the usual second Enter. On an empty
+starts with the same marker, a numbered list counts on (keeping the
+zeros of `01.`, which goes on as `02.`), and a task item gives you a
+fresh empty box. Enter in the middle of a numbered list renumbers, in
+the same step, the items after the new one that counted on from the
+item you were on (`1.` `2.` `3.` becomes `1.` `2.` `3.` `4.`); a list
+numbered any other way, `1.` `1.` `1.` or by hand, is left as written.
+Enter on an item you have not typed anything into —
+`- [ ]` with the box and no text included, with or without the space
+after it — ends the list instead, the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
-does, and only at the margin removes the marker. Inside a fenced code
+does, and only at the margin removes the marker. A rule written with
+spaces, `- - -` or `* * *`, is a rule and not a list: Enter after it adds
+nothing. Enter on a line that goes on an item's text — indented to where
+the text starts, under `- ` two spaces, under `10. ` four — starts the next
+line at that indent, so a long item stays one item; a line at the margin
+(a lazy continuation) gets the plain line break. Inside a fenced code
 block, a math block or the frontmatter it does nothing: a dash there is a
 dash.
 
@@ -708,7 +841,8 @@ marks, and a list inside the quote goes on behind them: `> - milk` and
 Enter gives `> - `, `> > x` gives `> > `, and the first line of a callout,
 `> [!note]`, gives `> ` for its body. Enter on a line with nothing after
 its marks, `> `, takes them off and leaves the quote; on an empty list
-item in a quote it takes the marker, and the next Enter the quote. Enter
+item in a quote it takes the marker, and the next Enter the quote. The
+marks are carried as you wrote them: `>- milk` goes on as `>- `. Enter
 and Tab read the line the same way, behind the `>`.
 
 Brackets come in pairs, in both editors and on every platform: `(`
@@ -1067,11 +1201,25 @@ for `- ` or `- [ ] `.
   siblings make room. An item with no parent loses up to the indent width of
   its own indent.
 - The first item of a list has nothing to nest under, so it moves by the
-  indent width (Settings, 2–8). So does every line that is not a list item.
+  indent width (Settings, 2–8). So does every line that is not a list item,
+  but for a blank line among several selected lines, which is left blank rather
+  than given trailing spaces.
 - On several selected lines, each item is placed by the same rule; items
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the
   `>`.
+- A selection that ends at the very start of a line — a triple click, or
+  Shift+Down from the start of a line — does not include that line, here and
+  in every command that works on the lines of the selection (the list, quote,
+  numbered-list, checklist, heading and Body commands).
+- With the caret on a line that is not a list item, Tab puts the indent at the
+  caret and Shift+Tab takes back the spaces right before it, so one undoes the
+  other wherever the caret is; with none before it, Shift+Tab takes up to the
+  indent width of the line's leading spaces. Only spaces are ever taken.
+- In a fenced code block, a math block or the frontmatter a line is text
+  whatever it says: Tab and Shift+Tab only add and take spaces — at the caret,
+  or at the start of each selected line — and nothing is nested or renumbered.
+  The same holds for a selection that reaches into code from the lines above.
 
 ### Move to tasks
 

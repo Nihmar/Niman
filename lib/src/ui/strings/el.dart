@@ -730,6 +730,17 @@ final class GreekStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Δεν ήταν δυνατή η αποθήκευση της σημείωσης. Το Niman θα δοκιμάσει ξανά.';
   @override
+  String get noteStatusGone => 'Δεν υπάρχει στον δίσκο · αποθήκευση ξανά';
+  @override
+  String get noteGoneSnack =>
+      'Αυτή η σημείωση δεν υπάρχει πια στον δίσκο. Το κείμενό της '
+      'διατηρείται εδώ — πατήστε την κατάσταση για να την αποθηκεύσετε '
+      'ξανά.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Δεν ήταν δυνατή η αποθήκευση του «$name». Το κείμενό του '
+      'διατηρείται στη μνήμη.';
+  @override
   String get noteChangedOnDisk =>
       'Ένα άλλο πρόγραμμα άλλαξε αυτή τη σημείωση. Εκείνη η έκδοση φυλάχτηκε '
       'στο ιστορικό.';
@@ -737,6 +748,10 @@ final class GreekStrings extends Strings {
   String get noteNotText =>
       'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
       'Niman δεν μπορεί να το εμφανίσει εδώ.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Αυτό το αρχείο δεν είναι UTF-8 και διαβάστηκε ως Windows-1252. Κατά '
+      'την αποθήκευση θα γραφτεί ως UTF-8.';
   @override
   String get noteLoadFailed => 'Δεν ήταν δυνατό να ανοίξει αυτή η σημείωση.';
   @override

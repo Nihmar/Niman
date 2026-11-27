@@ -713,6 +713,16 @@ final class FinnishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Muistiinpanoa ei voitu tallentaa. Niman yrittää uudelleen.';
   @override
+  String get noteStatusGone => 'Ei levyllä · tallenna uudelleen';
+  @override
+  String get noteGoneSnack =>
+      'Tätä muistiinpanoa ei enää ole levyllä. Sen teksti säilyy tässä '
+      '– tallenna se uudelleen napauttamalla tilaa.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Muistiinpanoa "$name" ei voitu tallentaa. Sen teksti säilyy '
+      'muistissa.';
+  @override
   String get noteChangedOnDisk =>
       'Toinen ohjelma muutti tätä muistiinpanoa. Se versio on tallessa '
       'historiassa.';
@@ -720,6 +730,11 @@ final class FinnishStrings extends Strings {
   String get noteNotText =>
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Tämä tiedosto ei ole UTF-8-muotoinen, joten se luettiin '
+      'Windows-1252-muodossa. Tallennettaessa se kirjoitetaan '
+      'UTF-8-muodossa.';
   @override
   String get noteLoadFailed => 'Tätä muistiinpanoa ei voitu avata.';
   @override

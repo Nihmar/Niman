@@ -719,6 +719,17 @@ final class GermanStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Die Notiz konnte nicht gespeichert werden. Niman versucht es erneut.';
   @override
+  String get noteStatusGone => 'Nicht auf dem Datenträger · erneut speichern';
+  @override
+  String get noteGoneSnack =>
+      'Diese Notiz ist nicht mehr auf dem Datenträger. Ihr Text bleibt '
+      'hier erhalten – tippen Sie auf den Status, um sie erneut zu '
+      'speichern.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      '„$name“ konnte nicht gespeichert werden. Der Text bleibt im '
+      'Speicher erhalten.';
+  @override
   String get noteChangedOnDisk =>
       'Ein anderes Programm hat diese Notiz geändert. Diese Fassung ist im '
       'Verlauf gesichert.';
@@ -726,6 +737,10 @@ final class GermanStrings extends Strings {
   String get noteNotText =>
       'Diese Datei ist keine Textnotiz, daher kann '
       'Niman sie hier nicht anzeigen.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Diese Datei ist nicht UTF-8 und wurde deshalb als Windows-1252 '
+      'gelesen. Beim Speichern wird sie als UTF-8 geschrieben.';
   @override
   String get noteLoadFailed => 'Diese Notiz konnte nicht geöffnet werden.';
   @override

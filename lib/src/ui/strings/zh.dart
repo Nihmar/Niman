@@ -663,9 +663,18 @@ final class ChineseStrings extends Strings {
   @override
   String get noteSaveFailedSnack => '无法保存此笔记。Niman 将会重试。';
   @override
+  String get noteStatusGone => '磁盘上已不存在 · 重新保存';
+  @override
+  String get noteGoneSnack => '此笔记已不在磁盘上。其文本仍保留在此，点按状态即可重新保存。';
+  @override
+  String noteHeldSaveFailed(String name) => '无法保存“$name”。其文本仍保留在内存中。';
+  @override
   String get noteChangedOnDisk => '另一个程序修改了此笔记。该版本已保存在历史记录中。';
   @override
   String get noteNotText => '此文件不是文本笔记，因此 Niman 无法在此显示。';
+  @override
+  String get noteReadAsWindows1252 =>
+      '此文件不是 UTF-8 编码，因此按 Windows-1252 读取。保存时将以 UTF-8 写入。';
   @override
   String get noteLoadFailed => '无法打开此笔记。';
   @override

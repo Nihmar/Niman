@@ -90,7 +90,11 @@ gone since) — the same comparison the version opens on. Open one to see what c
 the current note (removed lines in red, added in green; tap a folded
 row to show the unchanged lines) or to read its whole text. **Restore
 this version** keeps the current text as a version first, then puts the
-old one back — the snackbar's **Undo** swaps them again.
+old one back — the snackbar's **Undo** swaps them again. When the note is
+open with edits you typed after the history was opened, the editor shows the
+restored version as one change of its own: **Undo** in the editor (`Ctrl+Z`)
+brings your edits back, and the restore is not written over by the editor's
+next save.
 
 On a desktop with room for the dock, **History** on the note on screen
 opens the dock's **History** pane instead, and a version there opens
@@ -146,6 +150,12 @@ pinned: true
 aliases: [My alias]
 ---
 ```
+
+The block opens on the note's first line, which is exactly `---`, and closes
+at the next line that is `---` or `...`, within its first 1 024 lines. A
+note that starts with `---` and has no such line is not frontmatter: the
+`---` is a horizontal rule and the rest is the note, drawn and exported. A
+`---` at the start of a quote, a list item or a callout is a rule too.
 
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
@@ -234,6 +244,8 @@ tag's notes with a Back arrow.
 A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
 body are read the same way, so the same tag written either way is one tag.
+A `#` inside a web address (`https://example.com/#top`) is part of the
+address, not a tag, and so is a `$` there, not a formula.
 
 ## The tree
 
@@ -706,7 +718,10 @@ one.
 The file gets the editor, both of them, and the preview. It gets none of
 what a library adds:
 
-- **Saved where it is**, as it is. Nothing is written beside it.
+- **Saved where it is**, as it is. Nothing is written beside it. It is read
+  and written as a note is — a byte order mark, `CRLF` line endings and a
+  UTF-16 encoding come back as they were, and a file that is not UTF-8 opens
+  as Windows-1252 with a message ([editing](editing.md)).
 - **Not indexed**: search, tags and *Links to this note* never see it.
 - **No history, no sync, no trash.**
 - **Links shown, not followed** into a library. Its frontmatter is text:
@@ -718,8 +733,9 @@ It opens over whatever was showing, with a thin bar naming the file and
 the folder it sits in. Opening another adds a tab (`Ctrl+Tab` between
 them, `Ctrl+W` closes one), and closing the last, or going back, lands
 where you were. If another program changes the file while it is open,
-the change comes in, unless you have unsaved edits of your own; those
-win. As everywhere in Niman, edits save on their own after a pause.
+the change comes in — it is told by the file's size and time, and by its
+bytes when the file was written a moment before — unless you have unsaved
+edits of your own; those win. As everywhere in Niman, edits save on their own after a pause.
 
 A file inside the library you have open is one of its notes, and opens
 as one, with its history and its links. Opening it on its own would put

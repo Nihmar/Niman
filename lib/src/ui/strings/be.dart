@@ -711,11 +711,24 @@ final class BelarusianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Не ўдалося захаваць нататку. Niman паспрабуе яшчэ раз.';
   @override
+  String get noteStatusGone => 'Няма на дыску · захаваць зноў';
+  @override
+  String get noteGoneSnack =>
+      'Гэтай нататкі больш няма на дыску. Яе тэкст захаваны тут — '
+      'націсніце стан, каб захаваць яе зноў.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Не ўдалося захаваць «$name». Яе тэкст захаваны ў памяці.';
+  @override
   String get noteChangedOnDisk =>
       'Іншая праграма змяніла гэтую нататку. Тая версія захавана ў гісторыі.';
   @override
   String get noteNotText =>
       'Гэты файл не тэкставая нататка, таму Niman не можа паказаць яго тут.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Гэты файл не ў UTF-8, таму ён прачытаны як Windows-1252. Пры '
+      'захаванні ён будзе запісаны ў UTF-8.';
   @override
   String get noteLoadFailed => 'Не ўдалося адкрыць гэту нататку.';
   @override

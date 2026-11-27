@@ -393,20 +393,46 @@ void main() {
     expect(selected.end, 8);
   });
 
-  test('a motion from a selection moves its moving end', () {
+  test('a word motion from a selection moves its moving end', () {
     const text = 'una riga di testo';
     final buffer = SourceBuffer.fromText(text);
     final selected = moveCaret(
       const SelectionModel(anchor: 4, extent: 9),
-      CaretMotion.characterLeft,
+      CaretMotion.wordLeft,
       buffer: buffer,
     );
-    expect(
-      selected.extent,
-      8,
-      reason: 'the caret moves and the selection collapses to it',
-    );
+    expect(selected.extent, 4, reason: 'back to the start of `riga`');
     expect(selected.isCollapsed, isTrue);
+  });
+
+  test('Left and Right leave a range for its edges (#1349)', () {
+    const text = 'una riga di testo';
+    final buffer = SourceBuffer.fromText(text);
+    SelectionModel pressed(SelectionModel from, CaretMotion motion) =>
+        moveCaret(from, motion, buffer: buffer);
+    // Select 2..6, either way round: Left lands on 2, Right on 6.
+    for (final range in const [
+      SelectionModel(anchor: 2, extent: 6),
+      SelectionModel(anchor: 6, extent: 2),
+    ]) {
+      final left = pressed(range, CaretMotion.characterLeft);
+      expect((left.anchor, left.extent), (2, 2), reason: '$range, Left');
+      final right = pressed(range, CaretMotion.characterRight);
+      expect((right.anchor, right.extent), (6, 6), reason: '$range, Right');
+    }
+    // With Shift it is the extent that moves, the anchor held.
+    final shifted = moveCaret(
+      const SelectionModel(anchor: 2, extent: 6),
+      CaretMotion.characterLeft,
+      buffer: buffer,
+      extend: true,
+    );
+    expect((shifted.anchor, shifted.extent), (2, 5));
+    // A caret is no range: it steps as ever.
+    expect(
+      pressed(const SelectionModel.at(4), CaretMotion.characterLeft).extent,
+      3,
+    );
   });
 
   test('in a verbatim block a # or a - is text, not a marker (#579)', () {

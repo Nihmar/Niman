@@ -1,7 +1,6 @@
 // T-M3-01 AC: heading slug — the shared implementation the parser, the
 // editor/outline and the preview all use for `#heading` anchors.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/links/slug.dart';
@@ -63,7 +62,7 @@ void main() {
       expect(wiki.ref.heading, 'My Heading');
       expect(headingSlug(wiki.ref.heading!), 'my-heading');
 
-      final outline = outlineOf(HighlightDocument.fromText(doc).lines);
+      final outline = outlineOfText(doc);
       expect(outline, hasLength(1));
       expect(headingSlug(outline.single.text), headingSlug(wiki.ref.heading!));
     });
@@ -72,7 +71,7 @@ void main() {
       const doc = '## **Bold** Heading\n\n[[x#Bold Heading]]';
       final link = parseLinks(doc).single as WikiLink;
       expect(headingSlug(link.ref.heading!), 'bold-heading');
-      final entry = outlineOf(HighlightDocument.fromText(doc).lines).single;
+      final entry = outlineOfText(doc).single;
       expect(headingSlug(entry.text), 'bold-heading');
       expect(headingSlug(entry.text), headingSlug(link.ref.heading!));
     });

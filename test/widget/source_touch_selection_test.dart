@@ -142,6 +142,77 @@ void main() {
     expect(state.selectedText, 'parola sola');
   });
 
+  both('a handle dragged past the other leaves the other where it was', (
+    tester,
+    mode,
+  ) async {
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
+    // `parola` is columns 4..10.
+    await tester.longPressAt(_at(0, 6));
+    await tester.pumpAndSettle();
+    final handle = find.byKey(const ValueKey(SelectionHandle.start));
+    final from = tester.getCenter(handle);
+    // Where the finger is for a caret at [column]: the handle moves with it.
+    Offset finger(int column) => from + Offset((column - 4) * 14.0 + 1, 0);
+    final gesture = await tester.startGesture(from);
+    // Over the end, and on: the end of `parola` stays at 10.
+    for (final (column, expected) in <(int, (int, int))>[
+      (7, (7, 10)),
+      (12, (10, 12)),
+      (14, (10, 14)),
+      (12, (10, 12)),
+      (5, (5, 10)),
+    ]) {
+      await gesture.moveTo(finger(column));
+      await tester.pump();
+      expect(
+        (state.selection.start, state.selection.end),
+        expected,
+        reason: 'the finger at column $column',
+      );
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(state.selectedText, 'arola');
+  });
+
+  both('the end handle dragged back past the start keeps the start', (
+    tester,
+    mode,
+  ) async {
+    final state = await _pump(
+      tester,
+      'una parola sola\n',
+      live: mode == _Mode.live,
+    );
+    await tester.longPressAt(_at(0, 6));
+    await tester.pumpAndSettle();
+    final from = tester.getCenter(
+      find.byKey(const ValueKey(SelectionHandle.end)),
+    );
+    Offset finger(int column) => from + Offset((column - 10) * 14.0 + 1, 0);
+    final gesture = await tester.startGesture(from);
+    for (final (column, expected) in <(int, (int, int))>[
+      (2, (2, 4)),
+      (0, (0, 4)),
+      (8, (4, 8)),
+    ]) {
+      await gesture.moveTo(finger(column));
+      await tester.pump();
+      expect(
+        (state.selection.start, state.selection.end),
+        expected,
+        reason: 'the finger at column $column',
+      );
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   both('Copy puts the selection on the clipboard', (tester, mode) async {
     String? clipboard;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(

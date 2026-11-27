@@ -114,6 +114,9 @@ final class SourceEditorControls {
     copy: editor.typing.copySelection,
     paste: editor.typing.paste,
     selectAll: editor.selectAll,
+    history: () => editor.history,
+    undo: editor.undo,
+    redo: editor.redo,
     replace: editor.replaceRange,
     spellCheck: () => editor.services.spellCheck,
     spellRanges: editor.layout.marks.spellRanges,
@@ -262,6 +265,7 @@ final class SourceEditorControls {
     selectAll: editor.selectAll,
     deleteBackward: editor.deleteBackward,
     deleteForward: editor.deleteForward,
+    deleteTo: editor.typing.delete,
     undo: editor.undo,
     redo: editor.redo,
   );

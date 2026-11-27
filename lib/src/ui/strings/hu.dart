@@ -714,6 +714,16 @@ final class HungarianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'A jegyzetet nem sikerült menteni. A Niman újra megpróbálja.';
   @override
+  String get noteStatusGone => 'Nincs a lemezen · mentés újra';
+  @override
+  String get noteGoneSnack =>
+      'Ez a jegyzet már nincs a lemezen. A szövege itt megmarad – '
+      'koppintson az állapotra az újbóli mentéshez.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'A(z) „$name” jegyzetet nem sikerült menteni. A szövege a '
+      'memóriában megmarad.';
+  @override
   String get noteChangedOnDisk =>
       'Egy másik program módosította ezt a jegyzetet. Az a változat megmaradt '
       'az előzményekben.';
@@ -721,6 +731,10 @@ final class HungarianStrings extends Strings {
   String get noteNotText =>
       'Ez a fájl nem szöveges jegyzet, ezért a '
       'Niman itt nem tudja megjeleníteni.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Ez a fájl nem UTF-8, ezért Windows-1252-ként olvastuk be. Mentéskor '
+      'UTF-8-ként lesz kiírva.';
   @override
   String get noteLoadFailed => 'Ezt a jegyzetet nem sikerült megnyitni.';
   @override

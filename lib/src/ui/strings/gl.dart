@@ -716,12 +716,25 @@ final class GalicianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Non se puido gardar a nota. Niman tentarao de novo.';
   @override
+  String get noteStatusGone => 'Non está no disco · gardar de novo';
+  @override
+  String get noteGoneSnack =>
+      'Esta nota xa non está no disco. O seu texto consérvase aquí: '
+      'toca o estado para gardala de novo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Non se puido gardar «$name». O seu texto consérvase na memoria.';
+  @override
   String get noteChangedOnDisk =>
       'Outro programa cambiou esta nota. Esa versión gardouse no historial.';
   @override
   String get noteNotText =>
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Este ficheiro non está en UTF-8, así que se leu como Windows-1252. Ao '
+      'gardalo escribirase en UTF-8.';
   @override
   String get noteLoadFailed => 'Non se puido abrir esta nota.';
   @override

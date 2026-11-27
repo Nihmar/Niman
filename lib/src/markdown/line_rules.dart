@@ -14,12 +14,15 @@
 /// below measures from the note's margin.
 library;
 
+import 'dart:math' as math;
+
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/container_walk.dart';
 import 'package:niman/src/markdown/div_syntax.dart';
 import 'package:niman/src/markdown/footnote_syntax.dart';
 import 'package:niman/src/markdown/html_block_syntax.dart';
+import 'package:niman/src/markdown/line_exit.dart';
 import 'package:niman/src/markdown/line_read.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
@@ -37,6 +40,7 @@ final class LineRules {
     this._leftOver = const <int>[],
     this._lazy = const <bool>[],
     this.appSyntax = true,
+    this.isNote = true,
   });
 
   /// Which lines are lazy in the content around them — a quote's line
@@ -52,6 +56,10 @@ final class LineRules {
   /// display math. Always in the app; off for the specifications'
   /// examples, which know neither.
   final bool appSyntax;
+
+  /// Whether the lines are a note's own, and not a container's content read
+  /// again: only the note's first line can open the frontmatter.
+  final bool isNote;
 
   /// The text being scanned.
   final SourceBuffer buffer;
@@ -192,6 +200,9 @@ final class LineRules {
         (indent < 4 || continuing) &&
         TableLineSyntax.heads(text, next) &&
         _stays(line + 1, base, walk.footnote);
+    // What the line read of the lines after it to decide whether it opens
+    // the frontmatter, for the block it starts ([Block.reach]).
+    var openerReach = 0;
     LineRead made(
       BlockKind kind, {
       List<OpenItem>? items,
@@ -221,7 +232,7 @@ final class LineRules {
       divRole: divRole,
       definition: definition,
       definitionRead: definitionRead,
-      reach: reach,
+      reach: reach > 0 ? reach : openerReach,
       definitionsOnly: definitionsOnly,
       // A paragraph's line keeps what its paragraph was tried for.
       tableTried: openParagraph && tried,
@@ -289,11 +300,30 @@ final class LineRules {
       }
       return made(BlockKind.blank);
     }
+    // The note's own first line opens the frontmatter, when a closer
+    // follows within the window ([LineSyntax.frontmatterEnd]); a container's
+    // content has no frontmatter, its first line is no more the note's
+    // than its others. Whatever it looked at is its reach: an edit on one of
+    // those lines may decide it the other way.
     if (appSyntax &&
+        isNote &&
         line == 0 &&
         base.isEmpty &&
         LineSyntax.opensFrontmatter(line, text)) {
-      return made(BlockKind.frontmatter, frontmatter: true);
+      final end = LineSyntax.frontmatterEnd(
+        (at) => at < buffer.lineCount ? lineText(at) : null,
+      );
+      final looked = end < 0
+          ? math.min(buffer.lineCount, LineSyntax.frontmatterWindow)
+          : end + 1;
+      if (looked > farthestReach) farthestReach = looked;
+      if (end >= 0) {
+        openerReach = looked;
+        return made(BlockKind.frontmatter, frontmatter: true);
+      }
+      // Not frontmatter, and what the line is goes on as for any: its
+      // block carries what was looked at.
+      openerReach = looked;
     }
     final opened = LineSyntax.fenceOpen(text);
     if (opened != null) return made(BlockKind.fencedCode, fence: opened);
@@ -346,7 +376,7 @@ final class LineRules {
         items: inner.items,
         quoteDepth: inner.quoteDepth,
         carried: false,
-        exit: _footnoted(inner.exit),
+        exit: LineExit.footnoted(inner.exit),
         heads: inner.heads,
         footnote: Block.opensFootnote,
         divDepth: walk.divs.length,
@@ -656,7 +686,7 @@ final class LineRules {
       divRole: divRole,
       // A fence line stands in the divs around the one it opens or closes.
       divDepth: after.length < around.length ? after.length : around.length,
-      exit: _exit(
+      exit: LineExit.after(
         state,
         stack,
         divs: after,
@@ -677,127 +707,4 @@ final class LineRules {
       ),
     );
   }
-
-  /// The state after a line entered in [state]: the shared one where it can
-  /// be, and [state] itself when the line leaves it as it was.
-  static LineState _exit(
-    LineState state,
-    List<OpenItem> items, {
-    required List<OpenDiv> divs,
-    required int footnote,
-    required int definition,
-    required int quoteDepth,
-    required int quoteLast,
-    required FenceMarker? fence,
-    required bool math,
-    required bool frontmatter,
-    required HtmlBlockKind? html,
-    required String? htmlClosing,
-    required bool indentedCode,
-    required bool table,
-    required bool openParagraph,
-    required bool definitionsOnly,
-    required bool tableTried,
-  }) {
-    // A line that leaves the scan outside every construct is the shared
-    // state, not a new object equal to it. That is the common line of a long
-    // note of prose, and a state apiece was 68 MB of the shell running the
-    // million-line fixture (#346: 281 MB held after that scan, 213 MB with
-    // the shared state, `ProcessInfo` RSS) — a million copies of one value,
-    // held for as long as the scan is. A plain paragraph line is
-    // [LineState.paragraphOpen], the second shared constant.
-    if (items.isEmpty &&
-        footnote == 0 &&
-        definition == 0 &&
-        quoteDepth == 0 &&
-        fence == null &&
-        !math &&
-        !frontmatter &&
-        html == null &&
-        !indentedCode &&
-        !table &&
-        !definitionsOnly &&
-        !tableTried) {
-      if (divs.isEmpty) {
-        return openParagraph ? LineState.paragraphOpen : LineState.initial;
-      }
-      // The same two in a column, one pair for each stack of divs: a long
-      // column of prose allocates no state a line either.
-      if (!identical(divs, _sharedDivs)) {
-        _sharedDivs = divs;
-        _initialIn = LineState(divs: divs);
-        _paragraphIn = LineState(openParagraph: true, divs: divs);
-      }
-      return openParagraph ? _paragraphIn! : _initialIn!;
-    }
-    // Inside a construct, a line that leaves the state as it found it — the
-    // next line of an item's paragraph, of a quote, of a code block — hands
-    // on the state it entered in, for the same reason: the run's lines share
-    // one object.
-    if (identical(state.listStack, items) &&
-        identical(state.divs, divs) &&
-        state.footnote == footnote &&
-        state.definition == definition &&
-        state.quoteDepth == quoteDepth &&
-        state.quoteLast == quoteLast &&
-        state.fence == fence &&
-        state.math == math &&
-        state.frontmatter == frontmatter &&
-        state.html == html &&
-        state.htmlClosing == htmlClosing &&
-        state.indentedCode == indentedCode &&
-        state.table == table &&
-        state.openParagraph == openParagraph &&
-        state.definitionsOnly == definitionsOnly &&
-        state.tableTried == tableTried) {
-      return state;
-    }
-    return LineState(
-      fence: fence,
-      math: math,
-      frontmatter: frontmatter,
-      indentedCode: indentedCode,
-      html: html,
-      htmlClosing: htmlClosing,
-      quoteDepth: quoteDepth,
-      quoteLast: quoteLast,
-      listStack: items,
-      table: table,
-      openParagraph: openParagraph,
-      footnote: footnote,
-      definition: definition,
-      definitionsOnly: definitionsOnly,
-      tableTried: tableTried,
-      divs: divs,
-    );
-  }
-
-  /// The divs [_initialIn] and [_paragraphIn] stand in.
-  static List<OpenDiv>? _sharedDivs;
-
-  /// [LineState.initial] inside [_sharedDivs].
-  static LineState? _initialIn;
-
-  /// [LineState.paragraphOpen] inside [_sharedDivs].
-  static LineState? _paragraphIn;
-
-  /// [state] inside the footnote definition its line opened.
-  static LineState _footnoted(LineState state) => LineState(
-    fence: state.fence,
-    math: state.math,
-    frontmatter: state.frontmatter,
-    indentedCode: state.indentedCode,
-    html: state.html,
-    htmlClosing: state.htmlClosing,
-    quoteDepth: state.quoteDepth,
-    quoteLast: state.quoteLast,
-    listStack: state.listStack,
-    table: state.table,
-    openParagraph: state.openParagraph,
-    footnote: LineState.footnoteOpen,
-    definition: state.definition,
-    definitionsOnly: state.definitionsOnly,
-    tableTried: state.tableTried,
-    divs: state.divs,
-  );
 }

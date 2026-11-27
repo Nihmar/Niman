@@ -50,6 +50,9 @@ Future<void> _pumpEditor(
   await tester.pumpAndSettle();
 }
 
+/// Undo and redo: fixed at the bar's start, whatever the layout (#1336).
+const _history = [Key('toolbar-undo'), Key('toolbar-redo')];
+
 /// The toolbar's buttons, in render order.
 List<Key?> _renderedKeys(WidgetTester tester) {
   final toolbar = tester.widget<EditorToolbar>(find.byType(EditorToolbar));
@@ -59,7 +62,9 @@ List<Key?> _renderedKeys(WidgetTester tester) {
 void main() {
   testWidgets('the editor renders every button by default', (tester) async {
     await _pumpEditor(tester, ToolbarLayout.defaults);
+    // Undo and redo lead the bar, fixed (#1336); the layout's items follow.
     expect(_renderedKeys(tester), [
+      ..._history,
       for (final item in ToolbarItem.values) item.widgetKey,
     ]);
   });
@@ -105,7 +110,8 @@ void main() {
 
   testWidgets('a stored order is the render order', (tester) async {
     await _pumpEditor(tester, ToolbarLayout.parse('link,heading,bold'));
-    expect(_renderedKeys(tester).take(3), [
+    expect(_renderedKeys(tester).take(5), [
+      ..._history,
       ToolbarItem.link.widgetKey,
       ToolbarItem.heading.widgetKey,
       ToolbarItem.bold.widgetKey,

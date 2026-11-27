@@ -10,12 +10,37 @@ import 'package:niman/src/editor/list_row.dart';
 ///
 /// [lineAt] is asked for lines in `0..lineCount - 1`, one at a time, outward
 /// from the touched ones.
+///
+/// The whole block below the lines is read; [listIndentWindowBelow] reads as
+/// far as it is asked to.
 ({int first, int last}) listIndentWindow(
   String Function(int line) lineAt,
   int lineCount,
   int first,
   int last,
 ) {
+  final window = listIndentWindowBelow(lineAt, lineCount, first, last);
+  return (first: window.first, last: window.last);
+}
+
+/// [listIndentWindow] that reads at most [below] lines past `last` (all of
+/// the block when null), and says whether it reached the end of the block:
+/// `complete` false means more lines of it are below the window. With `top`
+/// the upward walk, which an earlier call made, is not made again.
+///
+/// The edit of an indent reads only as far down as it changes anything — the
+/// subtree of the item and the siblings it renumbers — by asking for a few
+/// lines, and for as many more as the answer says it needs
+/// (`indentListLinesWithin`): the cost follows the lines that change, not the
+/// length of the list (#1355).
+({int first, int last, bool complete}) listIndentWindowBelow(
+  String Function(int line) lineAt,
+  int lineCount,
+  int first,
+  int last, {
+  int? below,
+  int? top,
+}) {
   // A line belongs to the block when it is an item or is indented; a blank
   // line only when something that belongs follows it.
   bool belongs(ListRow row) => row.head != null || row.indent > 0;
@@ -23,23 +48,31 @@ import 'package:niman/src/editor/list_row.dart';
   // Upward the walk ends at the nearest item on the margin (at the quote
   // depth of the touched lines): nothing above it can hold an item that is
   // below it, so the structure from there on is the whole note's.
-  final depth = ListRow(lineAt(first)).depth;
-  var top = first;
-  for (var at = first - 1; at >= 0; at--) {
-    final row = ListRow(lineAt(at));
-    if (row.blank) continue;
-    if (!belongs(row)) break;
-    top = at;
-    if (row.head != null && row.indent == 0 && row.depth == depth) break;
+  var up = top ?? first;
+  if (top == null) {
+    final depth = ListRow(lineAt(first)).depth;
+    for (var at = first - 1; at >= 0; at--) {
+      final row = ListRow(lineAt(at));
+      if (row.blank) continue;
+      if (!belongs(row)) break;
+      up = at;
+      if (row.head != null && row.indent == 0 && row.depth == depth) break;
+    }
   }
   var bottom = last;
+  var complete = true;
+  final stop = below == null ? lineCount : last + 1 + below;
   for (var at = last + 1; at < lineCount; at++) {
+    if (at >= stop) {
+      complete = false;
+      break;
+    }
     final row = ListRow(lineAt(at));
     if (row.blank) continue;
     if (!belongs(row)) break;
     bottom = at;
   }
-  return (first: top, last: bottom);
+  return (first: up, last: bottom, complete: complete);
 }
 
 /// Where the caret on [column] of a line of [before] lands once the line

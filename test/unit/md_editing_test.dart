@@ -71,45 +71,89 @@ void main() {
     });
   });
 
-  group('prefixLines', () {
-    test('prefixed caret line: the caret follows the prefix', () {
-      final edit = prefixLines(text: 'item', selection: _sel(0), prefix: '- ');
+  group('the list and quote commands put their mark on each line', () {
+    test('a bullet on a caret line: the caret follows it', () {
+      final edit = toggleBulletList(text: 'item', selection: _sel(0));
       expect(edit.text, '- item');
       expect(edit.selection, _sel(2));
     });
 
-    test('each line of a multi-line selection is prefixed', () {
-      final edit = prefixLines(
+    test('each line of a multi-line selection is quoted', () {
+      final edit = toggleQuote(
         text: 'alpha\nbeta\ngamma',
         selection: _sel(0, 10), // 'alpha\nbeta' (the newline included).
-        prefix: '> ',
       );
       expect(edit.text, '> alpha\n> beta\ngamma');
-      expect(edit.selection.start, 4);
+      // Each end on its own text: after the mark of its own line only.
+      expect(edit.selection.start, 2);
       expect(edit.selection.end, 14);
     });
 
     test('collapsed caret on an empty line keeps the caret on it', () {
-      final edit = prefixLines(
-        text: 'a\n\nb',
-        selection: _sel(2),
-        prefix: '- ',
-      );
+      final edit = toggleBulletList(text: 'a\n\nb', selection: _sel(2));
       expect(edit.text, 'a\n- \nb');
       expect(edit.selection, _sel(4));
     });
 
-    test('quote prefixes a selection that ends mid-line', () {
-      final edit = prefixLines(
-        text: 'a\nb\nc',
-        selection: _sel(0, 3), // 'a\nb' minus the newline.
-        prefix: '> ',
-      );
+    test('quote marks a selection that ends mid-line', () {
+      final edit = toggleQuote(text: 'a\nb\nc', selection: _sel(0, 3));
       expect(edit.text, '> a\n> b\nc');
-      // Two lines prefixed: the selection shifts by 2 x 2.
-      expect(edit.selection, _sel(4, 7));
+      // The start stays on the `a` (after its own `> `), the end on the `b`.
+      expect(edit.selection, _sel(2, 7));
     });
   });
+
+  group(
+    'a selection ending at the start of a line leaves that line (#1345)',
+    () {
+      // `a\nb\nc` selected from the start to the start of `c`.
+      const text = 'a\nb\nc';
+      final selection = _sel(0, 4);
+
+      test('prefix', () {
+        final edit = toggleBulletList(text: text, selection: selection);
+        expect(edit.text, '- a\n- b\nc');
+        expect(edit.selection, _sel(2, 8));
+      });
+
+      test('numbers', () {
+        final edit = orderedList(text: text, selection: selection);
+        expect(edit.text, '1. a\n2. b\nc');
+      });
+
+      test('heading and body', () {
+        expect(
+          setHeading(text: text, selection: selection, level: 2).text,
+          '## a\n## b\nc',
+        );
+        expect(
+          removeHeading(text: '# a\n# b\n# c', selection: _sel(0, 8)).text,
+          'a\nb\n# c',
+        );
+      });
+
+      test('checklist', () {
+        expect(
+          toggleTaskList(text: text, selection: selection).text,
+          '- [ ] a\n- [ ] b\nc',
+        );
+      });
+
+      test('a caret at the start of a line is on that line', () {
+        expect(
+          toggleBulletList(text: text, selection: _sel(4)).text,
+          'a\nb\n- c',
+        );
+      });
+
+      test('a selection that starts at a line end holds that line', () {
+        expect(
+          toggleBulletList(text: text, selection: _sel(1, 2)).text,
+          '- a\nb\nc',
+        );
+      });
+    },
+  );
 
   group('toggleTaskList (#263)', () {
     MarkdownEdit toggle(String text, TextSelection selection) =>
@@ -147,6 +191,16 @@ void main() {
 
     test('an empty line alone becomes an empty task', () {
       expect(toggle('a\n\nb', _sel(2)).text, 'a\n- [ ] \nb');
+    });
+
+    test('a CRLF note keeps its line endings, and the second press undoes '
+        'the first (#1374)', () {
+      const note = '- a\r\n- b\r\n';
+      final tasks = toggle(note, _sel(0, 9));
+      expect(tasks.text, '- [ ] a\r\n- [ ] b\r\n');
+      expect(toggle(tasks.text, tasks.selection).text, 'a\r\nb\r\n');
+      expect(toggle('plain\r\n', _sel(0)).text, '- [ ] plain\r\n');
+      expect(toggle('  1. one\r\n', _sel(0)).text, '  1. [ ] one\r\n');
     });
 
     test('Enter on a task carries an unticked box on', () {

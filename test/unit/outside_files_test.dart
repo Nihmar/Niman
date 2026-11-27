@@ -63,18 +63,13 @@ void main() {
     setUp(() => dir = Directory.systemTemp.createTempSync('niman-outside'));
     tearDown(() => dir.deleteSync(recursive: true));
 
-    test('reads and writes the file where it is', () async {
+    test('says where the file is', () {
       final file = File(p.join(dir.path, 'README.md'))
         ..writeAsStringSync('# Hi');
       final document = EditorOnlyDocument(file.path);
       expect(document.name, 'README.md');
       expect(document.folder, dir.path);
       expect(File(document.filePath).existsSync(), isTrue);
-      expect(await document.read(), '# Hi');
-      await document.write('# Hello');
-      expect(file.readAsStringSync(), '# Hello');
-      // Nothing else is written beside it: no library, no temp left over.
-      expect(dir.listSync(), hasLength(1));
     });
 
     test('hears a change made by something else', () async {

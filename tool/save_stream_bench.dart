@@ -77,20 +77,20 @@ Future<void> _new(SourceBuffer buffer) async {
   final requests = await ready.first as SendPort;
   final clock = Stopwatch()..start();
   var index = 0;
+  var cursor = 0;
   var longest = 0;
   var longestMs = 0;
   var worst = 0;
   var slices = 0;
   while (true) {
     final sliceClock = Stopwatch()..start();
-    final first = index * _sliceLines;
-    if (first >= buffer.lineCount) {
+    if (cursor >= buffer.lineCount) {
       requests.send(null);
       break;
     }
-    final slice = utf8.encode(
-      buffer.sliceText(first, first + _sliceLines, _sliceChars),
-    );
+    final taken = buffer.takeSlice(cursor, cursor + _sliceLines, _sliceChars);
+    cursor = taken.next;
+    final slice = utf8.encode(taken.text);
     final sliceMs = sliceClock.elapsedMilliseconds;
     if (sliceMs > worst) worst = sliceMs;
     if (slice.length > longest) {

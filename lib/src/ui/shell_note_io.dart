@@ -14,7 +14,13 @@ import 'package:path/path.dart' as p;
 /// with the editor's absolute path turned library-relative. Null while no
 /// library is ready, or for a note outside the library root — the editor
 /// then writes the file itself.
-NoteSaver? noteSaverFor(LibrarySession controller) {
+///
+/// With [mustExist] — the editor's save of a note it loaded — a note whose
+/// file is gone is not created again but fails with `NoteGoneException`
+/// (#1321). A write that has to leave the text on disk whatever became of the
+/// file (a note switched away from, a save the user asked for again) asks for
+/// the other: the one that creates.
+NoteSaver? noteSaverFor(LibrarySession controller, {bool mustExist = false}) {
   final ops = controller.ops;
   final root = controller.root;
   if (ops == null || root == null) return null;
@@ -22,7 +28,12 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
     if (!p.isWithin(root, path)) {
       return writeNoteOffIsolate(path, content).then(
         (written) => NoteSaveResult(
-          stamp: DiskStamp(size: written.bytes, modified: written.modified),
+          stamp: DiskStamp(
+            size: written.bytes,
+            modified: written.modified,
+            taken: DateTime.now(),
+            digest: written.sha256,
+          ),
         ),
       );
     }
@@ -31,6 +42,7 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
       content,
       editSession: editSession,
       expected: expected,
+      mustExist: mustExist,
     );
   };
 }
@@ -41,7 +53,10 @@ NoteSaver? noteSaverFor(LibrarySession controller) {
 /// Null for a note outside the library root as well, which is the one
 /// case the streaming write does not cover — [NoteView] then joins the
 /// note and saves it through [noteSaverFor].
-NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
+NoteStreamSaver? noteStreamSaverFor(
+  LibrarySession controller, {
+  bool mustExist = false,
+}) {
   final ops = controller.ops;
   final root = controller.root;
   if (ops == null || root == null) return null;
@@ -57,6 +72,7 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
       editSession: editSession,
       references: references,
       expected: expected,
+      mustExist: mustExist,
     );
   };
 }

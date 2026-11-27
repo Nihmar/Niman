@@ -108,6 +108,60 @@ void main() {
     expect(names, ['Kept.md']);
   });
 
+  test(
+    'a slow writer is never more than a few slices behind (#1369)',
+    () async {
+      const slice = 1000;
+      const total = 40;
+      const inFlight = 3;
+      final target = File(p.join(root.path, 'Slow.md'));
+      var worstBehind = 0;
+      final result = await saveNoteStream(
+        root: root.path,
+        rel: 'Slow.md',
+        maxInFlight: inFlight,
+        writeDelay: const Duration(milliseconds: 15),
+        produce: (index) async {
+          if (index >= total) return null;
+          // What the writer has put in its temp file so far, in slices.
+          var written = 0;
+          for (final entry in root.listSync()) {
+            if (p.basename(entry.path).startsWith('.')) {
+              written = (entry as File).lengthSync() ~/ slice;
+            }
+          }
+          final behind = index - written;
+          if (behind > worstBehind) worstBehind = behind;
+          return Uint8List.fromList(List.filled(slice, 0x61));
+        },
+      );
+      expect(result, isNotNull);
+      expect(target.lengthSync(), slice * total);
+      // The producer is asked for slice `index` having sent `index` slices:
+      // those the writer has not written are the ones queued behind it.
+      expect(worstBehind, lessThanOrEqualTo(inFlight));
+    },
+  );
+
+  test('a writer that fails stops the producer, not the other way', () async {
+    // A folder that cannot be made: its name is a file's.
+    File(p.join(root.path, 'Plain.md')).writeAsStringSync('a file');
+    var calls = 0;
+    await expectLater(
+      saveNoteStream(
+        root: root.path,
+        rel: p.join('Plain.md', 'Inner.md'),
+        maxInFlight: 2,
+        produce: (index) async {
+          calls++;
+          return Uint8List.fromList(utf8.encode('slice $index\n'));
+        },
+      ),
+      throwsA(anything),
+    );
+    expect(calls, lessThan(100));
+  });
+
   test('the index follows a streamed save', () async {
     const text = '# Indexed\n\nbody words here';
     await writer.save('Indexed.md', producerOf(text));

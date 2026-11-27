@@ -723,12 +723,25 @@ final class RomanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Nota nu a putut fi salvată. Niman va încerca din nou.';
   @override
+  String get noteStatusGone => 'Nu este pe disc · salvează din nou';
+  @override
+  String get noteGoneSnack =>
+      'Această notă nu mai este pe disc. Textul ei este păstrat aici – '
+      'atingeți starea pentru a o salva din nou.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nu s-a putut salva „$name”. Textul ei este păstrat în memorie.';
+  @override
   String get noteChangedOnDisk =>
       'Un alt program a modificat această notă. Acea versiune este păstrată '
       'în istoric.';
   @override
   String get noteNotText =>
       'Acest fișier nu este o notă text, așa că Niman nu îl poate afișa aici.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Acest fișier nu este UTF-8, așa că a fost citit ca Windows-1252. La '
+      'salvare va fi scris ca UTF-8.';
   @override
   String get noteLoadFailed => 'Această notă nu a putut fi deschisă.';
   @override

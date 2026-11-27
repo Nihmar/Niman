@@ -713,6 +713,15 @@ final class CroatianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bilješka se nije mogla spremiti. Niman će pokušati ponovno.';
   @override
+  String get noteStatusGone => 'Nema na disku · spremi ponovo';
+  @override
+  String get noteGoneSnack =>
+      'Ove bilješke više nema na disku. Njezin tekst ostaje ovdje — '
+      'dodirnite status da je ponovo spremite.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nije moguće spremiti „$name”. Njezin tekst ostaje u memoriji.';
+  @override
   String get noteChangedOnDisk =>
       'Drugi program promijenio je ovu bilješku. Ta je verzija sačuvana u '
       'povijesti.';
@@ -720,6 +729,10 @@ final class CroatianStrings extends Strings {
   String get noteNotText =>
       'Ova datoteka nije tekstualna bilješka, pa je '
       'Niman ne može prikazati ovdje.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Ova datoteka nije u UTF-8, pa je pročitana kao Windows-1252. Pri '
+      'spremanju bit će zapisana u UTF-8.';
   @override
   String get noteLoadFailed => 'Ova se bilješka nije mogla otvoriti.';
   @override

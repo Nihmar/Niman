@@ -21,7 +21,6 @@ import 'package:niman/src/frontmatter/parser.dart' show normalizeTag;
 import 'package:niman/src/links/parser.dart';
 import 'package:niman/src/markdown/app_syntax.dart';
 import 'package:niman/src/markdown/block.dart';
-import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
 import 'package:niman/src/markdown/inline/inline_node.dart';
@@ -65,8 +64,13 @@ NoteReferences noteReferencesOf(String text) =>
 /// The tags and links of the note [buffer] holds, read off its lines as they
 /// are: what [noteReferencesOf] is, for a caller that has the buffer and
 /// would otherwise join it into a string for the read to split again.
-NoteReferences noteReferencesOfBuffer(SourceBuffer buffer) {
-  final blocks = BlockScanner(buffer).index.blocks;
+///
+/// [blocks] are the buffer's, when the caller has scanned it already.
+NoteReferences noteReferencesOfBuffer(
+  SourceBuffer buffer, {
+  List<Block>? blocks,
+}) {
+  blocks ??= BlockScanner(buffer).index.blocks;
   final parser = ReadParser();
   DocumentScope? scope;
   DocumentScope scopeOf() =>
@@ -108,7 +112,7 @@ BlockReferences blockReferencesOf(
   ReadParser parser,
   DocumentScope Function() scope,
 ) {
-  if (!_hasInlineText(block.kind)) return noBlockReferences;
+  if (!blockHasInlineText(block.kind)) return noBlockReferences;
   final raw = BlockParser.blockText(block, buffer);
   final bracket = raw.contains('[');
   // Without a `[` only a tag can be in it — and a heading's own hashes are
@@ -121,31 +125,7 @@ BlockReferences blockReferencesOf(
     scope: bracket ? scope() : DocumentScope.ofLines(buffer, 0, const []),
   );
   final out = _Collected(buffer);
-  void visit(BlockNode node) {
-    switch (node) {
-      case QuoteNode(:final children):
-        final title = read.titleOf(node);
-        if (title != null) out.read(title);
-        children.forEach(visit);
-      case ItemNode(:final children) || FootnoteNode(:final children):
-        children.forEach(visit);
-      case ListNode(:final items):
-        items.forEach(visit);
-      case ColumnsNode(:final columns):
-        columns.forEach(visit);
-      case ColumnNode(:final children):
-        children.forEach(visit);
-      case LeafNode():
-        final leaf = read.leaf(node);
-        final inline = leaf.inline;
-        if (inline != null) out.read(inline);
-        for (final row in leaf.rows) {
-          row.forEach(out.read);
-        }
-    }
-  }
-
-  visit(read.node);
+  read.forEachInline(out.read);
   if (out.tags.isEmpty &&
       out.links.isEmpty &&
       out.embeds.isEmpty &&
@@ -281,7 +261,7 @@ NoteReferences collectReferences(Iterable<BlockReferences> blocks) {
 }
 
 /// Whether a block of [kind] has inline text, where a tag or a link can be.
-bool _hasInlineText(BlockKind kind) => switch (kind) {
+bool blockHasInlineText(BlockKind kind) => switch (kind) {
   BlockKind.paragraph ||
   BlockKind.heading ||
   BlockKind.listItem ||

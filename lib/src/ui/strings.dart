@@ -543,8 +543,12 @@ final class AppStrings {
   static String get noteStatusError => _s.noteStatusError;
   static String get noteStatusSaveFailed => _s.noteStatusSaveFailed;
   static String get noteSaveFailedSnack => _s.noteSaveFailedSnack;
+  static String get noteStatusGone => _s.noteStatusGone;
+  static String get noteGoneSnack => _s.noteGoneSnack;
+  static String noteHeldSaveFailed(String name) => _s.noteHeldSaveFailed(name);
   static String get noteChangedOnDisk => _s.noteChangedOnDisk;
   static String get noteNotText => _s.noteNotText;
+  static String get noteReadAsWindows1252 => _s.noteReadAsWindows1252;
   static String get noteLoadFailed => _s.noteLoadFailed;
   static String get noteLoadMissing => _s.noteLoadMissing;
   static String get noteLoadDenied => _s.noteLoadDenied;

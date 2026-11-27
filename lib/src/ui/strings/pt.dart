@@ -714,6 +714,16 @@ final class PortugueseStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Não foi possível salvar a nota. O Niman tentará novamente.';
   @override
+  String get noteStatusGone => 'Não está no disco · guardar de novo';
+  @override
+  String get noteGoneSnack =>
+      'Esta nota já não está no disco. O texto fica guardado aqui: '
+      'toque no estado para a guardar de novo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Não foi possível guardar "$name". O texto fica guardado na '
+      'memória.';
+  @override
   String get noteChangedOnDisk =>
       'Outro programa alterou esta nota. Essa versão foi guardada no '
       'histórico.';
@@ -721,6 +731,10 @@ final class PortugueseStrings extends Strings {
   String get noteNotText =>
       'Este ficheiro não é uma nota de texto, por isso '
       'o Niman não o pode mostrar aqui.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Este ficheiro não está em UTF-8, por isso foi lido como Windows-1252. '
+      'Ao guardar, será escrito em UTF-8.';
   @override
   String get noteLoadFailed => 'Não foi possível abrir esta nota.';
   @override

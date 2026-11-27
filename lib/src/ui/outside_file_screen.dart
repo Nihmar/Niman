@@ -229,8 +229,9 @@ final class _OutsideFileScreenState extends ConsumerState<OutsideFileScreen> {
       services: NoteServices(
         // Its images sit beside it, not under a library root.
         libraryRoot: document.folder,
-        readNote: (_) => document.read(),
-        writeNote: (_, content) => document.write(content),
+        // No reader and no writer of its own: the file is read and written
+        // as a library note is — by its bytes, with its framing and its
+        // stamp (#1334).
         unsavedTracker: ref.watch(unsavedTrackerProvider),
         spellCheck: ref.watch(spellCheckProvider),
       ),

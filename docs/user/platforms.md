@@ -39,6 +39,12 @@ side. A PDF printed by the platform lays them out with the HTML page's
 CSS, and the fallback that draws the pages itself by the app's own rule:
 the two agree.
 
+Undo and redo ([editing](editing.md#undo-and-redo)) are on every platform
+and not only keys: they are the first two buttons of the editor's toolbar —
+greyed when there is nothing to undo or redo — and, on a phone, also in the
+overflow of the toolbar over a selection once there is something to undo (#1336). A phone or a tablet with no
+keyboard has them there and nowhere else.
+
 ## Android
 
 - **Android version:** Android 11 and later (minSdk 30, the oldest with
@@ -208,6 +214,16 @@ the two agree.
   three buttons are non-client for that, so the app no longer draws
   their hover highlight on Windows; the × still meets the unsaved-edits
   check.
+- **Shutting down, restarting or logging off** waits for the notes (#1364):
+  when Windows ends the session, the runner asks the app to write every note
+  with edits not yet on disk and lets Windows go once they are — Windows
+  shows *Niman is saving your notes* for as long as it waits, which is at
+  most 15 seconds. Ending the session is not a window close, so this is not
+  the unsaved-edits dialog: nothing is asked, the notes are saved. On macOS
+  a logout or shutdown goes through the quit the close guard already holds
+  and asks (see [macOS](#macos)); on Linux a session end that kills the app
+  without a close request is not handled yet, so the edits of the last
+  pause before it can be lost there — a gap, not a decision.
 - The installer can associate `.md` and `.markdown` files with Niman
   (a checkbox, on by default). Niman joins the files' *Open with* list;
   Windows leaves the choice of default app to you, so it becomes the
@@ -287,6 +303,11 @@ list at the end says what else it still lacks.
 - **Spell check** is the system's own (the one TextEdit and Mail use),
   in the languages the Mac has; the per-library personal dictionary
   applies on top.
+- **Text keys in the editor** are the Mac's: `⌥` for a word, `⌘` for the
+  line's and the note's ends, `⌥⌫` and `⌘⌫` to delete, and the system's own
+  text commands (what a key bindings file maps to `moveWordLeft:` and the
+  like) do what the same chord does. They are checked by key-binding tests,
+  not yet on a Mac with a keyboard in hand (see [shortcuts](shortcuts.md)).
 - **PDF export** goes through WebKit, the engine behind Safari: paginated
   A4 with real, selectable text, a note's or a folder's, nothing to
   install. **Web capture** runs a page with too little text in WebKit
@@ -382,7 +403,8 @@ page says of Android's screens holds there.
   on the clipboard.
 - **Slides** keep the screen on while they are presented.
 - **A hardware keyboard** gets the keys with `⌘`, as on a Mac (see
-  [shortcuts](shortcuts.md)).
+  [shortcuts](shortcuts.md)), the editor's word and line motions among
+  them (`⌥←`, `⌘←`; checked by key-binding tests, untried on a device).
 - **Date created** is the file's own creation time, kept across saves
   (see [Date created](#date-created)).
 

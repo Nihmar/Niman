@@ -712,11 +712,25 @@ final class CzechStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku se nepodařilo uložit. Niman to zkusí znovu.';
   @override
+  String get noteStatusGone => 'Není na disku · uložit znovu';
+  @override
+  String get noteGoneSnack =>
+      'Tato poznámka už na disku není. Její text zůstává zde – '
+      'klepnutím na stav ji uložíte znovu.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Poznámku „$name“ se nepodařilo uložit. Její text zůstává v '
+      'paměti.';
+  @override
   String get noteChangedOnDisk =>
       'Jiný program tuto poznámku změnil. Ta verze je uložena v historii.';
   @override
   String get noteNotText =>
       'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Tento soubor není v UTF-8, proto byl přečten jako Windows-1252. Při '
+      'uložení bude zapsán v UTF-8.';
   @override
   String get noteLoadFailed => 'Tuto poznámku se nepodařilo otevřít.';
   @override

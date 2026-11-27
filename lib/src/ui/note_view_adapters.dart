@@ -11,7 +11,8 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 
 /// The [UnsavedNote] view over a note view's revision pair (T-PP-11): no
 /// text copy, so the dirty bit cannot drift from the buffer.
-final class UnsavedNoteAdapter implements UnsavedNote, UnsavedNoteHead {
+final class UnsavedNoteAdapter
+    implements UnsavedNote, UnsavedNoteHead, UnsavedNoteDiscard {
   /// Creates an adapter reading the note's live state through getters,
   /// saving through [saveForClose].
   const new({
@@ -22,7 +23,20 @@ final class UnsavedNoteAdapter implements UnsavedNote, UnsavedNoteHead {
     required this.saveForClose,
     required this.bufferText,
     required this.bufferHead,
+    required this.discardWrites,
+    required this.restoreWrites,
+    required this.discarded,
   });
+
+  /// Drops the note's pending writes for a delete; completes when the save
+  /// running has ended (`NoteSavePipeline.discard`).
+  final Future<void> Function() discardWrites;
+
+  /// Takes it back when the delete failed (`NoteSavePipeline.undiscard`).
+  final void Function() restoreWrites;
+
+  /// Whether the writes were dropped: the note then reads as saved.
+  final bool Function() discarded;
 
   /// The open note's path.
   final String Function() notePath;
@@ -59,7 +73,14 @@ final class UnsavedNoteAdapter implements UnsavedNote, UnsavedNoteHead {
   // While a load is in flight the buffer holds the outgoing note and the
   // incoming one has nothing to save yet: not dirty, so a close landing on
   // the swap cannot write stale text under the new path.
-  bool get unsaved => !loading() && revision() != lastSavedRevision();
+  bool get unsaved =>
+      !loading() && !discarded() && revision() != lastSavedRevision();
+
+  @override
+  Future<void> discard() => discardWrites();
+
+  @override
+  void restore() => restoreWrites();
 
   @override
   Future<void> save() => saveForClose();

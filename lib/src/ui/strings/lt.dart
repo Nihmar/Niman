@@ -711,11 +711,24 @@ final class LithuanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Užrašo išsaugoti nepavyko. Niman bandys dar kartą.';
   @override
+  String get noteStatusGone => 'Nėra diske · įrašyti iš naujo';
+  @override
+  String get noteGoneSnack =>
+      'Šio užrašo diske nebėra. Jo tekstas išsaugotas čia – '
+      'bakstelėkite būseną, kad įrašytumėte iš naujo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nepavyko įrašyti „$name“. Jo tekstas išsaugotas atmintyje.';
+  @override
   String get noteChangedOnDisk =>
       'Kita programa pakeitė šį užrašą. Ta versija išsaugota istorijoje.';
   @override
   String get noteNotText =>
       'Šis failas nėra tekstinis užrašas, todėl Niman negali jo čia parodyti.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Šis failas nėra UTF-8, todėl jis perskaitytas kaip Windows-1252. '
+      'Išsaugant jis bus įrašytas UTF-8 formatu.';
   @override
   String get noteLoadFailed => 'Šio užrašo atidaryti nepavyko.';
   @override

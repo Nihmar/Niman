@@ -720,6 +720,15 @@ final class CatalanStrings extends Strings {
   String get noteSaveFailedSnack =>
       'No s’ha pogut guardar la nota. Niman ho tornarà a provar.';
   @override
+  String get noteStatusGone => 'No és al disc · desa-la de nou';
+  @override
+  String get noteGoneSnack =>
+      'Aquesta nota ja no és al disc. El text es conserva aquí: toca '
+      "l'estat per desar-la de nou.";
+  @override
+  String noteHeldSaveFailed(String name) =>
+      "No s'ha pogut desar «$name». El text es conserva a la memòria.";
+  @override
   String get noteChangedOnDisk =>
       'Un altre programa ha canviat aquesta nota. Aquella versió s’ha desat a '
       'l’historial.';
@@ -727,6 +736,10 @@ final class CatalanStrings extends Strings {
   String get noteNotText =>
       'Aquest fitxer no és una nota de text, així '
       'que Niman no el pot mostrar aquí.';
+  @override
+  String get noteReadAsWindows1252 =>
+      "Aquest fitxer no és UTF-8, així que s'ha llegit com a Windows-1252. "
+      "En desar-lo s'escriurà en UTF-8.";
   @override
   String get noteLoadFailed => 'No s’ha pogut obrir aquesta nota.';
   @override

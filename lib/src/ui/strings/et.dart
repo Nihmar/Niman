@@ -707,11 +707,25 @@ final class EstonianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Märget ei õnnestunud salvestada. Niman proovib uuesti.';
   @override
+  String get noteStatusGone => 'Pole kettal · salvesta uuesti';
+  @override
+  String get noteGoneSnack =>
+      'Seda märget pole enam kettal. Selle tekst säilib siin – '
+      'puudutage olekut, et see uuesti salvestada.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Märget „$name“ ei õnnestunud salvestada. Selle tekst säilib '
+      'mälus.';
+  @override
   String get noteChangedOnDisk =>
       'Teine programm muutis seda märget. See versioon on ajaloos alles.';
   @override
   String get noteNotText =>
       'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'See fail ei ole UTF-8, seega loeti see Windows-1252-na. Salvestamisel '
+      'kirjutatakse see UTF-8-na.';
   @override
   String get noteLoadFailed => 'Seda märget ei õnnestunud avada.';
   @override

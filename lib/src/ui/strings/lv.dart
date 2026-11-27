@@ -707,11 +707,24 @@ final class LatvianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Piezīmi neizdevās saglabāt. Niman mēģinās vēlreiz.';
   @override
+  String get noteStatusGone => 'Nav diskā · saglabāt vēlreiz';
+  @override
+  String get noteGoneSnack =>
+      'Šīs piezīmes diskā vairs nav. Tās teksts ir saglabāts šeit — '
+      'pieskarieties statusam, lai saglabātu vēlreiz.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Neizdevās saglabāt „$name”. Tās teksts ir saglabāts atmiņā.';
+  @override
   String get noteChangedOnDisk =>
       'Cita programma mainīja šo piezīmi. Šī versija ir saglabāta vēsturē.';
   @override
   String get noteNotText =>
       'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Šis fails nav UTF-8, tāpēc tas tika nolasīts kā Windows-1252. '
+      'Saglabājot tas tiks ierakstīts UTF-8 formātā.';
   @override
   String get noteLoadFailed => 'Šo piezīmi neizdevās atvērt.';
   @override

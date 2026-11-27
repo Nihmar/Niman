@@ -714,6 +714,15 @@ final class SerbianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Белешка није могла да се сачува. Niman ће покушати поново.';
   @override
+  String get noteStatusGone => 'Нема на диску · сачувај поново';
+  @override
+  String get noteGoneSnack =>
+      'Ове белешке више нема на диску. Њен текст је сачуван овде — '
+      'додирните статус да је поново сачувате.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Није могуће сачувати „$name“. Њен текст је сачуван у меморији.';
+  @override
   String get noteChangedOnDisk =>
       'Други програм је променио ову белешку. Та верзија је сачувана у '
       'историји.';
@@ -721,6 +730,10 @@ final class SerbianStrings extends Strings {
   String get noteNotText =>
       'Ова датотека није текстуална белешка, па је '
       'Niman не може приказати овде.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Ова датотека није у UTF-8, па је прочитана као Windows-1252. Приликом '
+      'чувања биће записана у UTF-8.';
   @override
   String get noteLoadFailed => 'Ова белешка није могла да се отвори.';
   @override

@@ -723,6 +723,15 @@ final class ItalianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Impossibile salvare la nota. Niman riproverà.';
   @override
+  String get noteStatusGone => 'Non è sul disco · salva di nuovo';
+  @override
+  String get noteGoneSnack =>
+      'Questa nota non è più sul disco. Il suo testo resta qui: tocca '
+      'lo stato per salvarla di nuovo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Impossibile salvare "$name". Il suo testo resta in memoria.';
+  @override
   String get noteChangedOnDisk =>
       'Un altro programma ha modificato questa nota. Quella versione è '
       'conservata nella cronologia.';
@@ -730,6 +739,10 @@ final class ItalianStrings extends Strings {
   String get noteNotText =>
       'Questo file non è una nota di testo, quindi '
       'Niman non può mostrarlo qui.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Questo file non è UTF-8, quindi è stato letto come Windows-1252. '
+      'Salvandolo verrà scritto in UTF-8.';
   @override
   String get noteLoadFailed => 'Impossibile aprire questa nota.';
   @override

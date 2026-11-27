@@ -61,6 +61,20 @@ class FlutterWindow : public Win32Window {
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
       caption_channel_;
 
+  // Asks the Flutter side to write every pending save, and does not return
+  // until it has answered or the deadline has passed (#1364). Run when Windows
+  // ends the session: that is not a window close, so the close guard's veto
+  // is not asked, and the edits of the last debounce were lost.
+  void FlushPendingSaves();
+
+  // The channel `flush` is sent on: `niman/session`.
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>>
+      session_channel_;
+
+  // Whether FlushPendingSaves is running: the messages it pumps while it
+  // waits must not start a second one.
+  bool flushing_ = false;
+
   // Where the title bar drew its minimize, maximize and close buttons (#169),
   // in physical pixels from the client origin. All three are answered, not
   // just the maximize one: the bar draws three buttons, so the hit test

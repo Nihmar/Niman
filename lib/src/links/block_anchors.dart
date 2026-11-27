@@ -258,9 +258,9 @@ final class BlockAnchorScanner {
 /// The block anchors of [text], in line order.
 ///
 /// The lines are the note's own, as the editor holds it: the rule loading a
-/// note applies ([normalizedLineEndings]), where a CR LF and a lone CR are
-/// line breaks like LF. A note written with Windows line endings has its ids
-/// where the same note with LF has them.
+/// note applies ([normalizedLineEndings]), where a CR LF is a line break like
+/// LF, and a lone CR is one in a note of lone-CR lines. A note written with
+/// Windows line endings has its ids where the same note with LF has them.
 List<BlockAnchor> blockAnchorsOfText(String text) {
   if (!text.contains('^')) return const <BlockAnchor>[];
   final scanner = BlockAnchorScanner();

@@ -716,6 +716,15 @@ final class SwedishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Anteckningen kunde inte sparas. Niman försöker igen.';
   @override
+  String get noteStatusGone => 'Finns inte på disken · spara igen';
+  @override
+  String get noteGoneSnack =>
+      'Den här anteckningen finns inte längre på disken. Texten är kvar '
+      'här – tryck på statusen för att spara den igen.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Det gick inte att spara "$name". Texten finns kvar i minnet.';
+  @override
   String get noteChangedOnDisk =>
       'Ett annat program ändrade anteckningen. Den versionen finns kvar i '
       'historiken.';
@@ -723,6 +732,10 @@ final class SwedishStrings extends Strings {
   String get noteNotText =>
       'Den här filen är inte en textanteckning, så '
       'Niman kan inte visa den här.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Den här filen är inte UTF-8, så den lästes som Windows-1252. Vid '
+      'sparning skrivs den som UTF-8.';
   @override
   String get noteLoadFailed => 'Anteckningen kunde inte öppnas.';
   @override

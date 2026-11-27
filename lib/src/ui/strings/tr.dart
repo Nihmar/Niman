@@ -706,11 +706,24 @@ final class TurkishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bu not kaydedilemedi. Niman yeniden deneyecek.';
   @override
+  String get noteStatusGone => 'Diskte yok · yeniden kaydet';
+  @override
+  String get noteGoneSnack =>
+      'Bu not artık diskte yok. Metni burada saklanıyor — yeniden '
+      'kaydetmek için duruma dokunun.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      '"$name" kaydedilemedi. Metni bellekte saklanıyor.';
+  @override
   String get noteChangedOnDisk =>
       'Başka bir program bu notu değiştirdi. O sürüm geçmişte saklandı.';
   @override
   String get noteNotText =>
       'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Bu dosya UTF-8 değil, bu yüzden Windows-1252 olarak okundu. '
+      'Kaydedildiğinde UTF-8 olarak yazılacak.';
   @override
   String get noteLoadFailed => 'Bu not açılamadı.';
   @override

@@ -6,6 +6,7 @@ import 'package:niman/src/core/creation_time.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_gone.dart';
 
 // The writes of `note_writer.dart` that block: each runs on a background
 // isolate (an `existsSync` or `statSync` is a FUSE round trip on Android,
@@ -71,7 +72,8 @@ replaceFileFrom(
 }
 
 /// Encodes [content] and writes it atomically to [abs], creating missing
-/// folders. With [snapshot] (and the note's [root] and library-relative
+/// folders — or, with [mustExist], throwing [NoteGoneException] when the
+/// file is gone. With [snapshot] (and the note's [root] and library-relative
 /// [rel]) the text being replaced is first kept as a history version when
 /// the request says so.
 ///
@@ -83,7 +85,11 @@ Future<NoteWriteResult> writeNoteFile(
   String? root,
   String? rel,
   SnapshotRequest? snapshot,
+  bool mustExist = false,
 }) async {
+  // A note the editor loaded and that is gone now stays gone (#1321): the
+  // check is here, with the write, where nothing can slip between the two.
+  if (mustExist && !File(abs).existsSync()) throw NoteGoneException(abs);
   SnapshotOutcome? outcome;
   String? snapshotError;
   if (snapshot != null && root != null && rel != null) {

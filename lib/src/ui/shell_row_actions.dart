@@ -24,6 +24,7 @@ import 'package:niman/src/ui/rename_check.dart';
 import 'package:niman/src/ui/shell_create_flow.dart';
 import 'package:niman/src/ui/shell_template_flow.dart';
 import 'package:niman/src/ui/strings.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/widget/widget_pin.dart';
 import 'package:path/path.dart' as p;
 
@@ -52,6 +53,7 @@ final class ShellRowActions {
     this.onLinksRewritten,
     this.onLinksProgress,
     this.taskLinks,
+    this.unsaved,
   });
 
   /// Asks whether the links to what a rename or a move took are to follow,
@@ -86,6 +88,10 @@ final class ShellRowActions {
   /// buffer must be there first, or its next save would put the old links
   /// back. A note that will not save stops the rename with it.
   final Future<void> Function() saveOpen;
+
+  /// The open notes' registry: a delete drops the pending saves of the
+  /// editors under what it deletes (#1321). Null in a test without one.
+  final UnsavedTracker? unsaved;
 
   /// Creating a note or a folder in the pressed row's folder.
   final ShellCreateFlow creates;
@@ -387,8 +393,10 @@ final class ShellRowActions {
       }
       if (!takeNotes) carry = const [];
     }
+    if (!context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
     await guard(() async {
-      await ops.delete(sel);
+      if (!await deleteOpen(messenger, ops, sel)) return;
       onDeleted(sel);
       // Each note on its own (#775): one that will not go must not leave
       // the file and the notes before it in the trash with no Undo — the
@@ -397,7 +405,7 @@ final class ShellRowActions {
       (Object, StackTrace)? failure;
       for (final note in carry) {
         try {
-          await ops.delete(note);
+          if (!await deleteOpen(messenger, ops, note)) continue;
           onDeleted(note);
           taken.add(note);
         } on Object catch (error, stack) {
@@ -473,6 +481,49 @@ final class ShellRowActions {
       annotationsFolder: await ops.annotationsFolder,
     ).of(sel, isDir: isDir);
     return carried;
+  }
+
+  /// Deletes the library-relative [path] after the open editors at or under
+  /// it wrote what they had not saved (#1321): the trash holds the latest
+  /// text, and Undo brings that back. What is left to write is then dropped,
+  /// since a save after the delete — an editor's debounce — would write the
+  /// note back to the old path. A note that will not save stops the delete
+  /// and says so: answers false, nothing deleted. A delete that fails gives
+  /// the editors their saves back, their edits untouched.
+  Future<bool> deleteOpen(
+    ScaffoldMessengerState messenger,
+    NoteOperations ops,
+    String path,
+  ) async {
+    final root = controller.root;
+    final abs = root == null ? null : p.join(root, path);
+    final tracker = unsaved;
+    if (abs != null && tracker != null) {
+      try {
+        await tracker.saveUnder(abs);
+      } on SaveUnderFailed catch (failure) {
+        if (messenger.mounted) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                AppStrings.noteHeldSaveFailed(
+                  p.basenameWithoutExtension(failure.path),
+                ),
+              ),
+            ),
+          );
+        }
+        return false;
+      }
+      await tracker.discardUnder(abs);
+    }
+    try {
+      await ops.delete(path);
+    } on Object {
+      if (abs != null) tracker?.restoreUnder(abs);
+      rethrow;
+    }
+    return true;
   }
 
   /// The trash name of [sel]'s freshest deletion: what Undo restores.

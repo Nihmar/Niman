@@ -123,6 +123,95 @@ void main() {
     });
   });
 
+  group('a thematic break written with spaces is not a list (#1341)', () {
+    for (final marked in <String>['- - -|', '* * *|', '_ _ _|', '-  -  -|']) {
+      test(marked, () => expect(_enter(marked), isNull));
+    }
+
+    test("inside a quote only the quote's marks are carried on", () {
+      expect(_enter('> - - -|'), '> - - -\n> |');
+    });
+  });
+
+  group("the writer's own marks and numbers are kept (#1342)", () {
+    for (final (marked, expected) in <(String, String)>[
+      ('- [ ]|', '|'),
+      ('- [x]|', '|'),
+      ('1. [ ]|', '|'),
+      ('> - [ ]|', '> |'),
+      ('- [ ]x|', '- [ ]x\n- |'),
+      ('- [ ] a|', '- [ ] a\n- [ ] |'),
+      ('01. a|', '01. a\n02. |'),
+      ('09. a|', '09. a\n10. |'),
+      ('009) a|', '009) a\n010) |'),
+      ('9. a|', '9. a\n10. |'),
+      ('99. a|', '99. a\n100. |'),
+      ('>- a|', '>- a\n>- |'),
+      ('>> 1. a|', '>> 1. a\n>> 2. |'),
+      ('> - a|', '> - a\n> - |'),
+    ]) {
+      test(marked, () => expect(_enter(marked), expected));
+    }
+  });
+
+  group(
+    'a line that goes on an item starts the next at its content (#1344)',
+    () {
+      for (final (marked, expected) in <(String, String)>[
+        ('- a\n  more|', '- a\n  more\n  |'),
+        ('1. a\n   more|', '1. a\n   more\n   |'),
+        ('10. a\n    more|', '10. a\n    more\n    |'),
+        ('- [ ] a\n  more|', '- [ ] a\n  more\n  |'),
+        ('- a\n  - b\n    more|', '- a\n  - b\n    more\n    |'),
+        ('- a\n  more\n  and more|', '- a\n  more\n  and more\n  |'),
+        ('- a\n\n  second|', '- a\n\n  second\n  |'),
+        ('- a\n  mo|re', '- a\n  mo\n  |re'),
+        ('> - a\n>   more|', '> - a\n>   more\n>   |'),
+        ('> > 1. a\n> >    more|', '> > 1. a\n> >    more\n> >    |'),
+        ('- a\n      deeper|', '- a\n      deeper\n  |'),
+      ]) {
+        test(marked.replaceAll('\n', r'\n'), () {
+          expect(_enter(marked), expected);
+        });
+      }
+
+      for (final marked in <String>[
+        '- a\nlazy|',
+        '- a\n  more\nlazy|',
+        '- a\n |more',
+        '- a\n  |more',
+        '  indented text|',
+        'para\n  indented|',
+        '- a\n\ntext\n  indented|',
+        '- a\n - b\n   |',
+        '1. a\n  too little|',
+        '> - a\n  not in the quote|',
+      ]) {
+        test("the platform's: ${marked.replaceAll('\n', r'\n')}", () {
+          expect(_enter(marked), isNull);
+        });
+      }
+
+      test("a paragraph wrapped past the reach is the platform's", () {
+        final lines = ['- a', for (var n = 0; n < 300; n++) '  line $n'];
+        final marked = '${lines.join('\n')}|';
+        expect(_enter(marked), isNull);
+      });
+
+      test('a CRLF note keeps its line endings', () {
+        final buffer = SourceBuffer.fromText('- a\r\n  more');
+        final edit = enterEdit(buffer, buffer.length, indentWidth: 2)!;
+        buffer.replaceRange(
+          edit.start,
+          edit.end,
+          edit.text,
+          verbatim: edit.verbatim,
+        );
+        expect(buffer.text, '- a\r\n  more\r\n  ');
+      });
+    },
+  );
+
   test('a CRLF note keeps its line endings through a quote', () {
     final buffer = SourceBuffer.fromText('> a\r\n> b');
     final edit = enterEdit(buffer, buffer.length, indentWidth: 2)!;

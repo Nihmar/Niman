@@ -94,10 +94,22 @@ the two have always shared.
 
 Moving and selecting in the source editor, on Windows and Linux:
 
+- `←` / `→` — one character; on a selection, without `Shift`, they close it
+  to its left or right edge (select a word, press `→`, and the caret is
+  right after it)
+- `↑` / `↓` (and `PageUp` / `PageDown`) — one row, or a page; the caret
+  keeps its column through a shorter or an empty line and comes back to it
+  on a longer one, until another key, a click or an edit moves it
 - `Ctrl+←` / `Ctrl+→` — jump a word; at the head of a line `Ctrl+←` goes to
   the end of the line above, and at the end of a line `Ctrl+→` to the head
   of the line below (past its indentation and any list marker)
-- `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word
+- `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word. A word is a run of
+  letters, digits and underscores, and a letter keeps what is written on it:
+  `é` typed as a letter and an accent, a Thai or Devanagari syllable, a
+  letter outside the Basic Multilingual Plane are all part of their word,
+  in the keys, in a double click and in a long press; a character with
+  many marks on it (or a long joined emoji sequence) is one step, however
+  long
 - `Home` / `End` — start and end of the line, `Shift` to select; `Home` stops
   first where the text starts, past the indentation and any list marker,
   task box, quote mark or heading hashes, and a second press goes to the
@@ -108,8 +120,25 @@ Moving and selecting in the source editor, on Windows and Linux:
   — there and for `Ctrl+←` / `Ctrl+→` alike
 - `Ctrl+Home` / `Ctrl+End` — start and end of the note
 - `Tab` / `Shift+Tab` — indent and outdent the line (a list item nests under
-  the item above it and back, see [editing](editing.md)); in a table in live
-  mode, the next and the previous cell instead
+  the item above it and back, see [editing](editing.md); on any other line the
+  two undo each other, and in code, maths or the frontmatter they only add and
+  take spaces); in a table in live mode, the next and the previous cell instead
+
+On a Mac, and on an iPad or iPhone with a hardware keyboard, the source
+editor takes the chords the system's own text fields take, since `Ctrl+←` is
+Mission Control there:
+
+- `⌥←` / `⌥→` — jump a word; `⌥↑` / `⌥↓` — to the start and end of the line;
+  with `Shift`, select
+- `⌘←` / `⌘→` — to the start (past the indentation and any list marker, as
+  `Home`) and the end of the line; `⌘↑` / `⌘↓` — to the start and end of the
+  note; with `Shift`, select
+- `⌥⌫` / `⌥⌦` — delete a word before and after the caret; `⌘⌫` / `⌘⌦` — delete
+  to the start and to the end of the line
+
+The same motions and deletions come from the system's own text commands
+(`moveToBeginningOfLine:`, `deleteWordBackward:` and the rest of what a Mac's
+key bindings can send), for a chord that is not bound here.
 
 Reading a note in the read view (Markdown notes, with the unified
 engine), which takes the keyboard when you switch to it or click it:

@@ -710,6 +710,15 @@ final class IcelandicStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Ekki tókst að vista minnispunktinn. Niman reynir aftur.';
   @override
+  String get noteStatusGone => 'Ekki á disknum · vista aftur';
+  @override
+  String get noteGoneSnack =>
+      'Þessi minnismiði er ekki lengur á disknum. Textinn er '
+      'varðveittur hér – ýttu á stöðuna til að vista hann aftur.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Ekki tókst að vista „$name“. Textinn er varðveittur í minni.';
+  @override
   String get noteChangedOnDisk =>
       'Annað forrit breytti þessum minnispunkti. Sú útgáfa er geymd í '
       'ferlinum.';
@@ -717,6 +726,10 @@ final class IcelandicStrings extends Strings {
   String get noteNotText =>
       'Þessi skrá er ekki textaminnispunktur, svo '
       'Niman getur ekki sýnt hana hér.';
+  @override
+  String get noteReadAsWindows1252 =>
+      'Þessi skrá er ekki í UTF-8, svo hún var lesin sem Windows-1252. Við '
+      'vistun verður hún skrifuð sem UTF-8.';
   @override
   String get noteLoadFailed => 'Ekki tókst að opna þennan minnispunkt.';
   @override
