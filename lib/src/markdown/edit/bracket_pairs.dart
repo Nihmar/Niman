@@ -273,7 +273,10 @@ final class BracketPairs {
     }
     if (offset >= buffer.length) return true;
     final next = buffer.substring(offset, offset + 1);
+    // A note with Windows line endings stores a `\r` before the `\n`: the
+    // line's end is either.
     return next == '\n' ||
+        next == '\r' ||
         next == ' ' ||
         next == '\t' ||
         _closingOnly.contains(next) ||

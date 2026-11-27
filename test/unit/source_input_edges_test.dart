@@ -262,6 +262,42 @@ void main() {
     });
   });
 
+  group('a batch after a stored line break (#1374)', () {
+    // The note's lines end `\r\n`; the platform's `\n` is stored as one.
+    const text = 'ab\r\ncd';
+
+    test('the next delta lands where the platform put it', () {
+      final surface = _wire(text, caret: 1);
+      surface.input.updateEditingValueWithDeltas([
+        _insert(text, 1, '\n'),
+        _insert('a\nb\r\ncd', 3, 'X'),
+      ]);
+      expect(surface.buffer.text, 'a\r\nbX\r\ncd');
+      expect(surface.carets.last.extent, 5, reason: 'after the X');
+    });
+
+    test('and the one after it, and a deletion', () {
+      final surface = _wire(text, caret: 1);
+      surface.input.updateEditingValueWithDeltas([
+        _insert(text, 1, '\n'),
+        _insert('a\nb\r\ncd', 3, 'X'),
+        _insert('a\nbX\r\ncd', 4, 'Y'),
+        _delete('a\nbXY\r\ncd', 0, 1),
+      ]);
+      expect(surface.buffer.text, '\r\nbXY\r\ncd');
+    });
+
+    test("without a stored break the offsets are the platform's own", () {
+      const plain = 'ab\ncd';
+      final surface = _wire(plain, caret: 1);
+      surface.input.updateEditingValueWithDeltas([
+        _insert(plain, 1, 'X'),
+        _insert('aXb\ncd', 3, 'Y'),
+      ]);
+      expect(surface.buffer.text, 'aXbY\ncd');
+    });
+  });
+
   test('performSelector hands the selector on', () {
     final surface = _wire('abc');
     surface.input.performSelector('moveToBeginningOfLine:');

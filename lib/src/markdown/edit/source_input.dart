@@ -504,6 +504,10 @@ final class SourceInput implements DeltaTextInputClient {
     );
     var known = true;
     var value = _platformValue;
+    // Whether the note stored something earlier in this batch the platform
+    // does not have — a `\n` as the note's `\r\n` — so that the platform's
+    // offsets in the next delta are a unit short of the note's (#1374).
+    var drifted = false;
     // The app's selection when the batch arrived. A platform edit that covers
     // the whole of its copy is read against this one: the platform moves its
     // own selection onto that copy's edge as it prepares the edit (Android's
@@ -549,7 +553,12 @@ final class SourceInput implements DeltaTextInputClient {
         ),
         _ => (-1, -1, ''),
       };
-      var (start, end) = (origin + from, origin + to);
+      var (start, end) = drifted && known && from >= 0
+          ? (
+              _noteOffset(delta.oldText, origin, from),
+              _noteOffset(delta.oldText, origin, to),
+            )
+          : (origin + from, origin + to);
       // A selection wider than the window reaches the platform clamped, and
       // what it types over is the part it holds: over the whole of it, in the
       // note — select all and type is the note replaced, not a window of it.
@@ -588,13 +597,57 @@ final class SourceInput implements DeltaTextInputClient {
           (onTyped?.call(start, end, inserted) ?? false)) {
         known = false;
       } else {
-        _replace(start, end, inserted, _caretOf(delta.selection, origin));
+        final caret = drifted && known
+            ? _noteCaret(delta.selection, delta.apply(value).text, origin)
+            : _caretOf(delta.selection, origin);
+        if (!_replace(start, end, inserted, caret)) drifted = true;
       }
       _composing = _shifted(delta.composing, origin);
       if (known) value = delta.apply(value);
     }
     _platformNowHas(known ? value : null);
   }
+
+  /// The note's offset for [offset] of [copy], the platform's text for the
+  /// window at [origin], when the note stored some of its `\n` as `\r\n`
+  /// that [copy] holds as one unit (#1374): the two are walked together, the
+  /// note's extra `\r` skipped.
+  int _noteOffset(String copy, int origin, int offset) {
+    if (offset <= 0) return origin + offset;
+    var breaks = 0;
+    for (var at = 0; at < offset && at < copy.length; at++) {
+      if (copy.codeUnitAt(at) == 0x0A) breaks++;
+    }
+    final room = math.min(buffer.length - origin, offset + breaks + 1);
+    final ours = buffer.substring(origin, origin + room);
+    var note = 0;
+    var theirs = 0;
+    while (theirs < offset && note < ours.length) {
+      final extra =
+          ours.codeUnitAt(note) == 0x0D &&
+          theirs < copy.length &&
+          copy.codeUnitAt(theirs) == 0x0A &&
+          note + 1 < ours.length &&
+          ours.codeUnitAt(note + 1) == 0x0A;
+      if (extra) {
+        note++;
+      } else {
+        note++;
+        theirs++;
+      }
+    }
+    return origin + note;
+  }
+
+  /// [selection], a platform selection on [copy], in note offsets
+  /// ([_noteOffset]).
+  SelectionModel _noteCaret(TextSelection selection, String copy, int origin) =>
+      selection.isValid
+      ? SelectionModel(
+          anchor: _noteOffset(copy, origin, selection.baseOffset),
+          extent: _noteOffset(copy, origin, selection.extentOffset),
+        )
+      : this.selection();
 
   /// The selection a platform update reports on a copy [length] long at
   /// [origin], in note offsets — the whole note when it is the platform's own
