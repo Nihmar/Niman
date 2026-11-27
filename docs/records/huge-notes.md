@@ -69,7 +69,16 @@ are real), and that is the point: the same work is no longer one 671 ms
 blocking turn of the UI isolate but 169 turns under 20 ms, so the frames
 land between them. The slices are 16 384 lines or 4 MB of characters,
 whichever comes first, and the loop yields between them
-(`note_view.dart`, `kSaveSliceLines`/`kSaveSliceChars`).
+(`note_save_pipeline.dart`, `kSaveSliceLines`/`kSaveSliceChars`). A slice
+cut short by the character limit is followed by one that starts where it
+stopped, not at the next multiple of 16 384 lines (#1320).
+
+The writer answers every slice it has written, and the producer keeps at most
+`kSlicesInFlight` (4) sent and unanswered: on a slow disk the slices would
+otherwise all queue as bytes in the writer's port, the full copy the streaming
+save exists to avoid (#1369). Before the rename the writer stats the target
+again and, when another program rewrote it since the slices began, keeps that
+version as an `external` one first (#1333).
 
 Two traps found on the way, both in `note_write_stream.dart`:
 

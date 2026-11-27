@@ -454,7 +454,9 @@ Replace all, an outgoing write) or when nobody touched it at all. When the
 file's size and time match neither, its bytes are compared with what Niman
 last wrote: a file that only shows another time (Android's storage does not
 always report the one the write left) is still Niman's own and is not
-announced.
+announced. The file is looked at again just before a save replaces it, so a
+program that rewrites a very long note while Niman is still writing its slices
+is kept in the history and announced the same way.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

@@ -12,6 +12,10 @@
 /// bytes leave for the writer as they are made, so no full copy of the
 /// note exists at any point of the save.
 ///
+/// **Backpressure.** The writer answers each slice once the file has taken
+/// it, and the producer sends no more than [kSlicesInFlight] ahead of those
+/// answers, so a slow disk never turns the whole note into queued bytes.
+///
 /// **What it does not do.** It does not read the note back, index it or
 /// version it: [saveNoteStream] takes the same history step and leaves the
 /// same bytes in place as [writeNoteFile] does, and the caller's reindex
@@ -28,6 +32,7 @@
 library;
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -37,6 +42,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/isolate_gauge.dart';
+import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -58,6 +64,11 @@ typedef NoteBytes = Uint8List;
 /// written in the order they are made.
 typedef NoteContentProducer = Future<NoteBytes?> Function(int index);
 
+/// How many slices a streaming save sends before the writer has written the
+/// first of them. A slice is at most 16 384 lines, so this bounds what waits
+/// in the writer's queue to a few megabytes of a note of ordinary lines.
+const int kSlicesInFlight = 4;
+
 /// Answers `true` when a save has to stop where it is: the note's buffer
 /// moved under the producer, so what it would write next no longer follows
 /// what it wrote before.
@@ -73,6 +84,7 @@ typedef NoteStreamStart = ({
   String rel,
   String root,
   SnapshotRequest? snapshot,
+  Duration writeDelay,
 });
 
 /// What the writing isolate is told first: the port it announces itself on,
@@ -96,6 +108,12 @@ typedef NoteStreamTalk = ({SendPort answers});
 /// it replaces is read and kept inside the writing isolate, from the disk,
 /// exactly as the joined path does.
 ///
+/// The writer acknowledges every slice it has written, and the producer keeps
+/// at most [maxInFlight] slices sent and not yet acknowledged: on a slow disk
+/// (an SD card, a network share) the slices would otherwise all queue as
+/// bytes in the writer's port — the full copy of the note this save exists
+/// to avoid (#1369).
+///
 /// Throws when the isolate cannot be started, the write fails, or the
 /// producer does; the temp file is gone either way, and the note still
 /// holds what it held.
@@ -110,11 +128,19 @@ Future<NoteWriteResult?> saveNoteStream({
   required NoteContentProducer produce,
   SnapshotRequest? snapshot,
   NoteSaveAbort? abort,
+  int maxInFlight = kSlicesInFlight,
   @visibleForTesting
   Future<Isolate?> Function(NoteStreamSpawn spawn)? spawnWriter,
+  @visibleForTesting Duration writeDelay = Duration.zero,
 }) async {
   final abs = p.join(root, rel);
-  final start = (abs: abs, rel: rel, root: root, snapshot: snapshot);
+  final start = (
+    abs: abs,
+    rel: rel,
+    root: root,
+    snapshot: snapshot,
+    writeDelay: writeDelay,
+  );
   // The producer stays on this isolate: it reads the editor's own buffer — a
   // closure over state no isolate can take — and awaiting it here is also
   // what hands the frames their gap between one slice and the next.
@@ -127,7 +153,20 @@ Future<NoteWriteResult?> saveNoteStream({
     // comes back on [answers] — a port that answers itself answers nobody.
     if (message is SendPort && !writer.isCompleted) writer.complete(message);
   });
-  answers.listen((message) => _settle(answer, message));
+  // What the writer has written, as a count of slices: the producer's room.
+  var written = 0;
+  Completer<void>? room;
+  answers.listen((message) {
+    if (message is int) {
+      written = message;
+      room?.complete();
+      room = null;
+      return;
+    }
+    _settle(answer, message);
+  });
+  // A failure the writer reports ends the wait for room as well.
+  final ended = answer.future.then<void>((_) {}, onError: (Object _) {});
   final job = IsolateGauge.begin('stream "$rel"');
   final spawn = (ready: ready.sendPort, start: start);
   final isolate =
@@ -137,7 +176,16 @@ Future<NoteWriteResult?> saveNoteStream({
     // The first message of the conversation: where the save's result goes.
     talk = (await writer.future)..send((answers: answers.sendPort));
     var index = 0;
+    var sent = 0;
     while (true) {
+      // Not another slice while the writer is behind by [maxInFlight]: one
+      // made now would only wait in its queue, as bytes.
+      while (sent - written >= maxInFlight && !answer.isCompleted) {
+        await Future.any([(room ??= Completer<void>()).future, ended]);
+      }
+      // The writer failed, or ended the conversation: its answer is the
+      // save's, and the producer has nothing more to hand over.
+      if (answer.isCompleted) return await answer.future;
       final slice = await produce(index++);
       if (slice == null) break;
       if (abort?.call() ?? false) {
@@ -148,7 +196,10 @@ Future<NoteWriteResult?> saveNoteStream({
         // the note as it then stands.
         return await _endTalk(talk, answer);
       }
-      if (slice.isNotEmpty) talk.send(slice);
+      if (slice.isNotEmpty) {
+        talk.send(slice);
+        sent++;
+      }
     }
     // The end of the note, then the end of the conversation: the writer
     // answers the first with the save's result and the second by closing,
@@ -291,11 +342,14 @@ final class _Conversation {
   /// When the save is over, however it ended.
   Future<void> get over => _over.future;
 
-  /// Slices that arrived before the temp file was open — the first message
-  /// and the first slice can be in the port's queue together.
-  final List<NoteBytes> _early = <NoteBytes>[];
+  /// Slices received and not yet written. The first message and the first
+  /// slice can be in the port's queue together, before the temp file is open.
+  final Queue<NoteBytes> _queue = Queue<NoteBytes>();
+  bool _pumping = false;
+  Completer<void>? _idle;
 
   IOSink? _sink;
+  int _written = 0;
   File? _temp;
   bool _created = false;
   int _bytes = 0;
@@ -341,14 +395,45 @@ final class _Conversation {
       );
       return;
     }
-    final sink = _sink;
-    if (sink == null) {
-      _early.add(message);
-      return;
+    _queue.add(message);
+    if (_sink != null) unawaited(_pump());
+  }
+
+  /// Writes the queued slices to the temp file, one at a time, and says after
+  /// each that the file has taken it: the producer waits for these answers
+  /// before it sends more (#1369). A flush answers once the sink has written
+  /// what it was given, and a sink cannot take more while one is pending, so
+  /// the slices wait here, in order, instead.
+  Future<void> _pump() async {
+    if (_pumping) return;
+    _pumping = true;
+    try {
+      while (_queue.isNotEmpty && _failure == null) {
+        final slice = _queue.removeFirst();
+        if (_start.writeDelay > Duration.zero) sleep(_start.writeDelay);
+        _sink!.add(slice);
+        _digest.add(slice);
+        _bytes += slice.length;
+        await _sink!.flush();
+        _answers?.send(++_written);
+      }
+    } on Object catch (error, stack) {
+      fail(error, stack);
+    } finally {
+      _pumping = false;
+      final idle = _idle;
+      _idle = null;
+      idle?.complete();
     }
-    sink.add(message);
-    _digest.add(message);
-    _bytes += message.length;
+  }
+
+  /// Completes once the queued slices are on the file.
+  Future<void> _drained() {
+    if (!_pumping && _queue.isEmpty) return Future<void>.value();
+    if (!_pumping) {
+      unawaited(_pump());
+    }
+    return (_idle ??= Completer<void>()).future;
   }
 
   /// The digest of the slices written, made as they are: the reindex behind
@@ -400,22 +485,20 @@ final class _Conversation {
       final file = File(start.abs);
       _created = !file.existsSync();
       if (_created) file.parent.createSync(recursive: true);
+      // The file as it is when the slices start: the rename at the end is
+      // the moment to ask whether somebody else wrote it since (#1333).
+      final before = DiskStamp.of(start.abs);
       final temp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
-      final sink = temp.openWrite();
+      _sink = temp.openWrite();
       _temp = temp;
-      _sink = sink;
-      for (final slice in _early) {
-        sink.add(slice);
-        _digest.add(slice);
-        _bytes += slice.length;
-      }
-      _early.clear();
+      unawaited(_pump());
       await _over.future;
+      await _drained();
       final failure = _failure;
       if (failure != null) {
         Error.throwWithStackTrace(failure, _stack ?? StackTrace.current);
       }
-      await sink.close();
+      await _sink?.close();
       _sink = null;
       if (!_endedWithNull) {
         // The caller stopped sending: the save is abandoned, and an
@@ -425,6 +508,12 @@ final class _Conversation {
         _answers?.send(null);
         return;
       }
+      // A note this save takes seconds to write — minutes, over a slow disk —
+      // can be rewritten by another program meanwhile, and the check made at
+      // the start did not see it: the file about to be replaced is looked at
+      // again, and kept as the outside version when it is not the one the
+      // slices began against (#1333).
+      outcome = _keepOutsideWrite(before, outcome) ?? outcome;
       // Flushed to storage, then renamed over the note: the same last step
       // as every other atomic write (#1058).
       final stamp = await publishTempFile(temp, start.abs);
@@ -460,6 +549,40 @@ final class _Conversation {
     } finally {
       _sink = null;
       _temp = null;
+    }
+  }
+
+  /// Keeps the version of the note another program wrote while the slices
+  /// were being written, when there is one: the file now is not the file
+  /// the save began against ([before]).
+  ///
+  /// Answers the snapshot's outcome when it took a version, so the save
+  /// reports an outside change as one made before the slices would have.
+  /// Null when nothing changed, when the file is gone (nothing to keep), when
+  /// the save keeps no history, or when the snapshot failed — that one is
+  /// logged by the caller's report and must not stop the save.
+  SnapshotOutcome? _keepOutsideWrite(
+    DiskStamp? before,
+    SnapshotOutcome? outcome,
+  ) {
+    final asked = _start.snapshot;
+    if (asked == null) return null;
+    final now = DiskStamp.of(_start.abs);
+    if (now == null || (before?.sameAs(now) ?? false)) return null;
+    try {
+      final kept = snapshotBeforeWrite(
+        _start.root,
+        _start.rel,
+        SnapshotRequest(
+          limit: asked.limit < 1 ? 1 : asked.limit,
+          interval: asked.interval,
+          now: asked.now,
+          forced: HistoryReason.external,
+        ),
+      );
+      return kept.version == null ? null : kept;
+    } on Object {
+      return null;
     }
   }
 }

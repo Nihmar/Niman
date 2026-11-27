@@ -42,6 +42,9 @@ void main() {
 
   File note() => File(p.join(root.path, 'a.md'));
 
+  bool hasTemp() =>
+      root.listSync().any((entry) => isTempFileName(p.basename(entry.path)));
+
   Future<List<HistoryVersion>> versions() async =>
       (await ops.noteHistory('a.md')).versions;
 
@@ -91,6 +94,57 @@ void main() {
     expect(
       await ops.readNoteVersion('a.md', kept.number),
       'theirs, streamed over',
+    );
+  });
+
+  test('a write that lands during a streaming save is kept (#1333)', () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+
+    // Another program rewrites the file after the slices began, before the
+    // save is renamed over it.
+    final second = await ops.saveNoteStream(
+      'a.md',
+      (index) async {
+        if (index == 1) {
+          // The writer is its own isolate: its temp file is there once the
+          // save has begun, which is when the outside write must land.
+          for (var i = 0; i < 400 && !hasTemp(); i++) {
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+          }
+          note().writeAsStringSync('theirs, landed in the middle of a save');
+        }
+        return index < 2
+            ? Uint8List.fromList(utf8.encode('mine, slice $index\n'))
+            : null;
+      },
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(second!.keptExternal, isTrue);
+    expect(note().readAsStringSync(), 'mine, slice 0\nmine, slice 1\n');
+    final kept = (await versions()).singleWhere(
+      (v) => v.reason == HistoryReason.external,
+    );
+    expect(
+      await ops.readNoteVersion('a.md', kept.number),
+      'theirs, landed in the middle of a save',
+    );
+  });
+
+  test('a streaming save nobody touched keeps nothing extra', () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+    final second = await ops.saveNoteStream(
+      'a.md',
+      (index) async =>
+          index == 0 ? Uint8List.fromList(utf8.encode('mine, streamed')) : null,
+      editSession: 1,
+      expected: first!.stamp,
+    );
+    expect(second!.keptExternal, isFalse);
+    expect(
+      (await versions()).where((v) => v.reason == HistoryReason.external),
+      isEmpty,
     );
   });
 
