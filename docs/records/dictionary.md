@@ -371,6 +371,95 @@ pipeline carries, measured in phase 2.
 - A small sample of the extraction is a test fixture, so the pipeline is
   tested without the dumps.
 
+### As built (#1381, 2026-11-27)
+
+**Running it:**
+
+```
+dart run tool/dictionary_pack.dart --out build/dictionary --work <spill> \
+  --english raw-wiktextract-data.jsonl.gz \
+  --edition it=it-extract.jsonl.gz [--edition fr=… …] \
+  [--languages en,it,…] [--memory 2048] [--examples 2] [--no-dictzip]
+dart run tool/dictionary_catalog.dart build/dictionary dictionary-pack-1
+```
+
+- A language given with `--edition` is built from its own edition, then
+  completed with the English edition's forms. Every other language is
+  glossed in English from the one pass over the English edition.
+- Without `--languages`, all 35 packs are built.
+
+**Memory.**
+- A regular expression drops the lines of languages not being built
+  before any JSON is decoded.
+- Rendered entries go into an external merge sort
+  (`tool/dictionary_pack/external_sorter.dart`), one sorter per language
+  under one shared `--memory` budget. When the budget is exceeded, the
+  fullest sorter spills a sorted run to disk.
+- The pack is written by a k-way merge of those runs. The merge also joins
+  a headword's parts of speech into one entry.
+- No set of headwords is ever held. The `.syn` records are sorted the same
+  way, then joined against a spilled list of headword keys to drop the
+  forms that are themselves headwords.
+- On a synthetic dump of 600,000 entries in 4 languages with
+  `--memory 64`, the process peaked near 300 MB. The real English dump has
+  not been run yet.
+
+**dictzip, in pure Dart.**
+- Each 58,315-byte chunk is compressed by a fresh `RawZLibFilter`. Its
+  sync flush, starting from an empty window, ends exactly as a full flush
+  does.
+- A final empty block closes the stream, so `gzip` and `ZLibDecoder` read
+  the whole file, and each chunk also inflates on its own (both tested).
+- The chunk size grows if a pack would need more than 32,762 chunks.
+- `dictunzip` itself is checked in the workflow, as a warning only.
+
+**What is published.** One uncompressed ustar `niman-<code>.tar` per pack,
+holding the four files:
+- one `Downloadable` and one SHA-256 per language;
+- it unpacks as a stream, with no central directory to seek to;
+- the prerelease also carries `SHA256SUMS`.
+
+**The workflow.**
+- One job builds, checks and publishes, so the archives never pass
+  through an artifact. This differs from `ocr-engine.yml`'s two jobs.
+- It frees the runner's preinstalled toolchains for disk, downloads the
+  English dump and the 12 other own editions, and builds the 35 packs.
+- Not yet verified on a real run:
+  - the URLs of the other editions (inferred from kaikki's page);
+  - the download time and the disk peak;
+  - `--memory 2048` against the runner's RAM.
+
+**What the packs keep:**
+- **Examples:** at most two per sense; quotations, examples over 240
+  characters and example translations are left out (the grammar has no
+  place for a translation).
+- **Sub-senses:** of a sub-sense's `glosses`, only the last, its own.
+- **`data-tags`:** always written, even empty.
+- **The form-of paragraph:** its `form-of` tag is dropped, since the
+  element says it already.
+- **Chinese:** `zh` also takes the English edition's `cmn` (Mandarin)
+  entries.
+- **Serbo-Croatian:** a Cyrillic headword gains its Latin spelling as a
+  form. Cyrillic to Latin is exact. The reverse is ambiguous (*nj*, *lj*,
+  *dž*), and a wrong key could reach the wrong lemma, so a Latin headword
+  reaches the Cyrillic script only through Wiktionary's own pages.
+
+**What the schema turned up.**
+- The other editions carry `raw_tags` on senses and forms; the English
+  edition's documented schema does not.
+- In the it, ja and nl editions, `form_of` carries alternative spellings
+  too.
+- **Gender:** in the other editions it is in the top-level `tags`. In the
+  English edition it is only in the `head_templates` expansion, which is
+  parsed for it.
+- The English edition's form bookkeeping (`table-tags`,
+  `inflection-template`, placeholders) is filtered out.
+
+**Still open:** the bar an own edition must meet, and every size. The
+reports give each own edition's `coverage` against the English edition,
+`senseRatio` and `sensesPerHeadword`. The first real run sets both, and
+this record is updated with them.
+
 ## The surfaces
 
 - **`ui/dictionary_lookup_flow.dart`**: from a selection (text, language,
