@@ -207,6 +207,45 @@ final class SourceCaretMotion {
     return buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
   }
 
+  /// The column the vertical motions aim for, as the note box's x, and the
+  /// selection the last of them left behind (#1348).
+  ///
+  /// A caret that goes down through a shorter line — or an empty one — and on
+  /// to a longer one comes back to the column it left: the goal is the x of
+  /// the caret when the run of Up, Down, PageUp and PageDown began. Any other
+  /// change of the selection — a key, a click, typing, an undo — ends the
+  /// run, and the next vertical move reads its goal from where the caret is:
+  /// the goal holds only while the selection is the one the run left.
+  double? _goal;
+  SelectionModel? _goalSelection;
+
+  /// The x, in global coordinates, a vertical move from [caret] aims for.
+  double _goalX(Rect caret) {
+    final goal = _goal;
+    final left = _goalSelection;
+    final selection = _selection();
+    final box = _noteBox();
+    if (goal != null &&
+        box != null &&
+        left != null &&
+        left.anchor == selection.anchor &&
+        left.extent == selection.extent) {
+      return box.localToGlobal(Offset(goal, 0)).dx;
+    }
+    return caret.center.dx;
+  }
+
+  /// Takes [x], global, as the goal of the run the caret has just moved in.
+  void _keepGoal(double x) {
+    final box = _noteBox();
+    if (box == null) {
+      _goal = null;
+      return;
+    }
+    _goal = box.globalToLocal(Offset(x, 0)).dx;
+    _goalSelection = _selection();
+  }
+
   /// Moves the caret [rows] visual rows up (negative) or down, keeping its
   /// horizontal place.
   ///
@@ -220,9 +259,17 @@ final class SourceCaretMotion {
   /// with
   /// the height map saying which line a y falls in.
   void moveVertically(int rows, {bool extend = false}) {
-    final caret = _caretRect();
-    if (caret == null || rows == 0) return;
+    final measured = _caretRect();
+    if (measured == null || rows == 0) return;
     final buffer = _buffer();
+    // The caret as it would stand in the column the run aims for.
+    final goal = _goalX(measured);
+    final caret = measured.shift(Offset(goal - measured.center.dx, 0));
+    void land(int offset) {
+      moveTo(offset, extend: extend);
+      _keepGoal(goal);
+    }
+
     // The caret's own row is the row height — its line's, at the scale it is
     // drawn at — and the point is the middle of the row [rows] away, so a
     // boundary never decides which row it is.
@@ -232,7 +279,7 @@ final class SourceCaretMotion {
     // to the next column, or out of the block (#729).
     final edge = _acrossColumns(caretLine, point, rows, caret);
     if (edge != null) {
-      moveTo(edge, extend: extend);
+      land(edge);
       return;
     }
     var offset = _paintedOffsetAt(point);
@@ -249,7 +296,7 @@ final class SourceCaretMotion {
       offset = _paintedOffsetAt(point);
     }
     if (offset != null) {
-      moveTo(offset, extend: extend);
+      land(offset);
       return;
     }
     // The row is not drawn: move the note under the caret by as much, and ask
@@ -267,6 +314,7 @@ final class SourceCaretMotion {
         rows < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
         extend: extend,
       );
+      _keepGoal(goal);
       return;
     }
     scroll.jumpTo(to);
@@ -274,7 +322,7 @@ final class SourceCaretMotion {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_mounted()) return;
       final landed = _paintedOffsetAt(shifted) ?? _mappedOffsetAt(shifted);
-      if (landed != null) moveTo(landed, extend: extend);
+      if (landed != null) land(landed);
     });
     WidgetsBinding.instance.scheduleFrame();
   }
@@ -419,20 +467,24 @@ final class SourceCaretMotion {
     );
     if (to == from) {
       // Nothing left to page through: the caret goes to that end of the note.
+      final caret = _caretRect();
+      final goal = caret == null ? null : _goalX(caret);
       moveBy(
         direction < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
         extend: extend,
       );
+      if (goal != null) _keepGoal(goal);
       return;
     }
     // The caret keeps its place *on the screen* while the note moves under
     // it, and that place is asked of whatever line is there after the jump —
     // the caret's own line may no longer be built at all.
     final box = _noteBox();
-    final point =
-        _caretRect()?.center ??
-        box?.localToGlobal(Offset(0, viewport / 2)) ??
-        Offset.zero;
+    final caret = _caretRect();
+    final goal = caret == null ? null : _goalX(caret);
+    final point = caret == null
+        ? box?.localToGlobal(Offset(0, viewport / 2)) ?? Offset.zero
+        : Offset(goal!, caret.center.dy);
     scroll.jumpTo(to);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_mounted()) return;
@@ -442,6 +494,7 @@ final class SourceCaretMotion {
           ? SelectionModel(anchor: _selection().anchor, extent: offset)
           : SelectionModel.at(offset);
       _apply(next, reveal: false);
+      if (goal != null) _keepGoal(goal);
     });
     WidgetsBinding.instance.scheduleFrame();
   }
