@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/source_buffer.dart';
 
 /// The first and the last line (0-based) the [selection] touches in [text].
 ///
@@ -14,6 +16,17 @@ import 'package:flutter/services.dart';
   if (last > first && endsAtLineStart(text, selection)) {
     return (first: first, last: last - 1);
   }
+  return (first: first, last: last);
+}
+
+/// The same over the lines of a [buffer], without reading any text.
+({int first, int last}) touchedBufferLines(
+  SourceBuffer buffer,
+  SelectionModel selection,
+) {
+  final first = buffer.lineOf(selection.start);
+  var last = buffer.lineOf(selection.end);
+  if (last > first && selection.end == buffer.offsetOfLine(last)) last--;
   return (first: first, last: last);
 }
 

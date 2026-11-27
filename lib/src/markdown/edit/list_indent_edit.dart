@@ -1,5 +1,6 @@
 import 'package:niman/src/editor/list_indent.dart';
 import 'package:niman/src/editor/list_window.dart';
+import 'package:niman/src/editor/touched_lines.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -25,7 +26,7 @@ ListIndentEdit? listIndentEdit(
   required int width,
   required bool outdent,
 }) {
-  final touched = _touchedLines(buffer, selection);
+  final touched = touchedBufferLines(buffer, selection);
   final window = listIndentWindow(
     buffer.lineAt,
     buffer.lineCount,
@@ -83,17 +84,4 @@ ListIndentEdit? listIndentEdit(
       extent: moved(selection.extent),
     ),
   );
-}
-
-/// The lines [selection] touches: the one it starts on to the one it ends
-/// on, but for a range ending at the very start of a line, which does not
-/// touch that line (`touchedLines`, #1345).
-({int first, int last}) _touchedLines(
-  SourceBuffer buffer,
-  SelectionModel selection,
-) {
-  final first = buffer.lineOf(selection.start);
-  var last = buffer.lineOf(selection.end);
-  if (last > first && selection.end == buffer.offsetOfLine(last)) last--;
-  return (first: first, last: last);
 }

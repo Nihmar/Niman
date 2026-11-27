@@ -1082,6 +1082,14 @@ for `- ` or `- [ ] `.
   Shift+Down from the start of a line — does not include that line, here and
   in every command that works on the lines of the selection (the list, quote,
   numbered-list, checklist, heading and Body commands).
+- With the caret on a line that is not a list item, Tab puts the indent at the
+  caret and Shift+Tab takes back the spaces right before it, so one undoes the
+  other wherever the caret is; with none before it, Shift+Tab takes up to the
+  indent width of the line's leading spaces. Only spaces are ever taken.
+- In a fenced code block, a math block or the frontmatter a line is text
+  whatever it says: Tab and Shift+Tab only add and take spaces — at the caret,
+  or at the start of each selected line — and nothing is nested or renumbered.
+  The same holds for a selection that reaches into code from the lines above.
 
 ### Move to tasks
 
