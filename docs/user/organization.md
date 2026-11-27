@@ -240,6 +240,8 @@ tag's notes with a Back arrow.
 A tag's characters are letters and digits — any script's, so `#città` and
 `#идея` are one tag each — plus `-`, `_` and `/`. The frontmatter and the note
 body are read the same way, so the same tag written either way is one tag.
+A `#` inside a web address (`https://example.com/#top`) is part of the
+address, not a tag, and so is a `$` there, not a formula.
 
 ## The tree
 

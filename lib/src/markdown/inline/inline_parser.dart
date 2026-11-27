@@ -6,6 +6,7 @@ library;
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/app_syntax.dart';
 import 'package:niman/src/markdown/extension_span.dart';
+import 'package:niman/src/markdown/inline/bare_urls.dart';
 import 'package:niman/src/markdown/inline/bracket.dart';
 import 'package:niman/src/markdown/inline/delimiter.dart';
 import 'package:niman/src/markdown/inline/delimiter_stack.dart';
@@ -53,6 +54,9 @@ final class InlineParser {
   /// none has failed yet ([_appConstruct]).
   late int _noInlineCloseFrom = text.length + 1;
   late int _noDisplayCloseFrom = text.length + 1;
+
+  /// Where the bare URLs are ([_appConstruct]).
+  late final BareUrls _urls = BareUrls(text);
 
   /// Where the closers of the raw HTML first failed to be found.
   late final RawHtmlMemo _rawHtml = RawHtmlMemo(text);
@@ -163,6 +167,9 @@ final class InlineParser {
         (inline && _pos >= _noInlineCloseFrom)) {
       return false;
     }
+    // A bare URL is one text (`https://x.com/#top`): what the autolink pass
+    // links, the app's syntax does not cut.
+    if ((char == 0x23 || char == 0x24) && _urls.holds(_pos)) return false;
     final span = AppSyntax.at(text, _pos);
     if (span == null) {
       if (display) _noDisplayCloseFrom = _pos;
