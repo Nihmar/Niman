@@ -471,6 +471,11 @@ lines end with `LF` or `CRLF`, a lone `CR` is a character of its line and is
 kept where it is, and `CR CR LF` is one line ending after a `CR` — neither is
 turned into a line break.
 
+**Links to a note.** A note that is a symbolic link is saved through the link:
+the link stays a link and the file it points to holds the new text. A note
+that has other hard links is saved as a new file under its own name, so the
+other names keep the old text — it becomes a separate copy.
+
 **UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
 order mark — what Windows Notepad's *Unicode* writes — opens as the text it
 holds, in any script, and is saved in the same encoding with its mark, so a
