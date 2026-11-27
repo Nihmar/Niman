@@ -85,7 +85,8 @@ void main() {
         prefix: '> ',
       );
       expect(edit.text, '> alpha\n> beta\ngamma');
-      expect(edit.selection.start, 4);
+      // Each end on its own text: after the prefix of its own line only.
+      expect(edit.selection.start, 2);
       expect(edit.selection.end, 14);
     });
 
@@ -106,8 +107,8 @@ void main() {
         prefix: '> ',
       );
       expect(edit.text, '> a\n> b\nc');
-      // Two lines prefixed: the selection shifts by 2 x 2.
-      expect(edit.selection, _sel(4, 7));
+      // The start stays on the `a` (after its own `> `), the end on the `b`.
+      expect(edit.selection, _sel(2, 7));
     });
   });
 

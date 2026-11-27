@@ -76,8 +76,9 @@ MarkdownEdit codeBlock({
 }
 
 /// Prefixes every line the [selection] touches with [prefix] ('- ' for
-/// lists, '> ' for quotes), one pass per line. The selection shifts by the
-/// total inserted length, keeping the caret in place.
+/// lists, '> ' for quotes), one pass per line. Each end of the selection
+/// stays on its own text: it moves by what its own line gained, not by what
+/// the lines above it did too.
 MarkdownEdit prefixLines({
   required String text,
   required TextSelection selection,
@@ -91,12 +92,14 @@ MarkdownEdit prefixLines({
     newLines[i] = '$prefix${newLines[i]}';
   }
   final newText = newLines.join('\n');
-  final shift = prefix.length * (endLine - startLine + 1);
   return MarkdownEdit(
     text: newText,
-    selection: TextSelection(
-      baseOffset: selection.start + shift,
-      extentOffset: selection.end + shift,
+    selection: _shiftSelectionForLines(
+      oldText: text,
+      newText: newText,
+      selection: selection,
+      startLine: startLine,
+      endLine: endLine,
     ),
   );
 }
