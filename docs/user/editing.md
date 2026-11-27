@@ -707,8 +707,12 @@ after it — ends the list instead, the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
 does, and only at the margin removes the marker. A rule written with
 spaces, `- - -` or `* * *`, is a rule and not a list: Enter after it adds
-nothing. Inside a fenced code block, a math block or the frontmatter it
-does nothing: a dash there is a dash.
+nothing. Enter on a line that goes on an item's text — indented to where
+the text starts, under `- ` two spaces, under `10. ` four — starts the next
+line at that indent, so a long item stays one item; a line at the margin
+(a lazy continuation) gets the plain line break. Inside a fenced code
+block, a math block or the frontmatter it does nothing: a dash there is a
+dash.
 
 Enter in a quote or a callout starts the next line with the same `>`
 marks, and a list inside the quote goes on behind them: `> - milk` and
