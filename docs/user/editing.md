@@ -446,7 +446,8 @@ have not changed — the tabs behind the one on screen too — shows the new fil
 at once. A note with edits of yours keeps them: your text wins and is saved
 over the file — but before it is, the version the other program wrote is kept
 in the note's [history](organization.md) (*changed outside Niman*), and a
-message says so. The comparison is of the file with the one the editor last
+message says so. That holds with history turned off too: the other program's
+version is then the one entry such a note has. The comparison is of the file with the one the editor last
 read or wrote **and** with the one Niman's own writer last left, so nothing is
 kept or announced when the other writer was the app itself (a second editor,
 Replace all, an outgoing write) or when nobody touched it at all. When the
