@@ -718,6 +718,10 @@ final class CzechStrings extends Strings {
   String get noteNotText =>
       'Tento soubor není textová poznámka, proto ho Niman nemůže zobrazit zde.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Tento soubor není v UTF-8, proto byl přečten jako Windows-1252. Při '
+      'uložení bude zapsán v UTF-8.';
+  @override
   String get noteLoadFailed => 'Tuto poznámku se nepodařilo otevřít.';
   @override
   String get noteLoadMissing => 'Soubor této poznámky už na disku není.';

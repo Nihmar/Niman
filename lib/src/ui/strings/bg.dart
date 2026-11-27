@@ -726,6 +726,10 @@ final class BulgarianStrings extends Strings {
   String get noteNotText =>
       'Този файл не е текстова бележка, затова Niman не може да го покаже тук.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Този файл не е в UTF-8, затова е прочетен като Windows-1252. При '
+      'запис ще бъде записан в UTF-8.';
+  @override
   String get noteLoadFailed => 'Тази бележка не можа да бъде отворена.';
   @override
   String get noteLoadMissing => 'Файлът на тази бележка вече го няма на диска.';

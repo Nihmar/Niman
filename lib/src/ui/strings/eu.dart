@@ -720,6 +720,10 @@ final class BasqueStrings extends Strings {
       'Fitxategi hau ez da testu-ohar bat, beraz '
       'Nimanek ezin du hemen erakutsi.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Fitxategi hau ez dago UTF-8n, beraz Windows-1252 gisa irakurri da. '
+      'Gordetzean UTF-8n idatziko da.';
+  @override
   String get noteLoadFailed => 'Ezin izan da ohar hau ireki.';
   @override
   String get noteLoadMissing => 'Ohar honen fitxategia ez dago jada diskoan.';

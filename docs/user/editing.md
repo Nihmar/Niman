@@ -473,6 +473,10 @@ holds, in any script, and is saved in the same encoding with its mark, so a
 one-character change is a one-character change of the file. Only the mark
 tells such a file apart: a UTF-16 file without one is not recognised as text,
 and neither is one cut in the middle of a character (an odd number of bytes).
+A note that is not valid UTF-8 — an old Latin-1 file, say — is read with
+every byte outside UTF-8 as the Windows-1252 character it most likely is, so
+no accent is lost, and it is saved as UTF-8: the file's encoding changes, its
+words do not. A message says so when the note opens, before you type anything.
 
 ## Markdown support
 

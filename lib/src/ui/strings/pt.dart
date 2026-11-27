@@ -722,6 +722,10 @@ final class PortugueseStrings extends Strings {
       'Este ficheiro não é uma nota de texto, por isso '
       'o Niman não o pode mostrar aqui.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Este ficheiro não está em UTF-8, por isso foi lido como Windows-1252. '
+      'Ao guardar, será escrito em UTF-8.';
+  @override
   String get noteLoadFailed => 'Não foi possível abrir esta nota.';
   @override
   String get noteLoadMissing => 'O arquivo desta nota não está mais no disco.';

@@ -719,6 +719,10 @@ final class SlovakStrings extends Strings {
   String get noteNotText =>
       'Tento súbor nie je textová poznámka, preto ho Niman nemôže zobraziť tu.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Tento súbor nie je v UTF-8, preto bol prečítaný ako Windows-1252. Pri '
+      'uložení bude zapísaný v UTF-8.';
+  @override
   String get noteLoadFailed => 'Túto poznámku sa nepodarilo otvoriť.';
   @override
   String get noteLoadMissing => 'Súbor tejto poznámky už na disku nie je.';

@@ -722,6 +722,10 @@ final class SerbianStrings extends Strings {
       'Ова датотека није текстуална белешка, па је '
       'Niman не може приказати овде.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ова датотека није у UTF-8, па је прочитана као Windows-1252. Приликом '
+      'чувања биће записана у UTF-8.';
+  @override
   String get noteLoadFailed => 'Ова белешка није могла да се отвори.';
   @override
   String get noteLoadMissing => 'Датотеке ове белешке више нема на диску.';

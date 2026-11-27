@@ -792,6 +792,12 @@ final class NoteViewParts {
         }
       });
     }
+    // A note read as Windows-1252 is saved as UTF-8: said before the first
+    // keystroke, not after the save (#1367).
+    if (disk.openNotice case final notice?) {
+      ScaffoldMessenger.maybeOf(context())
+          ?.showSnackBar(SnackBar(content: Text(notice)));
+    }
     landOnAnchor();
     view.onLoaded?.call(path, length);
     log.info(

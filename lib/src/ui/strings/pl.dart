@@ -725,6 +725,10 @@ final class PolishStrings extends Strings {
   String get noteNotText =>
       'Ten plik nie jest notatką tekstową, więc Niman nie może go tu pokazać.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ten plik nie jest w UTF-8, więc został odczytany jako Windows-1252. '
+      'Po zapisaniu zostanie zapisany w UTF-8.';
+  @override
   String get noteLoadFailed => 'Nie udało się otworzyć tej notatki.';
   @override
   String get noteLoadMissing => 'Pliku tej notatki nie ma już na dysku.';

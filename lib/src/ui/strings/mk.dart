@@ -727,6 +727,10 @@ final class MacedonianStrings extends Strings {
       'Оваа датотека не е текстуална белешка, па '
       'Niman не може да ја прикаже тука.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Оваа датотека не е во UTF-8, па затоа е прочитана како Windows-1252. '
+      'При зачувување ќе биде запишана во UTF-8.';
+  @override
   String get noteLoadFailed => 'Оваа белешка не можеше да се отвори.';
   @override
   String get noteLoadMissing =>

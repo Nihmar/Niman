@@ -719,6 +719,10 @@ final class AlbanianStrings extends Strings {
   String get noteNotText =>
       'Ky skedar nuk është shënim teksti, ndaj Niman nuk mund ta shfaqë këtu.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Ky skedar nuk është UTF-8, kështu që u lexua si Windows-1252. Kur '
+      'ruhet, do të shkruhet si UTF-8.';
+  @override
   String get noteLoadFailed => 'Ky shënim nuk mund të hapej.';
   @override
   String get noteLoadMissing => 'Skedari i këtij shënimi nuk është më në disk.';
