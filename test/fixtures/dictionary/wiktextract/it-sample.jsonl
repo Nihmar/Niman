@@ -7,3 +7,4 @@
 {"word": "ghiaccio", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["masculine"], "forms": [{"form": "ghiacci", "tags": ["plural"]}, {"form": "ghiaccio", "tags": ["singular"]}], "senses": [{"glosses": ["Acqua solida."], "examples": [{"text": "un cubetto di ghiaccio"}]}]}
 {"word": "Haus", "lang_code": "de", "lang": "Deutsch", "pos": "noun", "senses": [{"glosses": ["Gebaeude."]}]}
 {"word": "ghiaccioli", "lang_code": "it", "lang": "Italiano", "pos": "noun", "senses": [{"glosses": ["Plurale di ghiacciolo."], "form_of": [{"word": "ghiacciolo"}], "tags": ["plural"]}]}
+{"word": "ghiacciolo", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["masculine"], "forms": [{"form": "ghiaccioli", "tags": ["plural"]}], "senses": [{"glosses": ["Dolce di ghiaccio aromatizzato."]}]}

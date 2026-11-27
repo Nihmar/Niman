@@ -54,6 +54,7 @@ final class EntryCollector implements EntrySink {
         entry.senses.length,
         renderSection(entry),
         forms,
+        {for (final sense in entry.senses) ...sense.formOf}.toList(),
       ).encode(),
     );
   }

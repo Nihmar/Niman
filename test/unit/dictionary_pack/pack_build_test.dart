@@ -225,29 +225,34 @@ void main() {
       );
     });
 
-    test('a form shared by two lemmas has two records, a headword none', () {
+    test('a form shared by two lemmas has two records; a headword keeps its '
+        'lemma unless its entry names it', () {
       final it = readPack('niman-it');
       // ami: the plural of amo and a form of amare.
       expect(it.lemmasOf('ami'), ['amare', 'amo']);
       expect(it.lemmasOf('ancore'), ['ancora']);
       expect(it.lemmasOf('ancoro'), ['ancorare']);
-      // ancora and amo are forms of ancorare and amare, and headwords.
-      expect(it.lemmasOf('ancora'), isEmpty);
-      expect(it.lemmasOf('amo'), isEmpty);
-      // caminetti is a headword; its entry says it is a form of caminetto.
+      // ancora and amo are headwords and forms of ancorare and amare, which
+      // their entries do not name: they keep a record each.
+      expect(it.lemmasOf('ancora'), ['ancorare']);
+      expect(it.lemmasOf('amo'), ['amare']);
+      // caminetti is a headword and a form of caminetto, and its own entry
+      // names caminetto in a form-of paragraph: no record.
       expect(it.lemmasOf('caminetti'), isEmpty);
+      expect(it.html('caminetti'), contains('class="form-of"'));
       // Placeholders of the extractor are not forms.
       expect(it.syn.map((r) => r.word), isNot(contains('-')));
       expect(it.syn.map((r) => r.word), isNot(contains('no-table-tags')));
-      expect(it.syn, hasLength(4));
+      expect(it.syn, hasLength(6));
     });
 
     test('Serbo-Croatian is keyed in both scripts', () {
       final sh = readPack('niman-sh');
       expect(sh.idx.map((e) => e.word), containsAll(['kuća', 'кућа', 'вода']));
-      // Each script of kuća is a headword: no record for either.
-      expect(sh.lemmasOf('kuća'), isEmpty);
-      expect(sh.lemmasOf('кућа'), isEmpty);
+      // Each script of kuća is a headword and the other's form, naming
+      // nothing: a record each way.
+      expect(sh.lemmasOf('kuća'), ['кућа']);
+      expect(sh.lemmasOf('кућа'), ['kuća']);
       // The Latin spelling a Cyrillic entry lists, and the one it does not
       // list, which is added.
       expect(sh.lemmasOf('voda'), ['вода']);
@@ -295,7 +300,7 @@ void main() {
       expect(it.sourceEntries, 9);
       expect(it.senses, 11);
       expect(it.forms, 7);
-      expect(it.synRecords, 4);
+      expect(it.synRecords, 6);
       expect(it.skipped, {'no sense with a gloss': 1, 'redirect': 1});
       expect(it.comparison, isNull);
       final pack = readPack('niman-it');
@@ -311,7 +316,7 @@ void main() {
             .readAsStringSync(),
       ) as Map<String, Object?>;
       expect(json['headwords'], 7);
-      expect(json['synRecords'], 4);
+      expect(json['synRecords'], 6);
       expect(json['sensesPerHeadword'], closeTo(1.5714, 0.0001));
       expect(
         File(p.join(dir.path, 'out', 'report.txt')).readAsStringSync(),

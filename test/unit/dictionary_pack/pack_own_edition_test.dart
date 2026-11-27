@@ -77,6 +77,7 @@ void main() {
         'caminetto',
         'ghiaccio',
         'ghiaccioli',
+        'ghiacciolo',
       ]);
       // The qualifier is what Italian Wiktionary printed, not the English
       // tag the extractor normalized it to.
@@ -105,7 +106,8 @@ void main() {
     test('the English edition completes the forms of the lemmas it has', () {
       final it = readPack('with-english');
       // caminetto's own entry lists no form; the English one lists caminetti
-      // twice (in the lemma and as the entry of the form).
+      // twice (in the lemma and as the entry of the form). caminetti is no
+      // headword of the own edition, so it is a record.
       expect(it.lemmasOf('caminetti'), ['caminetto']);
       expect(it.lemmasOf('ancore'), ['ancora']);
       // The form shared by two lemmas reaches both.
@@ -114,12 +116,17 @@ void main() {
       expect(it.lemmasOf('ghiacci'), ['ghiaccio']);
       expect(it.lemmasOf('ghiaccio'), isEmpty);
       // ancorare is not in the own edition: its forms have no lemma to point
-      // at, and ancora is a headword anyway.
+      // at, so neither ancoro nor ancora reaches it.
       expect(it.lemmasOf('ancoro'), isEmpty);
       expect(it.lemmasOf('ancora'), isEmpty);
-      // amo is a headword here, so the form of amare is no record.
-      expect(it.lemmasOf('amo'), isEmpty);
-      expect(it.syn, hasLength(5));
+      // amo is a headword here and a form of amare: its entry does not name
+      // amare, so it keeps the record.
+      expect(it.lemmasOf('amo'), ['amare']);
+      // ghiaccioli is a headword and a form of ghiacciolo, and its entry
+      // names ghiacciolo in a form-of paragraph: no record.
+      expect(it.lemmasOf('ghiaccioli'), isEmpty);
+      expect(it.html('ghiaccioli'), contains('class="form-of"'));
+      expect(it.syn, hasLength(6));
     });
 
     test('every key is found, in either file', () {
@@ -145,10 +152,10 @@ void main() {
       expect(c.sharedEnglishSenses, 9);
       expect(c.senseRatio, closeTo(7 / 9, 1e-9));
       expect(c.formsFromEnglish, 5);
-      expect(report.headwords, 7);
+      expect(report.headwords, 8);
       expect(report.inflectionHeadwords, 1);
-      expect(report.sourceEntries, 8);
-      expect(report.senses, 9);
+      expect(report.sourceEntries, 9);
+      expect(report.senses, 10);
       expect(report.skipped, isEmpty);
       expect(report.summary(), contains('coverage 71.4%'));
     });

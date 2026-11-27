@@ -63,16 +63,17 @@ PackReport writePack(
   var sharedHeadwords = 0;
   var sharedOwnSenses = 0;
   var sharedEnglishSenses = 0;
-  final empty = Uint8List(0);
 
   for (final group in _groups(collector.sorter.drain())) {
     final headword = utf8.decode(group.key);
     final sections = <String>[];
+    final formOf = <String>{};
     final spans = <String, (String, String)>{};
     var groupSenses = 0;
     for (final record in group.records) {
       final part = decodeEntryPart(record.value);
       sections.add(part.section);
+      formOf.addAll(part.formOf);
       groupSenses += part.senses;
       for (final line in part.forms) {
         final tab = line.indexOf('\t');
@@ -120,9 +121,17 @@ PackReport writePack(
       ..writeUint32(dict.position)
       ..writeUint32(html.length);
     dict.write(html);
-    keyWriter.writeRecord(group.key, empty);
-    final index = Uint8List(4);
-    ByteData.sublistView(index).setUint32(0, headwords);
+    // The lemmas the entry names itself, for the join below.
+    keyWriter.writeRecord(
+      group.key,
+      Uint8List.fromList(utf8.encode(formOf.join('\n'))),
+    );
+    // A record's value is its lemma's index, then the lemma, which the join
+    // compares with what the form's own entry names.
+    final index = Uint8List.fromList([
+      ...(ByteData(4)..setUint32(0, headwords)).buffer.asUint8List(),
+      ...group.key,
+    ]);
     for (final form in {for (final (_, form) in spans.values) form}) {
       final bytes = utf8.encode(form);
       if (form != headword && bytes.length <= maxHeadwordBytes) {
@@ -191,9 +200,12 @@ PackReport writePack(
   );
 }
 
-/// Writes the `.syn` from the sorted form records, leaving out the forms that
-/// are headwords themselves (their own entry says what they are a form of),
-/// and returns how many records it holds. [keys] lists the headwords in order.
+/// Writes the `.syn` from the sorted form records and returns how many records
+/// it holds. A form that is also a headword keeps its record, since its own
+/// entry may say nothing of this lemma (*ancora* is an adverb, and a form of
+/// *ancorare*); it is left out only when that entry already names the lemma in
+/// a form-of paragraph, which the panel makes a look-up. [keys] lists the
+/// headwords in order, each with the lemmas its entry names.
 int _writeSyn(ExternalSorter syn, File keys, File target) {
   final out = BufferedFileWriter(target);
   final headwords = BufferedFileReader(keys);
@@ -209,12 +221,14 @@ int _writeSyn(ExternalSorter syn, File keys, File target) {
       head = headwords.readRecord();
     }
     if (head != null && compareStarDictKeys(head.key, record.key) == 0) {
-      continue;
+      final named = utf8.decode(head.value).split('\n');
+      final lemma = utf8.decode(Uint8List.sublistView(record.value, 4));
+      if (named.contains(lemma)) continue;
     }
     out
       ..write(record.key)
       ..write(const [0])
-      ..write(record.value);
+      ..write(Uint8List.sublistView(record.value, 0, 4));
     count++;
   }
   headwords.close();
