@@ -314,8 +314,10 @@ final class ShellNotePanes {
     features: controller.librarySettings.features,
     unsavedTracker: unsaved,
     spellCheck: spellCheck,
-    saveNote: noteSaverFor(controller),
-    saveNoteStream: noteStreamSaverFor(controller),
+    saveNote: noteSaverFor(controller, mustExist: true),
+    saveNoteStream: noteStreamSaverFor(controller, mustExist: true),
+    createNote: noteSaverFor(controller),
+    createNoteStream: noteStreamSaverFor(controller),
     createMissingNote: missingNoteCreatorFor(controller),
   );
 
@@ -511,7 +513,13 @@ final class ShellNotePanes {
                   context(),
                   controller,
                   onRestored: () {
-                    if (mounted()) selection.reload();
+                    final path = selection.path;
+                    final root = controller.root;
+                    if (!mounted()) return;
+                    if (path != null && root != null) {
+                      unsaved.restored(p.join(root, path));
+                    }
+                    selection.reload();
                   },
                 ),
               // A study beside the deck (#533): over the pane's notes too.

@@ -711,6 +711,15 @@ final class NorwegianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Notatet kunne ikke lagres. Niman prøver igjen.';
   @override
+  String get noteStatusGone => 'Ikke på disken · lagre på nytt';
+  @override
+  String get noteGoneSnack =>
+      'Dette notatet finnes ikke lenger på disken. Teksten er bevart '
+      'her – trykk på statusen for å lagre det på nytt.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Kunne ikke lagre «$name». Teksten er bevart i minnet.';
+  @override
   String get noteChangedOnDisk =>
       'Et annet program endret notatet. Den versjonen er bevart i historikken.';
   @override

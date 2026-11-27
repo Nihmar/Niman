@@ -383,6 +383,9 @@ abstract base class Strings {
   String get noteStatusError;
   String get noteStatusSaveFailed;
   String get noteSaveFailedSnack;
+  String get noteStatusGone;
+  String get noteGoneSnack;
+  String noteHeldSaveFailed(String name);
   String get noteChangedOnDisk;
   String get noteNotText;
   String get noteReadAsWindows1252;

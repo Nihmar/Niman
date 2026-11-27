@@ -711,6 +711,15 @@ final class LithuanianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Užrašo išsaugoti nepavyko. Niman bandys dar kartą.';
   @override
+  String get noteStatusGone => 'Nėra diske · įrašyti iš naujo';
+  @override
+  String get noteGoneSnack =>
+      'Šio užrašo diske nebėra. Jo tekstas išsaugotas čia – '
+      'bakstelėkite būseną, kad įrašytumėte iš naujo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nepavyko įrašyti „$name“. Jo tekstas išsaugotas atmintyje.';
+  @override
   String get noteChangedOnDisk =>
       'Kita programa pakeitė šį užrašą. Ta versija išsaugota istorijoje.';
   @override

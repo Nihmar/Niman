@@ -170,12 +170,16 @@ abstract interface class NoteOperations {
   /// [expected] is the file as the editor last saw it (#1055): if the disk
   /// holds another, that version is kept in the history first.
   ///
+  /// With [mustExist] a note whose file is gone is not created again: the
+  /// save throws `NoteGoneException` (#1321).
+  ///
   /// Answers what the write left on the disk, or null when it cannot say.
   Future<NoteSaveResult?> saveNote(
     String path,
     String content, {
     int? editSession,
     DiskStamp? expected,
+    bool mustExist = false,
   });
 
   /// Saves a note whose text is never joined: [content] makes the bytes one
@@ -193,6 +197,7 @@ abstract interface class NoteOperations {
     int? editSession,
     NoteReferences? references,
     DiskStamp? expected,
+    bool mustExist = false,
   });
 
   /// Tidies the note at [path]'s Markdown, in its turn among the note's

@@ -53,9 +53,12 @@ SnapshotOutcome snapshotBeforeWrite(
   // (a restore, a sync) stands.
   final check = exists ? ExternalWriteCheck.of(note, asked) : null;
   final foreign = check?.foreign ?? false;
+  // With history off (a limit of 0) the other program's version is still
+  // kept, as the one entry such a note has: it is about to be replaced, and
+  // nothing else holds it (#1362).
   final request = foreign
       ? SnapshotRequest(
-          limit: asked.limit,
+          limit: asked.limit < 1 ? 1 : asked.limit,
           interval: asked.interval,
           now: asked.now,
           sessionStart: asked.sessionStart,

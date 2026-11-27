@@ -716,6 +716,15 @@ final class BosnianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bilješka se nije mogla spremiti. Niman će pokušati ponovo.';
   @override
+  String get noteStatusGone => 'Nema na disku · spremi ponovo';
+  @override
+  String get noteGoneSnack =>
+      'Ove bilješke više nema na disku. Njen tekst je sačuvan ovdje — '
+      'dodirnite status da je ponovo spremite.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nije moguće spremiti „$name“. Njen tekst je sačuvan u memoriji.';
+  @override
   String get noteChangedOnDisk =>
       'Drugi program je promijenio ovu bilješku. Ta verzija je sačuvana u '
       'historiji.';

@@ -666,6 +666,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
+    unsaved: widget.unsavedTracker,
     creates: _createFlow,
     templates: _templateFlow,
     selectedPath: () => _selection.path,
@@ -1573,7 +1574,9 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     path: path,
     window: widget.window,
     onRestored: () {
-      if (mounted && _selection.path == path) _selection.reload();
+      if (!mounted || _selection.path != path) return;
+      widget.unsavedTracker.restored(p.join(widget.controller.root!, path));
+      _selection.reload();
     },
   );
 

@@ -719,6 +719,16 @@ final class DutchStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Deze notitie kon niet worden opgeslagen. Niman probeert het opnieuw.';
   @override
+  String get noteStatusGone => 'Niet op schijf · opnieuw opslaan';
+  @override
+  String get noteGoneSnack =>
+      'Deze notitie staat niet meer op de schijf. De tekst blijft hier '
+      'bewaard – tik op de status om hem opnieuw op te slaan.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      '"$name" kon niet worden opgeslagen. De tekst blijft in het '
+      'geheugen bewaard.';
+  @override
   String get noteChangedOnDisk =>
       'Een ander programma heeft deze notitie gewijzigd. Die versie staat in '
       'de geschiedenis.';

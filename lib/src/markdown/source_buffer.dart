@@ -192,13 +192,17 @@ final class SourceBuffer {
   /// [charLimit] is left for the next call, unless it is the first line,
   /// which is taken whole so a slice is never empty.
   ///
+  /// The `next` of the answer is the line the slice stopped before: a slice
+  /// cut short by [charLimit] leaves lines the caller must ask for again,
+  /// from there — asking from `last` instead drops them (#1320).
+  ///
   /// O(the slice). [text] is the one-call version of this, and it is what a
   /// save must not do to a note of hundreds of megabytes — it builds the
   /// whole note as one string for the writer to copy and encode in one go.
   /// Slicing it keeps each turn of the caller's loop to a few milliseconds,
   /// which is what lets the frames through during a save (see
   /// `docs/records/huge-notes.md`).
-  String sliceText(int first, int last, int charLimit) {
+  ({String text, int next}) takeSlice(int first, int last, int charLimit) {
     assert(first >= 0 && first < _store.length, 'line $first out of range');
     final end = last > _store.length ? _store.length : last;
     final buffer = StringBuffer();
@@ -210,7 +214,7 @@ final class SourceBuffer {
       at++;
       if (buffer.length >= charLimit) break;
     }
-    return buffer.toString();
+    return (text: buffer.toString(), next: at);
   }
 
   /// Line [line]'s text, without its terminator.

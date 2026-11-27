@@ -21,6 +21,7 @@ import 'package:path/path.dart' as p;
 void main() {
   late Directory root;
   late NoteOps ops;
+  late LibraryConfigRepo config;
 
   setUp(() async {
     root = await Directory.current.createTemp('niman_external_');
@@ -30,7 +31,7 @@ void main() {
       root: root.path,
       db: db,
       indexer: Indexer(db),
-      config: LibraryConfigRepo(root.path),
+      config: config = LibraryConfigRepo(root.path),
     );
   });
 
@@ -40,6 +41,9 @@ void main() {
   });
 
   File note() => File(p.join(root.path, 'a.md'));
+
+  bool hasTemp() =>
+      root.listSync().any((entry) => isTempFileName(p.basename(entry.path)));
 
   Future<List<HistoryVersion>> versions() async =>
       (await ops.noteHistory('a.md')).versions;
@@ -91,6 +95,111 @@ void main() {
       await ops.readNoteVersion('a.md', kept.number),
       'theirs, streamed over',
     );
+  });
+
+  test('a write that lands during a streaming save is kept (#1333)', () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+
+    // Another program rewrites the file after the slices began, before the
+    // save is renamed over it.
+    final second = await ops.saveNoteStream(
+      'a.md',
+      (index) async {
+        if (index == 1) {
+          // The writer is its own isolate: its temp file is there once the
+          // save has begun, which is when the outside write must land.
+          for (var i = 0; i < 400 && !hasTemp(); i++) {
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+          }
+          note().writeAsStringSync('theirs, landed in the middle of a save');
+        }
+        return index < 2
+            ? Uint8List.fromList(utf8.encode('mine, slice $index\n'))
+            : null;
+      },
+      editSession: 1,
+      expected: first!.stamp,
+    );
+
+    expect(second!.keptExternal, isTrue);
+    expect(note().readAsStringSync(), 'mine, slice 0\nmine, slice 1\n');
+    final kept = (await versions()).singleWhere(
+      (v) => v.reason == HistoryReason.external,
+    );
+    expect(
+      await ops.readNoteVersion('a.md', kept.number),
+      'theirs, landed in the middle of a save',
+    );
+  });
+
+  test('a streaming save nobody touched keeps nothing extra', () async {
+    final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+    final second = await ops.saveNoteStream(
+      'a.md',
+      (index) async =>
+          index == 0 ? Uint8List.fromList(utf8.encode('mine, streamed')) : null,
+      editSession: 1,
+      expected: first!.stamp,
+    );
+    expect(second!.keptExternal, isFalse);
+    expect(
+      (await versions()).where((v) => v.reason == HistoryReason.external),
+      isEmpty,
+    );
+  });
+
+  group('with history off (#1362)', () {
+    setUp(() async {
+      await config.update((c) => c.copyWith(historyVersions: 0));
+    });
+
+    test("the other program's version is still kept, and announced", () async {
+      final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+      note().writeAsStringSync('theirs, written outside, and longer');
+
+      final second = await ops.saveNote(
+        'a.md',
+        'mine, edited',
+        editSession: 1,
+        expected: first!.stamp,
+      );
+
+      expect(second!.keptExternal, isTrue);
+      expect(note().readAsStringSync(), 'mine, edited');
+      final kept = (await versions()).singleWhere(
+        (v) => v.reason == HistoryReason.external,
+      );
+      expect(
+        await ops.readNoteVersion('a.md', kept.number),
+        'theirs, written outside, and longer',
+      );
+    });
+
+    test('a streamed save keeps it too', () async {
+      final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+      note().writeAsStringSync('theirs, streamed over');
+
+      final second = await ops.saveNoteStream(
+        'a.md',
+        (index) async =>
+            index == 0 ? Uint8List.fromList(utf8.encode('mine again')) : null,
+        editSession: 1,
+        expected: first!.stamp,
+      );
+
+      expect(second!.keptExternal, isTrue);
+    });
+
+    test('the apps own writes still keep nothing', () async {
+      final first = await ops.saveNote('a.md', 'mine, saved', editSession: 1);
+      await ops.saveNote(
+        'a.md',
+        'mine, edited',
+        editSession: 1,
+        expected: first!.stamp,
+      );
+      expect(await versions(), isEmpty);
+    });
   });
 
   test("the editor's own last write is not another program's", () async {

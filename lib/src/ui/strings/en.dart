@@ -709,6 +709,15 @@ final class EnglishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'This note could not be saved. Niman will try again.';
   @override
+  String get noteStatusGone => 'Not on disk · save again';
+  @override
+  String get noteGoneSnack =>
+      'This note is no longer on disk. Its text is kept here — tap the '
+      'status to save it again.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Could not save "$name". Its text is kept in memory.';
+  @override
   String get noteChangedOnDisk =>
       'Another program changed this note. That version is kept in History.';
   @override

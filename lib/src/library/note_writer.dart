@@ -14,6 +14,7 @@ import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/note_history.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_tidy.dart';
 import 'package:niman/src/library/note_write_stream.dart';
@@ -123,6 +124,11 @@ final class NoteWriter {
   /// is kept in the history before this save replaces it
   /// ([HistoryReason.external]; [NoteSaveResult.keptExternal]).
   ///
+  /// With [mustExist] the save replaces the note and nothing else: when its
+  /// file is gone it throws [NoteGoneException] rather than create it again
+  /// (#1321) — what the editor of a note it loaded asks for, so a note
+  /// deleted or moved away is not written back.
+  ///
   /// Answers what the write left on the disk ([NoteSaveResult]), or null when
   /// the producer abandoned the save and the disk was not touched.
   Future<NoteSaveResult?> save(
@@ -132,6 +138,7 @@ final class NoteWriter {
     HistoryReason? forced,
     NoteReferences? references,
     DiskStamp? expected,
+    bool mustExist = false,
   }) {
     final queuedAt = Stopwatch()..start();
     return _inTurn(
@@ -144,6 +151,7 @@ final class NoteWriter {
         queuedAt,
         references: references,
         expected: expected,
+        mustExist: mustExist,
       ),
     );
   }
@@ -303,6 +311,7 @@ final class NoteWriter {
     Stopwatch queuedAt, {
     NoteReferences? references,
     DiskStamp? expected,
+    bool mustExist = false,
   }) async {
     final waitMs = queuedAt.elapsedMilliseconds;
     final session = editSession == null ? '' : ', session $editSession';
@@ -325,12 +334,13 @@ final class NoteWriter {
     final NoteWriteResult? result;
     try {
       result = content is String
-          ? await _writeOffIsolate(root, path, content, request)
+          ? await _writeOffIsolate(root, path, content, request, mustExist)
           : await saveNoteStream(
               root: root,
               rel: path,
               produce: content as NoteContentProducer,
               snapshot: request,
+              mustExist: mustExist,
             );
     } catch (e) {
       _log.error('save failed: "$path": $e');
@@ -395,6 +405,7 @@ final class NoteWriter {
     String rel,
     String content,
     SnapshotRequest? request,
+    bool mustExist,
   ) => IsolateGauge.run(
     () => writeNoteFile(
       p.join(root, rel),
@@ -402,6 +413,7 @@ final class NoteWriter {
       root: root,
       rel: rel,
       snapshot: request,
+      mustExist: mustExist,
     ),
     'write "$rel"',
   );

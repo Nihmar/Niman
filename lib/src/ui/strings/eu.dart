@@ -712,6 +712,15 @@ final class BasqueStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Ezin izan da oharra gorde. Nimanek berriro saiatuko da.';
   @override
+  String get noteStatusGone => 'Ez dago diskoan · gorde berriro';
+  @override
+  String get noteGoneSnack =>
+      'Ohar hau ez dago jada diskoan. Bere testua hemen gordetzen da — '
+      'ukitu egoera berriro gordetzeko.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Ezin izan da gorde "$name". Bere testua memorian gordetzen da.';
+  @override
   String get noteChangedOnDisk =>
       'Beste programa batek ohar hau aldatu du. Bertsio hori historian gorde '
       'da.';

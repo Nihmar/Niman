@@ -37,6 +37,20 @@ abstract interface class UnsavedNoteHead {
   String textHead(int maxChars);
 }
 
+/// An [UnsavedNote] whose pending writes can be dropped because the note is
+/// being deleted (#1321): its text goes to the trash with the file, and a
+/// write that came after the delete would only bring the note back.
+abstract interface class UnsavedNoteDiscard {
+  /// Stops writing: no save is made from here on, and the note reads as
+  /// saved. Completes when a write already running has ended — the delete
+  /// must come after it, not race it.
+  Future<void> discard();
+
+  /// The delete did not happen: the note holds what it held, writes again,
+  /// and a note with edits is saved.
+  void restore();
+}
+
 /// The app-level view of which open notes hold unsaved edits (T-PP-11).
 ///
 /// The source of truth is each [NoteView]'s revision state; the tracker
@@ -60,8 +74,18 @@ final class UnsavedTracker extends ChangeNotifier {
   /// disk — or, with none, that any open note's may have.
   void notifyDiskChanged(Set<String> paths) => _diskChanges.add(paths);
 
+  final StreamController<String> _heldFailures =
+      StreamController<String>.broadcast(sync: true);
+
+  /// The note at each path whose held write failed (#1363): a note switched
+  /// away from or closed whose text the disk would not take. Said once per
+  /// run of failures, as the editor says it of the note on screen; the text
+  /// is kept and retried, and the note reads as unsaved until it lands.
+  Stream<String> get heldWriteFailures => _heldFailures.stream;
+
   @override
   void dispose() {
+    unawaited(_heldFailures.close());
     unawaited(_diskChanges.close());
     super.dispose();
   }
@@ -138,7 +162,12 @@ final class UnsavedTracker extends ChangeNotifier {
       path: path,
       textOf: text,
       write: write,
-      onWritten: unregister,
+      onWritten: (save) {
+        final key = p.canonicalize(path);
+        _landed[key] = (_landed[key] ?? 0) + 1;
+        unregister(save);
+      },
+      onFailed: (save) => _heldFailures.add(save.path),
     );
     register(save);
     return save.start();
@@ -165,6 +194,64 @@ final class UnsavedTracker extends ChangeNotifier {
     if (text != null) _publish();
     return text;
   }
+
+  /// Drops the pending writes of every note at [path] or under it (an open
+  /// editor, a write held for a note switched away from), before [path] is
+  /// deleted (#1321). Completes when the writes already running have ended.
+  /// A failed delete calls [restoreUnder].
+  Future<void> discardUnder(String path) async {
+    final ended = <Future<void>>[
+      for (final note in _notes.toList())
+        if (note is UnsavedNoteDiscard && _isAt(note, path))
+          (note as UnsavedNoteDiscard).discard(),
+    ];
+    _publish();
+    await Future.wait(ended);
+  }
+
+  /// The delete of [path] failed: what [discardUnder] dropped is owed again.
+  void restoreUnder(String path) {
+    for (final note in _notes.toList()) {
+      if (note is UnsavedNoteDiscard && _isAt(note, path)) {
+        (note as UnsavedNoteDiscard).restore();
+      }
+    }
+    _publish();
+  }
+
+  static bool _isAt(UnsavedNote note, String path) =>
+      p.equals(note.path, path) || p.isWithin(path, note.path);
+
+  /// Completes when the writes held for the note at [path] that are running
+  /// have ended: what an editor opening the note waits for before it reads the
+  /// file, so a read cannot see the text from before a write that is about to
+  /// land (#1360).
+  Future<void> writesSettled(String path) => Future.wait([
+    for (final note in _notes.toList())
+      if (note is DetachedSave && p.equals(note.path, path)) note.settled,
+  ]);
+
+  final Map<String, DateTime> _restored = <String, DateTime>{};
+
+  /// A version was just restored into the note at the absolute [path] (#1361).
+  /// The open editor of it, asked to re-read the file next, shows the restored
+  /// text even if it holds edits ([takeRestored]).
+  void restored(String path) =>
+      _restored[p.canonicalize(path)] = DateTime.now();
+
+  /// Whether a restore into the note at [path] was announced in the last few
+  /// seconds, taken once: what is left over is not a later reload's.
+  bool takeRestored(String path) {
+    final at = _restored.remove(p.canonicalize(path));
+    return at != null &&
+        DateTime.now().difference(at) < const Duration(seconds: 10);
+  }
+
+  final Map<String, int> _landed = <String, int>{};
+
+  /// How many held writes of the note at [path] have landed so far: an editor
+  /// whose read of the file spans a change of it reads again (#1360).
+  int landings(String path) => _landed[p.canonicalize(path)] ?? 0;
 
   /// Tracks [note]; it reads its dirty state live until [unregister].
   /// Registering the same note twice is a no-op.

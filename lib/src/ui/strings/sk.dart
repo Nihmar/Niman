@@ -713,6 +713,16 @@ final class SlovakStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku sa nepodarilo uložiť. Niman to skúsi znova.';
   @override
+  String get noteStatusGone => 'Nie je na disku · uložiť znova';
+  @override
+  String get noteGoneSnack =>
+      'Táto poznámka už na disku nie je. Jej text zostáva tu – ťuknutím '
+      'na stav ju uložíte znova.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Poznámku „$name“ sa nepodarilo uložiť. Jej text zostáva v '
+      'pamäti.';
+  @override
   String get noteChangedOnDisk =>
       'Iný program túto poznámku zmenil. Tá verzia je uložená v histórii.';
   @override

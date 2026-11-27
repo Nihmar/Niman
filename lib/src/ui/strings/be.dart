@@ -711,6 +711,15 @@ final class BelarusianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Не ўдалося захаваць нататку. Niman паспрабуе яшчэ раз.';
   @override
+  String get noteStatusGone => 'Няма на дыску · захаваць зноў';
+  @override
+  String get noteGoneSnack =>
+      'Гэтай нататкі больш няма на дыску. Яе тэкст захаваны тут — '
+      'націсніце стан, каб захаваць яе зноў.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Не ўдалося захаваць «$name». Яе тэкст захаваны ў памяці.';
+  @override
   String get noteChangedOnDisk =>
       'Іншая праграма змяніла гэтую нататку. Тая версія захавана ў гісторыі.';
   @override

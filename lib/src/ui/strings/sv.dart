@@ -716,6 +716,15 @@ final class SwedishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Anteckningen kunde inte sparas. Niman försöker igen.';
   @override
+  String get noteStatusGone => 'Finns inte på disken · spara igen';
+  @override
+  String get noteGoneSnack =>
+      'Den här anteckningen finns inte längre på disken. Texten är kvar '
+      'här – tryck på statusen för att spara den igen.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Det gick inte att spara "$name". Texten finns kvar i minnet.';
+  @override
   String get noteChangedOnDisk =>
       'Ett annat program ändrade anteckningen. Den versionen finns kvar i '
       'historiken.';

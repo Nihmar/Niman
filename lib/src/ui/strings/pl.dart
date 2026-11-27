@@ -719,6 +719,16 @@ final class PolishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Nie udało się zapisać notatki. Niman spróbuje ponownie.';
   @override
+  String get noteStatusGone => 'Brak na dysku · zapisz ponownie';
+  @override
+  String get noteGoneSnack =>
+      'Tej notatki nie ma już na dysku. Jej tekst jest zachowany tutaj '
+      '– dotknij stanu, aby zapisać ją ponownie.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Nie udało się zapisać notatki „$name”. Jej tekst jest zachowany '
+      'w pamięci.';
+  @override
   String get noteChangedOnDisk =>
       'Inny program zmienił tę notatkę. Ta wersja jest zachowana w historii.';
   @override

@@ -729,6 +729,16 @@ final class FrenchStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Cette note n’a pas pu être enregistrée. Niman va réessayer.';
   @override
+  String get noteStatusGone => 'Absente du disque · réenregistrer';
+  @override
+  String get noteGoneSnack =>
+      'Cette note n’est plus sur le disque. Son texte est conservé ici '
+      ': touchez l’état pour la réenregistrer.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Impossible d’enregistrer « $name ». Son texte est conservé en '
+      'mémoire.';
+  @override
   String get noteChangedOnDisk =>
       'Un autre programme a modifié cette note. Cette version est conservée '
       'dans l’historique.';

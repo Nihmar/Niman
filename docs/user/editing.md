@@ -454,10 +454,15 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost. If you open that note again meanwhile, it opens with
+the last edits lost. A write that fails for a note that is no longer on screen
+is said as it is for the one that is: a message names the note (*Could not save
+"name"*), once for the run of failures. If you open that note again meanwhile, it opens with
 those edits in it, as unsaved changes of its own — not with the older text the
 disk still has — and the held write is dropped, so nothing old is ever written
-over what you type next.
+over what you type next. A note
+you come back to while its own write is still running is read after that write
+has landed, so it opens with the text you left, not the older text the write was
+about to replace.
 
 **A note changed by another program.** When a sync client, Niman's own sync or
 another program rewrites a note that is open, every open note whose text you
@@ -465,7 +470,8 @@ have not changed — the tabs behind the one on screen too — shows the new fil
 at once. A note with edits of yours keeps them: your text wins and is saved
 over the file — but before it is, the version the other program wrote is kept
 in the note's [history](organization.md) (*changed outside Niman*), and a
-message says so. The comparison is of the file with the one the editor last
+message says so. That holds with history turned off too: the other program's
+version is then the one entry such a note has. The comparison is of the file with the one the editor last
 read or wrote **and** with the one Niman's own writer last left, so nothing is
 kept or announced when the other writer was the app itself (a second editor,
 Replace all, an outgoing write) or when nobody touched it at all. When the
@@ -476,7 +482,19 @@ announced. A file's time is only as fine as the file system's clock — two
 seconds on FAT, a few milliseconds elsewhere — so a program that rewrites the
 same number of bytes within that tick of the last write leaves the same size
 and time: when the file was last written that recently, its bytes are checked
-too, and such a change is seen like any other.
+too, and such a change is seen like any other. The file is looked at again just before a save replaces it, so a
+program that rewrites a very long note while Niman is still writing its slices
+is kept in the history and announced the same way.
+
+**A note deleted while it is open.** Deleting a note (or a folder holding it)
+from the tree drops the edits an open editor had not saved yet: their text goes
+to the trash with the file, and nothing is written back to the old path. If
+another program, a sync or a move takes the file away while you are typing,
+Niman does not create it again behind your back: the status row reads *Not on
+disk · save again*, a message says so, and your text stays in the editor.
+Tapping the status (or saving again) writes the note afresh at the same place.
+A note you close while it is in that state is written back, so closing it never
+loses the text.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

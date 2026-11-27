@@ -720,6 +720,15 @@ final class CatalanStrings extends Strings {
   String get noteSaveFailedSnack =>
       'No s’ha pogut guardar la nota. Niman ho tornarà a provar.';
   @override
+  String get noteStatusGone => 'No és al disc · desa-la de nou';
+  @override
+  String get noteGoneSnack =>
+      'Aquesta nota ja no és al disc. El text es conserva aquí: toca '
+      "l'estat per desar-la de nou.";
+  @override
+  String noteHeldSaveFailed(String name) =>
+      "No s'ha pogut desar «$name». El text es conserva a la memòria.";
+  @override
   String get noteChangedOnDisk =>
       'Un altre programa ha canviat aquesta nota. Aquella versió s’ha desat a '
       'l’historial.';

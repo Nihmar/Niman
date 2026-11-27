@@ -1463,6 +1463,7 @@ final class FakeLibrarySession
     String content, {
     int? editSession,
     DiskStamp? expected,
+    bool mustExist = false,
   }) async {
     saves.add((path, content, editSession));
     final failure = saveError;
@@ -1496,6 +1497,7 @@ final class FakeLibrarySession
     int? editSession,
     NoteReferences? references,
     DiskStamp? expected,
+    bool mustExist = false,
   }) async {
     final buffer = StringBuffer();
     for (var index = 0; ; index++) {

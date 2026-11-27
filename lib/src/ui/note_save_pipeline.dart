@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_framing.dart';
@@ -72,6 +73,8 @@ final class NoteSavePipeline {
     required this.onSaved,
     required this.onSettled,
     this.diskStamp,
+    this.createNote,
+    this.createNoteStream,
     this.onExternalKept,
     this.hold,
     this.retryDelays = const [
@@ -127,6 +130,18 @@ final class NoteSavePipeline {
   /// written by somebody else, and the writer keeps that version first.
   final DiskStamp? Function()? diskStamp;
 
+  /// [saveNote] for a write that creates the note's file when it is gone
+  /// (#1321). The writer [saveNote] returns refuses to bring back a note that
+  /// was deleted or moved away (`NoteGoneException`), which is right for the
+  /// editor's own saves; the write of a note that has left the editor, and the
+  /// save the user asks for again ([retry]), must leave the text on disk
+  /// whatever became of the file, and go through this. Null falls back to
+  /// [saveNote].
+  final NoteSaver? Function()? createNote;
+
+  /// [createNote] for the streaming write.
+  final NoteStreamSaver? Function()? createNoteStream;
+
   /// A save of the note on screen found another program's version of the file
   /// and kept it in the note's history before overwriting it (#1055).
   final void Function(String path)? onExternalKept;
@@ -161,8 +176,39 @@ final class NoteSavePipeline {
   int get lastSavedRevision => _lastSavedRevision;
   int _lastSavedRevision = 0;
 
-  /// Whether the editor holds edits the disk does not.
-  bool get dirty => _revision != _lastSavedRevision;
+  /// Whether the editor holds edits the disk does not. Never while the note
+  /// is being deleted ([discard]): its text goes with the file.
+  bool get dirty => !_discarded && _revision != _lastSavedRevision;
+
+  /// Whether the note's pending writes were dropped for a delete.
+  bool get discarded => _discarded;
+  bool _discarded = false;
+
+  /// Whether the next save may create the note's file again: the user asked
+  /// for it after a save found the file gone ([retry]).
+  bool _recreate = false;
+
+  /// The note is about to be deleted (#1321): its pending saves are dropped
+  /// — the text goes to the trash with the file — and none is made from here
+  /// on, since a save after the delete would write the note back. Completes
+  /// when the save already running has ended.
+  Future<void> discard() {
+    _discarded = true;
+    _cancelTimers();
+    _pending = false;
+    final running = _activeSave;
+    return running == null
+        ? Future<void>.value()
+        : running.then<void>((_) {}, onError: (_) {});
+  }
+
+  /// The delete did not happen: the note is the editor's again, and its
+  /// edits are saved.
+  void undiscard() {
+    if (!_discarded) return;
+    _discarded = false;
+    if (dirty) saveInBackground();
+  }
 
   /// Whether a save is in flight.
   bool get saving => _saving;
@@ -238,7 +284,9 @@ final class NoteSavePipeline {
     _failures++;
     failure.value = SaveFailure(error, _failures);
     _retryTimer?.cancel();
-    if (_failures <= retryDelays.length) {
+    // A note that is gone does not come back by trying again: the user is
+    // told and decides ([retry]).
+    if (error is! NoteGoneException && _failures <= retryDelays.length) {
       _retryTimer = Timer(retryDelays[_failures - 1], saveInBackground);
     }
   }
@@ -248,6 +296,14 @@ final class NoteSavePipeline {
   /// it does not escape as an uncaught async error.
   void saveInBackground() {
     unawaited(save().then<void>((_) {}, onError: (Object _) {}));
+  }
+
+  /// The user asks for the save again — the status row's retry. When the
+  /// failure was a note gone from disk, this is the one save that creates
+  /// its file again (#1321).
+  void retry() {
+    if (failure.value?.error is NoteGoneException) _recreate = true;
+    saveInBackground();
   }
 
   /// Starts a new editor session, and returns its id.
@@ -303,6 +359,7 @@ final class NoteSavePipeline {
     // notePath may be a picture. Only a save with its own path (the
     // outgoing note's) may write then (#156).
     if (path == null && !ready()) return Future<void>.value();
+    if (path == null && _discarded) return Future<void>.value();
     final revision = _revision;
     if (revision == _lastSavedRevision) {
       return Future<void>.value(); // nothing new on disk
@@ -408,7 +465,7 @@ final class NoteSavePipeline {
       final clock = Stopwatch()..start();
       try {
         if (stream != null) {
-          await saveNoteStream()!(
+          await _streamSaver(create: true)(
             target,
             (index) => _nextSlice(stream, index),
             editSession: session,
@@ -416,7 +473,7 @@ final class NoteSavePipeline {
             expected: expected,
           );
         } else {
-          await _write(target, joined!, session, expected);
+          await _write(target, joined!, session, expected, create: true);
         }
         _landed(target, revision);
         _log.info(
@@ -461,12 +518,19 @@ final class NoteSavePipeline {
     // saves the outgoing note is followed by a load that starts the next
     // session, and this save belongs to the one it came from.
     final session = _editSession;
+    final create = _takeRecreate();
     _log.info(
       'save start: $target (${joined.length} chars, join $joinMs ms, '
       'session $session)',
     );
     try {
-      final saved = await _write(target, joined, session, expected);
+      final saved = await _write(
+        target,
+        joined,
+        session,
+        expected,
+        create: create,
+      );
       _saved(target, revision, saved);
       _log.info(
         'note saved: $target (${joined.length} chars, '
@@ -480,6 +544,19 @@ final class NoteSavePipeline {
       _finishSave();
     }
   }
+
+  /// Whether this save is the one that may create the note's file again, and
+  /// only the one ([retry]).
+  bool _takeRecreate() {
+    final recreate = _recreate;
+    _recreate = false;
+    return recreate;
+  }
+
+  /// The streaming writer: the one that creates the file when [create], else
+  /// the one that refuses to bring a deleted note back.
+  NoteStreamSaver _streamSaver({required bool create}) =>
+      (create ? createNoteStream?.call() : null) ?? saveNoteStream()!;
 
   /// Saves with the note handed over in slices, off the join.
   ///
@@ -499,12 +576,13 @@ final class NoteSavePipeline {
     // session, and this save belongs to the one it came from.
     final session = _editSession;
     final expected = diskStamp?.call();
+    final create = _takeRecreate();
     _log.info(
       'save start: $target (${lines.length} chars in '
       '${stream.slices} slices, session $session)',
     );
     try {
-      final saved = await saveNoteStream()!(
+      final saved = await _streamSaver(create: create)(
         target,
         (index) => _nextSlice(stream, index),
         editSession: session,
@@ -583,12 +661,9 @@ final class NoteSavePipeline {
   /// exists to avoid. Each is small enough that the frame after it is on
   /// time.
   Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
-    final first = index * kSaveSliceLines;
-    if (first >= stream.buffer.lineCount) return null;
-    final slice = stream.framing.applyToSlice(
-      stream.buffer.sliceText(first, first + kSaveSliceLines, kSaveSliceChars),
-      first: index == 0,
-    );
+    final taken = stream.take(index);
+    if (taken == null) return null;
+    final slice = stream.framing.applyToSlice(taken, first: index == 0);
     // Building the first slice is what starts the save; the gap the frames
     // need is the one after it, not before it.
     if (index > 0) await Future<void>.delayed(Duration.zero);
@@ -618,9 +693,10 @@ final class NoteSavePipeline {
     String path,
     String content,
     int editSession,
-    DiskStamp? expected,
-  ) async {
-    final saver = saveNote();
+    DiskStamp? expected, {
+    required bool create,
+  }) async {
+    final saver = (create ? createNote?.call() : null) ?? saveNote();
     if (saver != null) {
       return await saver(
         path,
@@ -658,7 +734,7 @@ final class NoteSavePipeline {
 /// were when the save started, which no later edit reaches.
 final class _StreamSave {
   /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer, {this.references, this.framing = NoteFraming.plain});
+  new(this.buffer, {this.references, this.framing = NoteFraming.plain});
 
   /// The note's lines, at the moment the save began.
   final SourceBuffer buffer;
@@ -670,10 +746,50 @@ final class _StreamSave {
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? references;
 
-  /// How many slices the save will hand over; for the log only.
+  /// How many slices the save will hand over at least; for the log only (a
+  /// slice cut short by its character limit makes the real count higher).
   int get slices =>
       (buffer.lineCount + NoteSavePipeline.kSaveSliceLines - 1) ~/
       NoteSavePipeline.kSaveSliceLines;
+
+  /// The line the next slice starts at: where the last one stopped, which is
+  /// before its asked-for end when the character limit cut it short (#1320).
+  int _cursor = 0;
+
+  /// The slice the writer is to ask for next.
+  int _index = 0;
+
+  /// The text of slice [index] — the lines from where the previous slice
+  /// stopped — or null when the note is out.
+  ///
+  /// The slices are asked for in order, from `0`; asking for `0` again (a
+  /// held write retried with the same snapshot) starts the note over. At the
+  /// end the cursor has to be at the last line: a save that ends short of it
+  /// fails instead of writing a shorter note than the editor holds.
+  String? take(int index) {
+    if (index == 0) {
+      _cursor = 0;
+      _index = 0;
+    }
+    if (index != _index) {
+      throw StateError('slice $index asked for, $_index was next');
+    }
+    final lines = buffer.lineCount;
+    if (_cursor >= lines) {
+      if (_cursor != lines) {
+        throw StateError('the save stopped at line $_cursor of $lines');
+      }
+      return null;
+    }
+    final taken = buffer.takeSlice(
+      _cursor,
+      _cursor + NoteSavePipeline.kSaveSliceLines,
+      NoteSavePipeline.kSaveSliceChars,
+    );
+    _cursor = taken.next;
+    _index++;
+    return taken.text;
+  }
 }
 
 /// Why a save of the note on screen failed, and how many tries in a row have

@@ -22,8 +22,10 @@ import 'package:niman/src/ui/history/note_version_screen.dart';
 import 'package:niman/src/ui/kinds/flashcards/deck_review_source.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_run.dart';
 import 'package:niman/src/ui/kinds/flashcards/review_tab.dart';
+import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
 import 'package:niman/src/workspace/workspace.dart';
+import 'package:path/path.dart' as p;
 
 import '../fakes/fake_library_session.dart';
 import '../fakes/fake_link_source.dart';
@@ -71,8 +73,10 @@ type: flashcard
 void main() {
   late FakeLibrarySession controller;
   late FakeFilePicker filePicker;
+  late UnsavedTracker unsaved;
 
   setUp(() {
+    unsaved = UnsavedTracker();
     controller = FakeLibrarySession();
     filePicker = useFakeFilePicker();
   });
@@ -83,6 +87,7 @@ void main() {
       ProviderScope(
         overrides: [
           librarySessionProvider.overrideWithValue(controller),
+          unsavedTrackerProvider.overrideWithValue(unsaved),
           todoSourceFactoryProvider.overrideWithValue((_) => FakeTodoSource()),
           windowControllerProvider.overrideWithValue(
             FakeWindowController(customTitleBar: true),
@@ -165,6 +170,9 @@ void main() {
     expect(controller.restores, [('alpha.md', 1)]);
     expect(tab, findsNothing);
     expect(find.byKey(const Key('history-restored-snack')), findsOne);
+    // The open editor is told, so it shows the restored text even where it
+    // holds edits (#1361).
+    expect(unsaved.takeRestored(p.join(controller.root!, 'alpha.md')), isTrue);
   });
 
   /// Opens version 1 of `alpha.md` as the compare tab, from the dock.
