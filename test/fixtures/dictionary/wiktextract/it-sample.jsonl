@@ -1,0 +1,9 @@
+{"word": "caminetto", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["masculine"], "senses": [{"glosses": ["Piccolo camino di una stanza."], "examples": [{"text": "accendere il caminetto"}]}, {"glosses": ["Luogo di ritrovo."], "raw_tags": ["figurato"], "tags": ["figuratively"]}], "forms": [], "etymology_texts": ["Da camino."]}
+{"word": "ancora", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["feminine"], "senses": [{"glosses": ["Attrezzo che tiene ferma una nave."]}]}
+{"word": "ancora", "lang_code": "it", "lang": "Italiano", "pos": "adv", "senses": [{"glosses": ["Fino a ora."], "raw_tags": ["avverbio di tempo"]}]}
+{"word": "amare", "lang_code": "it", "lang": "Italiano", "pos": "verb", "senses": [{"glosses": ["Provare amore."], "topics": ["sentimenti"]}]}
+{"word": "amo", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["masculine"], "senses": [{"glosses": ["Gancio da pesca."]}]}
+{"word": "a priori", "lang_code": "it", "lang": "Italiano", "pos": "adv", "senses": [{"glosses": ["Prima dell'esperienza."]}]}
+{"word": "ghiaccio", "lang_code": "it", "lang": "Italiano", "pos": "noun", "tags": ["masculine"], "forms": [{"form": "ghiacci", "tags": ["plural"]}, {"form": "ghiaccio", "tags": ["singular"]}], "senses": [{"glosses": ["Acqua solida."], "examples": [{"text": "un cubetto di ghiaccio"}]}]}
+{"word": "Haus", "lang_code": "de", "lang": "Deutsch", "pos": "noun", "senses": [{"glosses": ["Gebaeude."]}]}
+{"word": "ghiaccioli", "lang_code": "it", "lang": "Italiano", "pos": "noun", "senses": [{"glosses": ["Plurale di ghiacciolo."], "form_of": [{"word": "ghiacciolo"}], "tags": ["plural"]}]}
