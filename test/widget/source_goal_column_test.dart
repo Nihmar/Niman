@@ -60,8 +60,7 @@ Future<MarkdownSourceViewState> _pump(WidgetTester tester) async {
   await tester.pump();
   final state = tester.state<MarkdownSourceViewState>(
     find.byType(MarkdownSourceView),
-  );
-  state.placeCaret(8);
+  )..placeCaret(8);
   await tester.pump();
   await tester.pump();
   return state;

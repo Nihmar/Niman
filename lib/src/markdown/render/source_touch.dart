@@ -99,6 +99,12 @@ final class SourceTouchSelection extends ChangeNotifier {
   /// The word the long press started on, held while the finger moves.
   (int, int)? _longPressWord;
 
+  /// The end of the selection the handle being dragged does not hold, taken
+  /// when the drag starts and kept to its end (#1350): the dragged end can
+  /// cross it, and then it is the dragged end that is the selection's start,
+  /// not this one that stops being fixed.
+  int? _dragFixed;
+
   /// Whether the view this serves is gone.
   bool _disposed = false;
 
@@ -137,7 +143,10 @@ final class SourceTouchSelection extends ChangeNotifier {
       table: _toolbar ? _table() : null,
       onDismiss: hide,
       onHandleDrag: _dragHandle,
-      onHandleDragEnd: () => show(toolbar: true),
+      onHandleDragEnd: () {
+        _dragFixed = null;
+        show(toolbar: true);
+      },
     );
   }
 
@@ -238,9 +247,10 @@ final class SourceTouchSelection extends ChangeNotifier {
     final offset = _offsetAt(point);
     if (offset == null) return;
     final selection = _selection();
-    final next = handle == SelectionHandle.start
-        ? SelectionModel(anchor: selection.end, extent: offset)
-        : SelectionModel(anchor: selection.start, extent: offset);
+    final fixed = _dragFixed ??= handle == SelectionHandle.start
+        ? selection.end
+        : selection.start;
+    final next = SelectionModel(anchor: fixed, extent: offset);
     // An empty selection has no handles to hold: the dragged end stops one
     // character short of the other.
     if (next.isCollapsed) return;
