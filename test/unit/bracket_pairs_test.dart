@@ -175,6 +175,15 @@ void main() {
       expect(typedThrough("'", at: cafe.length, text: cafe), "$cafe'");
     });
 
+    test('after a letter outside the BMP a quote is only itself (#1346)', () {
+      const word = '\u{20BB7}';
+      expect(typedThrough("'", at: word.length, text: word), "$word'");
+      expect(
+        typedThrough("'", at: word.length + 1, text: '$word '),
+        "$word ''",
+      );
+    });
+
     test('after a backslash an emphasis is only itself', () {
       expect(typedThrough('*', at: 1, text: r'\'), r'\*');
     });
