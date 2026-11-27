@@ -583,12 +583,9 @@ final class NoteSavePipeline {
   /// exists to avoid. Each is small enough that the frame after it is on
   /// time.
   Future<NoteBytes?> _nextSlice(_StreamSave stream, int index) async {
-    final first = index * kSaveSliceLines;
-    if (first >= stream.buffer.lineCount) return null;
-    final slice = stream.framing.applyToSlice(
-      stream.buffer.sliceText(first, first + kSaveSliceLines, kSaveSliceChars),
-      first: index == 0,
-    );
+    final taken = stream.take(index);
+    if (taken == null) return null;
+    final slice = stream.framing.applyToSlice(taken, first: index == 0);
     // Building the first slice is what starts the save; the gap the frames
     // need is the one after it, not before it.
     if (index > 0) await Future<void>.delayed(Duration.zero);
@@ -658,7 +655,7 @@ final class NoteSavePipeline {
 /// were when the save started, which no later edit reaches.
 final class _StreamSave {
   /// Saves [buffer]'s lines, slice by slice.
-  const new(this.buffer, {this.references, this.framing = NoteFraming.plain});
+  new(this.buffer, {this.references, this.framing = NoteFraming.plain});
 
   /// The note's lines, at the moment the save began.
   final SourceBuffer buffer;
@@ -670,10 +667,50 @@ final class _StreamSave {
   /// The note's tags and links as of [buffer], when the editor keeps them.
   final NoteReferences? references;
 
-  /// How many slices the save will hand over; for the log only.
+  /// How many slices the save will hand over at least; for the log only (a
+  /// slice cut short by its character limit makes the real count higher).
   int get slices =>
       (buffer.lineCount + NoteSavePipeline.kSaveSliceLines - 1) ~/
       NoteSavePipeline.kSaveSliceLines;
+
+  /// The line the next slice starts at: where the last one stopped, which is
+  /// before its asked-for end when the character limit cut it short (#1320).
+  int _cursor = 0;
+
+  /// The slice the writer is to ask for next.
+  int _index = 0;
+
+  /// The text of slice [index] — the lines from where the previous slice
+  /// stopped — or null when the note is out.
+  ///
+  /// The slices are asked for in order, from `0`; asking for `0` again (a
+  /// held write retried with the same snapshot) starts the note over. At the
+  /// end the cursor has to be at the last line: a save that ends short of it
+  /// fails instead of writing a shorter note than the editor holds.
+  String? take(int index) {
+    if (index == 0) {
+      _cursor = 0;
+      _index = 0;
+    }
+    if (index != _index) {
+      throw StateError('slice $index asked for, $_index was next');
+    }
+    final lines = buffer.lineCount;
+    if (_cursor >= lines) {
+      if (_cursor != lines) {
+        throw StateError('the save stopped at line $_cursor of $lines');
+      }
+      return null;
+    }
+    final taken = buffer.takeSlice(
+      _cursor,
+      _cursor + NoteSavePipeline.kSaveSliceLines,
+      NoteSavePipeline.kSaveSliceChars,
+    );
+    _cursor = taken.next;
+    _index++;
+    return taken.text;
+  }
 }
 
 /// Why a save of the note on screen failed, and how many tries in a row have
