@@ -655,7 +655,7 @@ const TextStyle _hiddenMarker = liveHiddenMarker;
 /// line rather than of a word.
 ///
 /// A quote's `>`, a list's `-`, a heading's hashes, a fence and its language,
-/// a task's box — the marks `SourceStyler._structure` lays down at the start of
+/// a task's box — the marks `LineTokens.structure` lays down at the start of
 /// a line. They are revealed with the line. Everything else the surface hides
 /// is an *inline* mark, carried by `Token.marker` and revealed with the
 /// caret's own run (`hidden`).

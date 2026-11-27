@@ -513,7 +513,10 @@ yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting — and, in the read view and in live mode, a **copy**
 button at a code block's top right that puts its code on the clipboard;
 down a block taller than the screen it stays at the top of the part you
-see. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
+see. Math via `$…$` and `$$…$$` (KaTeX); a line that starts with `$$`
+and closes it on the same line, then goes on with text (`$$x$$ tail`), is a
+paragraph with the formula in it, while one that opens with `$$` and does not
+close it starts a block that runs to the next `$$` line. Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 The read view reads a note as GitHub does — GitHub Flavored Markdown, as
@@ -683,6 +686,10 @@ it takes the place of a blank line the caret is on, goes above a line
 the caret is at the start of, and below one the caret is anywhere else
 in, with a blank line kept from the text around it. One undo step takes
 it away. Rows and columns are added from the table itself in live mode.
+
+A table row is split at its pipes before anything inside it is read, as
+GitHub reads it: a `|` in a formula or a code span is written `\|`, so
+`$a\|b$` is one cell and `$a|b$` is two.
 
 Formatting toolbar buttons apply to whichever editor is active, and so
 do the formatting keys — `Ctrl+B`, `Ctrl+I`, `Ctrl+K` and the rest, all

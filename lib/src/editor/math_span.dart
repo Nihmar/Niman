@@ -70,7 +70,7 @@ List<MathSpan> mathSpansIn(String text) {
       }
       continue;
     }
-    if (trimmed.startsWith(r'$$')) {
+    if (isDisplayLine(trimmed)) {
       if (isSingleLineDisplay(trimmed)) {
         final indent = line.length - line.trimLeft().length;
         spans.add(

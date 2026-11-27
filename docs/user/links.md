@@ -282,7 +282,12 @@ Markdown link follow the new path (a reference link's `[label]: path` line
 included), and a link by name follows a rename (see
 [organization](organization.md) for what else follows the note). Only the
 links that pointed at what moved are rewritten: with two notes of the same
-name in different folders, a link to the other one is left as it is.
+name in different folders, a link to the other one is left as it is. A
+link is what the note draws as one: a `[[Link]]` in a code block, an
+indented code block, an HTML block or a comment is text, and a rename leaves
+it as it is. A Markdown link's destination with a space in it is written
+between angle brackets (`[x](<My note.md>)`), as in CommonMark; without them
+it is not a link.
 **Settings →
 Editor → Update links after rename or move** chooses what happens:
 

@@ -12,8 +12,10 @@
 ///   945 KB note of 13 004 formulas: none breaks either.
 /// * display math: a line starting (after optional indentation) with `$$`.
 ///   A line whose trimmed content is exactly `$$…$$` is single-line
-///   display; otherwise the block runs until the next line starting with
-///   `$$` (an unterminated block runs to EOF).
+///   display; one that closes itself and goes on with text (`$$x$$ tail`)
+///   is a paragraph with a display formula in it, as it is mid-line;
+///   otherwise the block runs until the next line starting with `$$` (an
+///   unterminated block runs to EOF).
 library;
 
 /// Whether [trimmed] is a single-line display block (`$$…$$`).
@@ -22,17 +24,24 @@ bool isSingleLineDisplay(String trimmed) =>
 
 /// Whether [trimmed] is display math at all — a `$$` line, of either form.
 ///
+/// A line that starts with `$$`, has another `$$` after it and does not end
+/// with it is none: it closes on itself and goes on with text, so it is a
+/// paragraph with a display formula in it, as the same text mid-line is, and
+/// not a block that runs to the next `$$` line (#1371).
+///
 /// The door the other two are asked behind: the preview's `MathBlockSyntax`
 /// and the read view's block scanner both classify by this first, so a line
 /// holding `$$x$$` is a display block in both. They drifted while the scanner
 /// kept its own copy of these rules — the line was a display block in the
 /// preview and a paragraph in the read view (#252) — so the copy is gone.
-bool isDisplayLine(String trimmed) => trimmed.startsWith(r'$$');
+bool isDisplayLine(String trimmed) =>
+    trimmed.startsWith(r'$$') &&
+    (isSingleLineDisplay(trimmed) || trimmed.indexOf(r'$$', 2) < 0);
 
 /// Whether a *line* (trimmed) starts a display-math block — single-line or
 /// multi-line. The block runs until [isDisplayClose] (or EOF).
 bool isDisplayOpen(String trimmed) =>
-    trimmed.startsWith(r'$$') && !isSingleLineDisplay(trimmed);
+    isDisplayLine(trimmed) && !isSingleLineDisplay(trimmed);
 
 /// Whether [trimmed] closes a multi-line display block.
 bool isDisplayClose(String trimmed) => trimmed.startsWith(r'$$');

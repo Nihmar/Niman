@@ -32,6 +32,27 @@ abstract final class LineSyntax {
   static (int, int)? headingMarkerOf(String text, [int? reach]) =>
       _headingMarker(text, 0, reach ?? text.length);
 
+  /// Where the closing `#`s of the ATX heading on [text] start and end, past
+  /// its opening marker, which ends at [from]; null when it has none: a
+  /// run of `#` at the end of the line, apart from the content by a space
+  /// or a tab (or the opening marker itself), and trailing white space
+  /// after it.
+  static (int, int)? headingCloseOf(String text, int from) {
+    var end = text.length;
+    while (end > from && isSpace(text.codeUnitAt(end - 1))) {
+      end--;
+    }
+    var start = end;
+    while (start > from && text.codeUnitAt(start - 1) == 0x23) {
+      start--;
+    }
+    if (start == end) return null;
+    // Apart from what is before it: the `#`s of `foo#` are text, and so are
+    // an escaped one's.
+    if (start > from && !isSpace(text.codeUnitAt(start - 1))) return null;
+    return (start, end);
+  }
+
   /// How many `#` open a heading on [text], or 0: up to three spaces in from
   /// [column], the content column of the item the line is in.
   static int headingLevel(String text, [int column = 0]) =>
@@ -125,14 +146,42 @@ abstract final class LineSyntax {
   /// Whether [text] closes a `$$` block.
   static bool closesMath(String text) => isDisplayClose(text.trim());
 
-  /// Whether line [line] opens the frontmatter block: only the first line can.
+  /// Whether line [line] may open the frontmatter block: only the first
+  /// line can, and only with `---`; whether it does is
+  /// [frontmatterEnd]'s to say.
   static bool opensFrontmatter(int line, String text) =>
-      line == 0 && (text.trim() == '---' || text.trim() == '...');
+      line == 0 && text.trim() == '---';
 
   /// Whether [text] closes the frontmatter.
   static bool closesFrontmatter(String text) {
     final trimmed = text.trim();
     return trimmed == '---' || trimmed == '...';
+  }
+
+  /// How many lines of a note are read for the line that closes its
+  /// frontmatter, the opener's included. A note that opens with `---` and
+  /// does not close it that soon has a rule on its first line, not a
+  /// frontmatter: the look is a bounded read, so the edit that asks it
+  /// stays O(change).
+  static const int frontmatterWindow = 1024;
+
+  /// The line that closes the frontmatter of a note, or -1 when it has
+  /// none: the first line is `---` and one of the next [frontmatterWindow]
+  /// lines is `---` or `...`. [lineAt] reads a line, null past the note's
+  /// last.
+  ///
+  /// The one place that decides it, for the scanner, the properties
+  /// panel and the word count: an unclosed opener is no frontmatter, it
+  /// is a rule and the text under it.
+  static int frontmatterEnd(String? Function(int line) lineAt) {
+    final first = lineAt(0);
+    if (first == null || !opensFrontmatter(0, first)) return -1;
+    for (var line = 1; line < frontmatterWindow; line++) {
+      final text = lineAt(line);
+      if (text == null) break;
+      if (closesFrontmatter(text)) return line;
+    }
+    return -1;
   }
 
   /// How deep in blockquotes a line sits, by its own markers, read from

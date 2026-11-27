@@ -146,6 +146,14 @@ abstract final class GfmAutolinks {
     return piece;
   }
 
+  /// The range of the `www.` address or URL that starts at [at] in [text],
+  /// or null: not an email address, which starts before its `@`.
+  static (int, int)? urlAt(String text, int at) {
+    if (text.codeUnitAt(at) == 0x40) return null;
+    final found = _at(text, at);
+    return found == null ? null : (found.$1, found.$2);
+  }
+
   /// The autolink starting at or around [at] in [text]: its range and
   /// destination, or null. An email address is found by its `@`, and
   /// starts before it.

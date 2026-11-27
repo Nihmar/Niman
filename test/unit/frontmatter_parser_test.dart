@@ -3,6 +3,10 @@
 // Inline tag extraction rides along on the editor tokenizer's rules.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/frontmatter/parser.dart';
+import 'package:niman/src/markdown/note_references.dart';
+
+/// The inline tags of [text], as the index reads them.
+List<String> _inlineTags(String text) => noteReferencesOf(text).tags;
 
 void main() {
   group('block detection', () {
@@ -219,27 +223,27 @@ void main() {
 
   group('inlineTags', () {
     test('finds #tags, normalizes them', () {
-      expect(inlineTags('text #Hello world #World again'), ['hello', 'world']);
+      expect(_inlineTags('text #Hello world #World again'), ['hello', 'world']);
     });
 
     test('skips code fences, inline code, math and frontmatter', () {
       const withCode = '```\n#not\n```\n\n`#nope` and \$\$#nope\$\$\n#yes';
-      expect(inlineTags(withCode), ['yes']);
+      expect(_inlineTags(withCode), ['yes']);
       const withFm = '---\ntags: [fm]\n---\n#inline';
-      expect(inlineTags(withFm), ['inline']);
+      expect(_inlineTags(withFm), ['inline']);
     });
 
     test('a # at the line start counts, a hashtag inside a word does not', () {
-      expect(inlineTags('#lead and #word'), ['lead', 'word']);
-      expect(inlineTags('C#sharp'), isEmpty);
+      expect(_inlineTags('#lead and #word'), ['lead', 'word']);
+      expect(_inlineTags('C#sharp'), isEmpty);
     });
 
     test('a unicode #tag is one tag, inline as in frontmatter', () {
       // An ASCII-only pattern read `#città` as `citt` and `#идея` as nothing,
       // while YAML's `tags:` kept the whole word: one tag, two rows.
-      expect(inlineTags('vedi #città e #идея'), ['città', 'идея']);
+      expect(_inlineTags('vedi #città e #идея'), ['città', 'идея']);
       const note = '---\ntags: [città, идея]\n---\n\nVedi #città e #идея.';
-      expect(inlineTags(note), parseFrontmatter(note)!.tags);
+      expect(_inlineTags(note), parseFrontmatter(note)!.tags);
     });
   });
 
