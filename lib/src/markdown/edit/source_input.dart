@@ -37,6 +37,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/edit/value_diff.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
@@ -466,26 +467,25 @@ final class SourceInput implements DeltaTextInputClient {
     final start = _windowStart;
     final theirs = value.text;
     if (ours != theirs) {
-      var prefix = 0;
-      final shortest = ours.length < theirs.length
-          ? ours.length
-          : theirs.length;
-      while (prefix < shortest &&
-          ours.codeUnitAt(prefix) == theirs.codeUnitAt(prefix)) {
-        prefix++;
-      }
-      var suffix = 0;
-      while (suffix < shortest - prefix &&
-          ours.codeUnitAt(ours.length - 1 - suffix) ==
-              theirs.codeUnitAt(theirs.length - 1 - suffix)) {
-        suffix++;
-      }
-      _replace(
-        start + prefix,
-        start + ours.length - suffix,
-        theirs.substring(prefix, theirs.length - suffix),
-        _caretOf(value.selection, start),
+      final diff = diffValues(
+        ours,
+        theirs,
+        caret: value.selection.isValid && value.selection.isCollapsed
+            ? value.selection.extentOffset
+            : null,
       );
+      final (from, to) = (start + diff.start, start + diff.end);
+      // The keystroke hooks are the delta path's own: a whole value that is
+      // an Enter or a typed character gets the list's continuation and the
+      // bracket's pair, whichever way the platform reports it (#1354).
+      if (diff.inserted == '\n' && (onNewline?.call(from, to) ?? false)) {
+        // The note says something else than the platform now; told below.
+      } else if (!_composes(value.composing) &&
+          (onTyped?.call(from, to, diff.inserted) ?? false)) {
+        // Likewise.
+      } else {
+        _replace(from, to, diff.inserted, _caretOf(value.selection, start));
+      }
     } else {
       _reportSelection(
         _platformSelection(value.selection, start, value.text.length),
@@ -584,7 +584,7 @@ final class SourceInput implements DeltaTextInputClient {
         );
       } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
         known = false;
-      } else if (!_composes(delta) &&
+      } else if (!_composes(delta.composing) &&
           (onTyped?.call(start, end, inserted) ?? false)) {
         known = false;
       } else {
@@ -619,10 +619,10 @@ final class SourceInput implements DeltaTextInputClient {
       selection.start == 0 &&
       selection.end == length;
 
-  /// Whether [delta] is part of a composition, which an IME may still
-  /// change: a bracket in it is not typed yet.
-  static bool _composes(TextEditingDelta delta) =>
-      delta.composing.isValid && !delta.composing.isCollapsed;
+  /// Whether an update that composes [composing] is part of a composition,
+  /// which an IME may still change: a bracket in it is not typed yet.
+  static bool _composes(TextRange composing) =>
+      composing.isValid && !composing.isCollapsed;
 
   /// [range], a platform range in a window at [origin], in note offsets.
   static TextRange _shifted(TextRange range, int origin) =>

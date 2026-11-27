@@ -4,6 +4,8 @@
 // round trips a stored `\r\n` costs (#1374, #1376).
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:niman/src/markdown/edit/bracket_pairs.dart';
+import 'package:niman/src/markdown/edit/enter_edit.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/source_input.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -39,6 +41,48 @@ _wire(
     onSelector: selectors.add,
   );
   return (buffer: buffer, input: input, carets: carets, selectors: selectors);
+}
+
+/// A surface whose keystroke hooks do what the editor's do: Enter continues a
+/// list, a typed bracket writes its pair.
+({SourceBuffer buffer, SourceInput input, List<SelectionModel> carets}) _typing(
+  String text, {
+  required int caret,
+}) {
+  final buffer = SourceBuffer.fromText(text);
+  final brackets = BracketPairs();
+  late SourceInput input;
+  var current = SelectionModel.at(caret);
+  final carets = <SelectionModel>[];
+  input = SourceInput(
+    buffer: buffer,
+    onTokenizer: (edit, buffer) {},
+    selection: () => current,
+    onSelection: (next) {
+      current = next;
+      carets.add(next);
+    },
+    onEdited: (_) {},
+    onNewline: (start, end) {
+      if (start != end) return false;
+      final edit = enterEdit(buffer, start, indentWidth: 2);
+      if (edit == null) return false;
+      buffer.replaceRange(edit.start, edit.end, edit.text);
+      current = edit.caret ?? SelectionModel.at(edit.start + edit.text.length);
+      input.sendSelection();
+      return true;
+    },
+    onTyped: (start, end, inserted) {
+      if (inserted.length != 1) return false;
+      final edit = brackets.typed(buffer, start, end, inserted);
+      if (edit == null) return false;
+      buffer.replaceRange(edit.start, edit.end, edit.text);
+      current = SelectionModel(anchor: edit.anchor, extent: edit.extent);
+      input.sendSelection();
+      return true;
+    },
+  );
+  return (buffer: buffer, input: input, carets: carets);
 }
 
 TextEditingDeltaInsertion _insert(String oldText, int at, String text) =>
@@ -147,6 +191,74 @@ void main() {
       final surface = _wire(text, caret: 2);
       surface.input.updateEditingValueWithDeltas([_delete(text, 0, 2)]);
       expect(surface.buffer.text, 'b\r\n');
+    });
+  });
+
+  group('a whole value is a keystroke too (#1354)', () {
+    /// The note after [text] is typed at [caret] as deltas, and as whole
+    /// values — the two ways a platform can say the same thing.
+    (String, String) typed(String text, int caret, String character) {
+      final byDelta = _typing(text, caret: caret);
+      byDelta.input.updateEditingValueWithDeltas([
+        _insert(text, caret, character),
+      ]);
+      final byValue = _typing(text, caret: caret);
+      byValue.input.updateEditingValue(
+        TextEditingValue(
+          text: text.substring(0, caret) + character + text.substring(caret),
+          selection: TextSelection.collapsed(offset: caret + character.length),
+        ),
+      );
+      return (byDelta.buffer.text, byValue.buffer.text);
+    }
+
+    test('Enter after a list item continues the list', () {
+      final (delta, value) = typed('- a', 3, '\n');
+      expect(delta, '- a\n- ');
+      expect(value, delta);
+    });
+
+    test('a typed bracket writes its pair', () {
+      final (delta, value) = typed('ab ', 3, '(');
+      expect(delta, 'ab ()');
+      expect(value, delta);
+    });
+
+    test('a bracket typed beside an equal one is the one at the caret', () {
+      // The two texts differ at 3 or at 4: the caret says which.
+      final byValue = _typing('f( g', caret: 3);
+      byValue.input.updateEditingValue(
+        const TextEditingValue(
+          text: 'f(( g',
+          selection: TextSelection.collapsed(offset: 3),
+        ),
+      );
+      final byDelta = _typing('f( g', caret: 3);
+      byDelta.input.updateEditingValueWithDeltas([_insert('f( g', 2, '(')]);
+      expect(byValue.buffer.text, byDelta.buffer.text);
+    });
+
+    test('a composing bracket is not typed yet', () {
+      final surface = _typing('ab ', caret: 3);
+      surface.input.updateEditingValue(
+        const TextEditingValue(
+          text: 'ab (',
+          selection: TextSelection.collapsed(offset: 4),
+          composing: TextRange(start: 3, end: 4),
+        ),
+      );
+      expect(surface.buffer.text, 'ab (');
+    });
+
+    test('a paste is the whole thing, hooks or not', () {
+      final surface = _typing('ab ', caret: 3);
+      surface.input.updateEditingValue(
+        const TextEditingValue(
+          text: 'ab (x)',
+          selection: TextSelection.collapsed(offset: 6),
+        ),
+      );
+      expect(surface.buffer.text, 'ab (x)');
     });
   });
 
