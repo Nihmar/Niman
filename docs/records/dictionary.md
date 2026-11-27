@@ -220,6 +220,89 @@ pack would hold.
 - **Nynorsk is not one of the app's languages**: a book tagged `nn` finds
   no pack and is offered to change the language.
 
+## The pack format, version 1
+
+This is the contract between the pipeline, which writes a pack, and the
+engine, which reads one. Both are tested against it, and a change to it
+bumps `niman-pack`.
+
+**Files.** A pack is the folder `<support>/dictionary/<id>/` holding
+`<id>.ifo`, `<id>.idx`, `<id>.dict.dz` and `<id>.syn`.
+- `<id>` is `niman-<code>`, where `<code>` is the app's language id
+  (`niman-it`). The Serbo-Croatian pack is `niman-sh`.
+- The engine also reads an uncompressed `<id>.dict`, which is what a
+  fixture, or a build without the `dictzip` tool, writes.
+- The engine's sidecar is `<id>.niman-index`, written next to the other
+  files by the engine. It is never published.
+
+**`.ifo`.** The StarDict 3.0.0 keys: `version=3.0.0`, `bookname`,
+`wordcount`, `synwordcount`, `idxfilesize`, `idxoffsetbits=32`,
+`sametypesequence=h`, `author`, `website`, `description`, `date`.
+Niman adds keys of its own, which StarDict ignores:
+- `niman-pack=1`
+- `languages=it` (several, comma-separated, for `niman-sh`: `hr,sr,bs`)
+- `definitions=it`: the language the glosses are written in
+- `source=it.wiktionary+en.wiktionary`
+- `license=CC BY-SA 4.0; GFDL`
+
+`description` carries the attribution and the wiktextract citation.
+
+**`.idx`.** One entry per headword, keeping its case. *Polish* and
+*polish* are two entries. Each entry holds every part of speech of that
+headword. The entries are sorted as StarDict sorts them
+(`g_ascii_strcasecmp`, then `strcmp`), which keeps the pack readable by
+other StarDict tools.
+
+**Lookup order.** The engine never binary-searches the `.idx` itself. It
+builds its sidecar from every `.idx` and `.syn` key, under its own
+normalization (decision 16), so the two sides need not agree on any
+order but StarDict's.
+
+**`.syn`.** One record per key that is not a headword:
+- an inflected form (`caminetti`);
+- an alternative spelling;
+- the other script of a Serbo-Croatian entry.
+
+Each record points at the `.idx` entry of its lemma. A form shared by two
+lemmas (*ancora*) has one record per lemma. A form that is itself a
+headword has no record: its own entry lists its lemma under `form_of`
+(below).
+
+**An entry** is UTF-8 HTML. The grammar is closed. Text is escaped (`&amp;`
+`&lt;` `&gt;` `&quot;`), and nothing outside it is written.
+
+```html
+<div class="entry">
+  <h1>caminetto</h1>
+  <section data-pos="noun" data-tags="masculine">
+    <ol>
+      <li><span class="q">figurative</span> Gloss text, with <i>italic</i>
+        and <b>bold</b> only.
+        <ul class="ex"><li>accendere il caminetto</li></ul></li>
+    </ol>
+    <p class="form-of" data-tags="plural">camino</p>
+  </section>
+  <div class="forms"><span data-tags="plural">caminetti</span></div>
+</div>
+```
+
+- `data-pos` is wiktextract's part-of-speech code (`noun`, `verb`,
+  `adj`…). `data-tags` is a space-separated list of wiktextract tags
+  (`masculine`, `plural`…).
+  - The panel draws both in the app's language, from its strings. A pack
+    holds no UI words.
+- `<span class="q">` is a sense's qualifier (wiktextract's `raw_tags` or
+  `topics`), as the source wrote it, in the pack's language. A sense has
+  none or one.
+- `<p class="form-of">` appears when the section is itself an inflected
+  form ("plural of *camino*"). Its text is the lemma, which the panel
+  makes a look-up.
+- `<div class="forms">` lists the headword's inflected forms with their
+  tags. The panel finds the form read there, to say "from *caminetti*,
+  plural".
+- `<i>`, `<b>` and the elements above are the whole grammar. The engine's
+  parser reads anything else as text.
+
 ## The engine — `lib/src/dictionary/`
 
 A new module (added to the layout in `AGENTS.md`).
