@@ -695,9 +695,11 @@ writes its definition under the paragraph, the caret on it to write the
 note.
 
 Enter inside a list carries the list on, in both editors: the next line
-starts with the same marker, a numbered list counts on, and a task item
-gives you a fresh empty box. Enter on an item you have not typed
-anything into ends the list instead — the usual second Enter. On an empty
+starts with the same marker, a numbered list counts on (keeping the
+zeros of `01.`, which goes on as `02.`), and a task item gives you a
+fresh empty box. Enter on an item you have not typed anything into —
+`- [ ]` with the box and no text included, with or without the space
+after it — ends the list instead, the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
 does, and only at the margin removes the marker. A rule written with
 spaces, `- - -` or `* * *`, is a rule and not a list: Enter after it adds
@@ -709,7 +711,8 @@ marks, and a list inside the quote goes on behind them: `> - milk` and
 Enter gives `> - `, `> > x` gives `> > `, and the first line of a callout,
 `> [!note]`, gives `> ` for its body. Enter on a line with nothing after
 its marks, `> `, takes them off and leaves the quote; on an empty list
-item in a quote it takes the marker, and the next Enter the quote. Enter
+item in a quote it takes the marker, and the next Enter the quote. The
+marks are carried as you wrote them: `>- milk` goes on as `>- `. Enter
 and Tab read the line the same way, behind the `>`.
 
 Brackets come in pairs, in both editors and on every platform: `(`

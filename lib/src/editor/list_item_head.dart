@@ -40,17 +40,28 @@ final class ListItemHead {
   /// thing to do.
   String get continuation {
     final number = this.number;
-    final next = number == null
-        ? marker
-        : '${number + 1}${marker[marker.length - 1]}';
+    final next = number == null ? marker : markerFor(number + 1);
     return '$indent$next ${box ? '[ ] ' : ''}';
+  }
+
+  /// The marker of an ordered item numbered [number], in this item's
+  /// style: the same delimiter and, for a number written with leading
+  /// zeros, the same width of digits — `01.` goes on as `02.` and `009)` as
+  /// `010)`, not as `2.` (#1342). A bulleted item's own marker.
+  String markerFor(int number) {
+    if (this.number == null) return marker;
+    final digits = marker.length - 1;
+    final padded = marker.startsWith('0') ? digits : 1;
+    return '${'$number'.padLeft(padded, '0')}${marker[digits]}';
   }
 }
 
 /// A list marker at the start of a line, with the task box that may
-/// follow it.
+/// follow it: a box is the `[ ]` or `[x]` that ends the line or has
+/// whitespace after it, so `- [ ]` is an empty task and `- [ ]x` is text
+/// (#1342).
 final RegExp _listItem = RegExp(
-  r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]+(\[[ xX]\][ \t]+)?(.*)$',
+  r'^([ \t]*)([-*+]|(\d{1,9})([.)]))[ \t]+(\[[ xX]\](?:[ \t]+|$))?(.*)$',
 );
 
 /// A thematic break written with spaces — `- - -`, `*  *  *` — which

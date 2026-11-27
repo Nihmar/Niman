@@ -100,11 +100,12 @@ EnterEdit? enterEdit(
   // A caret inside the marker is not "in the item": leave it to the platform.
   if (column < text.length - head.content.length) return null;
   // One edit, not a line break and then a marker: one undo step, and no frame
-  // where the marker is missing.
+  // where the marker is missing. The quote marks are the writer's own: `>- a`
+  // goes on as `>- `, not `> - ` (#1342).
   return (
     start: offset,
     end: offset,
-    text: '\n$prefix${head.continuation}',
+    text: '\n$marks${head.continuation}',
     caret: null,
     verbatim: false,
   );

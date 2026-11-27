@@ -133,6 +133,27 @@ void main() {
     });
   });
 
+  group("the writer's own marks and numbers are kept (#1342)", () {
+    for (final (marked, expected) in <(String, String)>[
+      ('- [ ]|', '|'),
+      ('- [x]|', '|'),
+      ('1. [ ]|', '|'),
+      ('> - [ ]|', '> |'),
+      ('- [ ]x|', '- [ ]x\n- |'),
+      ('- [ ] a|', '- [ ] a\n- [ ] |'),
+      ('01. a|', '01. a\n02. |'),
+      ('09. a|', '09. a\n10. |'),
+      ('009) a|', '009) a\n010) |'),
+      ('9. a|', '9. a\n10. |'),
+      ('99. a|', '99. a\n100. |'),
+      ('>- a|', '>- a\n>- |'),
+      ('>> 1. a|', '>> 1. a\n>> 2. |'),
+      ('> - a|', '> - a\n> - |'),
+    ]) {
+      test(marked, () => expect(_enter(marked), expected));
+    }
+  });
+
   test('a CRLF note keeps its line endings through a quote', () {
     final buffer = SourceBuffer.fromText('> a\r\n> b');
     final edit = enterEdit(buffer, buffer.length, indentWidth: 2)!;
