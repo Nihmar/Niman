@@ -34,7 +34,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/edit/value_diff.dart';
@@ -139,6 +138,12 @@ final class SourceInput implements DeltaTextInputClient {
 
   bool _holdSync = false;
 
+  /// Whether an update from the platform is being applied: what the surface
+  /// writes while it is — a list's next marker, a bracket's pair — is told to
+  /// the platform once, when the update is done, with what the platform said
+  /// (#1376). Told as it is written it was told twice, the same window.
+  bool _updating = false;
+
   /// How far the platform's window reaches on each side of the caret, before
   /// it is widened to whole lines.
   static const int windowReach = 2048;
@@ -214,7 +219,7 @@ final class SourceInput implements DeltaTextInputClient {
 
   /// Tells the platform what it should hold, when that is not what it holds.
   void _sync() {
-    if (!isAttached || _holdSync) return;
+    if (!isAttached || _holdSync || _updating) return;
     final value = _valueToSend();
     if (value == null) return;
     _connection!.setEditingState(value);
@@ -466,6 +471,24 @@ final class SourceInput implements DeltaTextInputClient {
     final ours = _platformValue.text;
     final start = _windowStart;
     final theirs = value.text;
+    _updating = true;
+    try {
+      _applyValue(ours, theirs, value, start);
+    } finally {
+      _updating = false;
+    }
+    _composing = _shifted(value.composing, start);
+    _platformNowHas(value);
+  }
+
+  /// Applies the platform's whole [value], over [ours] — the window at
+  /// [start] as this side held it — to the note.
+  void _applyValue(
+    String ours,
+    String theirs,
+    TextEditingValue value,
+    int start,
+  ) {
     if (ours != theirs) {
       final diff = diffValues(
         ours,
@@ -491,13 +514,24 @@ final class SourceInput implements DeltaTextInputClient {
         _platformSelection(value.selection, start, value.text.length),
       );
     }
-    _composing = _shifted(value.composing, start);
-    _platformNowHas(value);
   }
 
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     if (deltas.isEmpty) return;
+    _updating = true;
+    final TextEditingValue? value;
+    try {
+      value = _applyDeltas(deltas);
+    } finally {
+      _updating = false;
+    }
+    _platformNowHas(value);
+  }
+
+  /// Applies [deltas] to the note: what the platform holds after them, or
+  /// null when this side cannot say.
+  TextEditingValue? _applyDeltas(List<TextEditingDelta> deltas) {
     _log.debug(
       'deltas: ${deltas.map(_short).join(", ")} '
       '(ours ${buffer.length}, caret ${selection().extent})',
@@ -605,7 +639,7 @@ final class SourceInput implements DeltaTextInputClient {
       _composing = _shifted(delta.composing, origin);
       if (known) value = delta.apply(value);
     }
-    _platformNowHas(known ? value : null);
+    return known ? value : null;
   }
 
   /// The note's offset for [offset] of [copy], the platform's text for the
@@ -811,20 +845,4 @@ final class SourceInput implements DeltaTextInputClient {
   Size? _geometrySize;
   Matrix4? _geometryTransform;
   Rect? _geometryCaret;
-
-  /// The tokenizer's view of an edit: the lines that changed, and nothing else.
-  ///
-  /// This is what keeps a keystroke off the note's whole length — the phase's
-  /// 0.507 ms incremental-edit number is this call plus the buffer's own
-  /// `replaceRange`.
-  static void retokenize(
-    HighlightDocument tokens,
-    SourceEdit edit,
-    SourceBuffer buffer,
-  ) {
-    tokens.replaceLines(edit.firstLine, edit.removedLines, <String>[
-      for (var at = 0; at < edit.insertedLines; at++)
-        buffer.lineAt(edit.firstLine + at),
-    ]);
-  }
 }

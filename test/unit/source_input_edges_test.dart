@@ -298,6 +298,68 @@ void main() {
     });
   });
 
+  group('the platform is told once per update (#1376)', () {
+    var sent = 0;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+    setUp(() {
+      sent = 0;
+      messenger.setMockMethodCallHandler(SystemChannels.textInput, (
+        call,
+      ) async {
+        if (call.method == 'TextInput.setEditingState') sent++;
+        return null;
+      });
+    });
+    tearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.textInput, null),
+    );
+
+    /// A surface over [text] with the keyboard attached, and nothing counted.
+    ({SourceBuffer buffer, SourceInput input, List<SelectionModel> carets})
+    attached(String text, int caret) {
+      final surface = _typing(text, caret: caret);
+      surface.input.attach(viewId: 0);
+      addTearDown(surface.input.detach);
+      sent = 0;
+      return surface;
+    }
+
+    test('an Enter that continues a list', () {
+      final surface = attached('- a', 3);
+      surface.input.updateEditingValueWithDeltas([_insert('- a', 3, '\n')]);
+      expect(surface.buffer.text, '- a\n- ');
+      expect(sent, 1);
+    });
+
+    test('a bracket that writes its pair', () {
+      final surface = attached('ab ', 3);
+      surface.input.updateEditingValueWithDeltas([_insert('ab ', 3, '(')]);
+      expect(surface.buffer.text, 'ab ()');
+      expect(sent, 1);
+    });
+
+    test('a whole value that is an Enter', () {
+      final surface = attached('- a', 3);
+      surface.input.updateEditingValue(
+        const TextEditingValue(
+          text: '- a\n',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      expect(surface.buffer.text, '- a\n- ');
+      expect(sent, 1);
+    });
+
+    test('a plain keystroke is not told back at all', () {
+      final surface = attached('ab', 2);
+      surface.input.updateEditingValueWithDeltas([_insert('ab', 2, 'c')]);
+      expect(surface.buffer.text, 'abc');
+      expect(sent, 0);
+    });
+  });
+
   test('performSelector hands the selector on', () {
     final surface = _wire('abc');
     surface.input.performSelector('moveToBeginningOfLine:');
