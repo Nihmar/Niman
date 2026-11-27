@@ -453,7 +453,11 @@ Replace all, an outgoing write) or when nobody touched it at all. When the
 file's size and time match neither, its bytes are compared with what Niman
 last wrote: a file that only shows another time (Android's storage does not
 always report the one the write left) is still Niman's own and is not
-announced.
+announced. A file's time is only as fine as the file system's clock — two
+seconds on FAT, a few milliseconds elsewhere — so a program that rewrites the
+same number of bytes within that tick of the last write leaves the same size
+and time: when the file was last written that recently, its bytes are checked
+too, and such a change is seen like any other.
 
 **Line endings and the byte order mark.** The editor works with plain lines,
 but the file keeps what it had: a note with Windows (`CRLF`) line endings is

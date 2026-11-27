@@ -23,7 +23,11 @@ final class ExternalWriteCheck {
     if (expected == null) return const ExternalWriteCheck._(foreign: false);
     final lastWritten = asked.lastWritten;
     final now = DiskStamp.of(note.path);
-    if (expected.sameAs(now) || (lastWritten?.sameAs(now) ?? false)) {
+    // The stat alone is not enough within the clock's tick of the file's
+    // time: the bytes then vouch for the stamp (#1365).
+    if ((expected.sameAs(now) && expected.vouches(note.path)) ||
+        ((lastWritten?.sameAs(now) ?? false) &&
+            lastWritten!.vouches(note.path))) {
       return const ExternalWriteCheck._(foreign: false);
     }
     final stamps =

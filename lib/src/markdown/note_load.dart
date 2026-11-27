@@ -128,7 +128,7 @@ Object readNoteTextSync(
   if (decoded == null) return NoteReadFailure('$path: not text', notText: true);
   return NoteTextRead(
     text: decoded.text,
-    stamp: stamp,
+    stamp: _vouched(stamp, bytes),
     framing: _framingOf(bytes, decoded),
   );
 }
@@ -162,7 +162,7 @@ Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
     text: text,
     buffer: SourceBuffer.fromText(text),
     framing: framing,
-    stamp: stamp,
+    stamp: _vouched(stamp, bytes),
   );
 }
 
@@ -173,3 +173,13 @@ NoteFraming _framingOf(List<int> bytes, DecodedNote decoded) => NoteFraming.of(
   encoding: decoded.encoding,
   windows1252: decoded.lenient,
 );
+
+/// [stamp] with the digest of the [bytes] read after it, when it is
+/// ambiguous (#1365): a file written within a tick of the stat could be
+/// written again within the same tick, with the same size, and only its
+/// content tells. Any other stamp needs no hash — a note is not hashed on
+/// every open.
+DiskStamp? _vouched(DiskStamp? stamp, List<int> bytes) =>
+    stamp != null && stamp.isAmbiguous
+    ? stamp.withDigest(DiskStamp.digestOfBytes(bytes))
+    : stamp;
