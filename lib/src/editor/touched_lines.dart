@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:niman/src/editor/line_selection.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -11,8 +12,8 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// next one alone (#1345). A caret, and a selection that starts on that line,
 /// touch the line they are on.
 ({int first, int last}) touchedLines(String text, TextSelection selection) {
-  final first = _lineIndexOf(text, selection.start);
-  final last = _lineIndexOf(text, selection.end);
+  final first = lineIndexOf(text, selection.start);
+  final last = lineIndexOf(text, selection.end);
   if (last > first && endsAtLineStart(text, selection)) {
     return (first: first, last: last - 1);
   }
@@ -37,13 +38,4 @@ bool endsAtLineStart(String text, TextSelection selection) {
   return selection.start < end &&
       end <= text.length &&
       text.codeUnitAt(end - 1) == 0x0A;
-}
-
-/// The 0-based line index containing [offset].
-int _lineIndexOf(String text, int offset) {
-  var line = 0;
-  for (var i = 0; i < offset && i < text.length; i++) {
-    if (text.codeUnitAt(i) == 0x0A) line++;
-  }
-  return line;
 }

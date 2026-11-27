@@ -4,6 +4,7 @@
 library;
 
 import 'package:flutter/services.dart';
+import 'package:niman/src/editor/line_selection.dart';
 import 'package:niman/src/editor/list_item_head.dart';
 import 'package:niman/src/editor/touched_lines.dart';
 
@@ -94,7 +95,7 @@ MarkdownEdit prefixLines({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -126,7 +127,7 @@ MarkdownEdit setHeading({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -151,7 +152,7 @@ MarkdownEdit orderedList({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -205,7 +206,7 @@ MarkdownEdit toggleTaskList({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -326,7 +327,7 @@ String _tableCell(String label) => label.replaceAll('|', r'\|');
 /// writer leave, which is the one a second run meets.
 int _afterTable(String text, int offset) {
   final lines = text.split('\n');
-  final at = _lineIndexOf(text, offset);
+  final at = lineIndexOf(text, offset);
   if (!_startsTableRow(lines[at])) return offset;
   var first = at;
   while (first > 0 && _startsTableRow(lines[first - 1])) {
@@ -339,7 +340,7 @@ int _afterTable(String text, int offset) {
   while (last < lines.length - 1 && _startsTableRow(lines[last + 1])) {
     last++;
   }
-  return _lineStart(text, last) + lines[last].length;
+  return lineStartOf(text, last) + lines[last].length;
 }
 
 /// Whether [line] looks like one of a table's rows: it starts with a pipe.
@@ -366,8 +367,8 @@ MarkdownEdit insertBlock({
 }) {
   final lines = text.split('\n');
   final at0 = selection.extentOffset;
-  final line = _lineIndexOf(text, at0);
-  final column = at0 - _lineStart(text, line);
+  final line = lineIndexOf(text, at0);
+  final column = at0 - lineStartOf(text, line);
   final blank = lines[line].trim().isEmpty;
   final at = blank || column == 0 ? line : line + 1;
   final remove = blank ? 1 : 0;
@@ -380,7 +381,7 @@ MarkdownEdit insertBlock({
   final target = caret ?? (line: block.length - 1, column: block.last.length);
   final newText = newLines.join('\n');
   final offset =
-      _lineStart(newText, at + (before ? 1 : 0) + target.line) + target.column;
+      lineStartOf(newText, at + (before ? 1 : 0) + target.line) + target.column;
   return MarkdownEdit(
     text: newText,
     selection: TextSelection.collapsed(offset: offset),
@@ -427,7 +428,7 @@ MarkdownEdit removeHeading({
   final newText = newLines.join('\n');
   return MarkdownEdit(
     text: newText,
-    selection: _shiftSelectionForLines(
+    selection: shiftSelectionForLines(
       oldText: text,
       newText: newText,
       selection: selection,
@@ -454,14 +455,14 @@ MarkdownEdit insertFootnote({
   final reference = '[^$label]';
   final withReference = text.replaceRange(caret, caret, reference);
   final lines = withReference.split('\n');
-  var end = _lineIndexOf(withReference, caret + reference.length);
+  var end = lineIndexOf(withReference, caret + reference.length);
   while (end + 1 < lines.length && lines[end + 1].trim().isNotEmpty) {
     end++;
   }
   final definition = '[^$label]: ';
   final newLines = <String>[...lines]..insertAll(end + 1, ['', definition]);
   final newText = newLines.join('\n');
-  final at = _lineStart(newText, end + 2) + definition.length;
+  final at = lineStartOf(newText, end + 2) + definition.length;
   return MarkdownEdit(
     text: newText,
     selection: TextSelection.collapsed(offset: at),
@@ -482,82 +483,3 @@ String nextFootnoteLabel(Iterable<String> labels) {
 /// A leading run of `#` (1..6) and the one following space — an ATX
 /// heading prefix.
 final RegExp _headingPrefix = RegExp('^(#{1,6}) ?');
-
-/// Recomputes [selection] against the text after a line-level edit: the
-/// touched lines (startLine..endLine) changed length at their starts, so
-/// each endpoint lands on the same line, shifted by the lines at and
-/// before it (clamped so an offset never goes negative).
-TextSelection _shiftSelectionForLines({
-  required String oldText,
-  required String newText,
-  required TextSelection selection,
-  required int startLine,
-  required int endLine,
-}) {
-  return TextSelection(
-    baseOffset: _mapEndpoint(
-      oldText,
-      newText,
-      selection.baseOffset,
-      startLine,
-      endLine,
-    ),
-    extentOffset: _mapEndpoint(
-      oldText,
-      newText,
-      selection.extentOffset,
-      startLine,
-      endLine,
-    ),
-  );
-}
-
-int _mapEndpoint(
-  String oldText,
-  String newText,
-  int offset,
-  int startLine,
-  int endLine,
-) {
-  final (line, off) = _lineAndOffset(oldText, offset);
-  if (line < startLine || line > endLine) {
-    return _lineStart(newText, line) + off;
-  }
-  final delta =
-      newText.split('\n')[line].length - oldText.split('\n')[line].length;
-  final newOff = off + delta;
-  return _lineStart(newText, line) + (newOff < 0 ? 0 : newOff);
-}
-
-/// The absolute offset where [line] starts in [text].
-int _lineStart(String text, int line) {
-  var index = 0;
-  for (var current = 0; current < line; current++) {
-    final nl = text.indexOf('\n', index);
-    if (nl < 0) return text.length;
-    index = nl + 1;
-  }
-  return index;
-}
-
-/// The (line, offset-within-line) for the absolute [offset] in [text].
-(int, int) _lineAndOffset(String text, int offset) {
-  var line = 0;
-  var lineStart = 0;
-  for (var i = 0; i < offset && i < text.length; i++) {
-    if (text.codeUnitAt(i) == 0x0A) {
-      line++;
-      lineStart = i + 1;
-    }
-  }
-  return (line, offset - lineStart);
-}
-
-/// The 0-based line index containing [offset].
-int _lineIndexOf(String text, int offset) {
-  var line = 0;
-  for (var i = 0; i < offset && i < text.length; i++) {
-    if (text.codeUnitAt(i) == 0x0A) line++;
-  }
-  return line;
-}
