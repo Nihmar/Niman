@@ -23,6 +23,10 @@ void main() {
       ..setLastModifiedSync(modified);
   }
 
+  /// A time well ahead of now: any stat of such a file is taken before its
+  /// time, so its stamp is ambiguous.
+  const ahead = Duration(hours: -1);
+
   /// A time [ago] before now, to the millisecond, as a fine clock writes it.
   DateTime fine(Duration ago) => DateTime.fromMillisecondsSinceEpoch(
     DateTime.now().subtract(ago).millisecondsSinceEpoch,
@@ -86,8 +90,10 @@ void main() {
 
   group('an outside change of the same size and time', () {
     test('is seen when the stamp is ambiguous', () async {
-      // Written just now: whatever the clock's tick, the stamp is ambiguous.
-      final file = fileAt('a.md', 'first', fine(Duration.zero));
+      // A file time in the stat's future (a skewed clock, a time kept by a
+      // sync) is always ambiguous: deterministic, where a file written "just
+      // now" depends on how fast the test runs.
+      final file = fileAt('a.md', 'first', fine(ahead));
       final loaded = loadNoteSync(file.path) as LoadedNote;
       final stamp = loaded.stamp!;
       expect(stamp.isAmbiguous, isTrue);
@@ -109,7 +115,7 @@ void main() {
     });
 
     test('is seen by the note on screen: it is not "unchanged"', () async {
-      final file = fileAt('b.md', 'first', fine(Duration.zero));
+      final file = fileAt('b.md', 'first', fine(ahead));
       final disk = NoteDisk(readNote: () => null);
       final opened = await disk.open(file.path);
       disk.adoptOpened(opened);
@@ -132,7 +138,7 @@ void main() {
 
     test('a file of the same size and time with the same bytes is the same '
         'file', () async {
-      final file = fileAt('d.md', 'first', fine(Duration.zero));
+      final file = fileAt('d.md', 'first', fine(ahead));
       final stamp = (loadNoteSync(file.path) as LoadedNote).stamp!;
       final modified = file.lastModifiedSync();
       file
@@ -142,7 +148,7 @@ void main() {
     });
 
     test('an ambiguous stamp with no digest vouches for nothing', () async {
-      final file = fileAt('e.md', 'first', fine(Duration.zero));
+      final file = fileAt('e.md', 'first', fine(ahead));
       final stamp = DiskStamp.of(file.path)!;
       expect(stamp.isAmbiguous, isTrue);
       expect(stamp.digest, isNull);
