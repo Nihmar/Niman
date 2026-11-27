@@ -471,7 +471,10 @@ yellow, the same in every theme), callouts, fenced code blocks with
 syntax highlighting — and, in the read view and in live mode, a **copy**
 button at a code block's top right that puts its code on the clipboard;
 down a block taller than the screen it stays at the top of the part you
-see. Math via `$…$` and `$$…$$` (KaTeX). Links: standard
+see. Math via `$…$` and `$$…$$` (KaTeX); a line that starts with `$$`
+and closes it on the same line, then goes on with text (`$$x$$ tail`), is a
+paragraph with the formula in it, while one that opens with `$$` and does not
+close it starts a block that runs to the next `$$` line. Links: standard
 Markdown links plus `[[wikilinks]]` (see [links](links.md)).
 
 The read view reads a note as GitHub does — GitHub Flavored Markdown, as

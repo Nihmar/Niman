@@ -353,13 +353,11 @@ final class HighlightDocument {
       return BlockState(fence: fenceOpen);
     }
     final t = text.trim();
-    if (t.startsWith(r'$$') && !_isSingleLineMath(t)) {
+    if (isDisplayOpen(t)) {
       return const BlockState(inMath: true);
     }
     return BlockState.initial;
   }
-
-  static bool _isSingleLineMath(String trimmed) => isSingleLineDisplay(trimmed);
 
   /// Calls [onHeading] for each heading line of [text], in line order, with
   /// the line index, the level, and the heading's text (markers stripped).
