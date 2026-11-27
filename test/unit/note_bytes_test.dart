@@ -115,7 +115,7 @@ void main() {
         const latin1 = <int>[0x63, 0x61, 0x66, 0xE9, 0x0A];
         expect(decodeNoteTextIfText(latin1), decodeNoteText(latin1));
         expect(decodeNoteTextIfText(List<int>.filled(64, 0xFF)), isNull);
-        expect(decodeNoteTextIfText(<int>[0xFF, 0xFE, 0x00, 0xC3]), isNull);
+        expect(decodeNoteTextIfText(<int>[0xFF, 0xFE, 0x00]), isNull);
         expect(decodeNoteTextIfText(List<int>.filled(64, 0)), isNull);
         final stray = <int>[
           ...utf8.encode('a long note, '),

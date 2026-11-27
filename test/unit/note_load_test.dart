@@ -77,10 +77,11 @@ void main() {
   );
 
   test('a genuinely binary file (NUL bytes) is not text', () async {
-    // A UTF-16 BOM and a NUL: nothing a person writes as a note, and the
+    // A UTF-16 BOM cut in the middle of a unit, and a NUL: nothing a person
+    // writes as a note, and the
     // refusal of a file that is not text (issue #156) still holds.
     final file = File(p.join(dir.path, 'image.md'))
-      ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x00, 0xC3]);
+      ..writeAsBytesSync(<int>[0xFF, 0xFE, 0x00]);
     final loaded = await loadNote(file.path);
     expect(loaded, isA<NoteReadFailure>());
     expect((loaded as NoteReadFailure).notText, isTrue);

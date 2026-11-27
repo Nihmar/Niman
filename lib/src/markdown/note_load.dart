@@ -117,19 +117,19 @@ Object readNoteTextSync(
 }) {
   // Before the read, not after it (see [LoadedNote.stamp]).
   final stamp = DiskStamp.of(path);
-  final String? text;
+  final DecodedNote? decoded;
   final List<int> bytes;
   try {
     bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
-    text = decodeNoteTextIfText(bytes);
+    decoded = decodeNoteBytes(bytes);
   } on FileSystemException catch (error) {
     return _unreadable(path, error);
   }
-  if (text == null) return NoteReadFailure('$path: not text', notText: true);
+  if (decoded == null) return NoteReadFailure('$path: not text', notText: true);
   return NoteTextRead(
-    text: text,
+    text: decoded.text,
     stamp: stamp,
-    framing: NoteFraming.of(bytes: bytes, text: text),
+    framing: _framingOf(bytes, decoded),
   );
 }
 
@@ -146,18 +146,18 @@ NoteReadFailure _unreadable(String path, FileSystemException error) =>
 Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
   // Before the read, not after it (see [LoadedNote.stamp]).
   final stamp = DiskStamp.of(path);
-  final String? read;
+  final DecodedNote? read;
   final List<int> bytes;
   try {
     bytes = readBytes?.call(path) ?? File(path).readAsBytesSync();
-    read = decodeNoteTextIfText(bytes);
+    read = decodeNoteBytes(bytes);
   } on FileSystemException catch (error) {
     return _unreadable(path, error);
   }
   if (read == null) return NoteReadFailure('$path: not text', notText: true);
   // Counted before the endings are made `\n`, or there is nothing to count.
-  final framing = NoteFraming.of(bytes: bytes, text: read);
-  final text = normalizedLineEndings(read, dominant: framing.lineEnding);
+  final framing = _framingOf(bytes, read);
+  final text = normalizedLineEndings(read.text, dominant: framing.lineEnding);
   return LoadedNote(
     text: text,
     buffer: SourceBuffer.fromText(text),
@@ -165,3 +165,11 @@ Object loadNoteSync(String path, {List<int> Function(String path)? readBytes}) {
     stamp: stamp,
   );
 }
+
+/// What the file of [bytes] wraps its [decoded] text in.
+NoteFraming _framingOf(List<int> bytes, DecodedNote decoded) => NoteFraming.of(
+  bytes: bytes,
+  text: decoded.text,
+  encoding: decoded.encoding,
+  windows1252: decoded.lenient,
+);

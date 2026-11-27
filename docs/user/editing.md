@@ -467,6 +467,13 @@ lines end with `LF` or `CRLF`, a lone `CR` is a character of its line and is
 kept where it is, and `CR CR LF` is one line ending after a `CR` — neither is
 turned into a line break.
 
+**UTF-16 and UTF-32 notes.** A file that begins with a UTF-16 or UTF-32 byte
+order mark — what Windows Notepad's *Unicode* writes — opens as the text it
+holds, in any script, and is saved in the same encoding with its mark, so a
+one-character change is a one-character change of the file. Only the mark
+tells such a file apart: a UTF-16 file without one is not recognised as text,
+and neither is one cut in the middle of a character (an odd number of bytes).
+
 ## Markdown support
 
 Tables, task lists, footnotes, strikethrough, `==highlight==` (a marker's
