@@ -287,6 +287,11 @@ list at the end says what else it still lacks.
 - **Spell check** is the system's own (the one TextEdit and Mail use),
   in the languages the Mac has; the per-library personal dictionary
   applies on top.
+- **Text keys in the editor** are the Mac's: `⌥` for a word, `⌘` for the
+  line's and the note's ends, `⌥⌫` and `⌘⌫` to delete, and the system's own
+  text commands (what a key bindings file maps to `moveWordLeft:` and the
+  like) do what the same chord does. They are checked by key-binding tests,
+  not yet on a Mac with a keyboard in hand (see [shortcuts](shortcuts.md)).
 - **PDF export** goes through WebKit, the engine behind Safari: paginated
   A4 with real, selectable text, a note's or a folder's, nothing to
   install. **Web capture** runs a page with too little text in WebKit
@@ -382,7 +387,8 @@ page says of Android's screens holds there.
   on the clipboard.
 - **Slides** keep the screen on while they are presented.
 - **A hardware keyboard** gets the keys with `⌘`, as on a Mac (see
-  [shortcuts](shortcuts.md)).
+  [shortcuts](shortcuts.md)), the editor's word and line motions among
+  them (`⌥←`, `⌘←`; checked by key-binding tests, untried on a device).
 - **Date created** is the file's own creation time, kept across saves
   (see [Date created](#date-created)).
 
