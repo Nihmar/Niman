@@ -217,7 +217,7 @@ ContextMenuPart editorMenu({
               AppStrings.toolbarList,
               Icons.format_list_bulleted,
               (text, selection) =>
-                  prefixLines(text: text, selection: selection, prefix: '- '),
+                  toggleBulletList(text: text, selection: selection),
               on: active.contains(ToolbarItem.list),
             ),
             command(
@@ -243,7 +243,7 @@ ContextMenuPart editorMenu({
               AppStrings.toolbarQuote,
               Icons.format_quote,
               (text, selection) =>
-                  prefixLines(text: text, selection: selection, prefix: '> '),
+                  toggleQuote(text: text, selection: selection),
               on: active.contains(ToolbarItem.quote),
             ),
           ],

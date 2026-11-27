@@ -619,6 +619,17 @@ Pressed on lines that are all tasks already, it takes the boxes off and
 leaves their text. Blank lines in a selection are left alone, and the
 whole change is one undo step. On a task line the button reads as on.
 
+The other buttons that mark lines toggle the same way, from the toolbar,
+the editor's menu and the keys. The **bulleted list**, the **numbered list**
+and the **quote** put their mark on each selected line, and pressed on lines
+that all have it already they take it off again, so a button that reads as
+on takes its mark away. A numbered item pressed with the bullet button
+swaps its number for a bullet, a task its box for nothing, and a bulleted
+item pressed with the numbered one swaps in a number (a task keeps its box);
+a quote adds one level only to lines that have none and takes one level off
+at a time. The marks go behind a line's own indent and quote marks, and blank
+lines among several lines are left alone.
+
 The **table** button writes an empty table — two columns, a header and
 one row — on lines of its own, with the caret in its first header cell:
 it takes the place of a blank line the caret is on, goes above a line

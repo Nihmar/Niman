@@ -8,6 +8,7 @@ import 'package:niman/src/editor/line_selection.dart';
 import 'package:niman/src/editor/list_item_head.dart';
 import 'package:niman/src/editor/touched_lines.dart';
 
+export 'package:niman/src/editor/line_marks.dart';
 export 'package:niman/src/editor/list_item_head.dart';
 
 /// The result of a Markdown editing command.
@@ -77,34 +78,6 @@ MarkdownEdit codeBlock({
   );
 }
 
-/// Prefixes every line the [selection] touches with [prefix] ('- ' for
-/// lists, '> ' for quotes), one pass per line. Each end of the selection
-/// stays on its own text: it moves by what its own line gained, not by what
-/// the lines above it did too.
-MarkdownEdit prefixLines({
-  required String text,
-  required TextSelection selection,
-  required String prefix,
-}) {
-  final (first: startLine, last: endLine) = touchedLines(text, selection);
-  final lines = text.split('\n');
-  final newLines = <String>[...lines];
-  for (var i = startLine; i <= endLine; i++) {
-    newLines[i] = '$prefix${newLines[i]}';
-  }
-  final newText = newLines.join('\n');
-  return MarkdownEdit(
-    text: newText,
-    selection: shiftSelectionForLines(
-      oldText: text,
-      newText: newText,
-      selection: selection,
-      startLine: startLine,
-      endLine: endLine,
-    ),
-  );
-}
-
 /// Sets the heading [level] (1..6) of every line the [selection] touches.
 ///
 /// A line already carrying that level is de-headed (toggled off); any
@@ -123,31 +96,6 @@ MarkdownEdit setHeading({
     final stripped = match == null ? line : line.substring(match[0]!.length);
     final existing = match == null ? 0 : match[1]!.length;
     newLines[i] = existing == level ? stripped : '${'#' * level} $stripped';
-  }
-  final newText = newLines.join('\n');
-  return MarkdownEdit(
-    text: newText,
-    selection: shiftSelectionForLines(
-      oldText: text,
-      newText: newText,
-      selection: selection,
-      startLine: startLine,
-      endLine: endLine,
-    ),
-  );
-}
-
-/// Numbers every line the [selection] touches as an ordered list, starting
-/// at 1 for the first touched line (`1. `, `2. `, …).
-MarkdownEdit orderedList({
-  required String text,
-  required TextSelection selection,
-}) {
-  final (first: startLine, last: endLine) = touchedLines(text, selection);
-  final lines = text.split('\n');
-  final newLines = <String>[...lines];
-  for (var i = startLine; i <= endLine; i++) {
-    newLines[i] = '${i - startLine + 1}. ${newLines[i]}';
   }
   final newText = newLines.join('\n');
   return MarkdownEdit(

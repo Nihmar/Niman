@@ -71,41 +71,32 @@ void main() {
     });
   });
 
-  group('prefixLines', () {
-    test('prefixed caret line: the caret follows the prefix', () {
-      final edit = prefixLines(text: 'item', selection: _sel(0), prefix: '- ');
+  group('the list and quote commands put their mark on each line', () {
+    test('a bullet on a caret line: the caret follows it', () {
+      final edit = toggleBulletList(text: 'item', selection: _sel(0));
       expect(edit.text, '- item');
       expect(edit.selection, _sel(2));
     });
 
-    test('each line of a multi-line selection is prefixed', () {
-      final edit = prefixLines(
+    test('each line of a multi-line selection is quoted', () {
+      final edit = toggleQuote(
         text: 'alpha\nbeta\ngamma',
         selection: _sel(0, 10), // 'alpha\nbeta' (the newline included).
-        prefix: '> ',
       );
       expect(edit.text, '> alpha\n> beta\ngamma');
-      // Each end on its own text: after the prefix of its own line only.
+      // Each end on its own text: after the mark of its own line only.
       expect(edit.selection.start, 2);
       expect(edit.selection.end, 14);
     });
 
     test('collapsed caret on an empty line keeps the caret on it', () {
-      final edit = prefixLines(
-        text: 'a\n\nb',
-        selection: _sel(2),
-        prefix: '- ',
-      );
+      final edit = toggleBulletList(text: 'a\n\nb', selection: _sel(2));
       expect(edit.text, 'a\n- \nb');
       expect(edit.selection, _sel(4));
     });
 
-    test('quote prefixes a selection that ends mid-line', () {
-      final edit = prefixLines(
-        text: 'a\nb\nc',
-        selection: _sel(0, 3), // 'a\nb' minus the newline.
-        prefix: '> ',
-      );
+    test('quote marks a selection that ends mid-line', () {
+      final edit = toggleQuote(text: 'a\nb\nc', selection: _sel(0, 3));
       expect(edit.text, '> a\n> b\nc');
       // The start stays on the `a` (after its own `> `), the end on the `b`.
       expect(edit.selection, _sel(2, 7));
@@ -120,11 +111,7 @@ void main() {
       final selection = _sel(0, 4);
 
       test('prefix', () {
-        final edit = prefixLines(
-          text: text,
-          selection: selection,
-          prefix: '- ',
-        );
+        final edit = toggleBulletList(text: text, selection: selection);
         expect(edit.text, '- a\n- b\nc');
         expect(edit.selection, _sel(2, 8));
       });
@@ -154,14 +141,14 @@ void main() {
 
       test('a caret at the start of a line is on that line', () {
         expect(
-          prefixLines(text: text, selection: _sel(4), prefix: '- ').text,
+          toggleBulletList(text: text, selection: _sel(4)).text,
           'a\nb\n- c',
         );
       });
 
       test('a selection that starts at a line end holds that line', () {
         expect(
-          prefixLines(text: text, selection: _sel(1, 2), prefix: '- ').text,
+          toggleBulletList(text: text, selection: _sel(1, 2)).text,
           '- a\nb\nc',
         );
       });

@@ -24,9 +24,8 @@ final Map<String, _Command> _commands = <String, _Command>{
   'code block': (text, selection) =>
       codeBlock(text: text, selection: selection),
   'list': (text, selection) =>
-      prefixLines(text: text, selection: selection, prefix: '- '),
-  'quote': (text, selection) =>
-      prefixLines(text: text, selection: selection, prefix: '> '),
+      toggleBulletList(text: text, selection: selection),
+  'quote': (text, selection) => toggleQuote(text: text, selection: selection),
   'heading': (text, selection) =>
       setHeading(text: text, selection: selection, level: 2),
   'heading off': (text, selection) =>
