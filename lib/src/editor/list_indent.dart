@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import 'package:niman/src/editor/list_item_head.dart';
 import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/list_tree.dart';
 import 'package:niman/src/editor/list_window.dart';
@@ -105,8 +106,14 @@ List<String> indentListLines(
 }
 
 /// Where the items moved together went: the column of the sublist, and the
-/// number its next item takes (null when the marker stays).
-typedef _Sublist = ({int indent, int? number, String? delimiter});
+/// number its next item takes (null when the marker stays) in the style of
+/// the item `like` — its delimiter and the zeros it is padded with.
+typedef _Sublist = ({
+  int indent,
+  int? number,
+  String? delimiter,
+  ListItemHead? like,
+});
 
 final class _ListIndent {
   new(this.lines, this.width) {
@@ -201,6 +208,7 @@ final class _ListIndent {
     var indent = row.indent + width;
     int? take;
     String? delimiter;
+    var like = row.head;
     if (above >= 0) {
       final sibling = placed[above];
       if (sibling != null) {
@@ -209,6 +217,7 @@ final class _ListIndent {
         indent = sibling.indent;
         take = number == null ? null : sibling.number;
         delimiter = take == null ? null : sibling.delimiter;
+        like = sibling.like;
         group[at] = group[above] + 1;
         counted[at] = counted[above] && _follows(above, at);
         grouped[above] = true;
@@ -221,12 +230,13 @@ final class _ListIndent {
           final count = joined?.head!.number;
           take = count == null ? 1 : count + 1;
           delimiter = count == null ? row.delimiter : joined!.delimiter;
+          if (count != null) like = joined!.head;
         }
         group[at] = 1;
         counted[at] = _follows(above, at);
       }
     }
-    _place(at, indent, take, delimiter);
+    _place(at, indent, take, delimiter, like);
   }
 
   /// Whether the item [at] is numbered right after the item [above].
@@ -243,7 +253,7 @@ final class _ListIndent {
     final parent = tree.parent[at];
     if (parent < 0) {
       final spaces = row.indent < width ? row.indent : width;
-      _place(at, row.indent - spaces, null, null);
+      _place(at, row.indent - spaces, null, null, null);
       return;
     }
     final up = rows[parent];
@@ -255,24 +265,31 @@ final class _ListIndent {
       delimiter = up.delimiter;
       backTo[parent] = take + 1;
     }
-    _place(at, up.indent, take, delimiter);
+    _place(at, up.indent, take, delimiter, up.head);
   }
 
   /// Puts the item [at] on [indent] under [number] and [delimiter] (the
   /// number null: the marker stays), its subtree moving by as much as its
   /// content column did.
-  void _place(int at, int indent, int? number, String? delimiter) {
+  void _place(
+    int at,
+    int indent,
+    int? number,
+    String? delimiter,
+    ListItemHead? like,
+  ) {
     final row = rows[at];
     final head = row.head!;
     final next = number == null || delimiter == null
         ? head.marker
-        : '$number$delimiter';
+        : (like ?? head).markerFor(number);
     delta[at] = indent - row.indent;
     marker[at] = next == head.marker ? null : next;
     placed[at] = (
       indent: indent,
       number: number == null || delimiter == null ? null : number + 1,
       delimiter: delimiter,
+      like: like,
     );
     final shift = delta[at] + next.length - head.marker.length;
     final inside = row.contentColumn;

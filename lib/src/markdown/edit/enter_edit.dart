@@ -1,5 +1,6 @@
 import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/markdown/edit/list_indent_edit.dart';
+import 'package:niman/src/markdown/edit/numbered_enter.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -102,6 +103,25 @@ EnterEdit? enterEdit(
   // One edit, not a line break and then a marker: one undo step, and no frame
   // where the marker is missing. The quote marks are the writer's own: `>- a`
   // goes on as `>- `, not `> - ` (#1342).
+  if (head.number != null) {
+    // The items after it that counted on from it are one number up, in the
+    // same edit (#1343).
+    final renumbered = numberedEnter(
+      buffer,
+      line: line,
+      offset: offset,
+      continuation: '$marks${head.continuation}',
+    );
+    if (renumbered != null) {
+      return (
+        start: renumbered.start,
+        end: renumbered.end,
+        text: renumbered.text,
+        caret: renumbered.caret,
+        verbatim: true,
+      );
+    }
+  }
   return (
     start: offset,
     end: offset,

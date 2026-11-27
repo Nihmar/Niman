@@ -697,7 +697,11 @@ note.
 Enter inside a list carries the list on, in both editors: the next line
 starts with the same marker, a numbered list counts on (keeping the
 zeros of `01.`, which goes on as `02.`), and a task item gives you a
-fresh empty box. Enter on an item you have not typed anything into —
+fresh empty box. Enter in the middle of a numbered list renumbers, in
+the same step, the items after the new one that counted on from the
+item you were on (`1.` `2.` `3.` becomes `1.` `2.` `3.` `4.`); a list
+numbered any other way, `1.` `1.` `1.` or by hand, is left as written.
+Enter on an item you have not typed anything into —
 `- [ ]` with the box and no text included, with or without the space
 after it — ends the list instead, the usual second Enter. On an empty
 item that is nested, Enter first takes it back one level, as Shift+Tab
