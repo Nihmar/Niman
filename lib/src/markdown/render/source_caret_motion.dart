@@ -2,6 +2,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:niman/src/markdown/edit/line_direction.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/fence_band_painter.dart';
 import 'package:niman/src/markdown/render/live_hosts.dart';
@@ -107,9 +108,17 @@ final class SourceCaretMotion {
 
   int get _lineCount => _buffer().lineCount;
 
-  /// Moves the caret by [motion], the logical motions the key table calls.
-  void moveBy(CaretMotion motion, {bool extend = false}) {
+  /// Moves the caret by [pressed], the logical motions the key table calls.
+  void moveBy(CaretMotion pressed, {bool extend = false}) {
     final selection = _selection();
+    final motion = _visually(pressed, selection);
+    // A range left by an arrow goes to its edge, which is where it stops.
+    final collapsed = collapseTarget(selection, motion, extend: extend);
+    if (collapsed != null) {
+      final into = motion == CaretMotion.characterLeft ? -1 : 1;
+      _apply(SelectionModel.at(inCell(collapsed, into)), reveal: true);
+      return;
+    }
     var next = moveCaret(
       selection,
       motion,
@@ -150,6 +159,33 @@ final class SourceCaretMotion {
           : SelectionModel.at(extent);
     }
     _apply(next, reveal: true);
+  }
+
+  /// [pressed], as the motion it is on the line the caret is on: on a line
+  /// drawn right to left (its first strong character's direction,
+  /// `lineDirection`) Left and Right are swapped, so that the key moves the
+  /// caret the way it points on the screen (#1352).
+  ///
+  /// The swap is the line's, not each run's: inside a run of the other
+  /// direction — a Latin word in a Hebrew line — the keys still go by the
+  /// line, which is the one thing left logical, and is written in
+  /// `docs/user/editing.md`.
+  CaretMotion _visually(CaretMotion pressed, SelectionModel selection) {
+    if (pressed != CaretMotion.characterLeft &&
+        pressed != CaretMotion.characterRight &&
+        pressed != CaretMotion.wordLeft &&
+        pressed != CaretMotion.wordRight) {
+      return pressed;
+    }
+    final buffer = _buffer();
+    final line = buffer.lineOf(selection.extent.clamp(0, buffer.length));
+    if (lineDirection(buffer.lineAt(line)) != TextDirection.rtl) return pressed;
+    return switch (pressed) {
+      CaretMotion.characterLeft => CaretMotion.characterRight,
+      CaretMotion.characterRight => CaretMotion.characterLeft,
+      CaretMotion.wordLeft => CaretMotion.wordRight,
+      _ => CaretMotion.wordLeft,
+    };
   }
 
   /// Whether line [line] is one `live` draws as nothing to stop on (#729):
@@ -200,6 +236,45 @@ final class SourceCaretMotion {
     return buffer.offsetOfLine(line - 1) + buffer.lineLengthAt(line - 1);
   }
 
+  /// The column the vertical motions aim for, as the note box's x, and the
+  /// selection the last of them left behind (#1348).
+  ///
+  /// A caret that goes down through a shorter line — or an empty one — and on
+  /// to a longer one comes back to the column it left: the goal is the x of
+  /// the caret when the run of Up, Down, PageUp and PageDown began. Any other
+  /// change of the selection — a key, a click, typing, an undo — ends the
+  /// run, and the next vertical move reads its goal from where the caret is:
+  /// the goal holds only while the selection is the one the run left.
+  double? _goal;
+  SelectionModel? _goalSelection;
+
+  /// The x, in global coordinates, a vertical move from [caret] aims for.
+  double _goalX(Rect caret) {
+    final goal = _goal;
+    final left = _goalSelection;
+    final selection = _selection();
+    final box = _noteBox();
+    if (goal != null &&
+        box != null &&
+        left != null &&
+        left.anchor == selection.anchor &&
+        left.extent == selection.extent) {
+      return box.localToGlobal(Offset(goal, 0)).dx;
+    }
+    return caret.center.dx;
+  }
+
+  /// Takes [x], global, as the goal of the run the caret has just moved in.
+  void _keepGoal(double x) {
+    final box = _noteBox();
+    if (box == null) {
+      _goal = null;
+      return;
+    }
+    _goal = box.globalToLocal(Offset(x, 0)).dx;
+    _goalSelection = _selection();
+  }
+
   /// Moves the caret [rows] visual rows up (negative) or down, keeping its
   /// horizontal place.
   ///
@@ -213,9 +288,17 @@ final class SourceCaretMotion {
   /// with
   /// the height map saying which line a y falls in.
   void moveVertically(int rows, {bool extend = false}) {
-    final caret = _caretRect();
-    if (caret == null || rows == 0) return;
+    final measured = _caretRect();
+    if (measured == null || rows == 0) return;
     final buffer = _buffer();
+    // The caret as it would stand in the column the run aims for.
+    final goal = _goalX(measured);
+    final caret = measured.shift(Offset(goal - measured.center.dx, 0));
+    void land(int offset) {
+      moveTo(offset, extend: extend);
+      _keepGoal(goal);
+    }
+
     // The caret's own row is the row height — its line's, at the scale it is
     // drawn at — and the point is the middle of the row [rows] away, so a
     // boundary never decides which row it is.
@@ -225,7 +308,7 @@ final class SourceCaretMotion {
     // to the next column, or out of the block (#729).
     final edge = _acrossColumns(caretLine, point, rows, caret);
     if (edge != null) {
-      moveTo(edge, extend: extend);
+      land(edge);
       return;
     }
     var offset = _paintedOffsetAt(point);
@@ -242,7 +325,7 @@ final class SourceCaretMotion {
       offset = _paintedOffsetAt(point);
     }
     if (offset != null) {
-      moveTo(offset, extend: extend);
+      land(offset);
       return;
     }
     // The row is not drawn: move the note under the caret by as much, and ask
@@ -260,6 +343,7 @@ final class SourceCaretMotion {
         rows < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
         extend: extend,
       );
+      _keepGoal(goal);
       return;
     }
     scroll.jumpTo(to);
@@ -267,7 +351,7 @@ final class SourceCaretMotion {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_mounted()) return;
       final landed = _paintedOffsetAt(shifted) ?? _mappedOffsetAt(shifted);
-      if (landed != null) moveTo(landed, extend: extend);
+      if (landed != null) land(landed);
     });
     WidgetsBinding.instance.scheduleFrame();
   }
@@ -412,20 +496,24 @@ final class SourceCaretMotion {
     );
     if (to == from) {
       // Nothing left to page through: the caret goes to that end of the note.
+      final caret = _caretRect();
+      final goal = caret == null ? null : _goalX(caret);
       moveBy(
         direction < 0 ? CaretMotion.documentStart : CaretMotion.documentEnd,
         extend: extend,
       );
+      if (goal != null) _keepGoal(goal);
       return;
     }
     // The caret keeps its place *on the screen* while the note moves under
     // it, and that place is asked of whatever line is there after the jump —
     // the caret's own line may no longer be built at all.
     final box = _noteBox();
-    final point =
-        _caretRect()?.center ??
-        box?.localToGlobal(Offset(0, viewport / 2)) ??
-        Offset.zero;
+    final caret = _caretRect();
+    final goal = caret == null ? null : _goalX(caret);
+    final point = caret == null
+        ? box?.localToGlobal(Offset(0, viewport / 2)) ?? Offset.zero
+        : Offset(goal!, caret.center.dy);
     scroll.jumpTo(to);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_mounted()) return;
@@ -435,6 +523,7 @@ final class SourceCaretMotion {
           ? SelectionModel(anchor: _selection().anchor, extent: offset)
           : SelectionModel.at(offset);
       _apply(next, reveal: false);
+      if (goal != null) _keepGoal(goal);
     });
     WidgetsBinding.instance.scheduleFrame();
   }

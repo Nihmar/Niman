@@ -34,9 +34,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:niman/src/core/logging.dart';
-import 'package:niman/src/editor/highlighting.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
+import 'package:niman/src/markdown/edit/value_diff.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
@@ -55,6 +55,7 @@ final class SourceInput implements DeltaTextInputClient {
     this.onRecord,
     this.onNewline,
     this.onTyped,
+    this.onSelector,
     this.reach,
   });
 
@@ -89,6 +90,10 @@ final class SourceInput implements DeltaTextInputClient {
   /// surface made an edit of its own instead (a bracket's pair), in which
   /// case the platform's is not applied and it is told what the note says.
   final bool Function(int start, int end, String inserted)? onTyped;
+
+  /// Asked for what macOS and iOS ask of a text field by name — the text
+  /// system's `moveToBeginningOfLine:`, `deleteWordBackward:` (#1351).
+  final void Function(String selector)? onSelector;
 
   /// Where the caret is now.
   final SelectionModel Function() selection;
@@ -132,6 +137,12 @@ final class SourceInput implements DeltaTextInputClient {
   }
 
   bool _holdSync = false;
+
+  /// Whether an update from the platform is being applied: what the surface
+  /// writes while it is — a list's next marker, a bracket's pair — is told to
+  /// the platform once, when the update is done, with what the platform said
+  /// (#1376). Told as it is written it was told twice, the same window.
+  bool _updating = false;
 
   /// How far the platform's window reaches on each side of the caret, before
   /// it is widened to whole lines.
@@ -208,7 +219,7 @@ final class SourceInput implements DeltaTextInputClient {
 
   /// Tells the platform what it should hold, when that is not what it holds.
   void _sync() {
-    if (!isAttached || _holdSync) return;
+    if (!isAttached || _holdSync || _updating) return;
     final value = _valueToSend();
     if (value == null) return;
     _connection!.setEditingState(value);
@@ -366,14 +377,45 @@ final class SourceInput implements DeltaTextInputClient {
     _ => 'delta',
   };
 
+  /// `[from, to)` as the note can take it: never between a `\r` and its `\n`,
+  /// nor between the two halves of a surrogate pair (#1353).
+  ///
+  /// The platform addresses the whole text, line endings included, and counts
+  /// in code units: a keyboard that deletes one of them is asking for half of
+  /// an emoji, and a note holding half of one is saved as U+FFFD. A range is
+  /// widened to take the whole of what it touches; an insertion — a collapsed
+  /// range — is not a range to widen, and goes to one place, before the break
+  /// or the pair.
+  (int, int) _whole(int from, int to) {
+    if (from == to) {
+      final at = _beforePair(buffer.snapOutOfTerminator(from));
+      return (at, at);
+    }
+    return (
+      _beforePair(buffer.snapOutOfTerminator(from)),
+      _afterPair(buffer.snapOutOfTerminator(to, forward: true)),
+    );
+  }
+
+  /// Whether [offset] is between the halves of a surrogate pair.
+  bool _splitsPair(int offset) {
+    if (offset <= 0 || offset >= buffer.length) return false;
+    final units = buffer.substring(offset - 1, offset + 1);
+    return units.codeUnitAt(0) >= 0xD800 &&
+        units.codeUnitAt(0) <= 0xDBFF &&
+        units.codeUnitAt(1) >= 0xDC00 &&
+        units.codeUnitAt(1) <= 0xDFFF;
+  }
+
+  int _beforePair(int offset) => _splitsPair(offset) ? offset - 1 : offset;
+
+  int _afterPair(int offset) => _splitsPair(offset) ? offset + 1 : offset;
+
   /// Applies `[start, end)` → [inserted] to the note, and says whether the
   /// note now holds exactly what the platform does (it does not when a line
   /// break was stored as the note's own line ending).
   bool _replace(int from, int to, String inserted, SelectionModel caret) {
-    // The platform addresses the whole text, line endings included, and an
-    // edit that starts between a `\r` and its `\n` would split the pair.
-    final start = buffer.snapOutOfTerminator(from);
-    final end = buffer.snapOutOfTerminator(to, forward: true);
+    final (start, end) = _whole(from, to);
     final before = buffer.length;
     final removed = buffer.substring(start, end);
     final edit = buffer.replaceRange(start, end, inserted);
@@ -429,45 +471,77 @@ final class SourceInput implements DeltaTextInputClient {
     final ours = _platformValue.text;
     final start = _windowStart;
     final theirs = value.text;
-    if (ours != theirs) {
-      var prefix = 0;
-      final shortest = ours.length < theirs.length
-          ? ours.length
-          : theirs.length;
-      while (prefix < shortest &&
-          ours.codeUnitAt(prefix) == theirs.codeUnitAt(prefix)) {
-        prefix++;
-      }
-      var suffix = 0;
-      while (suffix < shortest - prefix &&
-          ours.codeUnitAt(ours.length - 1 - suffix) ==
-              theirs.codeUnitAt(theirs.length - 1 - suffix)) {
-        suffix++;
-      }
-      _replace(
-        start + prefix,
-        start + ours.length - suffix,
-        theirs.substring(prefix, theirs.length - suffix),
-        _caretOf(value.selection, start),
-      );
-    } else {
-      _reportSelection(
-        _platformSelection(value.selection, start, value.text.length),
-      );
+    _updating = true;
+    try {
+      _applyValue(ours, theirs, value, start);
+    } finally {
+      _updating = false;
     }
     _composing = _shifted(value.composing, start);
     _platformNowHas(value);
   }
 
+  /// Applies the platform's whole [value], over [ours] — the window at
+  /// [start] as this side held it — to the note.
+  void _applyValue(
+    String ours,
+    String theirs,
+    TextEditingValue value,
+    int start,
+  ) {
+    if (ours != theirs) {
+      final diff = diffValues(
+        ours,
+        theirs,
+        caret: value.selection.isValid && value.selection.isCollapsed
+            ? value.selection.extentOffset
+            : null,
+      );
+      final (from, to) = (start + diff.start, start + diff.end);
+      // The keystroke hooks are the delta path's own: a whole value that is
+      // an Enter or a typed character gets the list's continuation and the
+      // bracket's pair, whichever way the platform reports it (#1354).
+      if (diff.inserted == '\n' && (onNewline?.call(from, to) ?? false)) {
+        // The note says something else than the platform now; told below.
+      } else if (!_composes(value.composing) &&
+          (onTyped?.call(from, to, diff.inserted) ?? false)) {
+        // Likewise.
+      } else {
+        _replace(from, to, diff.inserted, _caretOf(value.selection, start));
+      }
+    } else {
+      _reportSelection(
+        _platformSelection(value.selection, start, value.text.length),
+      );
+    }
+  }
+
   @override
   void updateEditingValueWithDeltas(List<TextEditingDelta> deltas) {
     if (deltas.isEmpty) return;
+    _updating = true;
+    final TextEditingValue? value;
+    try {
+      value = _applyDeltas(deltas);
+    } finally {
+      _updating = false;
+    }
+    _platformNowHas(value);
+  }
+
+  /// Applies [deltas] to the note: what the platform holds after them, or
+  /// null when this side cannot say.
+  TextEditingValue? _applyDeltas(List<TextEditingDelta> deltas) {
     _log.debug(
       'deltas: ${deltas.map(_short).join(", ")} '
       '(ours ${buffer.length}, caret ${selection().extent})',
     );
     var known = true;
     var value = _platformValue;
+    // Whether the note stored something earlier in this batch the platform
+    // does not have — a `\n` as the note's `\r\n` — so that the platform's
+    // offsets in the next delta are a unit short of the note's (#1374).
+    var drifted = false;
     // The app's selection when the batch arrived. A platform edit that covers
     // the whole of its copy is read against this one: the platform moves its
     // own selection onto that copy's edge as it prepares the edit (Android's
@@ -513,7 +587,12 @@ final class SourceInput implements DeltaTextInputClient {
         ),
         _ => (-1, -1, ''),
       };
-      var (start, end) = (origin + from, origin + to);
+      var (start, end) = drifted && known && from >= 0
+          ? (
+              _noteOffset(delta.oldText, origin, from),
+              _noteOffset(delta.oldText, origin, to),
+            )
+          : (origin + from, origin + to);
       // A selection wider than the window reaches the platform clamped, and
       // what it types over is the part it holds: over the whole of it, in the
       // note — select all and type is the note replaced, not a window of it.
@@ -548,17 +627,61 @@ final class SourceInput implements DeltaTextInputClient {
         );
       } else if (inserted == '\n' && (onNewline?.call(start, end) ?? false)) {
         known = false;
-      } else if (!_composes(delta) &&
+      } else if (!_composes(delta.composing) &&
           (onTyped?.call(start, end, inserted) ?? false)) {
         known = false;
       } else {
-        _replace(start, end, inserted, _caretOf(delta.selection, origin));
+        final caret = drifted && known
+            ? _noteCaret(delta.selection, delta.apply(value).text, origin)
+            : _caretOf(delta.selection, origin);
+        if (!_replace(start, end, inserted, caret)) drifted = true;
       }
       _composing = _shifted(delta.composing, origin);
       if (known) value = delta.apply(value);
     }
-    _platformNowHas(known ? value : null);
+    return known ? value : null;
   }
+
+  /// The note's offset for [offset] of [copy], the platform's text for the
+  /// window at [origin], when the note stored some of its `\n` as `\r\n`
+  /// that [copy] holds as one unit (#1374): the two are walked together, the
+  /// note's extra `\r` skipped.
+  int _noteOffset(String copy, int origin, int offset) {
+    if (offset <= 0) return origin + offset;
+    var breaks = 0;
+    for (var at = 0; at < offset && at < copy.length; at++) {
+      if (copy.codeUnitAt(at) == 0x0A) breaks++;
+    }
+    final room = math.min(buffer.length - origin, offset + breaks + 1);
+    final ours = buffer.substring(origin, origin + room);
+    var note = 0;
+    var theirs = 0;
+    while (theirs < offset && note < ours.length) {
+      final extra =
+          ours.codeUnitAt(note) == 0x0D &&
+          theirs < copy.length &&
+          copy.codeUnitAt(theirs) == 0x0A &&
+          note + 1 < ours.length &&
+          ours.codeUnitAt(note + 1) == 0x0A;
+      if (extra) {
+        note++;
+      } else {
+        note++;
+        theirs++;
+      }
+    }
+    return origin + note;
+  }
+
+  /// [selection], a platform selection on [copy], in note offsets
+  /// ([_noteOffset]).
+  SelectionModel _noteCaret(TextSelection selection, String copy, int origin) =>
+      selection.isValid
+      ? SelectionModel(
+          anchor: _noteOffset(copy, origin, selection.baseOffset),
+          extent: _noteOffset(copy, origin, selection.extentOffset),
+        )
+      : this.selection();
 
   /// The selection a platform update reports on a copy [length] long at
   /// [origin], in note offsets — the whole note when it is the platform's own
@@ -583,10 +706,10 @@ final class SourceInput implements DeltaTextInputClient {
       selection.start == 0 &&
       selection.end == length;
 
-  /// Whether [delta] is part of a composition, which an IME may still
-  /// change: a bracket in it is not typed yet.
-  static bool _composes(TextEditingDelta delta) =>
-      delta.composing.isValid && !delta.composing.isCollapsed;
+  /// Whether an update that composes [composing] is part of a composition,
+  /// which an IME may still change: a bracket in it is not typed yet.
+  static bool _composes(TextRange composing) =>
+      composing.isValid && !composing.isCollapsed;
 
   /// [range], a platform range in a window at [origin], in note offsets.
   static TextRange _shifted(TextRange range, int origin) =>
@@ -679,7 +802,7 @@ final class SourceInput implements DeltaTextInputClient {
   }
 
   @override
-  void performSelector(String selectorName) {}
+  void performSelector(String selectorName) => onSelector?.call(selectorName);
 
   @override
   void insertTextPlaceholder(Size size) {}
@@ -722,20 +845,4 @@ final class SourceInput implements DeltaTextInputClient {
   Size? _geometrySize;
   Matrix4? _geometryTransform;
   Rect? _geometryCaret;
-
-  /// The tokenizer's view of an edit: the lines that changed, and nothing else.
-  ///
-  /// This is what keeps a keystroke off the note's whole length — the phase's
-  /// 0.507 ms incremental-edit number is this call plus the buffer's own
-  /// `replaceRange`.
-  static void retokenize(
-    HighlightDocument tokens,
-    SourceEdit edit,
-    SourceBuffer buffer,
-  ) {
-    tokens.replaceLines(edit.firstLine, edit.removedLines, <String>[
-      for (var at = 0; at < edit.insertedLines; at++)
-        buffer.lineAt(edit.firstLine + at),
-    ]);
-  }
 }

@@ -175,8 +175,41 @@ void main() {
       expect(typedThrough("'", at: cafe.length, text: cafe), "$cafe'");
     });
 
+    test('after a letter outside the BMP a quote is only itself (#1346)', () {
+      const word = '\u{20BB7}';
+      expect(typedThrough("'", at: word.length, text: word), "$word'");
+      expect(
+        typedThrough("'", at: word.length + 1, text: '$word '),
+        "$word ''",
+      );
+    });
+
     test('after a backslash an emphasis is only itself', () {
       expect(typedThrough('*', at: 1, text: r'\'), r'\*');
+    });
+
+    test('at the end of a line of a CRLF note it pairs as on any (#1374)', () {
+      for (final (key, pair) in const [
+        ('(', '()'),
+        ('[', '[]'),
+        ('"', '""'),
+        ('*', '**'),
+      ]) {
+        expect(
+          typedThrough(key, at: 4, text: 'abc \r\ndef'),
+          'abc $pair\r\ndef',
+          reason: key,
+        );
+        expect(
+          typedThrough(key, at: 4, text: 'abc \ndef'),
+          'abc $pair\ndef',
+          reason: '$key on an LF note',
+        );
+      }
+    });
+
+    test('before a word of a CRLF note it still does not', () {
+      expect(typedThrough('(', text: 'abc\r\ndef'), '(abc\r\ndef');
     });
   });
 }

@@ -262,6 +262,7 @@ final class SourceEditorControls {
     selectAll: editor.selectAll,
     deleteBackward: editor.deleteBackward,
     deleteForward: editor.deleteForward,
+    deleteTo: editor.typing.delete,
     undo: editor.undo,
     redo: editor.redo,
   );

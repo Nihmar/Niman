@@ -7,6 +7,7 @@ import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
+import 'package:niman/src/markdown/edit/apple_selectors.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
@@ -329,6 +330,8 @@ final class SourceEditor extends ChangeNotifier {
     onRecord: _history.record,
     onNewline: typing.newline,
     onTyped: typing.typed,
+    onSelector: (selector) =>
+        performAppleSelector(selector, controls.keyActions),
     onTokenizer: (edit, buffer) {
       // The edit path's clock: opened here and closed by `onEdited`, the
       // two ends of the same `_replace` (#316) — and only when a profiling

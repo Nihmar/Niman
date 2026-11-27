@@ -147,6 +147,19 @@ void main() {
       expect(editor.selection, const SelectionModel.at(10));
     });
 
+    test('Left and Right leave a selection for its edges (#1349)', () {
+      final editor = _editor(
+        'alpha beta gamma',
+        at: const SelectionModel(anchor: 2, extent: 6),
+      );
+
+      editor.layout.moveCaretBy(CaretMotion.characterLeft);
+      expect(editor.selection, const SelectionModel.at(2));
+      editor.select(const SelectionModel(anchor: 6, extent: 2));
+      editor.layout.moveCaretBy(CaretMotion.characterRight);
+      expect(editor.selection, const SelectionModel.at(6));
+    });
+
     test("Home goes past a list item's marker, End to the line's end", () {
       final editor = _editor('- item\nnext', at: const SelectionModel.at(4));
 
