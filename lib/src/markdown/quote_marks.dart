@@ -98,6 +98,7 @@ final class QuoteMarks {
           ),
         );
         from += start + hashes;
+        LineTokens.headingClose(text, from, out);
       }
     }
     return from;

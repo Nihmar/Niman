@@ -32,6 +32,27 @@ abstract final class LineSyntax {
   static (int, int)? headingMarkerOf(String text, [int? reach]) =>
       _headingMarker(text, 0, reach ?? text.length);
 
+  /// Where the closing `#`s of the ATX heading on [text] start and end, past
+  /// its opening marker, which ends at [from]; null when it has none: a
+  /// run of `#` at the end of the line, apart from the content by a space
+  /// or a tab (or the opening marker itself), and trailing white space
+  /// after it.
+  static (int, int)? headingCloseOf(String text, int from) {
+    var end = text.length;
+    while (end > from && isSpace(text.codeUnitAt(end - 1))) {
+      end--;
+    }
+    var start = end;
+    while (start > from && text.codeUnitAt(start - 1) == 0x23) {
+      start--;
+    }
+    if (start == end) return null;
+    // Apart from what is before it: the `#`s of `foo#` are text, and so are
+    // an escaped one's.
+    if (start > from && !isSpace(text.codeUnitAt(start - 1))) return null;
+    return (start, end);
+  }
+
   /// How many `#` open a heading on [text], or 0: up to three spaces in from
   /// [column], the content column of the item the line is in.
   static int headingLevel(String text, [int column = 0]) =>

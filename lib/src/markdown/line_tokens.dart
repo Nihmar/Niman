@@ -146,8 +146,20 @@ abstract final class LineTokens {
         ),
       );
       from += start + hashes;
+      if (block.kind == BlockKind.heading) headingClose(text, from, out);
     }
     return from;
+  }
+
+  /// The closing `#`s of the ATX heading on [text] whose opening marker ends
+  /// at [from], if it has any, added to [out] as a marker as the opening
+  /// ones are.
+  static void headingClose(String text, int from, List<InlinePiece> out) {
+    final close = LineSyntax.headingCloseOf(text, from);
+    if (close == null) return;
+    out.add(
+      InlinePiece(TokenKind.headingMarker, close.$1, close.$2, structural),
+    );
   }
 
   /// The list marker at [at] of [text], if one stands there, and its task

@@ -85,6 +85,39 @@ void main() {
     });
   });
 
+  group("an ATX heading's closing hashes are markers too (#1376)", () {
+    test('a closing run', () {
+      expect(_line('### foo ###', 0), [
+        'headingMarker[###]',
+        'headingMarker[###]',
+      ]);
+    });
+
+    test('a shorter run, trailing spaces after it', () {
+      expect(_line('# foo #   ', 0).last, 'headingMarker[#]');
+      expect(_line('## foo ###  ', 0), contains('headingMarker[###]'));
+    });
+
+    test('inline marks in the heading are still read', () {
+      final found = _line('## a **b** ##', 0);
+      expect(found.first, 'headingMarker[##]');
+      expect(found.last, 'headingMarker[##]');
+      expect(found, contains('bold[b]'));
+    });
+
+    test('hashes that are text are not markers', () {
+      expect(_count('# foo#', 0, 'headingMarker'), 1);
+      expect(_count(r'# foo \#', 0, 'headingMarker'), 1);
+      expect(_count('# C#', 0, 'headingMarker'), 1);
+      expect(_count('#', 0, 'headingMarker'), 1);
+    });
+
+    test('in a quote, and in a callout', () {
+      expect(_count('> ## foo ##', 0, 'headingMarker'), 2);
+      expect(_count('> [!note]\n> ## foo ##', 1, 'headingMarker'), 2);
+    });
+  });
+
   group('a fence opened on a list marker line is coloured where it is '
       '(#1328)', () {
     const text = '- ```js\n  a\n  b\n  ```';
