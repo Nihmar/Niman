@@ -79,7 +79,30 @@ List<String> indentListLines(
   required int last,
   required int width,
   required bool outdent,
-}) => _ListIndent(lines, width).run(first, last, outdent: outdent);
+}) => indentListLinesWithin(
+  lines,
+  first: first,
+  last: last,
+  width: width,
+  outdent: outdent,
+).lines;
+
+/// [indentListLines] over [lines] that may be the top of a longer block, as
+/// the window `listIndentWindowBelow` reads: with it, whether the answer is
+/// only right when more lines below are read — the subtree of an item moved
+/// ran to the last line, or the run of siblings renumbered did. When it is
+/// not, the lines are the answer the whole block gives.
+({List<String> lines, bool needsMore}) indentListLinesWithin(
+  List<String> lines, {
+  required int first,
+  required int last,
+  required int width,
+  required bool outdent,
+}) {
+  final indent = _ListIndent(lines, width);
+  final out = indent.run(first, last, outdent: outdent);
+  return (lines: out, needsMore: indent.needsMore);
+}
 
 /// Where the items moved together went: the column of the sublist, and the
 /// number its next item takes (null when the marker stays).
@@ -123,6 +146,10 @@ final class _ListIndent {
   late final List<int> group;
   late final List<bool> counted;
   late final List<bool> grouped;
+
+  /// Whether something the rows say — the end of a subtree, of a run of
+  /// siblings counted on — is only known with the rows below them.
+  bool needsMore = false;
 
   List<String> run(int first, int last, {required bool outdent}) {
     for (var at = first; at <= last; at++) {
@@ -249,7 +276,8 @@ final class _ListIndent {
     );
     final shift = delta[at] + next.length - head.marker.length;
     final inside = row.contentColumn;
-    for (var below = at + 1; below < rows.length; below++) {
+    var below = at + 1;
+    for (; below < rows.length; below++) {
       final line = rows[below];
       if (line.depth != row.depth) break;
       if (line.blank) continue;
@@ -257,6 +285,8 @@ final class _ListIndent {
       delta[below] += shift;
       moved[below] = true;
     }
+    // The subtree ran to the last row: more of it may be below.
+    if (below == rows.length) needsMore = true;
   }
 
   /// The siblings after [parent] make room for the items moved back to it.
@@ -268,19 +298,15 @@ final class _ListIndent {
   /// Adds [by] to the numbers of the siblings after [at] that count on from
   /// it one by one: a list numbered by hand stays as it was written.
   void _renumberAfter(int at, int by) {
-    final head = rows[at].head!;
-    final number = head.number;
+    final number = rows[at].head!.number;
     if (number == null || by == 0) return;
+    final counting = tree.countingAfter(at);
+    // The run still held at the last row: the next siblings are below it.
+    if (counting.open) needsMore = true;
     var expected = number;
-    var sibling = tree.next[at];
-    while (sibling >= 0) {
-      final row = rows[sibling];
+    for (final sibling in counting.run) {
       expected += 1;
-      if (row.head!.number != expected || row.delimiter != rows[at].delimiter) {
-        return;
-      }
-      marker[sibling] = '${expected + by}${row.delimiter}';
-      sibling = tree.next[sibling];
+      marker[sibling] = rows[sibling].head!.markerFor(expected + by);
     }
   }
 }

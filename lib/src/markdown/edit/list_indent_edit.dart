@@ -13,13 +13,18 @@ typedef ListIndentEdit = ({
   SelectionModel caret,
 });
 
+/// How many lines below the touched ones the edit reads first.
+const int _firstRead = 32;
+
 /// The edit that indents (or outdents, `outdent` true) the lines [selection]
 /// touches in [buffer], by the rule of `indentLines` — the one the toolbar's
 /// indent runs — or null when nothing would change.
 ///
-/// Only the list block around the selection is read, and only the lines that
-/// change are replaced, each keeping its own line terminator. Each end of the
-/// selection stays on its own line and character.
+/// Only the part of the list block around the selection that the edit can
+/// change is read — upward to the item it nests under, downward to the end of
+/// its subtree and of the run of siblings it renumbers — and only the lines
+/// that change are replaced, each keeping its own line terminator. Each end
+/// of the selection stays on its own line and character.
 ListIndentEdit? listIndentEdit(
   SourceBuffer buffer,
   SelectionModel selection, {
@@ -27,22 +32,38 @@ ListIndentEdit? listIndentEdit(
   required bool outdent,
 }) {
   final touched = touchedBufferLines(buffer, selection);
-  final window = listIndentWindow(
-    buffer.lineAt,
-    buffer.lineCount,
-    touched.first,
-    touched.last,
-  );
-  final before = [
-    for (var at = window.first; at <= window.last; at++) buffer.lineAt(at),
-  ];
-  final after = indentListLines(
-    before,
-    first: touched.first - window.first,
-    last: touched.last - window.first,
-    width: width,
-    outdent: outdent,
-  );
+  // Read down as far as the edit changes anything, and no further: a few
+  // lines first, then twice as many for as long as the answer says it needs
+  // the lines below the window (#1355).
+  var reach = _firstRead;
+  int? top;
+  late ({int first, int last, bool complete}) window;
+  late List<String> before;
+  late List<String> after;
+  while (true) {
+    window = listIndentWindowBelow(
+      buffer.lineAt,
+      buffer.lineCount,
+      touched.first,
+      touched.last,
+      below: reach,
+      top: top,
+    );
+    top = window.first;
+    before = [
+      for (var at = window.first; at <= window.last; at++) buffer.lineAt(at),
+    ];
+    final run = indentListLinesWithin(
+      before,
+      first: touched.first - window.first,
+      last: touched.last - window.first,
+      width: width,
+      outdent: outdent,
+    );
+    after = run.lines;
+    if (!run.needsMore || window.complete) break;
+    reach *= 2;
+  }
   var from = 0;
   while (from < before.length && before[from] == after[from]) {
     from++;
