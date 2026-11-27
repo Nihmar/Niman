@@ -1071,7 +1071,9 @@ for `- ` or `- [ ] `.
   siblings make room. An item with no parent loses up to the indent width of
   its own indent.
 - The first item of a list has nothing to nest under, so it moves by the
-  indent width (Settings, 2–8). So does every line that is not a list item.
+  indent width (Settings, 2–8). So does every line that is not a list item,
+  but for a blank line among several selected lines, which is left blank rather
+  than given trailing spaces.
 - On several selected lines, each item is placed by the same rule; items
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the

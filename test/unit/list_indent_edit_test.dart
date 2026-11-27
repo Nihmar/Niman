@@ -97,4 +97,23 @@ void main() {
       expect(_press('a|\n|b'), '  a|\n|b');
     });
   });
+
+  group('blank lines are not padded (#1345)', () {
+    test('a plain blank line among the lines stays empty', () {
+      expect(_press('|a\n\nb|'), '  |a\n\n  b|');
+      expect(_whole('|a\n\nb|'), '  |a\n\n  b|');
+    });
+
+    test('a line of spaces only is not given more', () {
+      expect(_press('|a\n  \nb|'), '  |a\n  \n  b|');
+    });
+
+    test('and outdent takes the spaces off it', () {
+      expect(_press('|  a\n  \n  b|', outdent: true), '|a\n\nb|');
+    });
+
+    test('a blank line among items and their text', () {
+      expect(_press('|- a\n\n  more\n- b|'), '  |- a\n\n    more\n  - b|');
+    });
+  });
 }

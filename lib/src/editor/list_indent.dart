@@ -128,7 +128,13 @@ final class _ListIndent {
     for (var at = first; at <= last; at++) {
       if (moved[at]) continue;
       if (rows[at].head == null) {
-        out[at] = outdent ? _strip(lines[at]) : '${' ' * width}${lines[at]}';
+        // A blank line is left blank: indenting it would only leave spaces
+        // at the end of the line (#1345).
+        if (outdent) {
+          out[at] = _strip(lines[at]);
+        } else if (!rows[at].blank) {
+          out[at] = '${' ' * width}${lines[at]}';
+        }
       } else if (outdent) {
         _outdent(at);
       } else {
