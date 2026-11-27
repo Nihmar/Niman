@@ -723,6 +723,10 @@ final class EstonianStrings extends Strings {
   String get noteNotText =>
       'See fail ei ole tekstimärge, seega ei saa Niman seda siin näidata.';
   @override
+  String get noteReadAsWindows1252 =>
+      'See fail ei ole UTF-8, seega loeti see Windows-1252-na. Salvestamisel '
+      'kirjutatakse see UTF-8-na.';
+  @override
   String get noteLoadFailed => 'Seda märget ei õnnestunud avada.';
   @override
   String get noteLoadMissing => 'Selle märke faili pole enam kettal.';

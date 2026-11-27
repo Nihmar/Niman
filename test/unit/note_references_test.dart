@@ -144,28 +144,30 @@ void main() {
     ], reason: 'an embed is not a link, but a move still carries it (#507)');
   });
 
-  test('every tag and link the legacy readers found in the fixtures', () {
-    // The index read notes with the legacy tokenizer until this; on the
-    // repo's own notes the unified engine finds the same tags and links —
-    // and on the worst note, the reference links the tokenizer could not
-    // resolve, which the note draws.
-    final fixtures = Directory(p.join('test', 'fixtures'))
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((file) => file.path.endsWith('.md'));
-    expect(fixtures, isNotEmpty);
-    for (final file in fixtures) {
-      final text = file.readAsStringSync();
-      final refs = noteReferencesOf(text);
-      expect(refs.tags.toSet(), inlineTags(text).toSet(), reason: file.path);
-      final now = refs.links.map(_key).toSet();
-      final before = parseLinks(text).map(_key).toSet();
-      expect(now, containsAll(before), reason: file.path);
-      for (final extra in now.difference(before)) {
-        expect(extra, startsWith('md '), reason: '${file.path}: $extra');
+  test(
+    'every link a rename follows is one the index counts, in the fixtures',
+    () {
+      // `parseLinks` (rename, move, export) and the index read a note with the
+      // same engine: what the first finds, the second counts, and the second
+      // counts more only in Markdown links — the ones by reference and the bare
+      // URLs, which a rewrite leaves to their definition.
+      final fixtures = Directory(p.join('test', 'fixtures'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.md'));
+      expect(fixtures, isNotEmpty);
+      for (final file in fixtures) {
+        final text = file.readAsStringSync();
+        final refs = noteReferencesOf(text);
+        final now = refs.links.map(_key).toSet();
+        final before = parseLinks(text).map(_key).toSet();
+        expect(now, containsAll(before), reason: file.path);
+        for (final extra in now.difference(before)) {
+          expect(extra, startsWith('md '), reason: '${file.path}: $extra');
+        }
       }
-    }
-  });
+    },
+  );
 
   test("a heading's own hashes are no tag; a tag in it still is (#581)", () {
     expect(AppSyntax.mayHoldTag('## Section ##'), isFalse);

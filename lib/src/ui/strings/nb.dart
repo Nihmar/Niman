@@ -726,6 +726,10 @@ final class NorwegianStrings extends Strings {
   String get noteNotText =>
       'Denne filen er ikke et tekstnotat, så Niman kan ikke vise den her.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Denne filen er ikke i UTF-8, så den ble lest som Windows-1252. Ved '
+      'lagring skrives den som UTF-8.';
+  @override
   String get noteLoadFailed => 'Notatet kunne ikke åpnes.';
   @override
   String get noteLoadMissing =>

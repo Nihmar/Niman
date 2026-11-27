@@ -738,6 +738,10 @@ final class GermanStrings extends Strings {
       'Diese Datei ist keine Textnotiz, daher kann '
       'Niman sie hier nicht anzeigen.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Diese Datei ist nicht UTF-8 und wurde deshalb als Windows-1252 '
+      'gelesen. Beim Speichern wird sie als UTF-8 geschrieben.';
+  @override
   String get noteLoadFailed => 'Diese Notiz konnte nicht geöffnet werden.';
   @override
   String get noteLoadMissing =>

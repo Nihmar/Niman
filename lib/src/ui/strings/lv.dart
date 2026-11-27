@@ -722,6 +722,10 @@ final class LatvianStrings extends Strings {
   String get noteNotText =>
       'Šis fails nav teksta piezīme, tāpēc Niman to šeit nevar parādīt.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Šis fails nav UTF-8, tāpēc tas tika nolasīts kā Windows-1252. '
+      'Saglabājot tas tiks ierakstīts UTF-8 formātā.';
+  @override
   String get noteLoadFailed => 'Šo piezīmi neizdevās atvērt.';
   @override
   String get noteLoadMissing => 'Šīs piezīmes faila diskā vairs nav.';

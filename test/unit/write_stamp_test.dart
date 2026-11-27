@@ -171,7 +171,13 @@ void main() {
         'a.md',
         'mine, edited',
         editSession: 1,
-        expected: DiskStamp(size: written.bytes, modified: written.modified),
+        // As the writer's own result stamps it, with the digest it kept.
+        expected: DiskStamp(
+          size: written.bytes,
+          modified: written.modified,
+          taken: DateTime.now(),
+          digest: written.sha256,
+        ),
       );
       expect(saved!.keptExternal, isFalse);
       final versions = (await ops.noteHistory('a.md')).versions;

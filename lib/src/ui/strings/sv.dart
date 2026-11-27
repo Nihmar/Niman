@@ -733,6 +733,10 @@ final class SwedishStrings extends Strings {
       'Den här filen är inte en textanteckning, så '
       'Niman kan inte visa den här.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Den här filen är inte UTF-8, så den lästes som Windows-1252. Vid '
+      'sparning skrivs den som UTF-8.';
+  @override
   String get noteLoadFailed => 'Anteckningen kunde inte öppnas.';
   @override
   String get noteLoadMissing =>

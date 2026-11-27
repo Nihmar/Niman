@@ -22,6 +22,7 @@ import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/outline.dart';
 import 'package:niman/src/editor/word_count_index.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/edit_step.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -236,8 +237,79 @@ final class MarkdownSurfaceController {
     final at = head == 0 ? 0 : buffer.offsetOfLine(head);
     final to = tail > last ? end : buffer.offsetOfLine(tail);
     if (at == to && textAt == textEnd) return null;
-    return (at: at, to: to, replacement: text.substring(textAt, textEnd));
+    // Inside the first and the last line that differ, the head and the tail
+    // they share are left out too (#1359): a bold on one word replaces that
+    // word, not the line it is in — which on a paragraph of 50 MB was copied
+    // three times and kept twice. (Nothing to cut from a pure insertion.)
+    if (tail <= head) {
+      return (at: at, to: to, replacement: text.substring(textAt, textEnd));
+    }
+    final firstLine = buffer.lineAt(head);
+    var prefix = _commonHead(firstLine, text, textAt, textEnd);
+    final lastIndex = tail - 1;
+    final lastLine = buffer.lineAt(lastIndex);
+    final terminator = lastIndex == last ? '' : buffer.terminatorAt(lastIndex);
+    var shared = _commonTail(
+      lastLine,
+      terminator,
+      text,
+      textEnd,
+      // Never into what the head already shares, on either side.
+      textAt + prefix,
+      lastIndex == head ? lastLine.length - prefix : lastLine.length,
+    );
+    // A pair of surrogates is one character: the cut does not split it.
+    if (prefix > 0 && _isHigh(firstLine.codeUnitAt(prefix - 1))) prefix--;
+    if (shared > 0 && _isLow(lastLine.codeUnitAt(lastLine.length - shared))) {
+      shared--;
+    }
+    // What the tail shares, with the terminator that ends the line when both
+    // sides have it: the range ends where the sharing begins.
+    final suffix = shared < 0 ? 0 : shared + terminator.length;
+    return (
+      at: at + prefix,
+      to: to - suffix,
+      replacement: text.substring(textAt + prefix, textEnd - suffix),
+    );
   }
+
+  /// How many code units [line] and [text] from [from] share at their heads,
+  /// within the line and before [limit] in the text.
+  static int _commonHead(String line, String text, int from, int limit) {
+    var n = 0;
+    final most = math.min(line.length, limit - from);
+    while (n < most && line.codeUnitAt(n) == text.codeUnitAt(from + n)) {
+      n++;
+    }
+    return n;
+  }
+
+  /// How many code units the end of [line] (followed by [terminator]) and the
+  /// end of [text] at [textEnd] share, counted back no further than [floor]
+  /// in the text nor [room] units into the line; -1 when the terminator is not
+  /// shared.
+  static int _commonTail(
+    String line,
+    String terminator,
+    String text,
+    int textEnd,
+    int floor,
+    int room,
+  ) {
+    final lineEnd = textEnd - terminator.length;
+    if (lineEnd < floor || !_sameAt(text, lineEnd, terminator)) return -1;
+    var n = 0;
+    final most = math.min(room, lineEnd - floor);
+    while (n < most &&
+        line.codeUnitAt(line.length - 1 - n) ==
+            text.codeUnitAt(lineEnd - 1 - n)) {
+      n++;
+    }
+    return n;
+  }
+
+  static bool _isHigh(int unit) => unit >= 0xD800 && unit <= 0xDBFF;
+  static bool _isLow(int unit) => unit >= 0xDC00 && unit <= 0xDFFF;
 
   /// Whether [text] says [part] at [at].
   static bool _sameAt(String text, int at, String part) {
@@ -309,34 +381,87 @@ final class MarkdownSurfaceController {
   /// Replaces `[start, end)` with [text], as one undoable edit, leaving the
   /// caret at [caret] or after the text. Without [follow] a source pane
   /// keeps its scroll rather than going to the caret.
+  ///
+  /// A caller that knows what changed — Replace all, one hunk per match —
+  /// hands the [hunks] (and [text] with its own line endings, [verbatim]):
+  /// the history keeps those and reads nothing of the span (#1359).
   void replaceRange(
     int start,
     int end,
     String text, {
     SelectionModel? caret,
     bool follow = true,
+    bool verbatim = false,
+    List<EditHunk>? hunks,
   }) {
     final view = _view;
     if (view != null) {
-      view.replaceText(start, end, text, caret: caret, follow: follow);
+      view.replaceText(
+        start,
+        end,
+        text,
+        caret: caret,
+        follow: follow,
+        verbatim: verbatim,
+        hunks: hunks,
+      );
       return;
     }
     if (start < 0 || end < start || end > buffer.length) return;
     final before = buffer.length;
-    final removed = buffer.substring(start, end);
-    final edit = buffer.replaceRange(start, end, text);
+    final selectionBefore = _pending.clampTo(before);
+    final known = hunks != null && verbatim;
+    final removed = known
+        ? (text: '', held: null)
+        : removalOf(buffer, start, end, text);
+    final edit = buffer.replaceRange(start, end, text, verbatim: verbatim);
     final stored = buffer.length - before + (end - start);
-    history.record(
-      EditRecord(
-        start: start,
-        removed: removed,
-        inserted: buffer.substring(start, start + stored),
-      ),
-    );
-    _pending = (caret ?? SelectionModel.at(start + stored)).clampTo(
+    final next = (caret ?? SelectionModel.at(start + stored)).clampTo(
       buffer.length,
     );
+    if (known) {
+      history.recordStep(
+        EditStep(start, hunks, before: selectionBefore, after: next),
+      );
+    } else {
+      history.record(
+        EditRecord(
+          start: start,
+          removed: removed.text,
+          held: removed.held,
+          inserted: buffer.substring(start, start + stored),
+          selectionBefore: selectionBefore,
+          selectionAfter: next,
+        ),
+        alone: true,
+      );
+    }
+    _pending = next;
     onChanged?.call(edit);
+  }
+
+  /// Undoes the last edit — the toolbar's Undo — with the selection it
+  /// stood on, and says whether there was one.
+  bool undo() {
+    final view = _view;
+    if (view != null) return view.undo();
+    return _walk(history.undo(buffer));
+  }
+
+  /// Redoes the last undone edit, and says whether there was one.
+  bool redo() {
+    final view = _view;
+    if (view != null) return view.redo();
+    return _walk(history.redo(buffer));
+  }
+
+  /// Takes the selection an undo or a redo gave, when it gave one: the note
+  /// is reported changed, as for any other edit.
+  bool _walk(SelectionModel? restored) {
+    if (restored == null) return false;
+    _pending = restored.clampTo(buffer.length);
+    if (history.lastEdit case final edit?) onChanged?.call(edit);
+    return true;
   }
 
   /// Replaces the selection with [text] — an image's link, an inserted

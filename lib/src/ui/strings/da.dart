@@ -726,6 +726,10 @@ final class DanishStrings extends Strings {
   String get noteNotText =>
       'Denne fil er ikke en tekstnote, så Niman kan ikke vise den her.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Denne fil er ikke i UTF-8, så den blev læst som Windows-1252. Ved '
+      'gemning skrives den som UTF-8.';
+  @override
   String get noteLoadFailed => 'Noten kunne ikke åbnes.';
   @override
   String get noteLoadMissing => 'Notens fil findes ikke længere på disken.';

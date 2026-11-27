@@ -727,6 +727,10 @@ final class UkrainianStrings extends Strings {
   String get noteNotText =>
       'Цей файл не є текстовою нотаткою, тож Niman не може показати його тут.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Цей файл не в UTF-8, тому його прочитано як Windows-1252. Під час '
+      'збереження його буде записано в UTF-8.';
+  @override
   String get noteLoadFailed => 'Не вдалося відкрити цю нотатку.';
   @override
   String get noteLoadMissing => 'Файлу цієї нотатки більше немає на диску.';

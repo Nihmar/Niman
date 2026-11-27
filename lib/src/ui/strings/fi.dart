@@ -731,6 +731,11 @@ final class FinnishStrings extends Strings {
       'Tämä tiedosto ei ole tekstimuistiinpano, joten '
       'Niman ei voi näyttää sitä tässä.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Tämä tiedosto ei ole UTF-8-muotoinen, joten se luettiin '
+      'Windows-1252-muodossa. Tallennettaessa se kirjoitetaan '
+      'UTF-8-muodossa.';
+  @override
   String get noteLoadFailed => 'Tätä muistiinpanoa ei voitu avata.';
   @override
   String get noteLoadMissing =>

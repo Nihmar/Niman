@@ -727,6 +727,10 @@ final class IcelandicStrings extends Strings {
       'Þessi skrá er ekki textaminnispunktur, svo '
       'Niman getur ekki sýnt hana hér.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Þessi skrá er ekki í UTF-8, svo hún var lesin sem Windows-1252. Við '
+      'vistun verður hún skrifuð sem UTF-8.';
+  @override
   String get noteLoadFailed => 'Ekki tókst að opna þennan minnispunkt.';
   @override
   String get noteLoadMissing =>

@@ -673,6 +673,9 @@ final class ChineseStrings extends Strings {
   @override
   String get noteNotText => '此文件不是文本笔记，因此 Niman 无法在此显示。';
   @override
+  String get noteReadAsWindows1252 =>
+      '此文件不是 UTF-8 编码，因此按 Windows-1252 读取。保存时将以 UTF-8 写入。';
+  @override
   String get noteLoadFailed => '无法打开此笔记。';
   @override
   String get noteLoadMissing => '此笔记的文件已不在磁盘上。';

@@ -51,7 +51,7 @@ final class BlockTree {
     return BlockTree._(appSyntax: appSyntax)._build(text, [
       for (var at = 0; at < lines.length; at++)
         (line: at, column: 0, leftOver: 0, lazy: false),
-    ]);
+    ], isNote: true);
   }
 
   /// The node of [block], one of the blocks the scanner made of [buffer]
@@ -85,13 +85,18 @@ final class BlockTree {
 
   /// The blocks of [text], whose line `i` starts in the note at
   /// `origins[i]`.
-  List<BlockNode> _build(String text, List<LineOrigin> origins) {
+  List<BlockNode> _build(
+    String text,
+    List<LineOrigin> origins, {
+    bool isNote = false,
+  }) {
     final buffer = SourceBuffer.fromText(text);
     final scanner = BlockScanner(
       buffer,
       leftOver: [for (final origin in origins) origin.leftOver],
       lazy: [for (final origin in origins) origin.lazy],
       appSyntax: appSyntax,
+      isNote: isNote,
     );
     LineOrigin origin(int line) => origins[line];
     final note = <BlockNode>[];

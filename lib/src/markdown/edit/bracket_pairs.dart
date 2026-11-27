@@ -47,7 +47,8 @@
 /// formulas are written with them.
 library;
 
-import 'package:niman/src/markdown/edit/caret_motion.dart';
+import 'package:flutter/foundation.dart';
+import 'package:niman/src/markdown/edit/grapheme_steps.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// An edit a bracket asks for: `[start, end)` replaced with `text`, and the
@@ -233,6 +234,10 @@ final class BracketPairs {
   /// Forgets every closing character written: another note.
   void clear() => _closers.clear();
 
+  /// Whether no closer is being tracked, for a test.
+  @visibleForTesting
+  bool get isEmpty => _closers.isEmpty;
+
   /// Whether [typed] opens a pair at [offset]: per character, because half
   /// of these are ordinary punctuation most of the time (#718).
   bool _opensAt(SourceBuffer buffer, int offset, String typed) {
@@ -273,7 +278,10 @@ final class BracketPairs {
     }
     if (offset >= buffer.length) return true;
     final next = buffer.substring(offset, offset + 1);
+    // A note with Windows line endings stores a `\r` before the `\n`: the
+    // line's end is either.
     return next == '\n' ||
+        next == '\r' ||
         next == ' ' ||
         next == '\t' ||
         _closingOnly.contains(next) ||
@@ -284,20 +292,16 @@ final class BracketPairs {
   static String? _charBefore(SourceBuffer buffer, int offset) =>
       offset <= 0 ? null : buffer.substring(offset - 1, offset);
 
-  /// Whether a word stands right before [offset]. The combining marks of a
-  /// decomposed accent — `café` written `cafe` + U+0301 — belong to the
-  /// letter before them, so they are stepped back over to it (#762).
+  /// Whether a word stands right before [offset]: the grapheme cluster that
+  /// ends there starts with a letter, a digit or an underscore. A decomposed
+  /// accent — `café` written `cafe` + U+0301 — belongs to the letter before
+  /// it, and a letter outside the BMP is one code point of two units, so the
+  /// cluster is read, not the last code unit (#762, #1346).
   static bool _wordBefore(SourceBuffer buffer, int offset) {
-    var index = offset;
-    while (index > 0 &&
-        _combiningMark.hasMatch(buffer.substring(index - 1, index))) {
-      index -= 1;
-    }
-    final before = _charBefore(buffer, index);
-    return before != null && isWordChar(before);
+    if (offset <= 0) return false;
+    final steps = GraphemeSteps.ofBuffer(buffer);
+    return isWordChar(buffer.substring(steps.previous(offset), offset));
   }
-
-  static final RegExp _combiningMark = RegExp(r'^\p{M}$', unicode: true);
 
   /// The closing character [char] this pair wrote, standing at [offset].
   _Closer? _closerAt(SourceBuffer buffer, int offset, String char) {

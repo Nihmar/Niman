@@ -93,7 +93,13 @@ final class NoteWriter {
   /// null when this writer has not written the note.
   static DiskStamp? _stampOf(KnownContent? wrote) => wrote == null
       ? null
-      : DiskStamp(size: wrote.size, modified: wrote.modified);
+      // Its digest, so a file with the same size and time is still told by
+      // its bytes (#1365); the moment it was taken is not kept.
+      : DiskStamp(
+          size: wrote.size,
+          modified: wrote.modified,
+          digest: wrote.sha256,
+        );
 
   /// Writes [content] to the note at library-relative [path], creating
   /// the file when it is not there.
@@ -363,7 +369,12 @@ final class NoteWriter {
       _log.info('kept the version of "$path" that was written outside');
     }
     return NoteSaveResult(
-      stamp: DiskStamp(size: result.bytes, modified: result.modified),
+      stamp: DiskStamp(
+        size: result.bytes,
+        modified: result.modified,
+        taken: DateTime.now(),
+        digest: result.sha256,
+      ),
       keptExternal: kept,
     );
   }

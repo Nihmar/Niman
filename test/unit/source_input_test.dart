@@ -30,7 +30,11 @@ _wire(String text, {int caret = 0}) {
   var current = SelectionModel.at(caret);
   final input = SourceInput(
     buffer: buffer,
-    onTokenizer: (edit, buffer) => SourceInput.retokenize(tokens, edit, buffer),
+    onTokenizer: (edit, buffer) =>
+        tokens.replaceLines(edit.firstLine, edit.removedLines, <String>[
+          for (var at = 0; at < edit.insertedLines; at++)
+            buffer.lineAt(edit.firstLine + at),
+        ]),
     selection: () => current,
     onSelection: (next) {
       current = next;

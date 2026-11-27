@@ -736,6 +736,10 @@ final class DutchStrings extends Strings {
   String get noteNotText =>
       'Dit bestand is geen tekstnotitie, dus Niman kan het hier niet tonen.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Dit bestand is geen UTF-8, dus het is gelezen als Windows-1252. Bij '
+      'het opslaan wordt het als UTF-8 geschreven.';
+  @override
   String get noteLoadFailed => 'Deze notitie kon niet worden geopend.';
   @override
   String get noteLoadMissing =>

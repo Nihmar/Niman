@@ -747,6 +747,10 @@ final class FrenchStrings extends Strings {
       'Ce fichier n’est pas une note texte, Niman '
       'ne peut donc pas l’afficher ici.';
   @override
+  String get noteReadAsWindows1252 =>
+      "Ce fichier n'est pas en UTF-8 ; il a été lu comme du Windows-1252. À "
+      "l'enregistrement, il sera écrit en UTF-8.";
+  @override
   String get noteLoadFailed => 'Impossible d’ouvrir cette note.';
   @override
   String get noteLoadMissing =>

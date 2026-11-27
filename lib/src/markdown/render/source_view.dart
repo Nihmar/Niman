@@ -36,6 +36,7 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/edit/caret_motion.dart';
 import 'package:niman/src/markdown/edit/caret_spot.dart';
 import 'package:niman/src/markdown/edit/edit_history.dart';
+import 'package:niman/src/markdown/edit/edit_step.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/render/scroll_anchor.dart';
@@ -296,13 +297,28 @@ final class MarkdownSourceViewState extends State<MarkdownSourceView> {
   /// a spelling fixed — as one undoable edit, caret at [caret] or after it.
   /// Without [follow] the note stays where it is scrolled, for an edit made
   /// somewhere the caret is not.
+  ///
+  /// A step of its own: what the shell asks for is a decision, not typing the
+  /// next keys go on with (#1339). A caller that knows what changed hands the
+  /// [hunks] ([SourceEditor.replaceRange]).
   void replaceText(
     int start,
     int end,
     String text, {
     SelectionModel? caret,
     bool follow = true,
-  }) => _editor.replaceRange(start, end, text, caret: caret, follow: follow);
+    bool verbatim = false,
+    List<EditHunk>? hunks,
+  }) => _editor.replaceRange(
+    start,
+    end,
+    text,
+    caret: caret,
+    follow: follow,
+    verbatim: verbatim,
+    alone: true,
+    hunks: hunks,
+  );
 
   /// Makes the note say [text] because it changed elsewhere
   /// ([SourceEditor.replaceAll]).

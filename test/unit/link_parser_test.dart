@@ -301,10 +301,21 @@ void main() {
         _mdLink('[x](https://example.com/a?b=1)').href,
         'https://example.com/a?b=1',
       );
-      expect(_mdLink('[x](#Local Heading)').href, '#Local Heading');
+      // A space in a destination is written between angle brackets, as
+      // CommonMark has it: the read view and the index read a bare one as
+      // text, and a link the note does not draw is no link to rewrite.
+      expect(_mdLink('[x](<#Local Heading>)').href, '#Local Heading');
       expect(_mdLink('[x](dir/note.md#Heading)').href, 'dir/note.md#Heading');
       expect(_mdLink('[x](note.md)').text, 'x');
     });
+
+    test(
+      'a destination with a bare space is no link, as the note draws it',
+      () {
+        expect(parseLinks('[x](#Local Heading)'), isEmpty);
+        expect(parseLinks('[x](My Note.md)'), isEmpty);
+      },
+    );
 
     test('empty text or href', () {
       final link = _mdLink('[](href)');

@@ -57,21 +57,16 @@ final class WordCount {
   /// mark included; zero for a note without one. Its lines count no words.
   int _front = 0;
 
-  /// How many lines are searched for the mark that closes the frontmatter. A
-  /// note that opens with `---` and does not close it that soon has a rule on
-  /// its first line, not a frontmatter: the search is a bounded read, so the
-  /// edit that asks it stays O(change).
-  static const int frontmatterWindow = 1024;
+  /// How many lines are searched for the mark that closes the frontmatter
+  /// ([LineSyntax.frontmatterWindow]).
+  static const int frontmatterWindow = LineSyntax.frontmatterWindow;
 
   /// How many lines at the top of [buffer] are its frontmatter.
   static int _frontLines(SourceBuffer buffer) {
-    if (buffer.lineCount == 0) return 0;
-    if (!LineSyntax.opensFrontmatter(0, buffer.lineAt(0))) return 0;
-    final last = min(buffer.lineCount, frontmatterWindow);
-    for (var line = 1; line < last; line++) {
-      if (LineSyntax.closesFrontmatter(buffer.lineAt(line))) return line + 1;
-    }
-    return 0;
+    final end = LineSyntax.frontmatterEnd(
+      (line) => line < buffer.lineCount ? buffer.lineAt(line) : null,
+    );
+    return end < 0 ? 0 : end + 1;
   }
 
   /// The word count of [buffer], worked out line by line.

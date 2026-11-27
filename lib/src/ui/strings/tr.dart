@@ -721,6 +721,10 @@ final class TurkishStrings extends Strings {
   String get noteNotText =>
       'Bu dosya bir metin notu değil, bu yüzden Niman onu burada gösteremiyor.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Bu dosya UTF-8 değil, bu yüzden Windows-1252 olarak okundu. '
+      'Kaydedildiğinde UTF-8 olarak yazılacak.';
+  @override
   String get noteLoadFailed => 'Bu not açılamadı.';
   @override
   String get noteLoadMissing => 'Bu notun dosyası artık diskte yok.';

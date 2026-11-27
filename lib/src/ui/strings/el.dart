@@ -749,6 +749,10 @@ final class GreekStrings extends Strings {
       'Αυτό το αρχείο δεν είναι σημείωση κειμένου, οπότε το '
       'Niman δεν μπορεί να το εμφανίσει εδώ.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Αυτό το αρχείο δεν είναι UTF-8 και διαβάστηκε ως Windows-1252. Κατά '
+      'την αποθήκευση θα γραφτεί ως UTF-8.';
+  @override
   String get noteLoadFailed => 'Δεν ήταν δυνατό να ανοίξει αυτή η σημείωση.';
   @override
   String get noteLoadMissing =>

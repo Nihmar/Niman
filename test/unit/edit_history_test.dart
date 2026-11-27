@@ -8,7 +8,7 @@ import 'package:niman/src/markdown/source_buffer.dart';
 /// Records an insertion of [text] at [at] over [buffer], as the surface does.
 void _typed(EditHistory history, SourceBuffer buffer, int at, String text) {
   buffer.replaceRange(at, at, text);
-  history.record(EditRecord(start: at, removed: '', inserted: text));
+  history.record(EditRecord(start: at, inserted: text));
 }
 
 void main() {
@@ -45,7 +45,7 @@ void main() {
     _typed(history, buffer, 0, 'ab');
     // The writer moved the caret and typed again: that is a second thought.
     buffer.insert(0, 'X');
-    history.record(const EditRecord(start: 0, removed: '', inserted: 'X'));
+    history.record(const EditRecord(start: 0, inserted: 'X'));
     expect(history.length, 2, reason: 'not contiguous, so not one step');
     history.undo(buffer);
     expect(buffer.text, 'ab');
@@ -235,7 +235,7 @@ void main() {
 
   test('an edit that changed nothing is not a step', () {
     final history = EditHistory()
-      ..record(const EditRecord(start: 0, removed: '', inserted: ''));
+      ..record(const EditRecord(start: 0, inserted: ''));
     expect(history.canUndo, isFalse);
   });
 
@@ -377,8 +377,8 @@ void main() {
       history.record(
         const EditRecord(start: 4, removed: ' mondo', inserted: ''),
       );
-      expect(history.undo(buffer), 10, reason: 'after what came back');
-      expect(history.redo(buffer), 4, reason: 'after what redo did');
+      expect(history.undo(buffer)?.extent, 10, reason: 'after what came back');
+      expect(history.redo(buffer)?.extent, 4, reason: 'after what redo did');
       expect(history.redo(buffer), isNull);
     });
   });
@@ -413,10 +413,7 @@ void main() {
     /// surface records as `()` with one closer.
     void pair(EditHistory history, SourceBuffer buffer, int at) {
       buffer.replaceRange(at, at, '()');
-      history.record(
-        EditRecord(start: at, removed: '', inserted: '()'),
-        closing: 1,
-      );
+      history.record(EditRecord(start: at, inserted: '()'), closing: 1);
     }
 
     test('a pause of more than a second ends the step', () {
@@ -526,10 +523,7 @@ void main() {
       final history = make();
       pair(history, buffer, 0);
       buffer.replaceRange(1, 1, '[]');
-      history.record(
-        const EditRecord(start: 1, removed: '', inserted: '[]'),
-        closing: 1,
-      );
+      history.record(const EditRecord(start: 1, inserted: '[]'), closing: 1);
       _typed(history, buffer, 2, 'x');
       expect(buffer.text, '([x])');
       expect(history.length, 1);

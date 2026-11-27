@@ -9,6 +9,7 @@ import 'package:niman/src/core/logging.dart';
 import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
+import 'package:niman/src/markdown/edit/edit_history.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
@@ -40,6 +41,10 @@ typedef NoteStreamSaver = Future<NoteSaveResult?> Function(
   NoteReferences? references,
   DiskStamp? expected,
 });
+
+/// The history, its place and the note's length at a moment the disk took the
+/// note's text.
+typedef _SavedMark = (EditHistory, HistoryPosition, int);
 
 /// How an open note reaches the disk: the revision the editor is at and the
 /// one the disk holds, the debounce after an edit, one save at a time with a
@@ -77,6 +82,7 @@ final class NoteSavePipeline {
     this.createNoteStream,
     this.onExternalKept,
     this.hold,
+    this.history,
     this.retryDelays = const [
       Duration(seconds: 2),
       Duration(seconds: 5),
@@ -146,6 +152,11 @@ final class NoteSavePipeline {
   /// and kept it in the note's history before overwriting it (#1055).
   final void Function(String path)? onExternalKept;
 
+  /// The editor's undo history, when there is one: it knows where in the
+  /// edits the disk is, so a note undone back to the saved text is clean
+  /// (#1358).
+  final EditHistory? Function()? history;
+
   /// Holds a write for a note that is leaving the editor, with the text it
   /// writes, in the app-wide registry of unsaved notes
   /// (`UnsavedTracker.hold`): the close guard then waits for the write, and
@@ -210,6 +221,42 @@ final class NoteSavePipeline {
     if (dirty) saveInBackground();
   }
 
+  /// Where the history and the note stood when the disk last took the note's
+  /// text, and when the save in flight took it (#1358); null when there is
+  /// no history, or the disk has text the history does not know.
+  _SavedMark? _savedMark;
+  _SavedMark? _inFlightMark;
+
+  /// The history's place and the note's length now.
+  _SavedMark? _markNow() {
+    final history = this.history?.call();
+    final length = buffer()?.length;
+    if (history == null || length == null) return null;
+    return (history, history.position, length);
+  }
+
+  /// The note was just undone or redone — or edited — and may be back on
+  /// the text the disk holds: when the history stands where it did when the
+  /// disk took the text, nothing is owed (#1358). The revision moved all the
+  /// same, so [dirty] alone would call it unsaved and write the same bytes
+  /// again after the debounce.
+  void cleanIfSaved() {
+    final mark = _savedMark;
+    // A save in flight leaves the disk with the text it took, not the one the
+    // mark says: the note is then settled by the save that follows it.
+    if (mark == null || _saving || _pending || mark != _markNow()) return;
+    _lastSavedRevision = _revision;
+    _cancelTimers();
+    _forgetFailure();
+  }
+
+  /// The note was edited though the history did not see it (the unsaved text
+  /// a crash left, taken back): the disk is not at any place of it.
+  void editedBehindHistory() {
+    edited();
+    _savedMark = null;
+  }
+
   /// Whether a save is in flight.
   bool get saving => _saving;
   bool _saving = false;
@@ -257,6 +304,7 @@ final class NoteSavePipeline {
   /// The disk holds what the editor does: the note was just taken from it.
   void markClean() {
     _lastSavedRevision = _revision;
+    _savedMark = _markNow();
     _cancelTimers();
     _forgetFailure();
   }
@@ -374,6 +422,7 @@ final class NoteSavePipeline {
     _ceiling = null;
     _saving = true;
     _inFlightRevision = revision;
+    _inFlightMark = _markNow();
     final future = _performSave(revision, path ?? notePath());
     _activeSave = future;
     return future;
@@ -616,6 +665,7 @@ final class NoteSavePipeline {
   void _saved(String target, int revision, NoteSaveResult? saved) {
     if (target != notePath()) return;
     _lastSavedRevision = revision;
+    _savedMark = _inFlightMark;
     _forgetFailure();
     onSaved(target, saved?.stamp);
     if (saved?.keptExternal ?? false) onExternalKept?.call(target);

@@ -24,9 +24,8 @@ final Map<String, _Command> _commands = <String, _Command>{
   'code block': (text, selection) =>
       codeBlock(text: text, selection: selection),
   'list': (text, selection) =>
-      prefixLines(text: text, selection: selection, prefix: '- '),
-  'quote': (text, selection) =>
-      prefixLines(text: text, selection: selection, prefix: '> '),
+      toggleBulletList(text: text, selection: selection),
+  'quote': (text, selection) => toggleQuote(text: text, selection: selection),
   'heading': (text, selection) =>
       setHeading(text: text, selection: selection, level: 2),
   'heading off': (text, selection) =>
@@ -37,6 +36,24 @@ final Map<String, _Command> _commands = <String, _Command>{
       indentLines(text: text, selection: selection, width: 4, outdent: false),
   'outdent': (text, selection) =>
       indentLines(text: text, selection: selection, width: 2, outdent: true),
+  'checklist': (text, selection) =>
+      toggleTaskList(text: text, selection: selection),
+  'remove heading': (text, selection) =>
+      removeHeading(text: text, selection: selection),
+};
+
+/// The commands that write whole blocks or read the lines around the caret:
+/// they are held to the CRLF rule below, not to the windowed one, which hands
+/// a command only the lines the selection touches.
+final Map<String, _Command> _blockCommands = <String, _Command>{
+  'table': (text, selection) => insertTable(text: text, selection: selection),
+  'block': (text, selection) => insertBlock(
+    text: text,
+    selection: selection,
+    block: const <String>['one', 'two'],
+  ),
+  'footnote': (text, selection) =>
+      insertFootnote(text: text, selection: selection, label: '1'),
 };
 
 /// The commands that read a block around the lines they touch, and so are
@@ -104,6 +121,61 @@ void main() {
             'at $anchor..$extent';
         expect(windowed.buffer.text, whole.buffer.text, reason: reason);
         expect(windowed.selection, whole.selection, reason: reason);
+      }
+    }
+  });
+
+  test('a CRLF note gives the answer its LF twin gives (#1374)', () {
+    final random = Random(20261127);
+    final commands = <String, _Command>{..._commands, ..._blockCommands};
+    for (var round = 0; round < 300; round++) {
+      final lines = [
+        for (var at = 0; at < 2 + random.nextInt(12); at++) _line(random),
+      ];
+      final lf = lines.join('\n');
+      final crlf = lines.join('\r\n');
+      final anchor = random.nextInt(lf.length + 1);
+      final extent = random.nextInt(3) == 0
+          ? anchor
+          : random.nextInt(lf.length + 1);
+      // The same place in the CRLF note: each line break before it is one
+      // character longer.
+      int inCrlf(int offset) =>
+          offset + '\n'.allMatches(lf.substring(0, offset)).length;
+      // A command writes its own line breaks as `\n` and leaves the note's
+      // as they were, so the `\r` to take off are the ones its text holds.
+      int inLf(String text, int offset) =>
+          offset - '\r'.allMatches(text.substring(0, offset)).length;
+      for (final MapEntry(key: name, value: command) in commands.entries) {
+        final answer = command(
+          lf,
+          TextSelection(baseOffset: anchor, extentOffset: extent),
+        );
+        final other = command(
+          crlf,
+          TextSelection(
+            baseOffset: inCrlf(anchor),
+            extentOffset: inCrlf(extent),
+          ),
+        );
+        final reason =
+            'round $round, $name on ${lf.replaceAll('\n', r'\n')} '
+            'at $anchor..$extent';
+        expect(
+          other.text.replaceAll('\r\n', '\n'),
+          answer.text,
+          reason: reason,
+        );
+        expect(
+          inLf(other.text, other.selection.baseOffset),
+          answer.selection.baseOffset,
+          reason: reason,
+        );
+        expect(
+          inLf(other.text, other.selection.extentOffset),
+          answer.selection.extentOffset,
+          reason: reason,
+        );
       }
     }
   });

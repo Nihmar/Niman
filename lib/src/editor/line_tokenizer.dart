@@ -7,12 +7,6 @@ import 'package:niman/src/editor/token_kind.dart';
 /// One line's tokens, given the block state entering it: the per-line half
 /// of the highlighter, which `HighlightDocument` carries the state for.
 abstract final class LineTokenizer {
-  /// The number of `#` opening a heading on [text], or 0: one to six of
-  /// them at offset zero, followed by whitespace or the end of the line.
-  ///
-  /// Block context is the caller's to rule out first. [lineTokens] and
-  /// [headingIn] share this, so the highlight and the outline cannot
-  /// disagree about what counts as a heading.
   /// Where the `#`s of an ATX heading on [text] start and how many there
   /// are, or null: up to three spaces in, as CommonMark and the block
   /// scanner read it (`LineSyntax.headingMarkerOf`).
@@ -32,24 +26,6 @@ abstract final class LineTokenizer {
       return (at, hashes);
     }
     return null;
-  }
-
-  /// The heading on [text] entered in [inState] — where its `#`s start and
-  /// how many — or null.
-  ///
-  /// Mirrors the order of [lineTokens]'s early returns — fence content, a
-  /// fence line, math, frontmatter, a horizontal rule — because a line that
-  /// stops there never reaches the heading branch there either.
-  static (int, int)? headingIn(String text, BlockState inState, int lineIndex) {
-    if (inState.fence != null) return null;
-    if (CodeFence.openedBy(text) != null) return null;
-    final trimmed = text.trim();
-    if (inState.inMath || trimmed.startsWith(r'$$')) return null;
-    if (inState.inFrontmatter || (lineIndex == 0 && trimmed == '---')) {
-      return null;
-    }
-    if (_hr.hasMatch(text)) return null;
-    return _headingHashes(text);
   }
 
   /// The tokens of [text], the line at [lineIndex], entered in [inState].

@@ -50,6 +50,7 @@ final class QuoteContent {
               leftOver: [for (final origin in from) origin.leftOver],
               lazy: [for (final origin in from) origin.lazy],
               appSyntax: appSyntax,
+              isNote: false,
             ).index.blocks,
       buffer: content,
     );

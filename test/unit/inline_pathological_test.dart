@@ -28,6 +28,13 @@ final Map<String, String Function(int n)> _cases = {
   'unclosed links A': (n) => '[a](<b' * n,
   'unclosed links B': (n) => '[a](b' * n,
   'unclosed comments': (n) => '<!--' * n,
+  'unclosed processing instruction': (n) => '<?${'a' * n}',
+  'unclosed processing instructions, spaced': (n) => '<? ' * n,
+  'unclosed processing instructions, with words': (n) => '<? ${'ab ' * n}',
+  'unclosed processing instruction openers': (n) => '<?' * n,
+  'unclosed CDATA': (n) => '<![CDATA[${'a ' * n}',
+  'unclosed CDATA openers': (n) => '<![CDATA[ ' * n,
+  'CDATA closed past a NUL': (n) => '${'<![CDATA[ ' * n}\x00]]>',
   'many links in unclosed brackets': (n) => '${'[' * n}${'[a](b) ' * n}',
   'a run of closing parentheses': (n) => 'http://a.b/${')' * n}',
   // The app's own syntax (docs/records/block-tree.md, phase 4).
@@ -69,6 +76,40 @@ void main() {
       );
     });
   }
+
+  test(
+    'an unclosed processing instruction or CDATA does not freeze a parse',
+    () {
+      // The pattern for them took 45 s on `<![CDATA[` and forty characters.
+      for (final text in [
+        '<![CDATA[${'a' * 60}',
+        '<![CDATA[${'a ' * 30}',
+        'In XML a <![CDATA[ section holds raw text, and no end',
+        'PHP opens with <?php echo \$x; and nothing closes it ${'ab ' * 20}',
+      ]) {
+        final watch = Stopwatch()..start();
+        InlineParser(text).parse();
+        expect(watch.elapsedMilliseconds, lessThan(500), reason: text);
+      }
+    },
+  );
+
+  test('a processing instruction and a CDATA section end at their first '
+      'closer', () {
+    String html(String md) => TreeHtml(md).render();
+    expect(html('a <?php echo 1; ?> b'), '<p>a <?php echo 1; ?> b</p>\n');
+    // The pattern read `??>` as a body of `?` + `?` + `>` and found no end.
+    expect(html('a <?x??> b'), '<p>a <?x??> b</p>\n');
+    expect(
+      html('a <![CDATA[ x ]] y ]]> b'),
+      '<p>a <![CDATA[ x ]] y ]]> b</p>\n',
+    );
+    expect(html('a <?x'), '<p>a &lt;?x</p>\n');
+    expect(html('a <![CDATA[x ]]'), '<p>a &lt;![CDATA[x ]]</p>\n');
+    // A second opener after a first that found no closer.
+    expect(html('x <?a <?b'), '<p>x &lt;?a &lt;?b</p>\n');
+    expect(html('a <?b ?> <?c'), '<p>a <?b ?> &lt;?c</p>\n');
+  });
 
   test('emphasis nested thousands deep is parsed and written', () {
     // Without recursion, in the parser and in the HTML: a recursive walk

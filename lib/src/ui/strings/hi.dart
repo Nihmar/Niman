@@ -717,6 +717,10 @@ final class HindiStrings extends Strings {
   String get noteNotText =>
       'यह फ़ाइल टेक्स्ट नोट नहीं है, इसलिए Niman इसे यहाँ नहीं दिखा सकता।';
   @override
+  String get noteReadAsWindows1252 =>
+      'यह फ़ाइल UTF-8 में नहीं है, इसलिए इसे Windows-1252 के रूप में पढ़ा '
+      'गया। सहेजने पर यह UTF-8 में लिखी जाएगी।';
+  @override
   String get noteLoadFailed => 'यह नोट खोला नहीं जा सका।';
   @override
   String get noteLoadMissing => 'इस नोट की फ़ाइल अब डिस्क पर नहीं है।';

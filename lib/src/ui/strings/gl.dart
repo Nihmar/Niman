@@ -732,6 +732,10 @@ final class GalicianStrings extends Strings {
       'Este ficheiro non é unha nota de texto, así '
       'que Niman non pode amosalo aquí.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Este ficheiro non está en UTF-8, así que se leu como Windows-1252. Ao '
+      'gardalo escribirase en UTF-8.';
+  @override
   String get noteLoadFailed => 'Non se puido abrir esta nota.';
   @override
   String get noteLoadMissing => 'O ficheiro desta nota xa non está no disco.';

@@ -735,6 +735,10 @@ final class SpanishStrings extends Strings {
       'Este archivo no es una nota de texto, así que '
       'Niman no puede mostrarlo aquí.';
   @override
+  String get noteReadAsWindows1252 =>
+      'Este archivo no es UTF-8, así que se ha leído como Windows-1252. Al '
+      'guardarlo se escribirá como UTF-8.';
+  @override
   String get noteLoadFailed => 'No se pudo abrir esta nota.';
   @override
   String get noteLoadMissing =>

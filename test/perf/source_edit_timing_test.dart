@@ -5,11 +5,11 @@
 //
 // * **the incremental edit: 0.507 ms.** That is the number every editor
 // alternative failed to beat (`docs/records/editor-alternatives.md`) — an edit is O(change),
-// not O(document) — and `SourceInput.retokenize` exists to keep it that way: a
-// keystroke hands the tokenizer the lines it changed and nothing else. What is
-//   timed here is the whole path a keystroke takes through the surface's own
-// layers: the buffer's `replaceRange`, the tokenizer's `replaceLines`, and the
-//   height map's rebuild.
+// not O(document) — and the surface's `onTokenizer` hook exists to keep it that
+// way: a keystroke hands the tokenizer the lines it changed and nothing else.
+// What is timed here is the whole path a keystroke takes through the
+// surface's own layers: the buffer's `replaceRange`, the tokenizer's
+// `replaceLines`, and the height map's rebuild.
 // * **the cold tokenize: 23.95 ms** for 200 KB, which is what opening a note
 //   costs before anything is on screen.
 //

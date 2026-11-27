@@ -27,6 +27,7 @@ library;
 
 import 'dart:collection';
 import 'dart:isolate';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/memory_reclaim.dart';
@@ -38,12 +39,14 @@ import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_node.dart';
 import 'package:niman/src/markdown/block_parser.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
-import 'package:niman/src/markdown/line_syntax.dart';
+import 'package:niman/src/markdown/line_tokens.dart';
 import 'package:niman/src/markdown/live_inlines.dart';
 import 'package:niman/src/markdown/note_reference_cache.dart';
 import 'package:niman/src/markdown/note_references.dart';
+import 'package:niman/src/markdown/quote_marks.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/read_parser.dart';
+import 'package:niman/src/markdown/scope_entry.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
@@ -64,7 +67,9 @@ final class SourceStyler implements Reclaimable {
     );
     _definers.addAll(holdings.lines);
     _opensBody.addAll(holdings.running);
-    _scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
+    _readEntries(0, _definers);
+    _definitionLinesRescanned = 0;
+    _scope = DocumentScope.of(buffer, buffer.revision, _entries);
     MemoryReclaim.track(this);
   }
 
@@ -74,9 +79,14 @@ final class SourceStyler implements Reclaimable {
     this._scope,
     List<int> definers,
     List<bool> opensBody,
+    List<ScopeEntry> entries,
   ) {
     _definers.addAll(definers);
     _opensBody.addAll(opensBody);
+    for (final entry in entries) {
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+    }
+    _entries.addAll(entries);
     MemoryReclaim.track(this);
   }
 
@@ -92,31 +102,41 @@ final class SourceStyler implements Reclaimable {
   /// than the whole note's worth of reading.
   static Future<SourceStyler> inBackground(SourceBuffer buffer) async {
     final revision = buffer.revision;
-    final (scanner, scope, definers, opensBody, references) = await Isolate.run(
-      () {
-        final holdings = _holdingsOf(
-          buffer,
-          0,
-          buffer.lineCount,
-          runningBody: false,
-        );
-        final scanner = BlockScanner(buffer);
-        final scope = DocumentScope.ofLines(buffer, revision, holdings.lines);
-        return (
-          scanner,
-          scope,
-          holdings.lines,
-          holdings.running,
-          NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
-        );
-      },
-    );
+    final (
+      scanner,
+      scope,
+      definers,
+      opensBody,
+      entries,
+      references,
+    ) = await Isolate.run(() {
+      final holdings = _holdingsOf(
+        buffer,
+        0,
+        buffer.lineCount,
+        runningBody: false,
+      );
+      final scanner = BlockScanner(buffer);
+      final entries = [
+        for (final line in holdings.lines) DocumentScope.entryAt(buffer, line),
+      ];
+      final scope = DocumentScope.of(buffer, revision, entries);
+      return (
+        scanner,
+        scope,
+        holdings.lines,
+        holdings.running,
+        entries,
+        NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
+      );
+    });
     final styler = SourceStyler._adopt(
       buffer,
       BlockScanner.rebound(scanner, buffer),
       scope.on(buffer, revision),
       definers,
       opensBody,
+      entries,
     ).._revision = revision;
     styler._references.adopt(references);
     // The record of what the edits do to the list starts at the list read.
@@ -216,6 +236,28 @@ final class SourceStyler implements Reclaimable {
   /// to. What the next line's own membership is read from, in O(log n).
   final List<bool> _opensBody = <bool>[];
 
+  /// What each line of [_definers] adds to the note's definitions, read once:
+  /// an edit reads the lines it changed again, and the scope is combined
+  /// from these, not from the lines (#1372).
+  final List<ScopeEntry> _entries = <ScopeEntry>[];
+
+  /// The most lines after its own any entry looked at: how far above an edit
+  /// an entry may be that the edit changes.
+  int _farthestEntry = 0;
+
+  /// Reads the entries of [lines] and puts them at [at] of [_entries] in
+  /// place of [count] of what was there. The reads are counted.
+  void _readEntries(int at, List<int> lines, {int count = 0}) {
+    final fresh = [
+      for (final line in lines) DocumentScope.entryAt(buffer, line),
+    ];
+    _definitionLinesRescanned += fresh.length;
+    for (final entry in fresh) {
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+    }
+    _entries.replaceRange(at, at + count, fresh);
+  }
+
   /// How many definition lines the edits have read again here, for the test
   /// that proves a keystroke in indented code rescans none (#496).
   int get definitionLinesRescanned => _definitionLinesRescanned;
@@ -223,10 +265,11 @@ final class SourceStyler implements Reclaimable {
 
   static const int _parseCacheSize = 4096;
 
-  /// A block past this many characters is not inline-parsed: its lines get
-  /// their structure and nothing more. A block is read whole whenever it
-  /// changes, and a pasted table of this size is one block: a keystroke in
-  /// it would read more than a frame affords.
+  /// A block whose lines take more than this many characters of the note
+  /// is not inline-parsed: its lines get their structure and nothing more.
+  /// A block is read whole whenever it changes, and a pasted table of this
+  /// size is one block: a keystroke in it would read more than a frame
+  /// affords.
   static const int _inlineLimit = 64 * 1024;
 
   /// The note's footnotes, in the order they are cited: the section the
@@ -295,8 +338,7 @@ final class SourceStyler implements Reclaimable {
     _scanner.edited(edit);
     _byStart.clear();
     if (_touchesDefinitions(edit)) {
-      _definitionLinesRescanned += _definers.length;
-      final scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
+      final scope = DocumentScope.of(buffer, buffer.revision, _entries);
       if (!_sameDefinitions(scope, _scope)) {
         _parses.clear();
         if (_references.kept) {
@@ -457,7 +499,7 @@ final class SourceStyler implements Reclaimable {
     final tokens = <InlinePiece>[];
     switch (block.kind) {
       case BlockKind.fencedCode:
-        return _fenceTokens(block, line, text);
+        return LineTokens.fence(block, line, text);
       case BlockKind.indentedCode:
         return <Token>[Token(TokenKind.codeBlock, 0, text.length)];
       case BlockKind.math:
@@ -472,7 +514,7 @@ final class SourceStyler implements Reclaimable {
       case BlockKind.div:
         // A column's fence is coloured as a code fence's; an unknown
         // div's is the text it is.
-        if (block.divRole!.laysOut) return _divTokens(text);
+        if (block.divRole!.laysOut) return LineTokens.div(text);
       case BlockKind.heading:
       case BlockKind.paragraph:
       case BlockKind.listItem:
@@ -485,150 +527,23 @@ final class SourceStyler implements Reclaimable {
       block.quoteDepth,
       BlockParser.itemPrefixLength(block, text),
     );
-    final structural = _structure(block, line, text, prefix, tokens);
     final parsed = _parsedOf(block);
+    // A quote's marks are the tree's; a block too long to parse has no tree,
+    // and its lines are matched as they look.
+    final quoteMarks = block.kind == BlockKind.quote
+        ? parsed?.quoteMarks
+        : null;
+    final structural = quoteMarks != null
+        ? quoteMarks.on(line - block.startLine, text, tokens)
+        : LineTokens.structure(block, line, text, prefix, tokens);
+    if (block.kind == BlockKind.listItem && line == block.startLine) {
+      LineTokens.fenceOpening(text, structural, tokens);
+    }
     if (parsed != null) {
       tokens.addAll(parsed.inlines.piecesOn(line - block.startLine));
     }
-    return _flatten(tokens, structural);
+    return LineTokens.flatten(tokens, structural);
   }
-
-  // ----------------------------------------------------------------- structure
-
-  /// A fenced div's fence line (#729): its colons as a fence's, and its
-  /// attributes as a fence's language.
-  static List<Token> _divTokens(String text) {
-    final start = text.indexOf(':');
-    if (start < 0) return const <Token>[];
-    var end = start;
-    while (end < text.length && text.codeUnitAt(end) == 0x3A) {
-      end++;
-    }
-    final rest = text.substring(end);
-    final attributes = rest.trim().replaceFirst(RegExp(r'[:\s]*$'), '');
-    if (attributes.isEmpty) {
-      return <Token>[Token(TokenKind.codeFence, start, end)];
-    }
-    final at = end + rest.indexOf(attributes);
-    final after = at + attributes.length;
-    final closing = text.trimRight().length;
-    return <Token>[
-      Token(TokenKind.codeFence, start, end),
-      Token(TokenKind.codeLanguage, at, after),
-      if (closing > after) Token(TokenKind.codeFence, after, closing),
-    ];
-  }
-
-  /// A fence's line: all of it code, and the opening line's language.
-  ///
-  /// Disjoint, as every line's tokens are: the language cuts the fence line
-  /// in three rather than lying on top of it.
-  static List<Token> _fenceTokens(Block block, int line, String text) {
-    final whole = <Token>[Token(TokenKind.codeFence, 0, text.length)];
-    if (line != block.startLine) {
-      // The code itself, unless this is the fence that closes the block.
-      final closing =
-          line == block.endLine - 1 && _closesFence(text.trimLeft());
-      return closing
-          ? whole
-          : <Token>[Token(TokenKind.codeBlock, 0, text.length)];
-    }
-    final info = block.fenceInfo;
-    if (info == null) return whole;
-    final at = text.indexOf(info);
-    if (at < 0) return whole;
-    final end = at + info.length;
-    return <Token>[
-      Token(TokenKind.codeFence, 0, at),
-      Token(TokenKind.codeLanguage, at, end),
-      if (end < text.length) Token(TokenKind.codeFence, end, text.length),
-    ];
-  }
-
-  /// Whether [text], a code block's last line trimmed, is its closing fence
-  /// rather than code: a block the note did not close ends on its code.
-  static bool _closesFence(String text) =>
-      text.startsWith('```') || text.startsWith('~~~');
-
-  /// A quote depth no line reaches: how far a line's own quote marks go.
-  static const int _anyDepth = 1 << 16;
-
-  /// The structural marks at the start of [text] — quote marks, a list
-  /// marker and its task box, a heading's hashes — added to [out]; answers
-  /// where they end, before which no inline token is put.
-
-  static int _structure(
-    Block block,
-    int line,
-    String text,
-    int prefix,
-    List<InlinePiece> out,
-  ) {
-    // Every quote mark the line has, not only the block's: a quote that
-    // opens at one level and goes a level deeper — `> a` then `> > b` — is one
-    // block at the first level, and the second `>` is as much syntax as the
-    // first (`live` drew it as text).
-    final own = BlockParser.quotePrefixLength(text, _anyDepth);
-    final marks = own > prefix ? own : prefix;
-    for (var at = 0; at < marks; at++) {
-      if (text.codeUnitAt(at) == 0x3E) {
-        out.add(InlinePiece(TokenKind.blockquote, at, at + 1, _structural));
-      }
-    }
-    var from = marks;
-    final rest = marks == 0 ? text : text.substring(marks);
-    final opensItem =
-        (block.kind == BlockKind.listItem && line == block.startLine) ||
-        block.kind == BlockKind.quote;
-    final marker = opensItem ? LineSyntax.listMarkerOf(rest) : null;
-    if (marker != null) {
-      final (start, width, content) = marker;
-      out.add(
-        InlinePiece(
-          TokenKind.listMarker,
-          prefix + start,
-          prefix + start + width,
-          _structural,
-        ),
-      );
-      from = prefix + content;
-      if (from + 3 <= text.length &&
-          text.codeUnitAt(from) == 0x5B &&
-          _isBoxMark(text.codeUnitAt(from + 1)) &&
-          text.codeUnitAt(from + 2) == 0x5D &&
-          (from + 3 == text.length || _isSpace(text.codeUnitAt(from + 3)))) {
-        out.add(InlinePiece(TokenKind.taskBox, from, from + 3, _structural));
-        from += 3;
-      }
-    }
-    // A heading block is one the scanner decided; a quote's inside is not,
-    // and a `#` four spaces into it is code, not a heading.
-    final heading = LineSyntax.headingMarkerOf(
-      from == 0 ? text : text.substring(from),
-      block.kind == BlockKind.quote ? 3 : null,
-    );
-    if (heading != null &&
-        (block.kind == BlockKind.heading || block.kind == BlockKind.quote)) {
-      // The `#`s where they stand: a heading may be indented, in an item or
-      // up to three spaces from the margin, and the spaces are not marker.
-      final (start, hashes) = heading;
-      out.add(
-        InlinePiece(
-          TokenKind.headingMarker,
-          from + start,
-          from + start + hashes,
-          _structural,
-        ),
-      );
-      from += start + hashes;
-    }
-    return from;
-  }
-
-  static bool _isBoxMark(int char) =>
-      char == 0x20 || char == 0x78 || char == 0x58;
-
-  static bool _isSpace(int char) => char == 0x20 || char == 0x09;
 
   // -------------------------------------------------------------------- inline
 
@@ -647,10 +562,20 @@ final class SourceStyler implements Reclaimable {
         cached.block.sameShape(block)) {
       return cached;
     }
+    // Too long by the size of its lines in the note — two lookups — and not
+    // by its text joined, which is the cost a limit is there to avoid: a
+    // block that is over it was joined on every call, for none of them to
+    // keep (#1326).
+    if (buffer.offsetOfLine(block.endLine) -
+            buffer.offsetOfLine(block.startLine) >
+        _inlineLimit) {
+      return null;
+    }
     _blockTextReads++;
-    final raw = BlockParser.blockText(block, buffer);
-    if (raw.length > _inlineLimit) return null;
-    // The items' indents too: what the reading makes of a block in a list
+    final raw = BlockParser.blockText(
+      block,
+      buffer,
+    ); // The items' indents too: what the reading makes of a block in a list
     // depends on them (`BlockParser.linePrefix`); and whether a table goes
     // on with one above, whose head it then has none of.
     final key =
@@ -668,98 +593,6 @@ final class SourceStyler implements Reclaimable {
     if (_parses.length > _parseCacheSize) _parses.remove(_parses.keys.first);
     _byStart[block.startLine] = parsed;
     return parsed;
-  }
-
-  // ------------------------------------------------------------------- flatten
-
-  /// The depth a structural mark wins at: nothing inline overlaps one.
-  static const int _structural = 1 << 20;
-
-  /// [pieces], which may nest, as disjoint tokens: each stretch of the line
-  /// takes the deepest piece over it. Inline pieces before [structural] are
-  /// dropped — the parse sees no marks there.
-  static List<Token> _flatten(List<InlinePiece> pieces, int structural) {
-    if (pieces.isEmpty) return const <Token>[];
-    final cuts = <int>{};
-    for (final piece in pieces) {
-      cuts
-        ..add(piece.start)
-        ..add(piece.end);
-    }
-    final points = cuts.toList()..sort();
-    final tokens = <Token>[];
-    for (var at = 0; at + 1 < points.length; at++) {
-      final from = points[at];
-      final to = points[at + 1];
-      InlinePiece? best;
-      for (final piece in pieces) {
-        if (piece.start > from || piece.end < to) continue;
-        if (piece.depth < _structural && from < structural) continue;
-        if (best == null || piece.depth >= best.depth) best = piece;
-      }
-      if (best == null) continue;
-      final outer = best.depth < _structural
-          ? _outerOf(pieces, best, from, to)
-          : const <TokenKind>[];
-      final last = tokens.isEmpty ? null : tokens.last;
-      if (last != null &&
-          last.end == from &&
-          last.kind == best.kind &&
-          last.marker == best.marker &&
-          _sameKinds(last.outer, outer) &&
-          best.depth < _structural) {
-        tokens[tokens.length - 1] = Token(
-          last.kind,
-          last.start,
-          to,
-          marker: last.marker,
-          outer: last.outer,
-        );
-      } else {
-        tokens.add(
-          Token(best.kind, from, to, marker: best.marker, outer: outer),
-        );
-      }
-    }
-    return tokens;
-  }
-
-  /// The inline constructs around [inner] over `[from, to)`, outermost
-  /// first: the text of the pieces shallower than it that cover the stretch,
-  /// each kind once. A construct's markers are its own syntax and style
-  /// nothing inside it, so a marker piece is none of them.
-  static List<TokenKind> _outerOf(
-    List<InlinePiece> pieces,
-    InlinePiece inner,
-    int from,
-    int to,
-  ) {
-    final around = <InlinePiece>[
-      for (final piece in pieces)
-        if (!identical(piece, inner) &&
-            !piece.marker &&
-            piece.depth < inner.depth &&
-            piece.start <= from &&
-            piece.end >= to)
-          piece,
-    ];
-    if (around.isEmpty) return const <TokenKind>[];
-    around.sort((a, b) => a.depth.compareTo(b.depth));
-    final kinds = <TokenKind>[];
-    for (final piece in around) {
-      if (piece.kind != inner.kind && !kinds.contains(piece.kind)) {
-        kinds.add(piece.kind);
-      }
-    }
-    return kinds.isEmpty ? const <TokenKind>[] : List.unmodifiable(kinds);
-  }
-
-  static bool _sameKinds(List<TokenKind> a, List<TokenKind> b) {
-    if (a.length != b.length) return false;
-    for (var at = 0; at < a.length; at++) {
-      if (a[at] != b[at]) return false;
-    }
-    return true;
   }
 
   // --------------------------------------------------------------- definitions
@@ -863,7 +696,24 @@ final class SourceStyler implements Reclaimable {
     }
     _definers.replaceRange(low, keepFrom, holdings.lines);
     _opensBody.replaceRange(low, keepFrom, holdings.running);
-    return touched;
+    _readEntries(low, holdings.lines, count: keepFrom - low);
+    // The lines above the edit that read the ones it changed — a definition's
+    // destination and title, a footnote's body — read again too.
+    var above = false;
+    for (
+      var at = _lowerBound(_definers, first - _farthestEntry);
+      at < low;
+      at++
+    ) {
+      if (_definers[at] + _entries[at].span < first) continue;
+      final entry = DocumentScope.entryAt(buffer, _definers[at]);
+      _definitionLinesRescanned++;
+      if (entry.sameAs(_entries[at])) continue;
+      _entries[at] = entry;
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+      above = true;
+    }
+    return touched || above;
   }
 
   static bool _sameDefinitions(DocumentScope a, DocumentScope b) {
@@ -900,4 +750,10 @@ final class _Parsed {
   final Block block;
   final ReadBlock read;
   final LiveInlines inlines;
+
+  /// The marks of the lines, when the block is a quote.
+  late final QuoteMarks quoteMarks = QuoteMarks.of(
+    read.node,
+    read.block.startLine,
+  );
 }

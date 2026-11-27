@@ -5,6 +5,7 @@ library;
 
 import 'package:niman/src/markdown/inline/html5_entities.dart';
 import 'package:niman/src/markdown/inline/inline_chars.dart';
+import 'package:niman/src/markdown/inline/raw_html_memo.dart';
 
 /// Where a construct read at a position ends, and what it says.
 abstract final class InlineScanners {
@@ -40,8 +41,26 @@ abstract final class InlineScanners {
 
   /// Where the raw HTML at [at] (`<`) ends, or null: an open or closing
   /// tag, a comment, a processing instruction, a declaration or a CDATA
-  /// section.
-  static int? rawHtml(String text, int at) {
+  /// section. [memo] remembers, across the calls on one text, where the
+  /// closers of the last two are.
+  ///
+  /// Their closer is looked for with `indexOf`, not a pattern: a pattern
+  /// for "anything but the closer" is tried in every partition of the text
+  /// when none follows. A NUL in between ends the attempt.
+  static int? rawHtml(String text, int at, [RawHtmlMemo? memo]) {
+    if (at + 1 < text.length) {
+      final next = text.codeUnitAt(at + 1);
+      final pi = next == 0x3F;
+      if (pi || (next == 0x21 && text.startsWith('<![CDATA[', at))) {
+        memo ??= RawHtmlMemo(text);
+        final open = at + (pi ? 2 : 9);
+        final close = pi ? memo.piCloseFrom(open) : memo.cdataCloseFrom(open);
+        if (close < 0) return null;
+        final nul = memo.nulFrom(open);
+        if (nul >= 0 && nul < close) return null;
+        return close + (pi ? 2 : 3);
+      }
+    }
     for (final pattern in _html) {
       final match = pattern.matchAsPrefix(text, at);
       if (match != null) return match.end;
@@ -226,8 +245,6 @@ abstract final class InlineScanners {
     RegExp('<[A-Za-z][A-Za-z0-9-]*(?:$_attribute)*$_space*/?>'),
     RegExp('</[A-Za-z][A-Za-z0-9-]*$_space*>'),
     RegExp(r'<!---->|<!--(?:-?[^\x00>-])(?:-?[^\x00-])*-->'),
-    RegExp(r'<\?(?:[^?>\x00]+|\?[^>\x00]|>)*\?>'),
     RegExp('<![A-Z]+$_space+[^>\\x00]*>'),
-    RegExp(r'<!\[CDATA\[(?:[^\]\x00]+|\][^\]\x00]|\]\][^>\x00])*\]\]>'),
   ];
 }

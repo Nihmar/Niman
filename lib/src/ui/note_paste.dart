@@ -63,6 +63,10 @@ final class NotePaste {
 
   /// Takes the clipboard when it holds files, attached (#1249), or a
   /// table: true when it did.
+  ///
+  /// Text that is not a table is pasted here too, from the text just read: a
+  /// clipboard of 40 MB is read once, not by this and again by the editor
+  /// that asked (#1356).
   Future<bool> paste() async {
     if (!canInsert()) return false;
     final files = await clipboardFiles();
@@ -72,7 +76,8 @@ final class NotePaste {
     if (text == null || text.isEmpty) return false;
     final table = tableFromClipboard(text);
     final around = surroundings();
-    if (table == null || around == null) return false;
+    if (around == null) return false;
+    if (table == null) return pasteText(text) != null;
     final block = padBlock(
       table.toLines().join('\n'),
       before: around.before,

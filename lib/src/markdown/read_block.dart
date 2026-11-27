@@ -170,6 +170,36 @@ final class ReadBlock {
   /// ([QuoteNode.title]); null otherwise.
   ReadInline? titleOf(QuoteNode quote) => _titles[quote];
 
+  /// Calls [visit] with each piece of inline text the block has, in order: a
+  /// callout's title, a leaf's text, a table's cells.
+  void forEachInline(void Function(ReadInline inline) visit) {
+    void walk(BlockNode node) {
+      switch (node) {
+        case QuoteNode(:final children):
+          final title = titleOf(node);
+          if (title != null) visit(title);
+          children.forEach(walk);
+        case ItemNode(:final children) || FootnoteNode(:final children):
+          children.forEach(walk);
+        case ListNode(:final items):
+          items.forEach(walk);
+        case ColumnsNode(:final columns):
+          columns.forEach(walk);
+        case ColumnNode(:final children):
+          children.forEach(walk);
+        case LeafNode():
+          final read = leaf(node);
+          final inline = read.inline;
+          if (inline != null) visit(inline);
+          for (final row in read.rows) {
+            row.forEach(visit);
+          }
+      }
+    }
+
+    walk(node);
+  }
+
   /// What a reader sees of the block as one line of plain text, for a
   /// passage quoted out of it (#284): its leaves' text, joined by a space.
   String get plainText {

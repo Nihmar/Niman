@@ -45,6 +45,10 @@ bool _fsFoldsCase() {
   }
 }
 
+/// A modification time far enough back for a stamp of it not to be
+/// ambiguous (#1365).
+DateTime _longAgo() => DateTime.now().subtract(const Duration(hours: 1));
+
 void main() {
   late Directory tempDir;
   // Decided before the tests are declared, because `skip:` is read then. On a
@@ -635,8 +639,11 @@ void main() {
 
   group('DiskStamp', () {
     test('matches the file it stamped, and not a changed one', () async {
+      // Written a while ago: a stamp of a file written just now is ambiguous
+      // (#1365) and only its bytes can vouch for it.
       final file = File(p.join(tempDir.path, 'stamp.md'))
-        ..writeAsStringSync('one two three');
+        ..writeAsStringSync('one two three')
+        ..setLastModifiedSync(_longAgo());
       final stamp = DiskStamp.of(file.path);
       expect(stamp, isNotNull);
       expect(stamp!.matches(file.path), isTrue);
@@ -648,6 +655,7 @@ void main() {
       // A different time, the same size: what a one-letter swap looks like.
       // The filesystem's stamp has to move, so write, take the stamp, wait,
       // and write again with the same length.
+      file.setLastModifiedSync(_longAgo());
       final kept = DiskStamp.of(file.path)!;
       await Future<void>.delayed(const Duration(milliseconds: 20));
       file.writeAsStringSync('one two three five');
@@ -665,7 +673,8 @@ void main() {
 
     test('asked without blocking, it answers the same (#1060)', () async {
       final file = File(p.join(tempDir.path, 'async.md'))
-        ..writeAsStringSync('one two three');
+        ..writeAsStringSync('one two three')
+        ..setLastModifiedSync(_longAgo());
       final stamp = DiskStamp.of(file.path)!;
       expect(stamp.sameAs(await DiskStamp.ofAsync(file.path)), isTrue);
       expect(await stamp.matchesAsync(file.path), isTrue);

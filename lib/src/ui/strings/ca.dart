@@ -737,6 +737,10 @@ final class CatalanStrings extends Strings {
       'Aquest fitxer no és una nota de text, així '
       'que Niman no el pot mostrar aquí.';
   @override
+  String get noteReadAsWindows1252 =>
+      "Aquest fitxer no és UTF-8, així que s'ha llegit com a Windows-1252. "
+      "En desar-lo s'escriurà en UTF-8.";
+  @override
   String get noteLoadFailed => 'No s’ha pogut obrir aquesta nota.';
   @override
   String get noteLoadMissing => 'El fitxer d’aquesta nota ja no és al disc.';

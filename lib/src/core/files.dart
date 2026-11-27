@@ -113,15 +113,27 @@ void pinWorkingDirectory(Directory directory) {
 /// storage, then renamed. A rename within one filesystem is atomic on
 /// Android and Linux, so readers never observe a partial write.
 ///
+/// A file that is a symbolic link is written through it (#1368): the temp
+/// file is made beside the file the link points to, and that file is the one
+/// replaced, so the link stays a link and its target holds the text
+/// ([writeTargetOf]). A file with other hard links is another matter: the
+/// rename gives the path a new file, so the other names keep the old bytes —
+/// a hard-linked note becomes a separate copy, which `docs/user/editing.md`
+/// says.
+///
 /// Answers the stamp of the file that took [file]'s place, when one can be
 /// taken ([publishTempFile]); a caller that stores it (a save's
 /// `lastWritten`) gets the fresh attributes rather than the renamed-over
 /// path's.
 Future<DiskStamp?> writeFileAtomically(File file, List<int> data) async {
-  final tmp = atomicTempPath(file, DateTime.now().microsecondsSinceEpoch);
+  final target = await writeTargetOf(file.path);
+  final tmp = atomicTempPath(
+    File(target),
+    DateTime.now().microsecondsSinceEpoch,
+  );
   try {
     await tmp.writeAsBytes(data);
-    return await publishTempFile(tmp, file.path);
+    return await publishTempFile(tmp, target);
   } catch (_) {
     if (await tmp.exists()) {
       await tmp.delete();
@@ -153,20 +165,91 @@ Future<DiskStamp?> writeFileAtomically(File file, List<int> data) async {
 /// by this process, so its attributes are fresh, and the rename does not
 /// change the modification time it reports.
 Future<DiskStamp?> publishTempFile(File temp, String target) async {
-  // Opened for appending, which writes nothing: the flush covers the file's
-  // data whichever handle wrote it (fsync on Linux and Android,
-  // FlushFileBuffers on Windows).
-  final handle = await temp.open(mode: FileMode.append);
-  try {
-    await handle.flush();
-  } finally {
-    await handle.close();
+  // A link is written through (#1368): the file it points to is replaced,
+  // from a temp file in the folder that file is in.
+  final real = await writeTargetOf(target);
+  var staged = temp;
+  if (real != target && _directoryOf(real) != _directoryOf(temp.path)) {
+    staged = atomicTempPath(File(real), DateTime.now().microsecondsSinceEpoch);
+    try {
+      // The temp is beside the link, the target elsewhere: where that is the
+      // same file system the rename is all it takes, and where it is not the
+      // bytes are copied and the original dropped.
+      try {
+        await temp.rename(staged.path);
+      } on FileSystemException {
+        await temp.copy(staged.path);
+        await temp.delete();
+      }
+    } on Object {
+      if (await staged.exists()) await staged.delete();
+      rethrow;
+    }
   }
-  keepCreationTime(target: target, replacement: temp.path);
-  final stamp = await DiskStamp.ofAsync(temp.path);
-  await temp.rename(target);
-  return stamp;
+  try {
+    // Opened for appending, which writes nothing: the flush covers the
+    // file's data whichever handle wrote it (fsync on Linux and Android,
+    // FlushFileBuffers on Windows).
+    final handle = await staged.open(mode: FileMode.append);
+    try {
+      await handle.flush();
+    } finally {
+      await handle.close();
+    }
+    keepCreationTime(target: real, replacement: staged.path);
+    final stamp = await DiskStamp.ofAsync(staged.path);
+    await staged.rename(real);
+    return stamp;
+  } catch (_) {
+    // The caller deletes [temp]; the copy beside the link's target is ours.
+    if (!identical(staged, temp) && await staged.exists()) {
+      await staged.delete();
+    }
+    rethrow;
+  }
 }
+
+/// The path a write to [path] replaces: [path] itself, or — when it is a
+/// symbolic link — the file the link points to, however many links lead
+/// there (#1368). Renaming a temp file over a link would replace the link
+/// with a regular file and leave its target as it was.
+///
+/// A link whose target does not exist yet answers that target: the write
+/// creates it. Cut by hand, as [atomicTempPath] is, for the same reason: it
+/// runs in the write isolates, where `package:path` would ask for the working
+/// directory. A chain of links that never ends is written as the path itself.
+Future<String> writeTargetOf(String path) async {
+  var current = path;
+  // Far more than any real chain; a loop ends here.
+  for (var hop = 0; hop < 40; hop++) {
+    try {
+      final type = await FileSystemEntity.type(current, followLinks: false);
+      if (type != FileSystemEntityType.link) return current;
+      final pointed = await Link(current).target();
+      current = _isAbsolutePath(pointed)
+          ? pointed
+          : '${_directoryOf(current)}$pointed';
+    } on FileSystemException {
+      return current;
+    }
+  }
+  return path;
+}
+
+/// [path] up to and including its last separator; empty when it has none.
+String _directoryOf(String path) {
+  final slash = path.lastIndexOf('/');
+  final backslash = path.lastIndexOf(r'\');
+  final cut = slash > backslash ? slash : backslash;
+  return cut < 0 ? '' : path.substring(0, cut + 1);
+}
+
+/// Whether [path] is absolute on the platform it is read on: a root, a drive
+/// or a share.
+bool _isAbsolutePath(String path) =>
+    path.startsWith('/') ||
+    path.startsWith(r'\') ||
+    (path.length >= 2 && path.codeUnitAt(1) == 0x3A);
 
 /// Whether [name] (a base name) is the temp file of a write: the atomic
 /// write's ([atomicTempPath]) or the sync download's

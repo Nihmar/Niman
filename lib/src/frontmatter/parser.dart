@@ -19,7 +19,7 @@
 library;
 
 import 'package:meta/meta.dart';
-import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:yaml/yaml.dart';
 
 /// One note's parsed frontmatter block.
@@ -90,7 +90,7 @@ final class Frontmatter {
 ///
 /// The block must start at the very first line with `---` (trimmed) and
 /// close with a line that is `---` or `...` (trimmed) — the same rule the
-/// editor tokenizer applies ([TokenKind.frontmatter]), so the editor, the
+/// block scanner applies (`LineSyntax.frontmatterEnd`), so the editor, the
 /// preview and the indexer agree on what is frontmatter. An unclosed
 /// block is not frontmatter at all: it is a horizontal rule and the text
 /// under it.
@@ -113,29 +113,30 @@ Frontmatter? parseFrontmatter(String text) {
 /// first few is a cost per keystroke that grows with the note. The scan
 /// reads only as far as the closing fence.
 ({String text, int startLine, int endLine})? frontmatterBlock(String text) {
-  var lineStart = 0;
-  var line = 0;
-  while (lineStart <= text.length) {
-    final newline = text.indexOf('\n', lineStart);
-    final lineEnd = newline < 0 ? text.length : newline;
-    final trimmed = text.substring(lineStart, lineEnd).trim();
-    if (line == 0) {
-      // Only a leading `---` opens a block; anything else is body.
-      if (trimmed != '---') return null;
-    } else if (trimmed == '---' || trimmed == '...') {
-      // The block's YAML is everything between the fences.
-      return (
-        text: text.substring(text.indexOf('\n') + 1, lineStart).trimRight(),
-        startLine: 0,
-        endLine: line,
-      );
+  // The lines are cut as the decision asks for them: as far as the closer,
+  // and no further.
+  final starts = <int>[0];
+  String? lineAt(int line) {
+    while (starts.length <= line && starts.last >= 0) {
+      final newline = text.indexOf('\n', starts.last);
+      starts.add(newline < 0 ? -1 : newline + 1);
+      if (newline < 0) break;
     }
-    if (newline < 0) break;
-    lineStart = newline + 1;
-    line++;
+    if (line >= starts.length || starts[line] < 0) return null;
+    final from = starts[line];
+    final newline = text.indexOf('\n', from);
+    return text.substring(from, newline < 0 ? text.length : newline);
   }
-  // The block never closed: not frontmatter, just a rule and some text.
-  return null;
+
+  // An unclosed block is not frontmatter, just a rule and some text.
+  final end = LineSyntax.frontmatterEnd(lineAt);
+  if (end < 0) return null;
+  // The block's YAML is everything between the fences.
+  return (
+    text: text.substring(starts[1], starts[end]).trimRight(),
+    startLine: 0,
+    endLine: end,
+  );
 }
 
 /// Parses the YAML [source] of a frontmatter block (without the `---`
@@ -280,31 +281,6 @@ String normalizeTag(String raw) {
   var t = raw.trim();
   if (t.startsWith('#')) t = t.substring(1);
   return t.toLowerCase();
-}
-
-/// The inline `#tags` of [text] (normalized, deduplicated, in order).
-///
-/// Scans the shared tokenizer's tag tokens, so tags inside code fences,
-/// math blocks, inline code and the frontmatter itself are never tags —
-/// exactly what the editor paints as tags.
-List<String> inlineTags(String text) {
-  return inlineTagsOf(HighlightDocument.fromText(text));
-}
-
-/// The inline tags of an already-tokenized [doc].
-///
-/// Same rules as [inlineTags]; indexer callers that tokenize anyway (links
-/// + tags from one pass) pass their document in.
-List<String> inlineTagsOf(HighlightDocument doc) {
-  final out = <String>[];
-  for (final line in doc.lines) {
-    for (final token in line.tokens) {
-      if (token.kind == TokenKind.tag) {
-        out.add(normalizeTag(line.text.substring(token.start, token.end)));
-      }
-    }
-  }
-  return _dedupe(out);
 }
 
 /// Writes [value] into [out] under [prefix]-scoped keys.

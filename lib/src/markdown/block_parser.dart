@@ -17,6 +17,7 @@ import 'package:niman/src/markdown/inline/link_references.dart';
 import 'package:niman/src/markdown/line_state.dart';
 import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:niman/src/markdown/link_definition_syntax.dart';
+import 'package:niman/src/markdown/scope_entry.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
 /// The prefixes a block's lines carry in the note.
@@ -305,30 +306,39 @@ final class DocumentScope {
   ///
   /// What a reader that keeps track of those lines rescans after an edit,
   /// instead of the note.
-  factory ofLines(SourceBuffer source, int revision, Iterable<int> lines) {
+  factory ofLines(SourceBuffer source, int revision, Iterable<int> lines) =>
+      DocumentScope.of(
+        source,
+        revision,
+        lines.map((at) => entryAt(source, at)),
+      );
+
+  /// The definitions of the note whose lines made [entries], in order: the
+  /// same answer as [DocumentScope.scan] when they are the entries of every
+  /// line a scope is read from.
+  factory of(SourceBuffer source, int revision, Iterable<ScopeEntry> entries) {
     final references = <String, LinkReference>{};
     final counts = <String, int>{};
     final bodies = <String, String>{};
     final labels = <String>[];
     final cited = <String>{};
-    for (final at in lines) {
-      final line = source.lineAt(at);
-      if (line.contains('[^')) {
-        for (final match in _footnoteReference.allMatches(line)) {
-          final label = match.group(1)!;
-          if (cited.add(label)) labels.add(label);
-        }
+    final keys = <String>{};
+    for (final entry in entries) {
+      for (final label in entry.cited) {
+        if (cited.add(label)) labels.add(label);
       }
-      if (!_opensWithBracket(line)) continue;
-      final footnote = _footnoteDefinition.firstMatch(line);
-      if (footnote != null) {
-        final label = footnote.group(1)!;
+      final label = entry.footnote;
+      if (label != null) {
         counts[label] = (counts[label] ?? 0) + 1;
-        final body = _footnoteBody(source, at, footnote.group(2) ?? '');
-        if (body.isNotEmpty) bodies.putIfAbsent(label, () => body);
+        keys.add(entry.footnoteKey!);
+        if (entry.body.isNotEmpty) bodies.putIfAbsent(label, () => entry.body);
         continue;
       }
-      _readDefinition(source, at, references);
+      final defined = entry.references;
+      if (defined == null) continue;
+      for (final MapEntry(:key, :value) in defined.entries) {
+        references[key] ??= value;
+      }
     }
     // The section a note ends with, in the order the references are cited —
     // which is the order `cmark-gfm` numbers them in, and the order a reader
@@ -340,9 +350,7 @@ final class DocumentScope {
     }
     return DocumentScope(
       references: references,
-      footnoteKeys: {
-        for (final label in counts.keys) LinkReferences.normalize(label),
-      },
+      footnoteKeys: keys,
       footnoteCounts: counts,
       footnoteLabels: labels,
       footnotes: notes,
@@ -351,6 +359,41 @@ final class DocumentScope {
     );
   }
 
+  /// What line [at] of [source] adds to a note's definitions.
+  static ScopeEntry entryAt(SourceBuffer source, int at) {
+    final line = source.lineAt(at);
+    var cited = const <String>[];
+    if (line.contains('[^')) {
+      cited = [
+        for (final match in _footnoteReference.allMatches(line))
+          match.group(1)!,
+      ];
+    }
+    if (!_opensWithBracket(line)) {
+      return cited.isEmpty ? _plain : ScopeEntry(cited: cited);
+    }
+    final footnote = _footnoteDefinition.firstMatch(line);
+    if (footnote != null) {
+      final (body, span) = _footnoteBody(source, at, footnote.group(2) ?? '');
+      return ScopeEntry(
+        cited: cited,
+        footnote: footnote.group(1),
+        footnoteKey: LinkReferences.normalize(footnote.group(1)!),
+        body: body,
+        span: span,
+      );
+    }
+    final references = <String, LinkReference>{};
+    final span = _readDefinition(source, at, references);
+    return ScopeEntry(
+      cited: cited,
+      references: references.isEmpty ? null : references,
+      span: span,
+    );
+  }
+
+  static const ScopeEntry _plain = ScopeEntry();
+
   /// The definitions a paragraph opening on line [at] of [source] starts
   /// with, read as `cmark` reads them into [into]: a destination or a
   /// title on the lines after the label's, escapes and entities resolved.
@@ -358,7 +401,9 @@ final class DocumentScope {
   /// Read off the lines, not the blocks: a line in a fence that reads as a
   /// definition is taken for one, as it was by the single-line pattern this
   /// stands beside.
-  static void _readDefinition(
+  ///
+  /// Answers how many lines after [at] it looked at.
+  static int _readDefinition(
     SourceBuffer source,
     int at,
     Map<String, LinkReference> into,
@@ -369,7 +414,8 @@ final class DocumentScope {
       final line = source.lineAt(next++);
       return line.trim().isEmpty ? null : line;
     });
-    if (count == 0) return;
+    final looked = next - at - 1;
+    if (count == 0) return looked;
     LinkReferences.parseInto(
       [
         for (var line = at; line < at + count; line++)
@@ -377,6 +423,7 @@ final class DocumentScope {
       ].join('\n'),
       into,
     );
+    return looked;
   }
 
   /// Whether [line] can be part of what a scope is made of on its own: it
@@ -417,14 +464,23 @@ final class DocumentScope {
   /// continuation the package's footnote reads (`FootnoteDefSyntax`), whose
   /// text runs as long as its indent. Read whole, so a multi-line footnote
   /// exists in the read view and in `live`, not only in the file (#361).
-  static String _footnoteBody(SourceBuffer source, int line, String own) {
+  ///
+  /// With how many lines after [line] it looked at: its continuation, and
+  /// the line that was none.
+  static (String, int) _footnoteBody(
+    SourceBuffer source,
+    int line,
+    String own,
+  ) {
     final parts = <String>[own.trim()];
-    for (var at = line + 1; at < source.lineCount; at++) {
+    var at = line + 1;
+    for (; at < source.lineCount; at++) {
       final text = source.lineAt(at);
       if (!continuesFootnote(text)) break;
       parts.add(text.trim());
     }
-    return parts.join('\n').trim();
+    final looked = at < source.lineCount ? at - line : at - line - 1;
+    return (parts.join('\n').trim(), looked);
   }
 
   /// A footnote definition's opening line: its label, and the text that line
