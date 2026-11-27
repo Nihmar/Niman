@@ -249,7 +249,7 @@ final class MarkdownSurfaceController {
     final lastIndex = tail - 1;
     final lastLine = buffer.lineAt(lastIndex);
     final terminator = lastIndex == last ? '' : buffer.terminatorAt(lastIndex);
-    var suffix = _commonTail(
+    var shared = _commonTail(
       lastLine,
       terminator,
       text,
@@ -260,9 +260,12 @@ final class MarkdownSurfaceController {
     );
     // A pair of surrogates is one character: the cut does not split it.
     if (prefix > 0 && _isHigh(firstLine.codeUnitAt(prefix - 1))) prefix--;
-    if (suffix > 0 && _isLow(lastLine.codeUnitAt(lastLine.length - suffix))) {
-      suffix--;
+    if (shared > 0 && _isLow(lastLine.codeUnitAt(lastLine.length - shared))) {
+      shared--;
     }
+    // What the tail shares, with the terminator that ends the line when both
+    // sides have it: the range ends where the sharing begins.
+    final suffix = shared < 0 ? 0 : shared + terminator.length;
     return (
       at: at + prefix,
       to: to - suffix,
@@ -283,8 +286,8 @@ final class MarkdownSurfaceController {
 
   /// How many code units the end of [line] (followed by [terminator]) and the
   /// end of [text] at [textEnd] share, counted back no further than [floor]
-  /// in the text nor [room] units into the line; none when the terminator is
-  /// not shared.
+  /// in the text nor [room] units into the line; -1 when the terminator is not
+  /// shared.
   static int _commonTail(
     String line,
     String terminator,
@@ -294,7 +297,7 @@ final class MarkdownSurfaceController {
     int room,
   ) {
     final lineEnd = textEnd - terminator.length;
-    if (lineEnd < floor || !_sameAt(text, lineEnd, terminator)) return 0;
+    if (lineEnd < floor || !_sameAt(text, lineEnd, terminator)) return -1;
     var n = 0;
     final most = math.min(room, lineEnd - floor);
     while (n < most &&

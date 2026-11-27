@@ -332,6 +332,29 @@ void main() {
         }
       }
     });
+
+    test('a change inside a line of a CRLF note keeps its terminators', () {
+      final random = math.Random(1359);
+      const pieces = ['a', 'b', ' ', '\u{1F600}', 'é', 'xx', '**'];
+      String line() => [
+        for (var j = random.nextInt(7); j > 0; j--)
+          pieces[random.nextInt(pieces.length)],
+      ].join();
+      for (var round = 0; round < 300; round++) {
+        final lines = [for (var i = 0; i < 2 + random.nextInt(5); i++) line()];
+        final changed = [...lines];
+        changed[random.nextInt(lines.length)] = line();
+        final before = lines.join('\r\n');
+        final after = changed.join('\r\n');
+        final surface = MarkdownSurfaceController(SourceBuffer.fromText(before))
+          ..applyEdit(after, const TextSelection.collapsed(offset: 0));
+        expect(surface.buffer.text, after, reason: '"$before" -> "$after"');
+        if (after != before) {
+          surface.undo();
+          expect(surface.buffer.text, before);
+        }
+      }
+    });
   });
 
   group('a paste and a cut are steps of their own (#1339)', () {
@@ -549,6 +572,32 @@ void main() {
       expect(history.redo(buffer), isNull);
       expect(buffer.text, 'zzz', reason: 'nothing written over it');
       expect(history.canRedo, isFalse);
+    });
+
+    test('the touch toolbar offers Undo and Redo only when they can run', () {
+      final editor = _editor('abc', at: const SelectionModel.at(3));
+      List<String?> labels() => [
+        for (final item in editor.controls.menu.clipboardItems(
+          () {},
+          touch: true,
+        ))
+          item.label,
+      ];
+      expect(labels(), isNot(contains('Undo')));
+      editor.replaceRange(3, 3, 'd');
+      expect(labels(), contains('Undo'));
+      expect(labels(), isNot(contains('Redo')));
+      editor.controls.menu
+          .clipboardItems(() {}, touch: true)
+          .firstWhere((item) => item.label == 'Undo')
+          .onPressed!();
+      expect(editor.buffer.text, 'abc');
+      expect(labels(), contains('Redo'));
+      // The desktop's menu has keys for it.
+      expect(
+        editor.controls.menu.clipboardItems(() {}).map((item) => item.label),
+        everyElement(isNull),
+      );
     });
 
     test('a caret the platform moved away ends the typing step', () {
