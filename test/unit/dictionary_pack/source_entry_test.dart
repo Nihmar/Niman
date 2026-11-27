@@ -281,27 +281,34 @@ void main() {
   });
 
   group('Serbo-Croatian scripts', () {
-    test('Cyrillic to Latin', () {
-      expect(otherScript('кућа'), 'kuća');
-      expect(otherScript('љубав'), 'ljubav');
-      expect(otherScript('Љубав'), 'Ljubav');
-      expect(otherScript('ЉУБАВ'), 'LJUBAV');
-      expect(otherScript('џеп'), 'džep');
-      expect(otherScript('Њујорк'), 'Njujork');
+    test('a Cyrillic word has its exact Latin spelling', () {
+      expect(latinSpelling('кућа'), 'kuća');
+      expect(latinSpelling('вода'), 'voda');
+      expect(latinSpelling('Београд'), 'Beograd');
     });
 
-    test('Latin to Cyrillic', () {
-      expect(otherScript('kuća'), 'кућа');
-      expect(otherScript('ljubav'), 'љубав');
-      expect(otherScript('Njujork'), 'Њујорк');
-      expect(otherScript('džep'), 'џеп');
-      expect(otherScript('moj dom'), 'мој дом');
+    test('the digraphs are lj, nj and dž, in the case of the word', () {
+      expect(latinSpelling('љубав'), 'ljubav');
+      expect(latinSpelling('Љубав'), 'Ljubav');
+      expect(latinSpelling('ЉУБАВ'), 'LJUBAV');
+      expect(latinSpelling('њива'), 'njiva');
+      expect(latinSpelling('Њујорк'), 'Njujork');
+      expect(latinSpelling('џеп'), 'džep');
+      expect(latinSpelling('Џон'), 'Džon');
     });
 
-    test('a word with nothing to change, or a foreign letter, has none', () {
-      expect(otherScript('123'), isNull);
-      expect(otherScript('taxi'), isNull);
-      expect(otherScript('café'), isNull);
+    test('a Latin word gains no Cyrillic key: that map is not exact', () {
+      // injekcija is инјекција, which a letter-by-letter map writes with the
+      // single letter њ.
+      expect(latinSpelling('kuća'), isNull);
+      expect(latinSpelling('injekcija'), isNull);
+      expect(latinSpelling('lijep'), isNull);
+      expect(latinSpelling('džep'), isNull);
+    });
+
+    test('a word with no Cyrillic letter, or a foreign one, has none', () {
+      expect(latinSpelling('123'), isNull);
+      expect(latinSpelling('мышь'), isNull);
     });
   });
 }

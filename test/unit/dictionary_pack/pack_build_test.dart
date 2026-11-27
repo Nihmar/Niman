@@ -248,11 +248,13 @@ void main() {
       // Each script of kuća is a headword: no record for either.
       expect(sh.lemmasOf('kuća'), isEmpty);
       expect(sh.lemmasOf('кућа'), isEmpty);
-      // The Latin spelling the Cyrillic entry lists, and the one it does
-      // not, and the Cyrillic ones of Latin entries that list none.
+      // The Latin spelling a Cyrillic entry lists, and the one it does not
+      // list, which is added.
       expect(sh.lemmasOf('voda'), ['вода']);
-      expect(sh.lemmasOf('лијеп'), ['lijep']);
-      expect(sh.lemmasOf('џеп'), ['džep']);
+      expect(sh.lemmasOf('ljubav'), ['љубав']);
+      // A Latin entry gains no Cyrillic key: that map is not exact.
+      expect(sh.lemmasOf('лијеп'), isEmpty);
+      expect(sh.lemmasOf('џеп'), isEmpty);
       expect(sh.lemmasOf('kuće'), ['kuća']);
     });
 

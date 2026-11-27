@@ -1,8 +1,13 @@
 // Serbo-Croatian is written in two scripts, and a Serbian book in Cyrillic and
 // a Croatian one in Latin must find the same entry. Wiktionary has a page for
-// each spelling, but not always a link from one to the other, so the pipeline
-// adds the other script of every headword as a form: a key that is not itself
-// a headword then reaches its entry through `.syn`.
+// each spelling, but not always a link from one to the other. Cyrillic to
+// Latin is exact (one letter, or one of three digraphs, for each letter), so a
+// Cyrillic headword gains its Latin spelling as a form: a key that is not
+// itself a headword then reaches the entry through `.syn`. Latin to Cyrillic
+// is not exact (`injekcija` is `инјекција`, not `ињекција`), and a wrong key
+// can collide with a real word and send a look-up to the wrong lemma, so a
+// Latin headword reaches Cyrillic only through Wiktionary's own pages and
+// forms.
 
 const Map<String, String> _toLatin = {
   'а': 'a',
@@ -37,20 +42,15 @@ const Map<String, String> _toLatin = {
   'ш': 'š',
 };
 
-/// The Cyrillic letter of each Latin one, digraphs included.
-final Map<String, String> _toCyrillic = {
-  for (final e in _toLatin.entries) e.value: e.key,
-};
-
 bool _isCyrillic(int rune) => rune >= 0x0400 && rune <= 0x04ff;
 
 /// Whether [word] has a Cyrillic letter.
 bool hasCyrillic(String word) => word.runes.any(_isCyrillic);
 
-/// [word] in the other script, or null when it has no letter to change or a
-/// letter outside the Serbo-Croatian alphabet (`q`, `w`, `x`, `y`).
-String? otherScript(String word) =>
-    hasCyrillic(word) ? _cyrillicToLatin(word) : _latinToCyrillic(word);
+/// The Latin spelling of the Cyrillic [word], or null when [word] has no
+/// Cyrillic letter, or a Cyrillic one outside the Serbo-Croatian alphabet.
+String? latinSpelling(String word) =>
+    hasCyrillic(word) ? _cyrillicToLatin(word) : null;
 
 String? _cyrillicToLatin(String word) {
   final out = StringBuffer();
@@ -82,28 +82,4 @@ String? _cyrillicToLatin(String word) {
   }
   final result = out.toString();
   return result == word ? null : result;
-}
-
-String? _latinToCyrillic(String word) {
-  const digraphs = {'lj', 'nj', 'dž'};
-  final out = StringBuffer();
-  var changed = false;
-  var i = 0;
-  while (i < word.length) {
-    final pair = i + 1 < word.length ? word.substring(i, i + 2) : '';
-    final lowerPair = pair.toLowerCase();
-    final piece = digraphs.contains(lowerPair) ? pair : word[i];
-    final lowerPiece = piece.toLowerCase();
-    final cyrillic = _toCyrillic[lowerPiece];
-    if (cyrillic != null) {
-      changed = true;
-      out.write(piece == lowerPiece ? cyrillic : cyrillic.toUpperCase());
-    } else if (piece.toLowerCase() != piece.toUpperCase()) {
-      return null;
-    } else {
-      out.write(piece);
-    }
-    i += piece.length;
-  }
-  return changed ? out.toString() : null;
 }

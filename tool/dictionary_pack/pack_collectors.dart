@@ -45,7 +45,7 @@ final class EntryCollector implements EntrySink {
     if (entry.senses.any((s) => s.formOf.isNotEmpty)) formOfEntries++;
     final forms = [
       for (final form in entry.forms) '${form.tags.join(' ')}\t${form.form}',
-      if (language.code == 'sh') ..._otherScript(entry),
+      if (language.code == 'sh') ..._latinSpelling(entry),
     ];
     sorter.add(
       Uint8List.fromList(utf8.encode(entry.word)),
@@ -58,11 +58,11 @@ final class EntryCollector implements EntrySink {
     );
   }
 
-  /// The headword in the other script, unless the entry lists it already.
-  Iterable<String> _otherScript(SourceEntry entry) sync* {
-    final other = otherScript(entry.word);
-    if (other == null || entry.forms.any((f) => f.form == other)) return;
-    yield '${hasCyrillic(entry.word) ? 'Latin' : 'Cyrillic'}\t$other';
+  /// The Latin spelling of a Cyrillic headword, unless the entry lists it.
+  Iterable<String> _latinSpelling(SourceEntry entry) sync* {
+    final latin = latinSpelling(entry.word);
+    if (latin == null || entry.forms.any((f) => f.form == latin)) return;
+    yield 'Latin	$latin';
   }
 }
 
