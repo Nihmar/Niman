@@ -18,7 +18,10 @@ engine, with no system dictionary, no other app and no network involved in a
 look-up. The catalog is downloaded per language — nothing ships in the
 package — and a download is the same size on every platform. Android,
 Linux, Windows, macOS and iOS all use the same files, so there is no
-platform code in it.
+platform code in it. **Look up** ([organization](organization.md#looking-up-a-word))
+is the same too, and only its shape follows the surface: a sheet at half the
+height of the screen where a thumb is, a panel under the selection where a
+pointer is, with `Ctrl+D` (`⌘D` on a Mac) for the keyboard.
 
 Kanban boards ([kanban](kanban.md)) are on every platform, drawn to the
 surface: columns side by side from a tablet's width up, one column at a

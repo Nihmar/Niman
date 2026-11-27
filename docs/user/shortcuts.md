@@ -147,6 +147,13 @@ engine), which takes the keyboard when you switch to it or click it:
 - `PageUp` / `PageDown` — scroll a page, keeping a line of the last one
 - `Home` / `End`, with `Ctrl` or without — start and end of the note
 
+Reading a book or a PDF, with a selection:
+
+- `Ctrl/⌘+D` — look the selection up: its meaning in a panel under it (see
+  [organization](organization.md#looking-up-a-word)). It is the readers' own
+  key, not a command of the palette, and is left to the app's own command if you
+  have given `Ctrl+D` to one in Settings → Keyboard shortcuts.
+
 The Files pane — the tree or the grid, whichever view is on — takes the
 keyboard when you click a folder's row or tile, or with `Tab`. A click on
 a note (or `Enter` on it) opens it and puts the caret in it, ready to

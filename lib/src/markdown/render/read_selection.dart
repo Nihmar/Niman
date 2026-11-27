@@ -23,14 +23,33 @@ import 'package:niman/src/ui/pointer_density.dart';
 /// Where a selection of the read view is: `line`, the first line of the
 /// block it starts in; `start`, its first character in that block's text;
 /// `end`, one past its last there, or null when it runs on into later
-/// blocks; and the `text` selected.
-typedef ReadSelection = ({int line, int start, int? end, String text});
+/// blocks; the `text` selected; and `anchor`, where it is on screen (in the
+/// window's coordinates), for a panel that opens beside it: the selection's
+/// own box when its menu knows it, else where the pointer last was, null
+/// when neither is known.
+typedef ReadSelection = ({
+  int line,
+  int start,
+  int? end,
+  String text,
+  Rect? anchor,
+});
 
 /// An action the selection's menu offers beside Copy and Select all.
-typedef ReadSelectionAction = ({
-  String label,
-  void Function(ReadSelection selection) onPressed,
-});
+final class ReadSelectionAction {
+  /// An action called [label], run on the selection when it is chosen, or
+  /// when [shortcut] is pressed while a selection exists.
+  const new({required this.label, required this.onPressed, this.shortcut});
+
+  /// What the menu says.
+  final String label;
+
+  /// Runs on the selection.
+  final void Function(ReadSelection selection) onPressed;
+
+  /// The keys that run it without the menu, on a desktop; null for none.
+  final SingleActivator? shortcut;
+}
 
 /// The parts of the blocks selected, as their listeners report them.
 final class ReadSelectionScope {
@@ -38,6 +57,14 @@ final class ReadSelectionScope {
 
   /// The text selected, as the selection area last said.
   String _text = '';
+
+  /// The selection's box, as its menu last placed itself by it; dropped
+  /// when the selection changes.
+  Rect? _anchor;
+
+  /// Where the pointer last was over the area, in the window's coordinates:
+  /// the stand-in for the selection's box when no menu gave it.
+  Offset? _pointer;
 
   /// The selection, or null when nothing is selected.
   ReadSelection? get selection {
@@ -49,8 +76,14 @@ final class ReadSelectionScope {
       start: first.start,
       end: lines.length == 1 ? first.end : null,
       text: _text,
+      anchor: _anchor ?? _pointerBox,
     );
   }
+
+  Rect? get _pointerBox => switch (_pointer) {
+    final at? => Rect.fromCenter(center: at, width: 0, height: 20),
+    null => null,
+  };
 
   void _set(int line, int start, int end) =>
       _blocks[line] = (start: start, end: end);
@@ -124,6 +157,18 @@ final class _SelectableBlockState extends State<SelectableBlock> {
       SelectionListener(selectionNotifier: _notifier, child: widget.child);
 }
 
+/// The box the menu's [anchors] describe: from the selection's top to its
+/// bottom, or one line high at the point a right click gave.
+Rect _boxOf(TextSelectionToolbarAnchors anchors) {
+  final box = Rect.fromPoints(
+    anchors.primaryAnchor,
+    anchors.secondaryAnchor ?? anchors.primaryAnchor,
+  );
+  return box.height >= 4
+      ? box
+      : Rect.fromCenter(center: box.center, width: 0, height: 20);
+}
+
 /// The read view's text, selectable: the blocks under [child] report to
 /// [scope], and the selection's menu offers [actions] beside Copy and
 /// Select all.
@@ -145,14 +190,43 @@ final class ReadSelectionArea extends StatelessWidget {
   /// The blocks.
   final Widget child;
 
+  /// The keys of the actions that have some, bound to run them on the
+  /// selection that exists.
+  Map<ShortcutActivator, VoidCallback> get _bindings => {
+    for (final action in actions)
+      ?action.shortcut: () {
+        if (scope.selection case final selection?) action.onPressed(selection);
+      },
+  };
+
   @override
-  Widget build(BuildContext context) => SelectionArea(
-    onSelectionChanged: (content) => scope._text = content?.plainText ?? '',
+  Widget build(BuildContext context) => _keyed(
+    Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerHover: (event) => scope._pointer = event.position,
+      onPointerUp: (event) => scope._pointer = event.position,
+      child: _area(),
+    ),
+  );
+
+  Widget _keyed(Widget child) => _bindings.isEmpty
+      ? child
+      : CallbackShortcuts(bindings: _bindings, child: child);
+
+  Widget _area() => SelectionArea(
+    onSelectionChanged: (content) {
+      scope
+        .._text = content?.plainText ?? ''
+        .._anchor = null;
+    },
     // The actions are offered whatever the scope says as the menu is built:
     // the blocks report the selection after it. They read it when pressed.
     // The first comes first, where a phone's toolbar keeps it in sight; the
     // rest after Copy and Select all, which a phone may fold away.
     contextMenuBuilder: (context, region) {
+      // Asked once: a right click's point is given only to the first ask.
+      final anchors = region.contextMenuAnchors;
+      scope._anchor = _boxOf(anchors);
       final items = [
         for (final action in actions)
           ContextMenuButtonItem(
@@ -175,7 +249,7 @@ final class ReadSelectionArea extends StatelessWidget {
       // toolbar sets its own button size and cannot be themed.
       if (pointerDense(Theme.of(context))) {
         final overlay = Overlay.of(context).context.findRenderObject();
-        final at = region.contextMenuAnchors.primaryAnchor;
+        final at = anchors.primaryAnchor;
         return SelectionButtonsMenu(
           anchor: overlay is RenderBox && overlay.hasSize
               ? overlay.globalToLocal(at)
@@ -184,7 +258,7 @@ final class ReadSelectionArea extends StatelessWidget {
         );
       }
       return AdaptiveTextSelectionToolbar.buttonItems(
-        anchors: region.contextMenuAnchors,
+        anchors: anchors,
         buttonItems: buttons,
       );
     },

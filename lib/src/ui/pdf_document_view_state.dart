@@ -20,6 +20,7 @@ import 'package:niman/src/ui/ocr/ocr_line_layer.dart';
 import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/pdf_document_view.dart';
 import 'package:niman/src/ui/pdf_held_document.dart';
+import 'package:niman/src/ui/pdf_look_up.dart';
 import 'package:niman/src/ui/pdf_mark_layer.dart';
 import 'package:niman/src/ui/pdf_selection_menu.dart';
 import 'package:niman/src/ui/place_link_button.dart';
@@ -48,6 +49,10 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
 
   /// The text selected, when some is.
   PdfTextSelection? _selection;
+
+  /// What looks the selection up (#1383), and keeps the language chosen for
+  /// the file.
+  late PdfLookUp _lookUp;
 
   /// The PDF's marks, while it is in a library that has them, and where
   /// they are drawn.
@@ -117,6 +122,15 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
   }
 
   void _follow() {
+    _lookUp = PdfLookUp(
+      owner: this,
+      path: widget.path,
+      positions: widget.positions,
+      passage: (selection) async =>
+          _annotates ? await _selected(selection) : null,
+      annotate: (annotation) => widget.onAnnotate?.call(annotation),
+    );
+    unawaited(_lookUp.load());
     _reading = ReadingTracker(widget.positions, widget.path);
     _left = _reading.read();
     _marks?.dispose();
@@ -342,40 +356,57 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
     );
   }
 
-  /// A selection's menu, with the passage's highlight and annotation.
-  void _selectionMenu(
+  /// A selection's menu, with the passage's highlight and annotation, and
+  /// looking it up.
+  @visibleForTesting
+  void selectionMenu(
     PdfViewerContextMenuBuilderParams params,
     List<ContextMenuButtonItem> items,
   ) {
     final selection = params.textSelectionDelegate;
-    if (!_annotates || !selection.hasSelectedText) return;
-    if (widget.marks != null) {
+    if (!selection.hasSelectedText) return;
+    if (_annotates) {
+      if (widget.marks != null) {
+        items.add(
+          ContextMenuButtonItem(
+            label: AppStrings.highlightAction,
+            onPressed: () {
+              params.dismissContextMenu();
+              unawaited(_highlightSelection(selection));
+            },
+          ),
+        );
+      }
       items.add(
         ContextMenuButtonItem(
-          label: AppStrings.highlightAction,
+          label: AppStrings.annotateAction,
           onPressed: () {
             params.dismissContextMenu();
-            unawaited(_highlightSelection(selection));
+            unawaited(_annotateSelection(selection));
           },
         ),
       );
     }
-    items.add(
-      ContextMenuButtonItem(
-        label: AppStrings.annotateAction,
-        onPressed: () {
-          params.dismissContextMenu();
-          unawaited(_annotateSelection(selection));
-        },
-      ),
-    );
+    // A PDF outside a library is looked up too: only the annotating of the
+    // passage with the definition is not there.
+    items.add(_lookUp.menuItem(params));
   }
 
   String _label(int page) =>
       AppStrings.pdfPageLabel(p.basenameWithoutExtension(widget.path), page);
 
   /// The PDF's pages, from the document [ref] opens.
-  Widget _viewer(PdfDocumentRef ref) => PdfViewer(
+  Widget _viewer(PdfDocumentRef ref) => CallbackShortcuts(
+    bindings: _lookUp.bindings(() => _selection),
+    child: Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerHover: (event) => _lookUp.pointer = event.position,
+      onPointerUp: (event) => _lookUp.pointer = event.position,
+      child: _pdfViewer(ref),
+    ),
+  );
+
+  Widget _pdfViewer(PdfDocumentRef ref) => PdfViewer(
     ref,
     key: const Key('attachment-pdf'),
     controller: _controller,
@@ -402,11 +433,11 @@ final class PdfDocumentViewState extends State<PdfDocumentView> {
       textSelectionParams: PdfTextSelectionParams(
         onTextSelectionChange: (selection) => _selection = selection,
       ),
-      customizeContextMenuItems: _selectionMenu,
+      customizeContextMenuItems: selectionMenu,
       // A pointer's menu is the app's compact one (`pointer_menu.dart`).
       buildContextMenu: pointerDense(Theme.of(context))
           ? (context, params) =>
-                pdfSelectionMenu(context, params, customize: _selectionMenu)
+                pdfSelectionMenu(context, params, customize: selectionMenu)
           : null,
     ),
   );

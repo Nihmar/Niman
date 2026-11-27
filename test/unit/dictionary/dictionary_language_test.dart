@@ -104,7 +104,7 @@ void main() {
       );
     });
 
-    test('with no choice and no spelling language is the app\'s', () {
+    test("with no choice and no spelling language is the app's", () {
       expect(DictionaryLanguage.forPdf(null, ui: 'pl'), 'pl');
       AppLanguages.choice = AppLanguage.french;
       expect(DictionaryLanguage.forPdf(null), 'fr');

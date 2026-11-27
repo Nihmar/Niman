@@ -40,7 +40,10 @@ void main() {
     quote: 'The spice must flow.',
   );
 
-  Future<void> start(WidgetTester tester) async {
+  Future<void> start(
+    WidgetTester tester, {
+    Annotation toAnnotate = annotation,
+  }) async {
     final flow = ShellAnnotationFlow(
       controller: session,
       unsaved: unsaved,
@@ -56,7 +59,7 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
-              onPressed: () => flow.annotate(context, annotation),
+              onPressed: () => flow.annotate(context, toAnnotate),
               child: const Text('annotate'),
             ),
           ),
@@ -92,6 +95,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(opened.single.$1, note);
     expect(text!.substring(opened.single.$2), startsWith('## Dune, p. 34'));
+  });
+
+  testWidgets('a passage annotated with a definition (#1383) opens with it '
+      'written in, and writes it as the comment', (tester) async {
+    await start(
+      tester,
+      toAnnotate: annotation.withComment('caminetto\n\n1. A small fireplace.'),
+    );
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('annotation-comment')),
+    );
+    expect(field.controller!.text, 'caminetto\n\n1. A small fireplace.');
+    expect(find.text(annotation.quote), findsOneWidget);
+    // Kept as it is.
+    await tester.tap(find.byKey(const Key('annotation-save')));
+    await tester.pumpAndSettle();
+    expect(
+      session.contentOf(note),
+      contains('\ncaminetto\n\n1. A small fireplace.\n'),
+    );
   });
 
   testWidgets('cancelled, nothing is written', (tester) async {

@@ -21,6 +21,8 @@ import 'package:niman/src/reading/book_location.dart';
 import 'package:niman/src/reading/reading_tracker.dart';
 import 'package:niman/src/ui/annotation_mark_chooser.dart';
 import 'package:niman/src/ui/attachment_unreadable.dart';
+import 'package:niman/src/ui/dictionary_look_up_action.dart';
+import 'package:niman/src/ui/dictionary_lookup_flow.dart';
 import 'package:niman/src/ui/epub_bar.dart';
 import 'package:niman/src/ui/epub_contents_sheet.dart';
 import 'package:niman/src/ui/epub_links.dart';
@@ -359,17 +361,24 @@ final class EpubPaneState extends State<EpubPane> {
     if (annotation != null) widget.onAnnotate?.call(annotation);
   }
 
-  /// What a selection of the book offers (#283): highlighting it (#626) —
-  /// first, where a phone keeps it in sight — annotating it and a link to
-  /// it, in a library; copying it, anywhere.
+  /// What a selection of the book offers: looking it up — first, where a
+  /// phone keeps it in sight (#1383) — reading aloud from it (#1276),
+  /// highlighting it (#626), annotating it and a link to it, in a library;
+  /// copying it, anywhere.
   List<ReadSelectionAction> _selectionActions() => [
+    lookUpReadAction(
+      context,
+      surface: DictionarySurface.book,
+      language: _document?.language,
+      annotate: _annotatesWithDefinition,
+    ),
     if (_aloud != null)
-      (
+      ReadSelectionAction(
         label: AppStrings.readAloudFromHere,
         onPressed: (selection) => _readAloudFrom(selection.line),
       ),
     if (widget.positions != null && widget.marks != null)
-      (
+      ReadSelectionAction(
         label: AppStrings.highlightAction,
         onPressed: (selection) {
           final source = widget.marks;
@@ -386,13 +395,13 @@ final class EpubPaneState extends State<EpubPane> {
         },
       ),
     if (widget.positions != null && widget.onAnnotate != null)
-      (
+      ReadSelectionAction(
         label: AppStrings.annotateAction,
         onPressed: (selection) =>
             _annotate(_places.selectionAnnotation(selection)),
       ),
     if (widget.positions != null)
-      (
+      ReadSelectionAction(
         label: AppStrings.copyPlaceLink,
         onPressed: (selection) {
           final at = _places.selected(selection);
@@ -402,6 +411,15 @@ final class EpubPaneState extends State<EpubPane> {
         },
       ),
   ];
+
+  /// What annotates [selection] with a definition (#1383), where the book
+  /// is in a library that annotates; null elsewhere.
+  DictionaryAnnotate? _annotatesWithDefinition(ReadSelection selection) {
+    if (widget.positions == null || widget.onAnnotate == null) return null;
+    final annotation = _places.selectionAnnotation(selection);
+    if (annotation == null) return null;
+    return (definition) async => _annotate(annotation.withComment(definition));
+  }
 
   /// The zoom of the books' text, while the pane has a size to keep.
   EpubTextZoom? get _zoom => switch (widget.onTextScale) {

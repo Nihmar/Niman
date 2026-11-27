@@ -796,9 +796,8 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('a word selected is highlighted first in the toolbar', (
-      tester,
-    ) async {
+    testWidgets('a word selected is highlighted from the toolbar, after the '
+        'look-up (#1383)', (tester) async {
       await pump(
         tester,
         path,
@@ -816,7 +815,9 @@ void main() {
         ))
           (button.child as Text).data,
       ];
-      expect(labels.first, AppStrings.highlightAction);
+      // Look up comes first, where a phone keeps it in sight (#1383).
+      expect(labels.first, AppStrings.lookUpAction);
+      expect(labels, contains(AppStrings.highlightAction));
       await tester.tap(find.text(AppStrings.highlightAction));
       await tester.pumpAndSettle();
       final passage = marks.highlighted.single;

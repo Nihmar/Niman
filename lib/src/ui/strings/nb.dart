@@ -4746,4 +4746,129 @@ final class NorwegianStrings extends Strings {
   @override
   String dictionaryIndexFailed(String reason) =>
       'Indeksen kunne ikke bygges: $reason';
+
+  // Look up (#1383).
+  @override
+  String get lookUpAction => 'Look up';
+
+  @override
+  String get lookUpCopy => 'Copy the definition';
+
+  @override
+  String get lookUpAnnotate => 'Annotate with the definition';
+
+  @override
+  String get lookUpLanguageTitle => 'Look up in';
+
+  @override
+  String get lookUpBack => 'Back to the previous look-up';
+
+  @override
+  String lookUpFromForm(String form) => 'From «$form»';
+
+  @override
+  String lookUpFromFormTags(String form, String tags) => 'From «$form», $tags';
+
+  @override
+  String lookUpFormOf(String tags, String lemma) => '$tags of «$lemma»';
+
+  @override
+  String lookUpFormOfPlain(String lemma) => 'Form of «$lemma»';
+
+  @override
+  String get lookUpForms => 'Forms';
+
+  @override
+  String lookUpAlsoSpelled(String spelling) => 'Also written «$spelling»';
+
+  @override
+  String get lookUpDidYouMean => 'Did you mean';
+
+  @override
+  String lookUpNoDefinition(String language) => '$language · no definition';
+
+  @override
+  String lookUpNotFound(String language) =>
+      'The $language dictionary has no entry for this, nor a '
+      'form to derive it from.';
+
+  @override
+  String lookUpNoPack(String language) =>
+      'There is no $language dictionary on this device.';
+
+  @override
+  String lookUpDownloadPack(String language, String size) =>
+      'Download $language · $size';
+
+  @override
+  String get lookUpOrChangeLanguage => 'or change the language';
+
+  @override
+  String lookUpNoPackOffered(String language) =>
+      'No $language dictionary is available to download yet.';
+
+  @override
+  String lookUpUnavailable(String language) =>
+      'The $language dictionary cannot be used.';
+
+  @override
+  String get lookUpOpenSettings => 'Open the dictionaries in Settings';
+
+  @override
+  Map<String, String> get lookUpGrammar => const {
+    'noun': 'noun',
+    'name': 'proper noun',
+    'verb': 'verb',
+    'adj': 'adjective',
+    'adv': 'adverb',
+    'pron': 'pronoun',
+    'det': 'determiner',
+    'prep': 'preposition',
+    'postp': 'postposition',
+    'conj': 'conjunction',
+    'intj': 'interjection',
+    'num': 'numeral',
+    'article': 'article',
+    'particle': 'particle',
+    'prefix': 'prefix',
+    'suffix': 'suffix',
+    'phrase': 'phrase',
+    'proverb': 'proverb',
+    'abbrev': 'abbreviation',
+    'contraction': 'contraction',
+    'masculine': 'masculine',
+    'feminine': 'feminine',
+    'neuter': 'neuter',
+    'common': 'common gender',
+    'singular': 'singular',
+    'plural': 'plural',
+    'dual': 'dual',
+    'first-person': 'first person',
+    'second-person': 'second person',
+    'third-person': 'third person',
+    'present': 'present',
+    'past': 'past',
+    'future': 'future',
+    'imperfect': 'imperfect',
+    'preterite': 'preterite',
+    'participle': 'participle',
+    'infinitive': 'infinitive',
+    'gerund': 'gerund',
+    'indicative': 'indicative',
+    'subjunctive': 'subjunctive',
+    'conditional': 'conditional',
+    'imperative': 'imperative',
+    'comparative': 'comparative',
+    'superlative': 'superlative',
+    'diminutive': 'diminutive',
+    'nominative': 'nominative',
+    'accusative': 'accusative',
+    'genitive': 'genitive',
+    'dative': 'dative',
+    'definite': 'definite',
+    'indefinite': 'indefinite',
+    'active': 'active',
+    'passive': 'passive',
+    'alternative': 'alternative form',
+  };
 }

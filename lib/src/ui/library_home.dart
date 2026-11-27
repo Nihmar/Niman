@@ -11,6 +11,7 @@ import 'package:niman/src/core/share_in.dart';
 import 'package:niman/src/core/shortcuts.dart';
 import 'package:niman/src/core/storage_access.dart';
 import 'package:niman/src/core/tray.dart';
+import 'package:niman/src/dictionary/dictionary_providers.dart';
 import 'package:niman/src/editor/editor_only.dart';
 import 'package:niman/src/export/export_files.dart';
 import 'package:niman/src/library/library_state.dart';
@@ -231,6 +232,10 @@ final class _LibraryHomeState extends ConsumerState<LibraryHome> {
     final controller = ref.watch(librarySessionProvider);
     // Started once: writes transcripts into notes no view has open.
     ref.read(audioTranscriptWriterProvider);
+    // Read as early as the app starts, not when a look-up first asks: a
+    // dictionary downloaded in an earlier session is unpacked and indexed
+    // by now, or being, and the first look-up does not wait for it (#1383).
+    ref.read(dictionaryInstallationProvider);
     // The first-run deck (#266) sits over whatever the phase asks for:
     // it is about the app, not about a library.
     return WelcomeGate(

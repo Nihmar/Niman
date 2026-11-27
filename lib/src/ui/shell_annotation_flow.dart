@@ -134,6 +134,8 @@ final class ShellAnnotationFlow implements AnnotationMarkSource {
       context,
       label: annotation.label,
       quote: annotation.quote,
+      // A passage annotated with a definition opens with it written in.
+      comment: annotation.comment,
     );
     if (comment == null || !context.mounted) return;
     final messenger = ScaffoldMessenger.of(context);

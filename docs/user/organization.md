@@ -695,6 +695,62 @@ the file's own actions — rename, move, delete — without the outline,
 tags, typewriter, **Tidy Markdown**, cheatsheet or history. The palette
 leaves those commands out too.
 
+### Looking up a word
+
+**Look up** shows what a selection means, from a dictionary downloaded in
+**Settings → Dictionaries** (see [settings](settings.md#dictionaries)); nothing
+is sent anywhere. It is offered for every selection — a word, a phrase, a
+sentence — in a book, in a PDF and in the text read from a scan:
+
+- In a book it is **first** in the selection's menu, where a phone keeps it
+  in sight; *Read aloud from here* follows the other actions.
+- In a PDF it comes after Annotate, and in a PDF outside any library as well,
+  where only annotating the passage with the definition is missing.
+- On a desktop, `Ctrl+D` (`⌘D` on a Mac) looks up the selection without the
+  menu. It is the readers' own key, not a command of the palette: it needs the
+  selection of the pane you are in, and it is left alone when you have given
+  `Ctrl+D` to a command of the app.
+
+The whole selection is looked up first, since a dictionary has entries such as
+*a priori*; failing that, its first word. A form finds its lemma: *caminetti*
+finds *caminetto*, and the panel says "From *caminetti*, plural".
+
+On a phone the meaning opens in a sheet at half the height of the screen,
+dragged higher to read more. On a desktop it is a panel under the selection,
+never over the line you are reading — above it only where there is no room
+below — that closes with `Esc` or a click anywhere outside it. It shows:
+
+- the **headword** and the form that led to it, and the **language** as a chip
+  that opens the list of languages (those with a dictionary first);
+- the **senses**, numbered, by part of speech — qualifier, definition, examples
+  in italics — then the word's **forms**. A form that is also a headword, or is
+  of two lemmas, shows each entry one after the other; a Serbo-Croatian word
+  written in two scripts is shown once and names the other spelling. A section
+  that is itself an inflected form says "plural of *camino*", and *camino* looks
+  itself up in the panel, with a button to go back;
+- at the foot, the dictionary and its licence, **Copy** (the definition as
+  plain text: headword, part of speech, numbered senses) and **Annotate with the
+  definition**, which opens the usual annotation sheet for the passage with the
+  definition written in as the comment, for you to keep or change. Where the
+  file cannot be annotated — outside a library, or with annotations off — that
+  icon is greyed.
+
+When the dictionary has nothing under the selection, the panel offers the
+nearest entries (*Did you mean*), which look themselves up. When there is no
+dictionary for the language, it offers that language's dictionary with its size
+and downloads it there; the word is looked up when it is ready — or, if none is
+on offer yet, says so and leaves the language to change. A dictionary that is
+there and cannot be used says why, with a link to Settings → Dictionaries.
+
+The **language** is the book's own (`dc:language`). A PDF does not say what
+language it is in, so the first spelling language of the library is used —
+the app's language when there is none — until you change it with the chip; the
+choice is **kept for that file**, in the library's reading positions, so it
+syncs with the place you stopped at. A PDF outside a library keeps it until you
+close it. The text of a scan is looked up in the library's first spelling
+language. Niman never guesses a language from the text: the chip is always
+there, because a book in one language quotes another.
+
 ## Opening a file outside any library
 
 Not every text file belongs in a library: a project's README, a draft

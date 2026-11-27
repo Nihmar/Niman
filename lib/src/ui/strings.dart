@@ -2442,4 +2442,34 @@ final class AppStrings {
   static String get dictionaryLicense => _s.dictionaryLicense;
   static String dictionaryIndexFailed(String reason) =>
       _s.dictionaryIndexFailed(reason);
+
+  // Look up (#1383).
+  static String get lookUpAction => _s.lookUpAction;
+  static String get lookUpCopy => _s.lookUpCopy;
+  static String get lookUpAnnotate => _s.lookUpAnnotate;
+  static String get lookUpLanguageTitle => _s.lookUpLanguageTitle;
+  static String get lookUpBack => _s.lookUpBack;
+  static String lookUpFromForm(String form) => _s.lookUpFromForm(form);
+  static String lookUpFromFormTags(String form, String tags) =>
+      _s.lookUpFromFormTags(form, tags);
+  static String lookUpFormOf(String tags, String lemma) =>
+      _s.lookUpFormOf(tags, lemma);
+  static String lookUpFormOfPlain(String lemma) => _s.lookUpFormOfPlain(lemma);
+  static String get lookUpForms => _s.lookUpForms;
+  static String lookUpAlsoSpelled(String spelling) =>
+      _s.lookUpAlsoSpelled(spelling);
+  static String get lookUpDidYouMean => _s.lookUpDidYouMean;
+  static String lookUpNoDefinition(String language) =>
+      _s.lookUpNoDefinition(language);
+  static String lookUpNotFound(String language) => _s.lookUpNotFound(language);
+  static String lookUpNoPack(String language) => _s.lookUpNoPack(language);
+  static String lookUpDownloadPack(String language, String size) =>
+      _s.lookUpDownloadPack(language, size);
+  static String get lookUpOrChangeLanguage => _s.lookUpOrChangeLanguage;
+  static String lookUpNoPackOffered(String language) =>
+      _s.lookUpNoPackOffered(language);
+  static String lookUpUnavailable(String language) =>
+      _s.lookUpUnavailable(language);
+  static String get lookUpOpenSettings => _s.lookUpOpenSettings;
+  static Map<String, String> get lookUpGrammar => _s.lookUpGrammar;
 }

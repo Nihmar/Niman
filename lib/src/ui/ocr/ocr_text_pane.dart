@@ -4,6 +4,8 @@ import 'package:niman/src/markdown/render/mark_highlight.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/preview/math_cache.dart';
+import 'package:niman/src/ui/dictionary_look_up_action.dart';
+import 'package:niman/src/ui/dictionary_lookup_flow.dart';
 import 'package:niman/src/ui/ocr/ocr_lines_scope.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
@@ -110,7 +112,9 @@ final class _OcrTextPaneState extends State<OcrTextPane> {
             parser: _parser,
             mathCache: _mathCache,
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            selectionActions: const [],
+            selectionActions: [
+              lookUpReadAction(context, surface: DictionarySurface.text),
+            ],
             marks: [
               if (selected != null)
                 (

@@ -12,6 +12,7 @@ void main() {
     WidgetTester tester, {
     required Size size,
     String quote = 'The spice must flow.',
+    String comment = '',
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -25,6 +26,7 @@ void main() {
                 context,
                 label: 'Dune, p. 34',
                 quote: quote,
+                comment: comment,
               ),
               child: const Text('go'),
             ),
@@ -61,6 +63,27 @@ void main() {
     await tester.tap(find.byKey(const Key('annotation-cancel')));
     await tester.pumpAndSettle();
     expect(await answer, isNull);
+  });
+
+  testWidgets('a comment given opens written in, to be kept or changed '
+      '(#1383)', (tester) async {
+    await open(tester, size: const Size(400, 800), comment: 'A definition.');
+    final field = tester.widget<TextField>(
+      find.byKey(const Key('annotation-comment')),
+    );
+    expect(field.controller!.text, 'A definition.');
+    await tester.tap(find.byKey(const Key('annotation-save')));
+    await tester.pumpAndSettle();
+    expect(await answer, 'A definition.');
+
+    await open(tester, size: const Size(400, 800), comment: 'A definition.');
+    await tester.enterText(
+      find.byKey(const Key('annotation-comment')),
+      'My own words.',
+    );
+    await tester.tap(find.byKey(const Key('annotation-save')));
+    await tester.pumpAndSettle();
+    expect(await answer, 'My own words.');
   });
 
   testWidgets('an empty comment still annotates', (tester) async {

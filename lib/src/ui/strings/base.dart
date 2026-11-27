@@ -2520,4 +2520,27 @@ abstract base class Strings {
   String get dictionaryNotice;
   String get dictionaryLicense;
   String dictionaryIndexFailed(String reason);
+
+  // Look up (#1383).
+  String get lookUpAction;
+  String get lookUpCopy;
+  String get lookUpAnnotate;
+  String get lookUpLanguageTitle;
+  String get lookUpBack;
+  String lookUpFromForm(String form);
+  String lookUpFromFormTags(String form, String tags);
+  String lookUpFormOf(String tags, String lemma);
+  String lookUpFormOfPlain(String lemma);
+  String get lookUpForms;
+  String lookUpAlsoSpelled(String spelling);
+  String get lookUpDidYouMean;
+  String lookUpNoDefinition(String language);
+  String lookUpNotFound(String language);
+  String lookUpNoPack(String language);
+  String lookUpDownloadPack(String language, String size);
+  String get lookUpOrChangeLanguage;
+  String lookUpNoPackOffered(String language);
+  String lookUpUnavailable(String language);
+  String get lookUpOpenSettings;
+  Map<String, String> get lookUpGrammar;
 }

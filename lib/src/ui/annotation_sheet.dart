@@ -12,13 +12,16 @@ import 'package:niman/src/ui/device_shape.dart';
 import 'package:niman/src/ui/strings.dart';
 
 /// Asks for the comment on the place [label] names, [quote] its passage;
-/// the comment, or null when the reader cancels.
+/// the comment, or null when the reader cancels. The field opens with
+/// [comment] written in it (a definition looked up, #1383), to be kept or
+/// changed.
 Future<String?> showAnnotationSheet(
   BuildContext context, {
   required String label,
   String quote = '',
+  String comment = '',
 }) {
-  final body = _AnnotationForm(label: label, quote: quote);
+  final body = _AnnotationForm(label: label, quote: quote, comment: comment);
   if (isWideShell(context)) {
     return showDialog<String>(
       context: context,
@@ -44,17 +47,20 @@ Future<String?> showAnnotationSheet(
 /// The form: what is annotated, the comment, Cancel and Save. Owns the
 /// [TextEditingController], so it lives as long as the route.
 final class _AnnotationForm extends StatefulWidget {
-  const new({required this.label, required this.quote});
+  const new({required this.label, required this.quote, required this.comment});
 
   final String label;
   final String quote;
+  final String comment;
 
   @override
   State<_AnnotationForm> createState() => _AnnotationFormState();
 }
 
 final class _AnnotationFormState extends State<_AnnotationForm> {
-  final TextEditingController _comment = TextEditingController();
+  late final TextEditingController _comment = TextEditingController(
+    text: widget.comment,
+  );
 
   @override
   void dispose() {
