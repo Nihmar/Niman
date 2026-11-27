@@ -207,7 +207,7 @@ final class NoteSession extends ChangeNotifier {
       if (restored) {
         _log.info('note opened with its unsaved text back: $path');
         _edited = true;
-        saves.edited();
+        saves.editedBehindHistory();
       }
       _loading = false;
       _ready = true;

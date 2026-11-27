@@ -414,27 +414,43 @@ final class SourceInput implements DeltaTextInputClient {
   /// Applies `[start, end)` → [inserted] to the note, and says whether the
   /// note now holds exactly what the platform does (it does not when a line
   /// break was stored as the note's own line ending).
-  bool _replace(int from, int to, String inserted, SelectionModel caret) {
+  ///
+  /// [composing] says the edit is an IME's composition at work: the history
+  /// folds it into the step of the composition (#1337).
+  bool _replace(
+    int from,
+    int to,
+    String inserted,
+    SelectionModel caret, {
+    bool composing = false,
+  }) {
     final (start, end) = _whole(from, to);
     final before = buffer.length;
-    final removed = buffer.substring(start, end);
+    final selectionBefore = selection();
+    final removed = removalOf(buffer, start, end, inserted);
     final edit = buffer.replaceRange(start, end, inserted);
     onTokenizer(edit, buffer);
     final stored = buffer.length - before + (end - start);
+    final exact = start == from && end == to && stored == inserted.length;
+    // A caret the platform computed against its own copy is off by what the
+    // note stored differently; the note's own arithmetic is not.
+    final landed = (exact ? caret : SelectionModel.at(start + stored)).clampTo(
+      buffer.length,
+    );
     // The history gets what the note *stored* — a line break as the note's
     // own `\r\n` — or an undo takes away the wrong number of characters.
     onRecord?.call(
       EditRecord(
         start: start,
-        removed: removed,
+        removed: removed.text,
+        held: removed.held,
         inserted: buffer.substring(start, start + stored),
+        selectionBefore: selectionBefore,
+        selectionAfter: landed,
+        composing: composing,
       ),
     );
-    final exact = start == from && end == to && stored == inserted.length;
-    // A caret the platform computed against its own copy is off by what the
-    // note stored differently; the note's own arithmetic is not.
-    final landed = exact ? caret : SelectionModel.at(start + stored);
-    onSelection(landed.clampTo(buffer.length));
+    onSelection(landed);
     onEdited(edit);
     return exact;
   }
@@ -507,7 +523,17 @@ final class SourceInput implements DeltaTextInputClient {
           (onTyped?.call(from, to, diff.inserted) ?? false)) {
         // Likewise.
       } else {
-        _replace(from, to, diff.inserted, _caretOf(value.selection, start));
+        _replace(
+          from,
+          to,
+          diff.inserted,
+          _caretOf(value.selection, start),
+          composing: _composesAt(
+            from,
+            to,
+            composesAfter: _composes(value.composing),
+          ),
+        );
       }
     } else {
       _reportSelection(
@@ -634,7 +660,18 @@ final class SourceInput implements DeltaTextInputClient {
         final caret = drifted && known
             ? _noteCaret(delta.selection, delta.apply(value).text, origin)
             : _caretOf(delta.selection, origin);
-        if (!_replace(start, end, inserted, caret)) drifted = true;
+        final exact = _replace(
+          start,
+          end,
+          inserted,
+          caret,
+          composing: _composesAt(
+            start,
+            end,
+            composesAfter: _composes(delta.composing),
+          ),
+        );
+        if (!exact) drifted = true;
       }
       _composing = _shifted(delta.composing, origin);
       if (known) value = delta.apply(value);
@@ -710,6 +747,15 @@ final class SourceInput implements DeltaTextInputClient {
   /// which an IME may still change: a bracket in it is not typed yet.
   static bool _composes(TextRange composing) =>
       composing.isValid && !composing.isCollapsed;
+
+  /// Whether an edit of `[start, end)` is the IME's composition at work: it
+  /// leaves text composing ([composesAfter]), or it replaces text the last
+  /// update left composing — the commit of a word (#1337).
+  bool _composesAt(int start, int end, {required bool composesAfter}) =>
+      composesAfter ||
+      (!_composing.isCollapsed &&
+          start >= _composing.start &&
+          end <= _composing.end);
 
   /// [range], a platform range in a window at [origin], in note offsets.
   static TextRange _shifted(TextRange range, int origin) =>

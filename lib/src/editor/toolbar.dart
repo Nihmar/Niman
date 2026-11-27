@@ -12,6 +12,7 @@ final class EditorToolbarButton {
     required this.onPressed,
     this.onPressedAt,
     this.active = false,
+    this.enabled = true,
     this.group,
   });
 
@@ -42,6 +43,11 @@ final class EditorToolbarButton {
   /// it is toggled off, the way a word processor's toolbar behaves
   /// (T-WYS-06). The source editor leaves it false.
   final bool active;
+
+  /// Whether the button can be pressed. One that cannot — Undo with nothing
+  /// to undo — keeps its place, greyed, so nothing moves under a thumb
+  /// already on it.
+  final bool enabled;
 
   /// The button's kind; a dense toolbar draws a divider wherever two
   /// neighbours' kinds differ (#173). Null never divides.
@@ -155,7 +161,7 @@ final class EditorToolbar extends StatelessWidget {
               child: Builder(
                 builder: (context) => InkWell(
                   key: button.key,
-                  onTap: () => button.pressIn(context),
+                  onTap: button.enabled ? () => button.pressIn(context) : null,
                   canRequestFocus: false,
                   child: Container(
                     padding: EdgeInsets.symmetric(
@@ -173,7 +179,9 @@ final class EditorToolbar extends StatelessWidget {
                     child: Icon(
                       button.icon,
                       size: iconSize,
-                      color: button.active
+                      color: !button.enabled
+                          ? theme.disabledColor
+                          : button.active
                           ? Theme.of(context).colorScheme.onPrimaryContainer
                           : null,
                     ),
@@ -216,7 +224,7 @@ final class EditorToolbar extends StatelessWidget {
         for (final button in buttons.skip(from))
           MenuItemButton(
             key: button.key,
-            onPressed: () => button.pressIn(anchor),
+            onPressed: button.enabled ? () => button.pressIn(anchor) : null,
             // A format on at the caret reads as on here too (#788), as the
             // pressed button does in the row: the same tint, and a check
             // a menu row says "on" with.

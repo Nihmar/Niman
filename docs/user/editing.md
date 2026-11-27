@@ -359,10 +359,19 @@ the way to it.
 The find bar searches the note a line at a time, without making a copy of
 it, so a very long note can have it open: the matches arrive in a moment
 after you stop typing the query. **Replace** swaps the current match and
-moves on, keeping the matches it already found; **Replace all** is one undo
-step and leaves the caret where it was in the text (moved by the
-replacements before it) instead of taking it to the first match. A query
-that contains a line break is searched over the whole note.
+moves on, keeping the matches it already found; **Replace all** replaces
+every match in the note — however many — as one undo step and leaves the caret
+where it was in the text (moved by the replacements before it) instead of
+taking it to the first match. The bar lists at most 100 000 matches and counts
+no further, but Replace all goes on to the end of the note. The matches are
+always those of the query in the bar: pressing Next, Replace or Replace all
+right after changing the query, on a note long enough that its matches arrive
+a moment late, searches again first rather than acting on the old ones.
+
+What the bar does and does not do: the query and the replacement are plain
+text, one line each — a line break cannot be typed or pasted into either, so a
+query never spans lines — matched letter by letter, ignoring case unless the
+case button is on. There is no regular expression and no whole-word option.
 
 ### Copy and paste
 
@@ -381,9 +390,13 @@ Cells copied from a spreadsheet (Excel, LibreOffice Calc, Numbers, Google
 Sheets) paste as a **Markdown table**, on lines of their own, the first
 row its header. So do the lines of a CSV file, separated by commas or
 semicolons, when every line has the same number of cells. A snackbar says
-so, and its **Paste as text** puts the clipboard's text in place of the
-table. Text that is not a clean table, a single row, and a paste into a
-code block stay text. On every platform.
+so, and its **Paste as text** takes the table paste back — undoes it — and
+puts the clipboard's text in its place, so the undo history holds the plain
+paste alone. Text that is not a clean table, a single row, a paste into a
+code block, and a copy of more than 2 MB (a spreadsheet's copy does not reach
+that) stay text; the text is refused as a table at the first line that is not
+shaped like one, so a long article costs a paste nothing extra. On every
+platform.
 
 Files copied in a file manager — Finder, Explorer, Nautilus, Dolphin, the
 Files app — and pasted into a note are **attached**: each is copied into
@@ -411,13 +424,30 @@ one thing done rather than one key pressed. Typing is a step, and so is a
 run of Backspace or Delete in one direction: a held Backspace is undone with
 one `Ctrl/⌘+Z`, not one character per press.
 
+Undo and redo are the first two buttons of the editor's toolbar on every
+platform — the only way to undo on a phone or a tablet with no keyboard — and
+are greyed, in their place, when there is nothing to undo or redo. On a phone
+they are also at the end of the overflow of the toolbar over a selection, once
+there is something to undo or redo. They are not
+among the buttons Settings → Editor can hide or reorder. Undo puts the
+selection back as it was before the step — the word a bold was applied to is
+selected again, and the caret goes back where a forward Delete began — and redo
+as it was after it.
+
 A step ends when you:
 
 - stop for about a second;
 - start a new word — the word you type after a space is a step of its own,
   so undo takes words back one at a time;
-- press Enter, or move the caret;
-- change from typing to deleting, or from Backspace to Delete.
+- press Enter, or move the caret — also when the keyboard moves it;
+- change from typing to deleting, or from Backspace to Delete;
+- paste or cut: a paste, a cut and an edit a command makes — a link inserted,
+  a format applied — are steps of their own, never joined to the typing or the
+  deleting next to them.
+
+On a keyboard that composes — an on-screen keyboard's word suggestions, an
+input method for Chinese, Japanese or Korean — the word being composed is one
+step however many times the keyboard rewrites it as you type.
 
 A bracket or quote that closes itself belongs to the step of what you type
 inside it: `(like this)` is undone whole, and typing the closing `)` over the
@@ -425,8 +455,14 @@ one the editor wrote does not end the step.
 
 Each open note keeps its last 200 steps, as long as the text they hold fits
 in about 32 MB; past that the oldest go first, and the latest step always
-stays. A change over a long stretch of the note — Replace All, Tidy — keeps
-only the lines it changed, so a big note does not weigh down its own undo.
+stays. A change over a long stretch of the note keeps only what it changed:
+Replace All one piece per match, Tidy the lines that differ, a format command
+the words it touched rather than their line, and a long deletion — the whole
+note selected and deleted — the note's own text where it stands, not a copy.
+
+A note undone back to the text on the disk is the saved text: it is not marked
+unsaved and is not written again, and an outside change to it is adopted as it
+is for any saved note.
 
 ### Opening and saving a note
 

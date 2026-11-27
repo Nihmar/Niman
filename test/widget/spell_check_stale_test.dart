@@ -5,15 +5,12 @@
 // issue and check again.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:niman/src/core/settings/library_settings.dart';
-import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
 import 'package:niman/src/spellcheck/editor_spell_check.dart';
 import 'package:niman/src/spellcheck/spell_check_sheet.dart';
 import 'package:niman/src/spellcheck/spell_checker.dart';
-import 'package:niman/src/ui/note_edit_commands.dart';
-import 'package:niman/src/ui/note_task_items.dart';
+import 'package:niman/src/ui/note_spelling.dart';
 import 'package:niman/src/ui/note_view_handle.dart';
 
 /// 'teh' is wrong; its suggestion is 'the'.
@@ -47,36 +44,13 @@ void main() {
     );
     edited = ChangeNotifier();
     scans = 0;
-    final commands = NoteEditCommands(
+    final spelling = NoteSpelling(
       surface: () => surface,
-      focus: () {},
       context: () => throw UnimplementedError(),
-      mounted: () => true,
-      canInsert: () => true,
-      text: () => surface.buffer.substring(0, surface.buffer.length),
-      sourceView: () => null,
-      readView: () => null,
-      activeFormats: ValueNotifier(const {}),
-      linkType: () => LinkType.wikilink,
-      notePath: () => null,
-      indentWidth: () => 2,
-      toolbarLayout: () => ToolbarLayout.defaults,
-      pasteAsMarkdown: () => null,
-      taskItems: NoteTaskItems(
-        surface: () => surface,
-        sourceView: () => null,
-        canInsert: () => true,
-        focus: () {},
-      ),
-      moveToTasks: () => null,
-      libraryRoot: () => null,
-      pickImage: () async => null,
-      importImage: (_, _) async => '',
-      onInserted: () {},
       spellCheck: () => spell,
       onSpellChecked: () {},
     );
-    review = commands.spellReview(edited: edited)!;
+    review = spelling.spellReview(edited: edited)!;
   });
 
   tearDown(() {

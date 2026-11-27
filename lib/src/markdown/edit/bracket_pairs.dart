@@ -47,6 +47,7 @@
 /// formulas are written with them.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:niman/src/markdown/edit/grapheme_steps.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 
@@ -232,6 +233,10 @@ final class BracketPairs {
 
   /// Forgets every closing character written: another note.
   void clear() => _closers.clear();
+
+  /// Whether no closer is being tracked, for a test.
+  @visibleForTesting
+  bool get isEmpty => _closers.isEmpty;
 
   /// Whether [typed] opens a pair at [offset]: per character, because half
   /// of these are ordinary punctuation most of the time (#718).

@@ -30,7 +30,7 @@ int _typing(int count) {
   final history = EditHistory();
   final watch = Stopwatch()..start();
   for (var at = 0; at < count; at++) {
-    history.record(EditRecord(start: at, removed: '', inserted: 'x'));
+    history.record(EditRecord(start: at, inserted: 'x'));
   }
   watch.stop();
   expect(history.length, 1, reason: 'one run of typing, one step');

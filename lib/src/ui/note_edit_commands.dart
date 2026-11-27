@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +11,6 @@ import 'package:niman/src/editor/editor_tool.dart';
 import 'package:niman/src/editor/list_indent.dart';
 import 'package:niman/src/editor/list_tally.dart';
 import 'package:niman/src/editor/list_tally_edit.dart';
-import 'package:niman/src/editor/list_to_mindmap.dart' as mindmap;
 import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart';
 import 'package:niman/src/editor/task_items.dart';
@@ -19,27 +19,24 @@ import 'package:niman/src/editor/toolbar_layout.dart';
 import 'package:niman/src/links/attachment_embed.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/block_scanner.dart';
-import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/render/markdown_read_view.dart';
 import 'package:niman/src/markdown/render/source_view.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/surface_controller.dart';
-import 'package:niman/src/spellcheck/editor_spell_check.dart';
-import 'package:niman/src/spellcheck/spell_check_sheet.dart';
-import 'package:niman/src/spellcheck/spell_issue.dart';
 import 'package:niman/src/ui/editor_menu.dart';
 import 'package:niman/src/ui/editor_tools_sheet.dart';
 import 'package:niman/src/ui/heading_level_sheet.dart';
 import 'package:niman/src/ui/list_tally_sheet.dart';
+import 'package:niman/src/ui/note_mind_map.dart';
 import 'package:niman/src/ui/note_task_items.dart';
-import 'package:niman/src/ui/note_view_handle.dart';
 import 'package:niman/src/ui/strings.dart';
 import 'package:path/path.dart' as p;
 
 /// The open note's editing commands: what the formatting toolbar, the
 /// format keys and the editor's context menu run (T-UI-08, #174, #205,
-/// #260), the Tools sheet's (#136), the image picker's (T-M2-09) and the
-/// spelling review's (T-PP-09).
+/// #260), the Tools sheet's (#136) and the image picker's (T-M2-09); the
+/// spelling review and the mind-map conversion have collaborators of their
+/// own (`NoteSpelling`, `NoteMindMap`).
 ///
 /// Every one goes through the editor surface's own door, as one undoable
 /// edit; the note view owns this and hands it the surface, its panes and
@@ -73,8 +70,7 @@ final class NoteEditCommands {
     required this.pickImage,
     required this.importImage,
     required this.onInserted,
-    required this.spellCheck,
-    required this.onSpellChecked,
+    required this.mindMap,
   });
 
   /// The note on the editor surface, or null before one is open.
@@ -141,11 +137,8 @@ final class NoteEditCommands {
   /// and the preview are brought up to date.
   final VoidCallback onInserted;
 
-  /// The editor's spelling state, or null when there is none.
-  final EditorSpellCheck? Function() spellCheck;
-
-  /// The spelling review closed: the pane is drawn again.
-  final VoidCallback onSpellChecked;
+  /// The list-to-mind-map conversion, which the Tools sheet offers.
+  final NoteMindMap mindMap;
 
   /// What each toolbar button does. The catalogue and the order live in
   /// `editor/toolbar_item.dart`; the commands stay here, with the
@@ -185,35 +178,52 @@ final class NoteEditCommands {
     };
   }
 
+  /// [markdown] at the caret, as a block that keeps a blank line from the
+  /// lines either side: the palette's and the shell's inserts.
+  void insertSnippetAtCaret(String markdown) {
+    if (!canInsert()) return;
+    run(
+      (text, selection) =>
+          insertSnippet(text: text, selection: selection, snippet: markdown),
+      context: 1,
+    );
+  }
+
   /// Two columns at the caret, on lines of their own, the first column's
   /// text selected (#729): the toolbar's Columns, the palette's Insert
   /// columns.
-  void insertColumnsAtCaret() => run(
-    (text, selection) => insertColumns(
-      text: text,
-      selection: selection,
-      left: AppStrings.columnsLeft,
-      right: AppStrings.columnsRight,
-    ),
-    // The lines either side: the block keeps a blank line from them.
-    context: 1,
-  );
+  void insertColumnsAtCaret() {
+    if (!canInsert()) return;
+    run(
+      (text, selection) => insertColumns(
+        text: text,
+        selection: selection,
+        left: AppStrings.columnsLeft,
+        right: AppStrings.columnsRight,
+      ),
+      // The lines either side: the block keeps a blank line from them.
+      context: 1,
+    );
+  }
 
   /// An Eisenhower matrix at the caret, in the app's language, the caret
   /// in its first quadrant (#1139): the Tools sheet's Insert Eisenhower
   /// matrix, the Insert menu's and the palette's.
-  void insertEisenhowerMatrixAtCaret() => run(
-    (text, selection) => insertEisenhowerMatrix(
-      text: text,
-      selection: selection,
-      urgent: AppStrings.eisenhowerUrgent,
-      notUrgent: AppStrings.eisenhowerNotUrgent,
-      important: AppStrings.eisenhowerImportant,
-      notImportant: AppStrings.eisenhowerNotImportant,
-    ),
-    // The lines either side: the table keeps a blank line from them.
-    context: 1,
-  );
+  void insertEisenhowerMatrixAtCaret() {
+    if (!canInsert()) return;
+    run(
+      (text, selection) => insertEisenhowerMatrix(
+        text: text,
+        selection: selection,
+        urgent: AppStrings.eisenhowerUrgent,
+        notUrgent: AppStrings.eisenhowerNotUrgent,
+        important: AppStrings.eisenhowerImportant,
+        notImportant: AppStrings.eisenhowerNotImportant,
+      ),
+      // The lines either side: the table keeps a blank line from them.
+      context: 1,
+    );
+  }
 
   /// The toolbar buttons that open a menu, run with the button's place on
   /// screen so a pointer's menu grows from it (#780). A key runs the same
@@ -281,62 +291,6 @@ final class NoteEditCommands {
   }) {
     surface()?.applyLineCommand(command, context: context, reach: reach);
     focus();
-  }
-
-  /// Converts the list at the caret into a mind map, or says why it could
-  /// not: the palette offers the command anywhere.
-  void convertListToMindMap() {
-    if (!canInsert()) return;
-    final surface = this.surface();
-    if (surface == null) return;
-    final map = _mindMapAtCaret();
-    if (map == null) {
-      // The palette offers the command anywhere: say why it did nothing.
-      final messenger = ScaffoldMessenger.maybeOf(context());
-      final reason = SnackBar(content: Text(AppStrings.toolMindMapNeedsList));
-      messenger?.showSnackBar(reason);
-      return;
-    }
-    // Only the list's lines are replaced: one undo step, and the note is
-    // never copied whole to make it.
-    final buffer = surface.buffer;
-    final last = map.endLine - 1;
-    final terminator = buffer.terminatorAt(map.startLine);
-    surface.applyEdit(
-      map.fence.join(terminator.isEmpty ? '\n' : terminator),
-      const TextSelection.collapsed(offset: 0),
-      start: buffer.offsetOfLine(map.startLine),
-      end: buffer.offsetOfLine(last) + buffer.lineLengthAt(last),
-    );
-    focus();
-  }
-
-  /// The mind map the list at the caret becomes, or null when the caret is
-  /// not in one — what the palette command converts and the Tools sheet
-  /// offers, read the same way for both.
-  mindmap.ListMindMap? _mindMapAtCaret() =>
-      _caretList<mindmap.ListMindMap?>(mindmap.listToMindMap);
-
-  /// [read] of the list at the caret, or null without a note: the caret's
-  /// line, and the pane's own scan when it draws this buffer — a scan as far
-  /// as the list otherwise.
-  T? _caretList<T>(
-    T Function({
-      required SourceBuffer buffer,
-      required int line,
-      Block? Function(int line)? blockAt,
-    })
-    read,
-  ) {
-    final surface = this.surface();
-    if (surface == null) return null;
-    final buffer = surface.buffer;
-    final view = sourceView();
-    return read(
-      buffer: buffer,
-      line: buffer.lineOf(surface.selection.extent),
-      blockAt: identical(view?.widget.buffer, buffer) ? view?.blockAt : null,
-    );
   }
 
   /// T-M2-09: pick an image, copy it into the library's attachments
@@ -416,7 +370,7 @@ final class NoteEditCommands {
       context(),
       available: <EditorTool>{
         if (_hasListToCount) EditorTool.countList,
-        if (_hasListAtCaret) EditorTool.mindMap,
+        if (mindMap.listAtCaret) EditorTool.mindMap,
         if (moves == MoveAvailability.ready) EditorTool.moveToTasks,
         if (canInsert()) EditorTool.eisenhower,
       },
@@ -432,17 +386,13 @@ final class NoteEditCommands {
       case EditorTool.countList:
         await _countList();
       case EditorTool.mindMap:
-        convertListToMindMap();
+        mindMap.convert();
       case EditorTool.moveToTasks:
         move?.call();
       case EditorTool.eisenhower:
         insertEisenhowerMatrixAtCaret();
     }
   }
-
-  /// Whether the caret stands in a list, so the mind-map tool can run.
-  /// One block read, not the conversion: the sheet only asks.
-  bool get _hasListAtCaret => _caretList(mindmap.hasListAt) ?? false;
 
   /// Whether the note has a list the count could run on.
   ///
@@ -459,12 +409,35 @@ final class NoteEditCommands {
     final scanned = sourceView()?.blocks ?? readView()?.blocks;
     final buffer = surface()?.buffer;
     if (scanned != null) return blockList(scanned);
-    if (buffer != null) return blockList(BlockScanner(buffer).index.blocks);
+    if (buffer != null) return _listNearTop(buffer);
     return blockList(scannedBlocksOf(text()));
+  }
+
+  /// How many lines of a note nobody has scanned are looked at for a list
+  /// item: what a frame reads of it (#1357).
+  static const int _listLookahead = 4096;
+
+  /// Whether the top of [buffer] holds a list item, scanned here and now for
+  /// no more than [_listLookahead] lines — the whole note was a scan on the UI
+  /// isolate, which for a long note is what the pane is still reading in the
+  /// background. A note longer than that is given the benefit of the doubt:
+  /// the count then says there is no list when there is none.
+  bool _listNearTop(SourceBuffer buffer) {
+    final lines = math.min(buffer.lineCount, _listLookahead);
+    final scanner = BlockScanner(buffer, firstLines: lines);
+    for (var line = 0; line < lines;) {
+      final block = scanner.blockAt(line);
+      if (block == null) break;
+      if (block.kind == BlockKind.listItem) return true;
+      line = block.endLine;
+    }
+    return buffer.lineCount > lines;
   }
 
   /// Counts a list into a checklist.
   Future<void> _countList() async {
+    final buffer = surface()?.buffer;
+    final revision = buffer?.revision;
     final text = this.text();
     final targets = tallyTargetsIn(text);
     if (targets.isEmpty) return;
@@ -484,6 +457,12 @@ final class NoteEditCommands {
           : targets.indexWhere((t) => t.sourceStart == here.sourceStart),
     );
     if (!mounted() || choice == null) return;
+    // The sheet is not modal to the note's text: an outside change adopted
+    // while it was open, a sync, an edit from another pane. The tally was
+    // worked out on the text read before it, and applied to this one it
+    // would put that text back over the change (#1375).
+    final now = surface()?.buffer;
+    if (!identical(now, buffer) || now?.revision != revision) return;
     final target = targets[choice.index];
     _applyMarkdownEdit(
       applyTally(
@@ -578,108 +557,5 @@ final class NoteEditCommands {
       (text, selection) =>
           setHeading(text: text, selection: selection, level: level),
     );
-  }
-
-  /// The words the review's Ignore was pressed on (#907), for as long as
-  /// the note is open in this view: closing the pane or editing does not
-  /// bring them back. Not stored: a new session starts clean, and the
-  /// library's dictionary is for words to keep.
-  final Set<String> _ignoredSpelling = <String>{};
-
-  /// The note's spelling, for the review in the dock (#712); null without
-  /// a spell check. [edited] tells of an edit, a pause after it.
-  SpellReview? spellReview({required Listenable edited}) {
-    final spell = spellCheck();
-    if (spell == null) return null;
-    return (
-      start: _scanSpelling,
-      suggest: spell.suggestionsFor,
-      apply: _applySpelling,
-      reveal: _revealSpelling,
-      addWord: spell.addToDictionary,
-      ignored: _ignoredSpelling,
-      edited: edited,
-      available: spell.available,
-    );
-  }
-
-  /// Opens the spelling review (T-PP-09) as a sheet over the note: the
-  /// phone's way to it. The row's button is left out wherever the panel
-  /// holds the review (#1002), so a sheet is all this opens.
-  Future<void> openSpellCheck() async {
-    final spell = spellCheck();
-    if (spell == null) return;
-    await showModalBottomSheet<void>(
-      context: context(),
-      isScrollControlled: true,
-      builder: (context) => SpellCheckSheet(
-        start: _scanSpelling,
-        suggest: spell.suggestionsFor,
-        apply: _applySpelling,
-        available: spell.available,
-      ),
-    );
-    onSpellChecked();
-  }
-
-  /// A pass over the whole note, in reading order (the panel's), reading
-  /// each line — and tokenizing it for what to skip — only as the pass
-  /// gets to it (#61).
-  SpellScan _scanSpelling() {
-    final spell = spellCheck()!;
-    final surface = this.surface();
-    if (surface == null) {
-      return spell.startScan(lineCount: 0, lineAt: (_) => (text: '', skip: []));
-    }
-    // The surface's own lines, and its own tokenizer's runs: code, maths,
-    // links and markers are skipped as they are in the underline.
-    final buffer = surface.buffer;
-    // The review in the dock leaves the note editable, and the pass hands
-    // the frame back between slices: it is bound to the revision it was
-    // started on, and stops at the first line after an edit (#958).
-    final revision = buffer.revision;
-    return spell.startScan(
-      lineCount: buffer.lineCount,
-      lineAt: (i) =>
-          (text: buffer.lineAt(i), skip: spellSkipRanges(surface.tokensOf(i))),
-      current: () =>
-          identical(surface.buffer, buffer) && buffer.revision == revision,
-    );
-  }
-
-  /// Where [issue]'s line starts in the buffer, or null when the note no
-  /// longer holds the issue's word at the range the pass found (#908): the
-  /// docked review is not modal, so the note can change between the pass
-  /// and the click, and the range is then another text's.
-  int? _spellingLineStart(SourceBuffer buffer, SpellIssue issue) {
-    if (issue.line >= buffer.lineCount) return null;
-    if (issue.end > buffer.lineLengthAt(issue.line)) return null;
-    final start = buffer.offsetOfLine(issue.line);
-    final held = buffer.substring(start + issue.start, start + issue.end);
-    return held == issue.word ? start : null;
-  }
-
-  /// Selects one issue's word in the editor and brings it into view;
-  /// false, and nothing selected, when the word is no longer there.
-  bool _revealSpelling(SpellIssue issue) {
-    final surface = this.surface();
-    if (surface == null) return false;
-    final start = _spellingLineStart(surface.buffer, issue);
-    if (start == null) return false;
-    surface.select(
-      SelectionModel(anchor: start + issue.start, extent: start + issue.end),
-    );
-    return true;
-  }
-
-  /// Replaces one issue's word in the controller (the panel's fix); false,
-  /// and the text untouched, when the word is no longer there.
-  bool _applySpelling(SpellIssue issue, String replacement) {
-    final surface = this.surface();
-    if (surface == null) return false;
-    final start = _spellingLineStart(surface.buffer, issue);
-    if (start == null) return false;
-    surface.replaceRange(start + issue.start, start + issue.end, replacement);
-    return true;
   }
 }

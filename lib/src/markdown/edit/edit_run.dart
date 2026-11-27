@@ -5,7 +5,12 @@
 // deletion adds a piece to a list, so a run of n keystrokes costs O(n) in all,
 // not O(n²) from joining the whole step again at every key. The history turns
 // the run into an immutable record once nothing can join it any more.
+//
+// An IME's composition is one run (#1337): each update replaces the composing
+// text, and the run takes the new text in place of the old rather than
+// stacking a step on it.
 import 'package:niman/src/markdown/edit/edit_record.dart';
+import 'package:niman/src/markdown/edit/selection_model.dart';
 
 enum _Kind {
   /// Characters typed, one after the other.
@@ -37,9 +42,14 @@ final class EditRun {
   new(EditRecord first, {int closing = 0})
     : start = first.start,
       _kind = _kindOf(first),
-      _solo = first {
+      _solo = first,
+      _before = first.selectionBefore,
+      _after = first.selectionAfter {
     switch (_kind) {
       case _Kind.insertion:
+        // A composition may begin by replacing a selection: what it replaced
+        // goes back with the step.
+        _replaced = first.removed;
         _write(first.inserted, closing);
       case _Kind.deletion:
         _removed.add(first.removed);
@@ -56,6 +66,14 @@ final class EditRun {
 
   /// The edit of a run that is only that edit.
   final EditRecord? _solo;
+
+  /// The selection before the run's first edit, and after its last.
+  final SelectionModel? _before;
+  SelectionModel? _after;
+
+  /// What the first edit of an insertion run replaced — a composition that
+  /// began over a selection — or nothing.
+  String _replaced = '';
 
   /// The text of an insertion run, as typed: what stands before the caret.
   final StringBuffer _typed = StringBuffer();
@@ -77,12 +95,15 @@ final class EditRun {
   _Direction _direction = _Direction.unknown;
 
   static _Kind _kindOf(EditRecord record) {
+    // A long stretch kept as the note's chunks is a step by itself.
+    if (record.held != null) return _Kind.solo;
     if (_hasBreak(record.removed) || _hasBreak(record.inserted)) {
       return _Kind.solo;
     }
     if (record.removed.isEmpty) return _Kind.insertion;
     if (record.inserted.isEmpty) return _Kind.deletion;
-    return _Kind.solo;
+    // A composition over a selection starts the text it goes on writing.
+    return record.composing ? _Kind.insertion : _Kind.solo;
   }
 
   /// Whether [text] holds a line break: a decision of its own, which undoing
@@ -102,8 +123,16 @@ final class EditRun {
 
   /// How many code units the step holds.
   int get units => _kind == _Kind.solo
-      ? _solo!.removed.length + _solo.inserted.length
-      : _typed.length + _tail.length + _removedLength;
+      ? _solo!.removedLength + _solo.inserted.length
+      : _replaced.length + _typed.length + _tail.length + _removedLength;
+
+  /// Whether the run holds nothing any more: a composition cancelled the
+  /// text it had typed.
+  bool get isEmpty =>
+      _kind == _Kind.insertion &&
+      _replaced.isEmpty &&
+      _typed.isEmpty &&
+      _tail.isEmpty;
 
   /// Where the caret stands once the run's typing is in: after the typed
   /// text, before the closers.
@@ -116,14 +145,53 @@ final class EditRun {
     final head = inserted.substring(0, cut);
     _typed.write(head);
     _tail = '${inserted.substring(cut)}$_tail';
-    for (var i = 0; i < head.length; i++) {
-      if (_isSpace(head.codeUnitAt(i))) {
+    _scan(head);
+  }
+
+  /// Takes [typed] into [_hasWord] and [_endsInSpace].
+  void _scan(String typed) {
+    for (var i = 0; i < typed.length; i++) {
+      if (_isSpace(typed.codeUnitAt(i))) {
         _endsInSpace = true;
       } else {
         _hasWord = true;
         _endsInSpace = false;
       }
     }
+  }
+
+  /// Whether the selection standing at [next] is where the run left it — or
+  /// the run does not know where that is.
+  bool endsAt(SelectionModel next) => _after == null || _after == next;
+
+  /// Whether [next] is the composition this run holds at work: an IME's
+  /// update that replaces text the run typed. [absorb] takes it.
+  bool absorbs(EditRecord next) {
+    if (!next.composing || _kind != _Kind.insertion || next.held != null) {
+      return false;
+    }
+    final from = next.start - start;
+    final to = from + next.removed.length;
+    if (next.removed.isEmpty || from < 0 || to > _typed.length) return false;
+    return '$_typed'.substring(from, to) == next.removed;
+  }
+
+  /// Puts the text of [next], which [absorbs] said it can, in place of the
+  /// composing text it replaces.
+  void absorb(EditRecord next) {
+    final from = next.start - start;
+    final text = '$_typed'.replaceRange(
+      from,
+      from + next.removed.length,
+      next.inserted,
+    );
+    _typed
+      ..clear()
+      ..write(text);
+    _hasWord = false;
+    _endsInSpace = false;
+    _scan(text);
+    _after = next.selectionAfter;
   }
 
   /// Whether [next] simply goes on with this run.
@@ -133,6 +201,8 @@ final class EditRun {
       case _Kind.solo:
         return false;
       case _Kind.insertion:
+        // What replaces text is a composition's, and [absorbs] decides it.
+        if (next.removed.isNotEmpty) return false;
         // At the caret, or just past the closers the run wrote.
         if (next.start != _caret && next.start != _caret + _tail.length) {
           return false;
@@ -172,8 +242,10 @@ final class EditRun {
           _endsInSpace = false;
         }
         _write(next.inserted, closing);
+        _after = next.selectionAfter;
       case _Kind.deletion:
         final backward = next.start + next.removed.length == start;
+        _after = next.selectionAfter;
         if (_direction == _Direction.unknown) {
           _direction = backward ? _Direction.backward : _Direction.forward;
         }
@@ -193,6 +265,7 @@ final class EditRun {
     _typed.write(_tail.substring(0, 1));
     _tail = _tail.substring(1);
     _endsInSpace = false;
+    _after = SelectionModel.at(caret);
     return true;
   }
 
@@ -202,12 +275,24 @@ final class EditRun {
       case _Kind.solo:
         return _solo!;
       case _Kind.insertion:
-        return EditRecord(start: start, removed: '', inserted: '$_typed$_tail');
+        return EditRecord(
+          start: start,
+          removed: _replaced,
+          inserted: '$_typed$_tail',
+          selectionBefore: _before,
+          selectionAfter: _after,
+        );
       case _Kind.deletion:
         final pieces = _direction == _Direction.backward
             ? _removed.reversed
             : _removed;
-        return EditRecord(start: start, removed: pieces.join(), inserted: '');
+        return EditRecord(
+          start: start,
+          removed: pieces.join(),
+          inserted: '',
+          selectionBefore: _before,
+          selectionAfter: _after,
+        );
     }
   }
 }
