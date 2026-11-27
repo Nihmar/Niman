@@ -371,14 +371,45 @@ final class SourceInput implements DeltaTextInputClient {
     _ => 'delta',
   };
 
+  /// `[from, to)` as the note can take it: never between a `\r` and its `\n`,
+  /// nor between the two halves of a surrogate pair (#1353).
+  ///
+  /// The platform addresses the whole text, line endings included, and counts
+  /// in code units: a keyboard that deletes one of them is asking for half of
+  /// an emoji, and a note holding half of one is saved as U+FFFD. A range is
+  /// widened to take the whole of what it touches; an insertion — a collapsed
+  /// range — is not a range to widen, and goes to one place, before the break
+  /// or the pair.
+  (int, int) _whole(int from, int to) {
+    if (from == to) {
+      final at = _beforePair(buffer.snapOutOfTerminator(from));
+      return (at, at);
+    }
+    return (
+      _beforePair(buffer.snapOutOfTerminator(from)),
+      _afterPair(buffer.snapOutOfTerminator(to, forward: true)),
+    );
+  }
+
+  /// Whether [offset] is between the halves of a surrogate pair.
+  bool _splitsPair(int offset) {
+    if (offset <= 0 || offset >= buffer.length) return false;
+    final units = buffer.substring(offset - 1, offset + 1);
+    return units.codeUnitAt(0) >= 0xD800 &&
+        units.codeUnitAt(0) <= 0xDBFF &&
+        units.codeUnitAt(1) >= 0xDC00 &&
+        units.codeUnitAt(1) <= 0xDFFF;
+  }
+
+  int _beforePair(int offset) => _splitsPair(offset) ? offset - 1 : offset;
+
+  int _afterPair(int offset) => _splitsPair(offset) ? offset + 1 : offset;
+
   /// Applies `[start, end)` → [inserted] to the note, and says whether the
   /// note now holds exactly what the platform does (it does not when a line
   /// break was stored as the note's own line ending).
   bool _replace(int from, int to, String inserted, SelectionModel caret) {
-    // The platform addresses the whole text, line endings included, and an
-    // edit that starts between a `\r` and its `\n` would split the pair.
-    final start = buffer.snapOutOfTerminator(from);
-    final end = buffer.snapOutOfTerminator(to, forward: true);
+    final (start, end) = _whole(from, to);
     final before = buffer.length;
     final removed = buffer.substring(start, end);
     final edit = buffer.replaceRange(start, end, inserted);
