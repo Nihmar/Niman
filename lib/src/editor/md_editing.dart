@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter/services.dart';
 import 'package:niman/src/editor/list_item_head.dart';
+import 'package:niman/src/editor/touched_lines.dart';
 
 export 'package:niman/src/editor/list_item_head.dart';
 
@@ -84,8 +85,7 @@ MarkdownEdit prefixLines({
   required TextSelection selection,
   required String prefix,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {
@@ -113,8 +113,7 @@ MarkdownEdit setHeading({
   required TextSelection selection,
   required int level,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {
@@ -143,8 +142,7 @@ MarkdownEdit orderedList({
   required String text,
   required TextSelection selection,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {
@@ -175,8 +173,7 @@ MarkdownEdit toggleTaskList({
   required String text,
   required TextSelection selection,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   final several = endLine > startLine;
@@ -420,8 +417,7 @@ MarkdownEdit removeHeading({
   required String text,
   required TextSelection selection,
 }) {
-  final startLine = _lineIndexOf(text, selection.start);
-  final endLine = _lineIndexOf(text, selection.end);
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final lines = text.split('\n');
   final newLines = <String>[...lines];
   for (var i = startLine; i <= endLine; i++) {

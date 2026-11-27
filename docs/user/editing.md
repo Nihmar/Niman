@@ -1076,6 +1076,10 @@ for `- ` or `- [ ] `.
   selected together move together, and an item selected with its own children
   keeps its shape. Inside a quote or a callout the rule is the same, behind the
   `>`.
+- A selection that ends at the very start of a line — a triple click, or
+  Shift+Down from the start of a line — does not include that line, here and
+  in every command that works on the lines of the selection (the list, quote,
+  numbered-list, checklist, heading and Body commands).
 
 ### Move to tasks
 

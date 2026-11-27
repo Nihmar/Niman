@@ -4,6 +4,7 @@ import 'package:niman/src/editor/list_row.dart';
 import 'package:niman/src/editor/list_tree.dart';
 import 'package:niman/src/editor/list_window.dart';
 import 'package:niman/src/editor/md_editing.dart' show MarkdownEdit;
+import 'package:niman/src/editor/touched_lines.dart';
 
 /// Indents (or outdents, with [outdent] true) every line the [selection]
 /// touches.
@@ -25,8 +26,7 @@ MarkdownEdit indentLines({
   final lines = text.split('\n');
   final base = _locate(lines, selection.baseOffset);
   final extent = _locate(lines, selection.extentOffset);
-  final startLine = base.line < extent.line ? base.line : extent.line;
-  final endLine = base.line < extent.line ? extent.line : base.line;
+  final (first: startLine, last: endLine) = touchedLines(text, selection);
   final window = listIndentWindow(
     (at) => lines[at],
     lines.length,

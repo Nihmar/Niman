@@ -112,6 +112,62 @@ void main() {
     });
   });
 
+  group(
+    'a selection ending at the start of a line leaves that line (#1345)',
+    () {
+      // `a\nb\nc` selected from the start to the start of `c`.
+      const text = 'a\nb\nc';
+      final selection = _sel(0, 4);
+
+      test('prefix', () {
+        final edit = prefixLines(
+          text: text,
+          selection: selection,
+          prefix: '- ',
+        );
+        expect(edit.text, '- a\n- b\nc');
+        expect(edit.selection, _sel(2, 8));
+      });
+
+      test('numbers', () {
+        final edit = orderedList(text: text, selection: selection);
+        expect(edit.text, '1. a\n2. b\nc');
+      });
+
+      test('heading and body', () {
+        expect(
+          setHeading(text: text, selection: selection, level: 2).text,
+          '## a\n## b\nc',
+        );
+        expect(
+          removeHeading(text: '# a\n# b\n# c', selection: _sel(0, 8)).text,
+          'a\nb\n# c',
+        );
+      });
+
+      test('checklist', () {
+        expect(
+          toggleTaskList(text: text, selection: selection).text,
+          '- [ ] a\n- [ ] b\nc',
+        );
+      });
+
+      test('a caret at the start of a line is on that line', () {
+        expect(
+          prefixLines(text: text, selection: _sel(4), prefix: '- ').text,
+          'a\nb\n- c',
+        );
+      });
+
+      test('a selection that starts at a line end holds that line', () {
+        expect(
+          prefixLines(text: text, selection: _sel(1, 2), prefix: '- ').text,
+          '- a\nb\nc',
+        );
+      });
+    },
+  );
+
   group('toggleTaskList (#263)', () {
     MarkdownEdit toggle(String text, TextSelection selection) =>
         toggleTaskList(text: text, selection: selection);

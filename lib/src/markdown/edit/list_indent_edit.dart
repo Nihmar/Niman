@@ -25,10 +25,7 @@ ListIndentEdit? listIndentEdit(
   required int width,
   required bool outdent,
 }) {
-  final touched = (
-    first: buffer.lineOf(selection.start),
-    last: buffer.lineOf(selection.end),
-  );
+  final touched = _touchedLines(buffer, selection);
   final window = listIndentWindow(
     buffer.lineAt,
     buffer.lineCount,
@@ -63,9 +60,12 @@ ListIndentEdit? listIndentEdit(
     final line = buffer.lineOf(offset);
     final index = line - window.first;
     var shift = 0;
-    for (var at = 0; at < index; at++) {
+    for (var at = 0; at < index && at < before.length; at++) {
       shift += after[at].length - before[at].length;
     }
+    // A selection that ends at the start of the line after the last one it
+    // touches may end outside the window: after all of it.
+    if (index >= before.length) return offset + shift;
     final column = offset - buffer.offsetOfLine(line);
     return buffer.offsetOfLine(line) +
         shift +
@@ -83,4 +83,17 @@ ListIndentEdit? listIndentEdit(
       extent: moved(selection.extent),
     ),
   );
+}
+
+/// The lines [selection] touches: the one it starts on to the one it ends
+/// on, but for a range ending at the very start of a line, which does not
+/// touch that line (`touchedLines`, #1345).
+({int first, int last}) _touchedLines(
+  SourceBuffer buffer,
+  SelectionModel selection,
+) {
+  final first = buffer.lineOf(selection.start);
+  var last = buffer.lineOf(selection.end);
+  if (last > first && selection.end == buffer.offsetOfLine(last)) last--;
+  return (first: first, last: last);
 }
