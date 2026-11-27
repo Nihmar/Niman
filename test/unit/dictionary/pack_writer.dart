@@ -27,12 +27,12 @@ int starDictCompare(List<int> a, List<int> b) {
 /// A dictzip file of [data]: the gzip header with the `RA` field, then one
 /// raw deflate stream per chunk, each flushed on its own so it inflates
 /// alone (what `Z_FULL_FLUSH` gives), and the gzip trailer.
-Uint8List dictzip(Uint8List data, {int chunkLength = 58315}) {
+Uint8List dictzip(Uint8List data, {int chunkLength = 58315, int level = 9}) {
   final chunks = <Uint8List>[];
   for (var at = 0; at < data.length || at == 0; at += chunkLength) {
     final end = at + chunkLength < data.length ? at + chunkLength : data.length;
     final last = end >= data.length;
-    final filter = RawZLibFilter.deflateFilter(raw: true, level: 9)
+    final filter = RawZLibFilter.deflateFilter(raw: true, level: level)
       ..process(data, at, end);
     final packed = <int>[];
     while (true) {

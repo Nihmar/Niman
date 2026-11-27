@@ -52,8 +52,20 @@ final class DictionaryIndexBuilder {
     final synBytes = stamps[2].size;
     final readBytes = idxBytes + synBytes == 0 ? 1 : idxBytes + synBytes;
 
-    final table = IndexKeyTable();
-    final entries = ByteSink(1 << 20);
+    // What the `.ifo` counts is a hint, never trusted: a table that is too
+    // small only grows, and one too big is held to what the files could
+    // hold. A key is its record less the bytes of its number.
+    final hinted = (ifo.wordCount ?? 0) + (ifo.synWordCount ?? 0);
+    final fileBytes = idxBytes + synBytes;
+    final keyBytes =
+        fileBytes - 8 * (ifo.wordCount ?? 0) - 5 * (ifo.synWordCount ?? 0);
+    final table = IndexKeyTable(
+      keys: hinted.clamp(0, fileBytes ~/ 5),
+      bytes: keyBytes.clamp(0, fileBytes),
+    );
+    final entries = ByteSink(
+      (8 * (ifo.wordCount ?? 0)).clamp(1 << 16, 8 * (idxBytes ~/ 9 + 1)),
+    );
     await StardictIdx.scan(
       idxPath,
       offsetBits: ifo.idxOffsetBits,

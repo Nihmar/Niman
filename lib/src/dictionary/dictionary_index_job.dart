@@ -59,7 +59,7 @@ Future<void> _run((SendPort, String, String) start) async {
       id: id,
       // A message per percent, not per block read.
       onProgress: (fraction) {
-        if (fraction - lastSent >= 0.01) {
+        if (fraction >= 1 || fraction - lastSent >= 0.01) {
           lastSent = fraction;
           messages.send(fraction);
         }

@@ -13,10 +13,15 @@ import 'package:niman/src/dictionary/unicode_nfc.dart';
 /// each key is reduced to its first bytes and its position, and only the
 /// keys that still tie are compared whole.
 final class IndexKeyTable {
-  /// An empty table.
-  new() : _starts = Uint32List(1 << 16), _values = Uint32List(1 << 16);
+  /// An empty table with room for [keys] keys of [bytes] bytes in all before
+  /// it grows: the `.ifo` says how many there will be, and growing is a
+  /// copy of everything so far, twice the memory for a moment.
+  new({int keys = 1 << 16, int bytes = 1 << 20})
+    : _starts = Uint32List(keys < 16 ? 16 : keys),
+      _values = Uint32List(keys < 16 ? 16 : keys),
+      _blob = ByteSink(bytes < 64 ? 64 : bytes);
 
-  final ByteSink _blob = ByteSink(1 << 20);
+  final ByteSink _blob;
   Uint32List _starts;
   Uint32List _values;
   int _count = 0;
