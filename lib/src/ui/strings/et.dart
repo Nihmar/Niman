@@ -4626,4 +4626,86 @@ final class EstonianStrings extends Strings {
   String get recurFromDueDate => 'Tähtajast';
   @override
   String get recurFromCompletion => 'Lõpetamisest';
+
+  @override
+  String get settingsSectionDictionaries => 'Sõnastikud';
+
+  @override
+  String get dictionariesIntro =>
+      'Tähendusi otsitakse sellesse seadmesse salvestatud sõnastikest, igale '
+      'keelele üks. Otsing ei lähe kunagi võrku.';
+
+  @override
+  String get dictionariesInstalled => 'Paigaldatud';
+
+  @override
+  String get dictionariesDownload => 'Laadi sõnastik alla';
+
+  @override
+  String get dictionariesSearchHint => 'Otsi keelt';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Ühtegi sõnastikku pole veel paigaldatud.';
+
+  @override
+  String get dictionariesUnavailable => 'Allalaaditavaid sõnastikke pole veel.';
+
+  @override
+  String get dictionariesNoMatch => 'Ükski keel ei vasta otsingule.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Kõik saadaolevad sõnastikud on paigaldatud.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definitsioonid: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Keelele: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Kas kustutada sõnastik $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'See vabastab $size. Saad selle uuesti alla laadida.';
+
+  @override
+  String get dictionaryUnpacking => 'Lahtipakkimine…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Indeksi loomine… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ei saa kasutada: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Sõnastikku $language ei õnnestunud kustutada: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF-i keel';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF ei ütle, mis keeles see on, seega kasutatakse kogu esimest '
+      'õigekirjakeelt, kuni muudad seda tähenduste paneelil. Valik jäetakse '
+      'selle faili jaoks meelde.';
+
+  @override
+  String get dictionaryNotice =>
+      'Sõnastikud on rakenduse andmekaustas, mitte kogus: need ei '
+      'sünkroonita ja need ei ole märkmed. Sõnastiku indeks ehitatakse ise '
+      'uuesti üles, kui see kustutatakse.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekstid Wiktionaryst, CC BY-SA 4.0 ja GFDL, välja võetud '
+      'wiktextractiga.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeksi loomine ebaõnnestus: $reason';
 }

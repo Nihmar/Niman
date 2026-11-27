@@ -4738,4 +4738,85 @@ final class UkrainianStrings extends Strings {
   String get recurFromDueDate => 'Від терміну';
   @override
   String get recurFromCompletion => 'Від виконання';
+
+  @override
+  String get settingsSectionDictionaries => 'Словники';
+
+  @override
+  String get dictionariesIntro =>
+      'Значення шукають у словниках, що зберігаються на цьому пристрої, по '
+      'одному на мову. Пошук ніколи не виходить у мережу.';
+
+  @override
+  String get dictionariesInstalled => 'Установлені';
+
+  @override
+  String get dictionariesDownload => 'Завантажити словник';
+
+  @override
+  String get dictionariesSearchHint => 'Пошук мови';
+
+  @override
+  String get dictionariesNoneInstalled => 'Жодного словника ще не встановлено.';
+
+  @override
+  String get dictionariesUnavailable => 'Словників для завантаження ще немає.';
+
+  @override
+  String get dictionariesNoMatch => 'Жодна мова не відповідає пошуку.';
+
+  @override
+  String get dictionariesAllInstalled => 'Усі доступні словники встановлено.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Визначення: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Для: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Видалити словник $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Звільнить $size. Його можна завантажити знову.';
+
+  @override
+  String get dictionaryUnpacking => 'Розпакування…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Створення індексу… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) =>
+      'Не можна використовувати: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Не вдалося видалити словник $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Мова PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF не вказує, якою мовою він написаний, тому використовується перша '
+      'мова перевірки правопису бібліотеки, доки ви не зміните її на панелі '
+      "значень. Вибір запам'ятовується для цього файлу.";
+
+  @override
+  String get dictionaryNotice =>
+      'Словники зберігаються в папці даних застосунку, а не в бібліотеці: '
+      'вони не синхронізуються й не є нотатками. Індекс словника '
+      'відновлюється сам, якщо його видалити.';
+
+  @override
+  String get dictionaryLicense =>
+      'Тексти з Wiktionary, CC BY-SA 4.0 і GFDL, вилучені за допомогою '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Не вдалося створити індекс: $reason';
 }

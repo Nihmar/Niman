@@ -4208,4 +4208,74 @@ final class ChineseStrings extends Strings {
   String get recurFromDueDate => '从截止日起';
   @override
   String get recurFromCompletion => '从完成日起';
+
+  @override
+  String get settingsSectionDictionaries => '词典';
+
+  @override
+  String get dictionariesIntro => '词义会在本设备上保存的词典中查找，每种语言一部。查词从不联网。';
+
+  @override
+  String get dictionariesInstalled => '已安装';
+
+  @override
+  String get dictionariesDownload => '下载词典';
+
+  @override
+  String get dictionariesSearchHint => '搜索语言';
+
+  @override
+  String get dictionariesNoneInstalled => '尚未安装任何词典。';
+
+  @override
+  String get dictionariesUnavailable => '暂时没有可下载的词典。';
+
+  @override
+  String get dictionariesNoMatch => '没有与搜索相符的语言。';
+
+  @override
+  String get dictionariesAllInstalled => '所有可用的词典均已安装。';
+
+  @override
+  String dictionaryDefinitions(String language) => '释义语言：$language';
+
+  @override
+  String dictionaryServes(String languages) => '适用于：$languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => '删除$language词典？';
+
+  @override
+  String dictionaryDeleteBody(String size) => '将释放 $size。你可以再次下载。';
+
+  @override
+  String get dictionaryUnpacking => '正在解压…';
+
+  @override
+  String dictionaryIndexing(int percent) => '正在建立索引… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => '无法使用：$reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      '无法删除$language词典：$reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF 的语言';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF 不会说明自己使用哪种语言，因此在你于词义面板中更改之前，会使用文库的第一种拼写检查语言。该选择会按文件保存。';
+
+  @override
+  String get dictionaryNotice =>
+      '词典保存在应用的数据文件夹中，而不是文库里：它们不会同步，也不是笔记。词典的索引被删除后会自动重建。';
+
+  @override
+  String get dictionaryLicense =>
+      '文本来自 Wiktionary（CC BY-SA 4.0 和 GFDL），由 wiktextract 提取。';
+
+  @override
+  String dictionaryIndexFailed(String reason) => '无法建立索引：$reason';
 }

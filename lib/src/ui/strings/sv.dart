@@ -4702,4 +4702,85 @@ final class SwedishStrings extends Strings {
   String get recurFromDueDate => 'Från förfallodatum';
   @override
   String get recurFromCompletion => 'Från slutförande';
+
+  @override
+  String get settingsSectionDictionaries => 'Ordböcker';
+
+  @override
+  String get dictionariesIntro =>
+      'Betydelser slås upp i ordböcker som finns på den här enheten, en per '
+      'språk. Ett uppslag går aldrig ut på nätet.';
+
+  @override
+  String get dictionariesInstalled => 'Installerade';
+
+  @override
+  String get dictionariesDownload => 'Ladda ned en ordbok';
+
+  @override
+  String get dictionariesSearchHint => 'Sök efter ett språk';
+
+  @override
+  String get dictionariesNoneInstalled => 'Ingen ordbok är installerad än.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Inga ordböcker finns att ladda ned än.';
+
+  @override
+  String get dictionariesNoMatch => 'Inget språk matchar sökningen.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Alla tillgängliga ordböcker är installerade.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definitioner: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'För $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Ta bort ordboken för $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Det frigör $size. Du kan ladda ned den igen.';
+
+  @override
+  String get dictionaryUnpacking => 'Packar upp…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Bygger indexet… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Kan inte användas: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Det gick inte att ta bort ordboken för $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Språk för en PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'En PDF anger inte vilket språk den är på: bibliotekets första '
+      'stavningsspråk används tills du ändrar det i betydelsepanelen. Valet '
+      'sparas för den filen.';
+
+  @override
+  String get dictionaryNotice =>
+      'Ordböckerna ligger i appens datamapp, inte i biblioteket: de synkas '
+      'inte och är inte anteckningar. En ordboks index byggs upp igen av sig '
+      'självt om det tas bort.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texter från Wiktionary, CC BY-SA 4.0 och GFDL, utvunna med wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Det gick inte att bygga indexet: $reason';
 }

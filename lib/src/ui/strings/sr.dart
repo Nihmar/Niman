@@ -4708,4 +4708,84 @@ final class SerbianStrings extends Strings {
   String get recurFromDueDate => 'Од рока';
   @override
   String get recurFromCompletion => 'Од завршетка';
+
+  @override
+  String get settingsSectionDictionaries => 'Речници';
+
+  @override
+  String get dictionariesIntro =>
+      'Значења се траже у речницима сачуваним на овом уређају, по један за '
+      'сваки језик. Претрага никада не иде на мрежу.';
+
+  @override
+  String get dictionariesInstalled => 'Инсталирани';
+
+  @override
+  String get dictionariesDownload => 'Преузми речник';
+
+  @override
+  String get dictionariesSearchHint => 'Тражи језик';
+
+  @override
+  String get dictionariesNoneInstalled => 'Још није инсталиран ниједан речник.';
+
+  @override
+  String get dictionariesUnavailable => 'Још нема речника за преузимање.';
+
+  @override
+  String get dictionariesNoMatch => 'Ниједан језик не одговара претрази.';
+
+  @override
+  String get dictionariesAllInstalled => 'Сви доступни речници су инсталирани.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Дефиниције: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'За: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Избрисати речник $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Ослобађа $size. Можете га поново преузети.';
+
+  @override
+  String get dictionaryUnpacking => 'Распакивање…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Прављење индекса… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Не може се користити: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Речник $language није било могуће избрисати: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Језик PDF-а';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF не каже на ком је језику па се користи први језик провере '
+      'правописа библиотеке док га не промените у панелу значења. Избор се '
+      'памти за ту датотеку.';
+
+  @override
+  String get dictionaryNotice =>
+      'Речници су у фасцикли података апликације, не у библиотеци: не '
+      'синхронизују се и нису белешке. Индекс речника се сам поново изгради '
+      'ако се избрише.';
+
+  @override
+  String get dictionaryLicense =>
+      'Текстови са Wiktionary-ја, CC BY-SA 4.0 и GFDL, издвојени алатом '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Индекс није било могуће направити: $reason';
 }

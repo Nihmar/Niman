@@ -4311,4 +4311,77 @@ final class JapaneseStrings extends Strings {
   String get recurFromDueDate => '期限日から';
   @override
   String get recurFromCompletion => '完了日から';
+
+  @override
+  String get settingsSectionDictionaries => '辞書';
+
+  @override
+  String get dictionariesIntro =>
+      '意味は、このデバイスに保存された辞書（言語ごとに1つ）で調べます。検索がネットワークに出ることはありません。';
+
+  @override
+  String get dictionariesInstalled => 'インストール済み';
+
+  @override
+  String get dictionariesDownload => '辞書をダウンロード';
+
+  @override
+  String get dictionariesSearchHint => '言語を検索';
+
+  @override
+  String get dictionariesNoneInstalled => 'インストールされた辞書はまだありません。';
+
+  @override
+  String get dictionariesUnavailable => 'ダウンロードできる辞書はまだありません。';
+
+  @override
+  String get dictionariesNoMatch => '検索に一致する言語はありません。';
+
+  @override
+  String get dictionariesAllInstalled => '利用できる辞書はすべてインストール済みです。';
+
+  @override
+  String dictionaryDefinitions(String language) => '定義: $language';
+
+  @override
+  String dictionaryServes(String languages) => '対象: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => '$languageの辞書を削除しますか？';
+
+  @override
+  String dictionaryDeleteBody(String size) => '$sizeが空きます。もう一度ダウンロードできます。';
+
+  @override
+  String get dictionaryUnpacking => '展開中…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'インデックスを作成中… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => '使用できません: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      '$languageの辞書を削除できませんでした: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDFの言語';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDFは自身の言語を示さないため、意味パネルで変更するまで、ライブラリの最初のスペルチェック言語を使います。選択はそのファイルごとに保存されま'
+      'す。';
+
+  @override
+  String get dictionaryNotice =>
+      '辞書はライブラリではなく、アプリのデータフォルダーに保存されます。同期されず、ノートでもありません。辞書のインデックスは、削除されても自動で再'
+      '構築されます。';
+
+  @override
+  String get dictionaryLicense =>
+      'テキストは Wiktionary（CC BY-SA 4.0 と GFDL）から、wiktextract で抽出したものです。';
+
+  @override
+  String dictionaryIndexFailed(String reason) => 'インデックスを作成できませんでした: $reason';
 }

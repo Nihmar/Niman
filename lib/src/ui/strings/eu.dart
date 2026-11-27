@@ -4740,4 +4740,88 @@ final class BasqueStrings extends Strings {
   String get recurFromDueDate => 'Epemugatik';
   @override
   String get recurFromCompletion => 'Amaitzetik';
+
+  @override
+  String get settingsSectionDictionaries => 'Hiztegiak';
+
+  @override
+  String get dictionariesIntro =>
+      'Esanahiak gailu honetan gordetako hiztegietan bilatzen dira, '
+      'hizkuntza bakoitzeko bat. Bilaketak ez du inoiz sarera jotzen.';
+
+  @override
+  String get dictionariesInstalled => 'Instalatuta';
+
+  @override
+  String get dictionariesDownload => 'Deskargatu hiztegi bat';
+
+  @override
+  String get dictionariesSearchHint => 'Bilatu hizkuntza bat';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Oraindik ez dago hiztegirik instalatuta.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Oraindik ez dago deskargatzeko hiztegirik.';
+
+  @override
+  String get dictionariesNoMatch =>
+      'Ez dago bilaketarekin bat datorren hizkuntzarik.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Eskuragarri dauden hiztegi guztiak instalatuta daude.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definizioak: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Hauentzat: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      '$language hiztegia ezabatu nahi duzu?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      '$size askatzen ditu. Berriro deskarga dezakezu.';
+
+  @override
+  String get dictionaryUnpacking => 'Deskonprimatzen…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Indizea eraikitzen… %$percent';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ezin da erabili: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Ezin izan da $language hiztegia ezabatu: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF baten hizkuntza';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF batek ez du esaten zer hizkuntzatan dagoen: liburutegiaren lehen '
+      'ortografia-hizkuntza erabiltzen da, esanahien panelean aldatu arte. '
+      'Aukera fitxategi horretarako gordetzen da.';
+
+  @override
+  String get dictionaryNotice =>
+      'Hiztegiak aplikazioaren datu-karpetan daude, ez liburutegian: ez dira '
+      'sinkronizatzen eta ez dira oharrak. Hiztegi baten indizea berez '
+      'berreraikitzen da ezabatzen bada.';
+
+  @override
+  String get dictionaryLicense =>
+      'Wiktionary-ko testuak, CC BY-SA 4.0 eta GFDL, wiktextract-ekin atera '
+      'direnak.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Ezin izan da indizea eraiki: $reason';
 }

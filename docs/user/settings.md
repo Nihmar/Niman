@@ -12,7 +12,7 @@ library.
 
 Settings is split into areas, grouped by what they change: **App**
 (appearance, themes, editor, keyboard shortcuts, commands, text
-recognition, export, updates, diagnostics),
+recognition, dictionaries, export, updates, diagnostics),
 the open **Library** (features, folders, journal, study, navigation, trash and history, sync,
 transcription, reminders), and **Maintenance** (re-index, rebuild the index, import a Notion
 export or a folder, convert an EPUB or an HTML file to Markdown, switch
@@ -232,6 +232,45 @@ Making one, editing its colors, renaming it, deleting it, exporting it
 into a `.json` file and importing one back are all there. The whole story
 is in [themes.md](themes.md); the themes do not live in the library — they
 are the installation's, so a copied folder does not carry them.
+
+### Dictionaries
+
+**Settings → Dictionaries** holds the dictionaries that meanings are looked
+up in, one per language, downloaded to the device and read there: a
+look-up never goes online (#1382). The personal dictionary, the words you
+teach the spell checker, stays under Spelling in the editor's settings.
+The packs are the installation's, not the library's: they live in the app's
+data folder (`dictionary/`), do not sync and are not notes, and a copied
+library does not carry them.
+
+- **Installed** lists a row per dictionary: the language's own name, where
+  the words come from (Wiktionary), the language its definitions are
+  written in, its licence and its size on disk, and a delete button that
+  asks first. A dictionary this version of Niman cannot read (a format it
+  does not know, a file missing) says why on its row, and can be deleted
+  all the same. Deleting closes the dictionary first; if the system will
+  not let a file go, the page says so and the dictionary stays as it was.
+- **Download a dictionary** lists the dictionaries that are not installed,
+  with a search over the languages' names (in themselves and in English).
+  A row says the language its definitions are in and its size before you
+  download. Croatian, Serbian and Bosnian share one Serbo-Croatian
+  dictionary, as Wiktionary does, and the row says so. While none is on
+  offer — as before the first dictionaries are published — one line says
+  so, and nothing else changes.
+- A download shows its progress with a cancel button, then *Unpacking* and
+  the index's progress, in the row where it started: it moves up among the
+  installed dictionaries and stays there. It goes on when you leave the
+  page, and one a lost connection cut off resumes where it stopped. A
+  dictionary is installed only when all of it is: the download is checked
+  by its size and its SHA-256, and unpacked into place in one step, so an
+  interrupted install leaves nothing that looks like a dictionary.
+- The index of a dictionary is built once, when it is downloaded, and sits
+  beside its files; if it is deleted, it is built again by itself.
+- Below the lists, a note says how a PDF's language is chosen: a PDF does
+  not say what language it is in, so the library's first spelling language
+  is used until you change it in the look-up panel, and the choice is kept
+  for that file; and the notice that the texts are Wiktionary's,
+  CC BY-SA 4.0 and GFDL, extracted with wiktextract.
 
 ### Sync
 

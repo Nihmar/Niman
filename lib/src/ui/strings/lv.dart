@@ -4692,4 +4692,84 @@ final class LatvianStrings extends Strings {
   String get recurFromDueDate => 'No termiņa';
   @override
   String get recurFromCompletion => 'No pabeigšanas';
+
+  @override
+  String get settingsSectionDictionaries => 'Vārdnīcas';
+
+  @override
+  String get dictionariesIntro =>
+      'Nozīmes meklē šajā ierīcē glabātās vārdnīcās, pa vienai katrai '
+      'valodai. Meklēšana nekad neiet uz tīklu.';
+
+  @override
+  String get dictionariesInstalled => 'Instalētās';
+
+  @override
+  String get dictionariesDownload => 'Lejupielādēt vārdnīcu';
+
+  @override
+  String get dictionariesSearchHint => 'Meklēt valodu';
+
+  @override
+  String get dictionariesNoneInstalled => 'Neviena vārdnīca vēl nav instalēta.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Lejupielādei vēl nav pieejamu vārdnīcu.';
+
+  @override
+  String get dictionariesNoMatch => 'Neviena valoda neatbilst meklēšanai.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Visas pieejamās vārdnīcas ir instalētas.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definīcijas: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Valodām: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => 'Dzēst vārdnīcu: $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Atbrīvo $size. Varēsiet to lejupielādēt vēlreiz.';
+
+  @override
+  String get dictionaryUnpacking => 'Izpako…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Veido indeksu… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nevar izmantot: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Neizdevās izdzēst vārdnīcu ($language): $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'PDF valoda';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF nenorāda, kādā valodā tas ir, tāpēc tiek izmantota bibliotēkas '
+      'pirmā pareizrakstības valoda, kamēr to nomainīsiet nozīmju panelī. '
+      'Izvēle tiek saglabāta šim failam.';
+
+  @override
+  String get dictionaryNotice =>
+      'Vārdnīcas atrodas lietotnes datu mapē, nevis bibliotēkā: tās netiek '
+      'sinhronizētas un nav piezīmes. Vārdnīcas indekss pats atjaunojas, ja '
+      'to izdzēš.';
+
+  @override
+  String get dictionaryLicense =>
+      'Teksti no Wiktionary, CC BY-SA 4.0 un GFDL, iegūti ar wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Neizdevās izveidot indeksu: $reason';
 }

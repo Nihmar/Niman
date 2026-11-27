@@ -2409,4 +2409,37 @@ final class AppStrings {
   static String get recurUnitYears => _s.recurUnitYears;
   static String get recurFromDueDate => _s.recurFromDueDate;
   static String get recurFromCompletion => _s.recurFromCompletion;
+
+  // Settings: dictionaries (#1382).
+  static String get settingsSectionDictionaries =>
+      _s.settingsSectionDictionaries;
+  static String get dictionariesIntro => _s.dictionariesIntro;
+  static String get dictionariesInstalled => _s.dictionariesInstalled;
+  static String get dictionariesDownload => _s.dictionariesDownload;
+  static String get dictionariesSearchHint => _s.dictionariesSearchHint;
+  static String get dictionariesNoneInstalled => _s.dictionariesNoneInstalled;
+  static String get dictionariesUnavailable => _s.dictionariesUnavailable;
+  static String get dictionariesNoMatch => _s.dictionariesNoMatch;
+  static String get dictionariesAllInstalled => _s.dictionariesAllInstalled;
+  static String dictionaryDefinitions(String language) =>
+      _s.dictionaryDefinitions(language);
+  static String dictionaryServes(String languages) =>
+      _s.dictionaryServes(languages);
+  static String dictionaryDeleteTitle(String language) =>
+      _s.dictionaryDeleteTitle(language);
+  static String dictionaryDeleteBody(String size) =>
+      _s.dictionaryDeleteBody(size);
+  static String get dictionaryUnpacking => _s.dictionaryUnpacking;
+  static String dictionaryIndexing(int percent) =>
+      _s.dictionaryIndexing(percent);
+  static String dictionaryUnusable(String reason) =>
+      _s.dictionaryUnusable(reason);
+  static String dictionaryRemoveFailed(String language, String reason) =>
+      _s.dictionaryRemoveFailed(language, reason);
+  static String get dictionaryPdfLanguageTitle => _s.dictionaryPdfLanguageTitle;
+  static String get dictionaryPdfLanguageNote => _s.dictionaryPdfLanguageNote;
+  static String get dictionaryNotice => _s.dictionaryNotice;
+  static String get dictionaryLicense => _s.dictionaryLicense;
+  static String dictionaryIndexFailed(String reason) =>
+      _s.dictionaryIndexFailed(reason);
 }

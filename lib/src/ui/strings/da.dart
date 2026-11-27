@@ -4658,4 +4658,86 @@ final class DanishStrings extends Strings {
   String get recurFromDueDate => 'Fra forfaldsdatoen';
   @override
   String get recurFromCompletion => 'Fra afslutning';
+
+  @override
+  String get settingsSectionDictionaries => 'Ordbøger';
+
+  @override
+  String get dictionariesIntro =>
+      'Betydninger slås op i ordbøger, der ligger på denne enhed, én pr. '
+      'sprog. Et opslag går aldrig online.';
+
+  @override
+  String get dictionariesInstalled => 'Installeret';
+
+  @override
+  String get dictionariesDownload => 'Download en ordbog';
+
+  @override
+  String get dictionariesSearchHint => 'Søg efter et sprog';
+
+  @override
+  String get dictionariesNoneInstalled => 'Ingen ordbog er installeret endnu.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Der er endnu ingen ordbøger at downloade.';
+
+  @override
+  String get dictionariesNoMatch => 'Intet sprog matcher din søgning.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Alle tilgængelige ordbøger er installeret.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definitioner: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Til $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Slet ordbogen for $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Det frigør $size. Du kan downloade den igen.';
+
+  @override
+  String get dictionaryUnpacking => 'Pakker ud…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Opbygger indekset… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Kan ikke bruges: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Ordbogen for $language kunne ikke slettes: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Sproget i en PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'En PDF oplyser ikke, hvilket sprog den er på: bibliotekets første '
+      'stavesprog bruges, indtil du ændrer det i betydningspanelet. Valget '
+      'huskes for den fil.';
+
+  @override
+  String get dictionaryNotice =>
+      'Ordbøgerne ligger i appens datamappe, ikke i biblioteket: de '
+      'synkroniseres ikke og er ikke noter. En ordbogs indeks genopbygger '
+      'sig selv, hvis det slettes.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekster fra Wiktionary, CC BY-SA 4.0 og GFDL, udtrukket med '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indekset kunne ikke opbygges: $reason';
 }

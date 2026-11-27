@@ -4737,4 +4737,88 @@ final class DutchStrings extends Strings {
   String get recurFromDueDate => 'Vanaf de vervaldatum';
   @override
   String get recurFromCompletion => 'Vanaf voltooiing';
+
+  @override
+  String get settingsSectionDictionaries => 'Woordenboeken';
+
+  @override
+  String get dictionariesIntro =>
+      'Betekenissen worden opgezocht in woordenboeken op dit apparaat, één '
+      'per taal. Opzoeken gaat nooit online.';
+
+  @override
+  String get dictionariesInstalled => 'Geïnstalleerd';
+
+  @override
+  String get dictionariesDownload => 'Een woordenboek downloaden';
+
+  @override
+  String get dictionariesSearchHint => 'Zoek een taal';
+
+  @override
+  String get dictionariesNoneInstalled => 'Nog geen woordenboek geïnstalleerd.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Er zijn nog geen woordenboeken om te downloaden.';
+
+  @override
+  String get dictionariesNoMatch =>
+      'Geen taal komt overeen met je zoekopdracht.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Alle beschikbare woordenboeken zijn geïnstalleerd.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definities: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Voor $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Woordenboek $language verwijderen?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Dit maakt $size vrij. Je kunt het opnieuw downloaden.';
+
+  @override
+  String get dictionaryUnpacking => 'Uitpakken…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Index opbouwen… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Niet te gebruiken: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Het woordenboek $language kon niet worden verwijderd: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Taal van een pdf';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Een pdf geeft zijn taal niet aan: de eerste spellingtaal van de '
+      'bibliotheek wordt gebruikt tot je die wijzigt in het betekenispaneel. '
+      'De keuze blijft bewaard voor dat bestand.';
+
+  @override
+  String get dictionaryNotice =>
+      'Woordenboeken staan in de gegevensmap van de app, niet in de '
+      'bibliotheek: ze worden niet gesynchroniseerd en zijn geen notities. '
+      'De index van een woordenboek bouwt zichzelf opnieuw op als hij wordt '
+      'verwijderd.';
+
+  @override
+  String get dictionaryLicense =>
+      'Teksten van Wiktionary, CC BY-SA 4.0 en GFDL, geëxtraheerd met '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'De index kon niet worden opgebouwd: $reason';
 }

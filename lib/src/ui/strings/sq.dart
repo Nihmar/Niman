@@ -4720,4 +4720,87 @@ final class AlbanianStrings extends Strings {
   String get recurFromDueDate => 'Nga afati';
   @override
   String get recurFromCompletion => 'Nga përfundimi';
+
+  @override
+  String get settingsSectionDictionaries => 'Fjalorë';
+
+  @override
+  String get dictionariesIntro =>
+      'Kuptimet kërkohen në fjalorë të ruajtur në këtë pajisje, nga një për '
+      'çdo gjuhë. Një kërkim nuk shkon kurrë në internet.';
+
+  @override
+  String get dictionariesInstalled => 'Të instaluar';
+
+  @override
+  String get dictionariesDownload => 'Shkarko një fjalor';
+
+  @override
+  String get dictionariesSearchHint => 'Kërko një gjuhë';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Ende nuk është instaluar asnjë fjalor.';
+
+  @override
+  String get dictionariesUnavailable =>
+      "Ende nuk ka fjalorë për t'u shkarkuar.";
+
+  @override
+  String get dictionariesNoMatch => 'Asnjë gjuhë nuk përputhet me kërkimin.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Të gjithë fjalorët e disponueshëm janë instaluar.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Përkufizime: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Për $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Të fshihet fjalori i $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Liron $size. Mund ta shkarkosh përsëri.';
+
+  @override
+  String get dictionaryUnpacking => 'Po çarkivohet…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Po ndërtohet indeksi… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nuk mund të përdoret: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Fjalori i $language nuk u fshi dot: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Gjuha e një PDF-je';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Një PDF nuk thotë në çfarë gjuhe është: përdoret gjuha e parë e '
+      'drejtshkrimit të bibliotekës derisa ta ndryshosh te paneli i '
+      'kuptimeve. Zgjedhja ruhet për atë skedar.';
+
+  @override
+  String get dictionaryNotice =>
+      'Fjalorët ruhen në dosjen e të dhënave të aplikacionit, jo në '
+      'bibliotekë: nuk sinkronizohen dhe nuk janë shënime. Indeksi i një '
+      'fjalori rindërtohet vetë nëse fshihet.';
+
+  @override
+  String get dictionaryLicense =>
+      'Tekste nga Wiktionary, CC BY-SA 4.0 dhe GFDL, të nxjerra me '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Indeksi nuk u ndërtua dot: $reason';
 }

@@ -7,6 +7,7 @@ import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_areas.dart';
 import 'package:niman/src/ui/settings_search_appearance.dart';
 import 'package:niman/src/ui/settings_search_diagnostics.dart';
+import 'package:niman/src/ui/settings_search_dictionaries.dart';
 import 'package:niman/src/ui/settings_search_editor.dart';
 import 'package:niman/src/ui/settings_search_entry.dart';
 import 'package:niman/src/ui/settings_search_export.dart';
@@ -53,6 +54,7 @@ List<SettingsSearchEntry> settingsSearchEntries({
     ...exportSearchEntries(scope),
     ...diagnosticsSearchEntries(scope),
     ...serviceSearchEntries(scope, ocr: ocr, transcription: transcription),
+    ...dictionarySearchEntries(scope),
     ...maintenanceSearchEntries(scope, libraryRows: libraryRows),
   ];
   final titles = {for (final entry in entries) entry.title};

@@ -4707,4 +4707,86 @@ final class SlovakStrings extends Strings {
   String get recurFromDueDate => 'Od termínu';
   @override
   String get recurFromCompletion => 'Od dokončenia';
+
+  @override
+  String get settingsSectionDictionaries => 'Slovníky';
+
+  @override
+  String get dictionariesIntro =>
+      'Významy sa hľadajú v slovníkoch uložených v tomto zariadení, jeden na '
+      'jazyk. Vyhľadávanie nikdy nejde cez internet.';
+
+  @override
+  String get dictionariesInstalled => 'Nainštalované';
+
+  @override
+  String get dictionariesDownload => 'Stiahnuť slovník';
+
+  @override
+  String get dictionariesSearchHint => 'Hľadať jazyk';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Zatiaľ nie je nainštalovaný žiadny slovník.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Zatiaľ nie sú na stiahnutie žiadne slovníky.';
+
+  @override
+  String get dictionariesNoMatch => 'Hľadaniu nezodpovedá žiadny jazyk.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Všetky dostupné slovníky sú nainštalované.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definície: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Pre: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Odstrániť slovník $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Uvoľní $size. Môžete si ho stiahnuť znova.';
+
+  @override
+  String get dictionaryUnpacking => 'Rozbaľuje sa…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Vytvára sa index… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nedá sa použiť: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Slovník $language sa nepodarilo odstrániť: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Jazyk PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF svoj jazyk neuvádza, preto sa použije prvý jazyk pravopisu '
+      'knižnice, kým ho nezmeníte v paneli významov. Voľba sa pamätá pre '
+      'daný súbor.';
+
+  @override
+  String get dictionaryNotice =>
+      'Slovníky sú v dátovom priečinku aplikácie, nie v knižnici: '
+      'nesynchronizujú sa a nie sú to poznámky. Index slovníka sa po '
+      'odstránení sám obnoví.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texty z Wiktionary, CC BY-SA 4.0 a GFDL, získané pomocou wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Index sa nepodarilo vytvoriť: $reason';
 }

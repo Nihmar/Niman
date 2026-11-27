@@ -117,6 +117,11 @@ abstract final class SettingsKeys {
   static const ocrLanguage = Key('ocr-language-setting');
   static const ocrAlso = Key('ocr-also-setting');
 
+  // Dictionaries.
+  static const dictionaries = Key('dictionaries-setting');
+  static const dictionaryDownload = Key('dictionary-download-setting');
+  static const dictionaryPdfLanguage = Key('dictionary-pdf-language-setting');
+
   // Maintenance: actions rather than settings, searchable all the same.
   static const reindex = Key('reindex-setting');
   static const rebuildIndex = Key('rebuild-index-setting');

@@ -4732,4 +4732,85 @@ final class SlovenianStrings extends Strings {
   String get recurFromDueDate => 'Od roka';
   @override
   String get recurFromCompletion => 'Od dokončanja';
+
+  @override
+  String get settingsSectionDictionaries => 'Slovarji';
+
+  @override
+  String get dictionariesIntro =>
+      'Pomeni se iščejo v slovarjih, shranjenih v tej napravi, po en za '
+      'jezik. Iskanje nikoli ne gre prek spleta.';
+
+  @override
+  String get dictionariesInstalled => 'Nameščeni';
+
+  @override
+  String get dictionariesDownload => 'Prenesi slovar';
+
+  @override
+  String get dictionariesSearchHint => 'Poišči jezik';
+
+  @override
+  String get dictionariesNoneInstalled => 'Noben slovar še ni nameščen.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Za prenos še ni na voljo nobenega slovarja.';
+
+  @override
+  String get dictionariesNoMatch => 'Nobeden jezik ne ustreza iskanju.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Vsi razpoložljivi slovarji so nameščeni.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definicije: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Za: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => 'Izbrišem slovar $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Sprosti $size. Lahko ga znova prenesete.';
+
+  @override
+  String get dictionaryUnpacking => 'Razpakiranje …';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Gradnja kazala … $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ni mogoče uporabiti: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Slovarja $language ni bilo mogoče izbrisati: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Jezik PDF-ja';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF ne pove, v katerem jeziku je, zato se uporabi prvi črkovalni '
+      'jezik knjižnice, dokler ga ne spremenite v plošči pomenov. Izbira se '
+      'za to datoteko ohrani.';
+
+  @override
+  String get dictionaryNotice =>
+      'Slovarji so v podatkovni mapi aplikacije, ne v knjižnici: ne '
+      'sinhronizirajo se in niso zapiski. Kazalo slovarja se po izbrisu samo '
+      'znova zgradi.';
+
+  @override
+  String get dictionaryLicense =>
+      'Besedila iz Wiktionary, CC BY-SA 4.0 in GFDL, pridobljena z '
+      'wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Kazala ni bilo mogoče zgraditi: $reason';
 }

@@ -22,6 +22,8 @@ LibraryFeature? featureOfArea(SettingsAreaId area) => switch (area) {
   SettingsAreaId.export ||
   SettingsAreaId.updates ||
   SettingsAreaId.diagnostics ||
+  // Core: a look-up is offered wherever there is text to select.
+  SettingsAreaId.dictionaries ||
   // Always listed: it is where the switches are (#1109).
   SettingsAreaId.features ||
   SettingsAreaId.folders ||

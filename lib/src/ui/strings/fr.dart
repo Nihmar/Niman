@@ -4819,4 +4819,89 @@ final class FrenchStrings extends Strings {
   String get recurFromDueDate => 'Depuis l’échéance';
   @override
   String get recurFromCompletion => 'Depuis l’achèvement';
+
+  @override
+  String get settingsSectionDictionaries => 'Dictionnaires';
+
+  @override
+  String get dictionariesIntro =>
+      'Les sens se cherchent dans des dictionnaires conservés sur cet '
+      'appareil, un par langue. Une recherche ne passe jamais par le réseau.';
+
+  @override
+  String get dictionariesInstalled => 'Installés';
+
+  @override
+  String get dictionariesDownload => 'Télécharger un dictionnaire';
+
+  @override
+  String get dictionariesSearchHint => 'Rechercher une langue';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      "Aucun dictionnaire installé pour l'instant.";
+
+  @override
+  String get dictionariesUnavailable =>
+      "Aucun dictionnaire n'est encore disponible au téléchargement.";
+
+  @override
+  String get dictionariesNoMatch =>
+      'Aucune langue ne correspond à la recherche.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Tous les dictionnaires disponibles sont installés.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Définitions : $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Pour $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Supprimer le dictionnaire $language ?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Libère $size. Vous pourrez le télécharger à nouveau.';
+
+  @override
+  String get dictionaryUnpacking => 'Décompression…';
+
+  @override
+  String dictionaryIndexing(int percent) => "Création de l'index… $percent %";
+
+  @override
+  String dictionaryUnusable(String reason) => 'Inutilisable : $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Impossible de supprimer le dictionnaire $language : $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => "Langue d'un PDF";
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      "Un PDF n'indique pas sa langue : on utilise la première langue de "
+      "correction orthographique de la bibliothèque, jusqu'à ce que vous la "
+      'changiez dans le panneau de définition. Le choix est conservé pour ce '
+      'fichier.';
+
+  @override
+  String get dictionaryNotice =>
+      "Les dictionnaires sont dans le dossier de données de l'app, pas dans "
+      'la bibliothèque : ils ne se synchronisent pas et ne sont pas des '
+      "notes. L'index d'un dictionnaire se reconstruit tout seul s'il est "
+      'supprimé.';
+
+  @override
+  String get dictionaryLicense =>
+      'Textes de Wiktionary, CC BY-SA 4.0 et GFDL, extraits avec wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      "Impossible de créer l'index : $reason";
 }

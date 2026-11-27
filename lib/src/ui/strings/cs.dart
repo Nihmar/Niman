@@ -4690,4 +4690,85 @@ final class CzechStrings extends Strings {
   String get recurFromDueDate => 'Od termínu';
   @override
   String get recurFromCompletion => 'Od dokončení';
+
+  @override
+  String get settingsSectionDictionaries => 'Slovníky';
+
+  @override
+  String get dictionariesIntro =>
+      'Významy se hledají ve slovnících uložených v tomto zařízení, jeden na '
+      'jazyk. Vyhledávání nikdy nejde přes internet.';
+
+  @override
+  String get dictionariesInstalled => 'Nainstalované';
+
+  @override
+  String get dictionariesDownload => 'Stáhnout slovník';
+
+  @override
+  String get dictionariesSearchHint => 'Hledat jazyk';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Zatím není nainstalován žádný slovník.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Zatím nejsou ke stažení žádné slovníky.';
+
+  @override
+  String get dictionariesNoMatch => 'Hledání neodpovídá žádný jazyk.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Všechny dostupné slovníky jsou nainstalovány.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definice: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Pro: $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) => 'Smazat slovník $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Uvolní $size. Můžete si ho stáhnout znovu.';
+
+  @override
+  String get dictionaryUnpacking => 'Rozbaluje se…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Vytváří se index… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Nelze použít: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Slovník $language se nepodařilo smazat: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Jazyk PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF svůj jazyk neuvádí, proto se použije první jazyk pravopisu '
+      'knihovny, dokud ho nezměníte v panelu významů. Volba se pamatuje pro '
+      'daný soubor.';
+
+  @override
+  String get dictionaryNotice =>
+      'Slovníky jsou v datové složce aplikace, ne v knihovně: '
+      'nesynchronizují se a nejsou to poznámky. Index slovníku se po smazání '
+      'sám obnoví.';
+
+  @override
+  String get dictionaryLicense =>
+      'Texty z Wiktionary, CC BY-SA 4.0 a GFDL, získané pomocí wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Index se nepodařilo vytvořit: $reason';
 }

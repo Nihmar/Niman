@@ -11,6 +11,15 @@ are in both choosers, note and folder alike. EPUB is platform-neutral
 Dart — no engine, no WebView — so a book is built the same way
 everywhere; PDF goes through each platform's own printer (below).
 
+Dictionaries (**Settings → Dictionaries**, [settings](settings.md#dictionaries))
+are the same on every platform: one dictionary per language, downloaded
+from inside the app into its data folder and read there by Niman's own
+engine, with no system dictionary, no other app and no network involved in a
+look-up. The catalog is downloaded per language — nothing ships in the
+package — and a download is the same size on every platform. Android,
+Linux, Windows, macOS and iOS all use the same files, so there is no
+platform code in it.
+
 Kanban boards ([kanban](kanban.md)) are on every platform, drawn to the
 surface: columns side by side from a tablet's width up, one column at a
 time under tabs on a phone, where a card moves from a sheet instead of

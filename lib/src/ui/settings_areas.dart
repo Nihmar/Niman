@@ -22,6 +22,7 @@ import 'package:niman/src/ui/settings_appearance.dart';
 import 'package:niman/src/ui/settings_area_features.dart';
 import 'package:niman/src/ui/settings_commands.dart';
 import 'package:niman/src/ui/settings_diagnostics.dart';
+import 'package:niman/src/ui/settings_dictionaries.dart';
 import 'package:niman/src/ui/settings_editor.dart';
 import 'package:niman/src/ui/settings_export.dart';
 import 'package:niman/src/ui/settings_folders_paths.dart';
@@ -92,6 +93,9 @@ enum SettingsAreaId {
 
   /// Reminder notifications.
   reminders,
+
+  /// Dictionaries: the packs Look up reads, downloaded per language (#1382).
+  dictionaries,
 }
 
 /// A place in the settings: an area, and a row in it to flash (#229).
@@ -266,6 +270,19 @@ List<SettingsArea> settingsAreas({
           highlight: highlight,
         ),
       ),
+    // App-wide: the packs live in the app's data folder, not in a library
+    // (docs/records/dictionary.md, decision 14).
+    SettingsArea(
+      id: SettingsAreaId.dictionaries,
+      group: SettingsGroup.app,
+      rowKey: const Key('settings-area-dictionaries'),
+      icon: () => Icons.menu_book_outlined,
+      title: AppStrings.settingsSectionDictionaries,
+      build: (highlight) => SettingsDictionariesScreen(
+        controller: controller,
+        highlight: highlight,
+      ),
+    ),
     // What an export is made on (#1285), the same for every library.
     SettingsArea(
       id: SettingsAreaId.export,

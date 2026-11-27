@@ -4678,4 +4678,85 @@ final class IcelandicStrings extends Strings {
   String get recurFromDueDate => 'Frá skiladegi';
   @override
   String get recurFromCompletion => 'Frá lokum';
+
+  @override
+  String get settingsSectionDictionaries => 'Orðabækur';
+
+  @override
+  String get dictionariesIntro =>
+      'Merkingar eru flettar upp í orðabókum sem eru geymdar á þessu tæki, '
+      'einni fyrir hvert tungumál. Uppflettingar fara aldrei á netið.';
+
+  @override
+  String get dictionariesInstalled => 'Uppsettar';
+
+  @override
+  String get dictionariesDownload => 'Sækja orðabók';
+
+  @override
+  String get dictionariesSearchHint => 'Leita að tungumáli';
+
+  @override
+  String get dictionariesNoneInstalled => 'Engin orðabók er uppsett ennþá.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Engar orðabækur eru tiltækar til niðurhals ennþá.';
+
+  @override
+  String get dictionariesNoMatch => 'Ekkert tungumál passar við leitina.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Allar tiltækar orðabækur eru uppsettar.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Skilgreiningar: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Fyrir $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      'Eyða orðabókinni fyrir $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Losar $size. Þú getur sótt hana aftur.';
+
+  @override
+  String get dictionaryUnpacking => 'Pakka upp…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Býr til vísi… $percent%';
+
+  @override
+  String dictionaryUnusable(String reason) => 'Ekki hægt að nota: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'Ekki tókst að eyða orðabókinni fyrir $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Tungumál PDF-skjals';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'PDF-skjal segir ekki á hvaða tungumáli það er, svo fyrsta '
+      'stafsetningartungumál bókasafnsins er notað þar til þú breytir því í '
+      'merkingarspjaldinu. Valið er munað fyrir þá skrá.';
+
+  @override
+  String get dictionaryNotice =>
+      'Orðabækurnar eru í gagnamöppu forritsins, ekki í bókasafninu: þær '
+      'samstillast ekki og eru ekki minnismiðar. Vísir orðabókar byggist upp '
+      'aftur af sjálfu sér ef honum er eytt.';
+
+  @override
+  String get dictionaryLicense =>
+      'Textar frá Wiktionary, CC BY-SA 4.0 og GFDL, unnir út með wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'Ekki tókst að búa til vísinn: $reason';
 }

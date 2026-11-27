@@ -4750,4 +4750,86 @@ final class SpanishStrings extends Strings {
   String get recurFromDueDate => 'Desde el vencimiento';
   @override
   String get recurFromCompletion => 'Desde la finalización';
+
+  @override
+  String get settingsSectionDictionaries => 'Diccionarios';
+
+  @override
+  String get dictionariesIntro =>
+      'Los significados se buscan en diccionarios guardados en este '
+      'dispositivo, uno por idioma. Una búsqueda nunca va a la red.';
+
+  @override
+  String get dictionariesInstalled => 'Instalados';
+
+  @override
+  String get dictionariesDownload => 'Descargar un diccionario';
+
+  @override
+  String get dictionariesSearchHint => 'Buscar un idioma';
+
+  @override
+  String get dictionariesNoneInstalled =>
+      'Todavía no hay ningún diccionario instalado.';
+
+  @override
+  String get dictionariesUnavailable =>
+      'Aún no hay diccionarios disponibles para descargar.';
+
+  @override
+  String get dictionariesNoMatch => 'Ningún idioma coincide con la búsqueda.';
+
+  @override
+  String get dictionariesAllInstalled =>
+      'Todos los diccionarios disponibles están instalados.';
+
+  @override
+  String dictionaryDefinitions(String language) => 'Definiciones: $language';
+
+  @override
+  String dictionaryServes(String languages) => 'Para $languages';
+
+  @override
+  String dictionaryDeleteTitle(String language) =>
+      '¿Eliminar el diccionario de $language?';
+
+  @override
+  String dictionaryDeleteBody(String size) =>
+      'Libera $size. Podrás descargarlo de nuevo.';
+
+  @override
+  String get dictionaryUnpacking => 'Descomprimiendo…';
+
+  @override
+  String dictionaryIndexing(int percent) => 'Creando el índice… $percent %';
+
+  @override
+  String dictionaryUnusable(String reason) => 'No se puede usar: $reason';
+
+  @override
+  String dictionaryRemoveFailed(String language, String reason) =>
+      'No se pudo eliminar el diccionario de $language: $reason';
+
+  @override
+  String get dictionaryPdfLanguageTitle => 'Idioma de un PDF';
+
+  @override
+  String get dictionaryPdfLanguageNote =>
+      'Un PDF no dice en qué idioma está: se usa el primer idioma de '
+      'ortografía de la biblioteca hasta que lo cambies en el panel de '
+      'significados. La elección se guarda para ese archivo.';
+
+  @override
+  String get dictionaryNotice =>
+      'Los diccionarios están en la carpeta de datos de la app, no en la '
+      'biblioteca: no se sincronizan y no son notas. El índice de un '
+      'diccionario se reconstruye solo si se borra.';
+
+  @override
+  String get dictionaryLicense =>
+      'Textos de Wiktionary, CC BY-SA 4.0 y GFDL, extraídos con wiktextract.';
+
+  @override
+  String dictionaryIndexFailed(String reason) =>
+      'No se pudo crear el índice: $reason';
 }
