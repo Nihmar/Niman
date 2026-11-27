@@ -14,6 +14,7 @@ import 'package:niman/src/editor/plain_text.dart';
 import 'package:niman/src/editor/toolbar_item.dart';
 import 'package:niman/src/frontmatter/note_kind.dart';
 import 'package:niman/src/library/attachment_store.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/links/link_preview.dart' show PreviewLimits;
 import 'package:niman/src/markdown/background_scan.dart';
 import 'package:niman/src/markdown/edit/source_find.dart';
@@ -37,7 +38,6 @@ import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
-import 'package:niman/src/ui/note_gone.dart';
 import 'package:niman/src/ui/note_inserts.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -448,7 +448,8 @@ final class NoteViewParts {
     },
     hold: view.services.unsavedTracker?.hold,
     diskStamp: () => disk.stamp,
-    fileGone: () => view.services.fileGone,
+    createNote: () => view.services.createNote,
+    createNoteStream: () => view.services.createNoteStream,
     onExternalKept: (_) {
       if (!mounted()) return;
       ScaffoldMessenger.maybeOf(context())

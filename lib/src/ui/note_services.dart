@@ -27,7 +27,8 @@ final class NoteServices {
     this.spellCheck,
     this.saveNote,
     this.saveNoteStream,
-    this.fileGone,
+    this.createNote,
+    this.createNoteStream,
     this.createMissingNote,
     this.readNote,
     this.writeNote,
@@ -81,10 +82,14 @@ final class NoteServices {
   /// its root — joins the note and saves it through [saveNote] as before.
   final NoteStreamSaver? saveNoteStream;
 
-  /// Whether a note's file is gone from the disk (#1321): the editor's save
-  /// of a note that was deleted or moved away fails instead of writing it
-  /// back. Null — no library — saves without asking.
-  final Future<bool> Function(String path)? fileGone;
+  /// [saveNote] for a write that creates the note's file when it is gone
+  /// (#1321): [saveNote] itself refuses to bring back a note that was deleted
+  /// or moved away, and this is what a note switched away from, or a save the
+  /// user asked for again, goes through. Null where [saveNote] never refuses.
+  final NoteSaver? createNote;
+
+  /// [createNote] for a note handed over in slices ([saveNoteStream]).
+  final NoteStreamSaver? createNoteStream;
 
   /// The note-creation path for dead links (issue #78): creates an empty
   /// note at the library-relative path it is given and returns its

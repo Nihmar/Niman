@@ -6,12 +6,12 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/core/logging.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/ui/note_gone.dart';
 
 /// Saves [content] as the note at absolute [path]; [editSession] is the
 /// editor session the save belongs to (one opening of the note). Answers what
@@ -73,7 +73,8 @@ final class NoteSavePipeline {
     required this.onSaved,
     required this.onSettled,
     this.diskStamp,
-    this.fileGone,
+    this.createNote,
+    this.createNoteStream,
     this.onExternalKept,
     this.hold,
     this.retryDelays = const [
@@ -129,11 +130,17 @@ final class NoteSavePipeline {
   /// written by somebody else, and the writer keeps that version first.
   final DiskStamp? Function()? diskStamp;
 
-  /// Whether the file at a path is gone, asked of the disk (#1321). A save of
-  /// the note on screen that finds the file it loaded gone does not write: it
-  /// fails with [NoteGoneException] and the text stays in the editor. Null
-  /// where nothing can say (a test, a note outside a library).
-  final Future<bool> Function(String path)? Function()? fileGone;
+  /// [saveNote] for a write that creates the note's file when it is gone
+  /// (#1321). The writer [saveNote] returns refuses to bring back a note that
+  /// was deleted or moved away (`NoteGoneException`), which is right for the
+  /// editor's own saves; the write of a note that has left the editor, and the
+  /// save the user asks for again ([retry]), must leave the text on disk
+  /// whatever became of the file, and go through this. Null falls back to
+  /// [saveNote].
+  final NoteSaver? Function()? createNote;
+
+  /// [createNote] for the streaming write.
+  final NoteStreamSaver? Function()? createNoteStream;
 
   /// A save of the note on screen found another program's version of the file
   /// and kept it in the note's history before overwriting it (#1055).
@@ -458,7 +465,7 @@ final class NoteSavePipeline {
       final clock = Stopwatch()..start();
       try {
         if (stream != null) {
-          await saveNoteStream()!(
+          await _streamSaver(create: true)(
             target,
             (index) => _nextSlice(stream, index),
             editSession: session,
@@ -466,7 +473,7 @@ final class NoteSavePipeline {
             expected: expected,
           );
         } else {
-          await _write(target, joined!, session, expected);
+          await _write(target, joined!, session, expected, create: true);
         }
         _landed(target, revision);
         _log.info(
@@ -511,13 +518,19 @@ final class NoteSavePipeline {
     // saves the outgoing note is followed by a load that starts the next
     // session, and this save belongs to the one it came from.
     final session = _editSession;
+    final create = _takeRecreate();
     _log.info(
       'save start: $target (${joined.length} chars, join $joinMs ms, '
       'session $session)',
     );
     try {
-      await _checkGone(target, expected);
-      final saved = await _write(target, joined, session, expected);
+      final saved = await _write(
+        target,
+        joined,
+        session,
+        expected,
+        create: create,
+      );
       _saved(target, revision, saved);
       _log.info(
         'note saved: $target (${joined.length} chars, '
@@ -532,16 +545,18 @@ final class NoteSavePipeline {
     }
   }
 
-  /// Fails with [NoteGoneException] when the note the editor loaded — it has
-  /// [expected], the file as it last saw it — is no longer on disk, unless the
-  /// user asked for it to be created again ([retry]).
-  Future<void> _checkGone(String target, DiskStamp? expected) async {
+  /// Whether this save is the one that may create the note's file again, and
+  /// only the one ([retry]).
+  bool _takeRecreate() {
     final recreate = _recreate;
     _recreate = false;
-    final gone = fileGone?.call();
-    if (recreate || expected == null || gone == null) return;
-    if (await gone(target)) throw NoteGoneException(target);
+    return recreate;
   }
+
+  /// The streaming writer: the one that creates the file when [create], else
+  /// the one that refuses to bring a deleted note back.
+  NoteStreamSaver _streamSaver({required bool create}) =>
+      (create ? createNoteStream?.call() : null) ?? saveNoteStream()!;
 
   /// Saves with the note handed over in slices, off the join.
   ///
@@ -561,13 +576,13 @@ final class NoteSavePipeline {
     // session, and this save belongs to the one it came from.
     final session = _editSession;
     final expected = diskStamp?.call();
+    final create = _takeRecreate();
     _log.info(
       'save start: $target (${lines.length} chars in '
       '${stream.slices} slices, session $session)',
     );
     try {
-      await _checkGone(target, expected);
-      final saved = await saveNoteStream()!(
+      final saved = await _streamSaver(create: create)(
         target,
         (index) => _nextSlice(stream, index),
         editSession: session,
@@ -678,9 +693,10 @@ final class NoteSavePipeline {
     String path,
     String content,
     int editSession,
-    DiskStamp? expected,
-  ) async {
-    final saver = saveNote();
+    DiskStamp? expected, {
+    required bool create,
+  }) async {
+    final saver = (create ? createNote?.call() : null) ?? saveNote();
     if (saver != null) {
       return await saver(
         path,

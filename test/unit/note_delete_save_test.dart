@@ -2,17 +2,19 @@
 // used to create the file and its folders again, so the delete — or another
 // program's — achieved nothing and the trash held a copy of a note that was
 // on disk all along.
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/settings/library_config_repo.dart';
 import 'package:niman/src/db/index_database.dart';
 import 'package:niman/src/db/indexer.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_ops.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/ui/note_gone.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/note_view_adapters.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
@@ -42,6 +44,29 @@ void main() {
     await root.delete(recursive: true);
   });
 
+  /// The library's writer as the shell hands it to an editor
+  /// (`noteSaverFor`).
+  NoteSaver saver({required bool mustExist}) =>
+      (path, content, {required editSession, expected}) => ops.saveNote(
+        p.relative(path, from: root.path),
+        content,
+        editSession: editSession,
+        expected: expected,
+        mustExist: mustExist,
+      );
+
+  /// The same for a note handed over in slices.
+  NoteStreamSaver streamSaver({required bool mustExist}) =>
+      (path, content, {required editSession, references, expected}) =>
+          ops.saveNoteStream(
+            p.relative(path, from: root.path),
+            content,
+            editSession: editSession,
+            references: references,
+            expected: expected,
+            mustExist: mustExist,
+          );
+
   /// An editor over the note at library-relative [rel], as the shell builds
   /// one: it saves through the library, and is registered with [tracker].
   Future<({NoteSavePipeline pipeline, SourceBuffer buffer, String abs})> open(
@@ -65,21 +90,14 @@ void main() {
       buffer: () => buffer,
       references: () => null,
       framing: () => NoteFraming.plain,
-      saveNote: () =>
-          (path, content, {required editSession, expected}) => ops.saveNote(
-            p.relative(path, from: root.path),
-            content,
-            editSession: editSession,
-            expected: expected,
-          ),
+      saveNote: () => saver(mustExist: true),
+      createNote: () => saver(mustExist: false),
       writeNote: () => null,
-      saveNoteStream: () => null,
+      saveNoteStream: () => streamSaver(mustExist: true),
+      createNoteStream: () => streamSaver(mustExist: false),
       onSaved: (_, saved) => stamp = saved,
       onSettled: () {},
       diskStamp: () => stamp,
-      fileGone: () =>
-          (path) async =>
-              (await FileStat.stat(path)).type == FileSystemEntityType.notFound,
       hold: tracker.hold,
     );
     addTearDown(pipeline.cancel);
@@ -169,5 +187,49 @@ void main() {
 
     expect(File(note.abs).readAsStringSync(), 'edited');
     expect(note.pipeline.failure.value, isNull);
+  });
+
+  group('the writer, asked to replace a note', () {
+    Uint8List one(int index, String text) =>
+        Uint8List.fromList(utf8.encode(text));
+
+    test('throws for a joined save of a file that is gone', () async {
+      await expectLater(
+        ops.saveNote('gone.md', 'text', editSession: 1, mustExist: true),
+        throwsA(isA<NoteGoneException>()),
+      );
+      expect(File(p.join(root.path, 'gone.md')).existsSync(), isFalse);
+    });
+
+    test('throws for a streamed save of a file that is gone', () async {
+      await expectLater(
+        ops.saveNoteStream(
+          'Docs/gone.md',
+          (index) async => index == 0 ? one(index, 'text') : null,
+          editSession: 1,
+          mustExist: true,
+        ),
+        throwsA(isA<NoteGoneException>()),
+      );
+      expect(Directory(p.join(root.path, 'Docs')).existsSync(), isFalse);
+    });
+
+    test('replaces a note that is there, joined or streamed', () async {
+      await ops.saveNote('a.md', 'one', editSession: 1);
+      await ops.saveNote('a.md', 'two', editSession: 1, mustExist: true);
+      expect(File(p.join(root.path, 'a.md')).readAsStringSync(), 'two');
+      await ops.saveNoteStream(
+        'a.md',
+        (index) async => index == 0 ? one(index, 'three') : null,
+        editSession: 1,
+        mustExist: true,
+      );
+      expect(File(p.join(root.path, 'a.md')).readAsStringSync(), 'three');
+    });
+
+    test('creates the note when it is not asked to replace one', () async {
+      await ops.saveNote('new.md', 'text', editSession: 1);
+      expect(File(p.join(root.path, 'new.md')).existsSync(), isTrue);
+    });
   });
 }

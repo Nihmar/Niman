@@ -538,12 +538,14 @@ final class NoteOps implements NoteOperations {
     String content, {
     int? editSession,
     DiskStamp? expected,
+    bool mustExist = false,
   }) async {
     final saved = await writer.save(
       path,
       content,
       editSession: editSession,
       expected: expected,
+      mustExist: mustExist,
     );
     // After the write: a sync that read the hint before the text landed
     // could otherwise upload the old text and drop the hint.
@@ -565,6 +567,7 @@ final class NoteOps implements NoteOperations {
     int? editSession,
     NoteReferences? references,
     DiskStamp? expected,
+    bool mustExist = false,
   }) async {
     final saved = await writer.save(
       path,
@@ -572,6 +575,7 @@ final class NoteOps implements NoteOperations {
       editSession: editSession,
       references: references,
       expected: expected,
+      mustExist: mustExist,
     );
     _hint(path, SyncOpKind.changed);
     return saved;

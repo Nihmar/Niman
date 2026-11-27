@@ -314,9 +314,10 @@ final class ShellNotePanes {
     features: controller.librarySettings.features,
     unsavedTracker: unsaved,
     spellCheck: spellCheck,
-    saveNote: noteSaverFor(controller),
-    saveNoteStream: noteStreamSaverFor(controller),
-    fileGone: noteGoneCheckFor(controller),
+    saveNote: noteSaverFor(controller, mustExist: true),
+    saveNoteStream: noteStreamSaverFor(controller, mustExist: true),
+    createNote: noteSaverFor(controller),
+    createNoteStream: noteStreamSaverFor(controller),
     createMissingNote: missingNoteCreatorFor(controller),
   );
 

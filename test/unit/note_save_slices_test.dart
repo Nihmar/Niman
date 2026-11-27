@@ -85,8 +85,9 @@ void main() {
       final random = Random(seed);
       final lines = <String>[];
       var chars = 0;
-      // Past two character limits, so a slice is cut short more than once.
-      while (chars < 2 * NoteSavePipeline.kSaveSliceChars + 5000) {
+      // Past the character limit with a few thousand lines left to write, so
+      // a slice is cut short and the next one has to start where it stopped.
+      while (chars < NoteSavePipeline.kSaveSliceChars + 400000) {
         final length = random.nextInt(10) == 0
             ? random.nextInt(60000)
             : random.nextInt(400);
@@ -105,5 +106,5 @@ void main() {
         );
       }
     }
-  });
+  }, timeout: const Timeout(Duration(minutes: 3)));
 }

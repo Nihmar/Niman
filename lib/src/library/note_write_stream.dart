@@ -45,6 +45,7 @@ import 'package:niman/src/core/isolate_gauge.dart';
 import 'package:niman/src/history/history_manifest.dart';
 import 'package:niman/src/history/history_store.dart';
 import 'package:niman/src/history/snapshot_policy.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_writer.dart';
 import 'package:niman/src/library/note_writer_blocking.dart';
 import 'package:path/path.dart' as p;
@@ -85,6 +86,7 @@ typedef NoteStreamStart = ({
   String root,
   SnapshotRequest? snapshot,
   Duration writeDelay,
+  bool mustExist,
 });
 
 /// What the writing isolate is told first: the port it announces itself on,
@@ -114,6 +116,9 @@ typedef NoteStreamTalk = ({SendPort answers});
 /// bytes in the writer's port — the full copy of the note this save exists
 /// to avoid (#1369).
 ///
+/// With [mustExist] the save throws [NoteGoneException] instead of creating
+/// the note when its file is gone (#1321).
+///
 /// Throws when the isolate cannot be started, the write fails, or the
 /// producer does; the temp file is gone either way, and the note still
 /// holds what it held.
@@ -129,6 +134,7 @@ Future<NoteWriteResult?> saveNoteStream({
   SnapshotRequest? snapshot,
   NoteSaveAbort? abort,
   int maxInFlight = kSlicesInFlight,
+  bool mustExist = false,
   @visibleForTesting
   Future<Isolate?> Function(NoteStreamSpawn spawn)? spawnWriter,
   @visibleForTesting Duration writeDelay = Duration.zero,
@@ -140,6 +146,7 @@ Future<NoteWriteResult?> saveNoteStream({
     root: root,
     snapshot: snapshot,
     writeDelay: writeDelay,
+    mustExist: mustExist,
   );
   // The producer stays on this isolate: it reads the editor's own buffer — a
   // closure over state no isolate can take — and awaiting it here is also
@@ -470,6 +477,13 @@ final class _Conversation {
   /// out (measured 2026-09-22).
   Future<void> _write() async {
     final start = _start;
+    // A note the editor loaded and that is gone now stays gone (#1321): said
+    // before anything is written, and the producer's wait for room ends with
+    // it.
+    if (start.mustExist && !File(start.abs).existsSync()) {
+      _answers?.send((NoteGoneException(start.abs), StackTrace.current));
+      return;
+    }
     SnapshotOutcome? outcome;
     String? snapshotError;
     final snapshot = start.snapshot;

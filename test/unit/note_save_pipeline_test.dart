@@ -7,12 +7,12 @@ import 'dart:convert';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:niman/src/core/files.dart';
+import 'package:niman/src/library/note_gone.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
-import 'package:niman/src/ui/note_gone.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
@@ -41,7 +41,8 @@ final class Harness {
       onSettled: () => settled++,
       hold: tracker?.hold,
       diskStamp: () => seen,
-      fileGone: () => gone,
+      createNote: () => streaming ? null : _create,
+      createNoteStream: () => streaming ? _createStream : null,
     );
   }
 
@@ -72,8 +73,12 @@ final class Harness {
   /// What the editor last saw of the file: handed to every write.
   DiskStamp? seen;
 
-  /// Whether the file is gone from the disk, when the test says so (#1321).
-  Future<bool> Function(String path)? gone;
+  /// Whether the file is gone from the disk (#1321): the writer that refuses
+  /// to bring a note back throws, the one that creates it does not.
+  bool gone = false;
+
+  /// The writes made by the writer that creates the file, by path.
+  final List<String> created = [];
 
   /// What the writers answer with: the file the write left.
   DiskStamp? leaves;
@@ -105,12 +110,43 @@ final class Harness {
     await gate.future;
   }
 
+  Future<NoteSaveResult?> _create(
+    String path,
+    String content, {
+    required int editSession,
+    DiskStamp? expected,
+  }) async {
+    created.add(path);
+    return await _write(path, content, editSession, expected);
+  }
+
+  Future<NoteSaveResult?> _createStream(
+    String path,
+    NoteContentProducer content, {
+    required int editSession,
+    NoteReferences? references,
+    DiskStamp? expected,
+  }) async {
+    created.add(path);
+    return await _streamWrite(path, content, editSession, references, expected);
+  }
+
   Future<NoteSaveResult?> _save(
     String path,
     String content, {
     required int editSession,
     DiskStamp? expected,
   }) async {
+    if (gone) throw NoteGoneException(path);
+    return await _write(path, content, editSession, expected);
+  }
+
+  Future<NoteSaveResult?> _write(
+    String path,
+    String content,
+    int editSession,
+    DiskStamp? expected,
+  ) async {
     await _gate();
     expecteds.add(expected);
     writes.add((path: path, text: content, session: editSession));
@@ -124,6 +160,17 @@ final class Harness {
     NoteReferences? references,
     DiskStamp? expected,
   }) async {
+    if (gone) throw NoteGoneException(path);
+    return await _streamWrite(path, content, editSession, references, expected);
+  }
+
+  Future<NoteSaveResult?> _streamWrite(
+    String path,
+    NoteContentProducer content,
+    int editSession,
+    NoteReferences? references,
+    DiskStamp? expected,
+  ) async {
     // Held before the first slice: an edit while it waits must not reach it.
     await _gate();
     expecteds.add(expected);
@@ -650,17 +697,15 @@ void main() {
   });
 
   group('a note gone from the disk (#1321)', () {
-    final stamp = DiskStamp(size: 4, modified: DateTime(2026));
-
     test('is not written back: the text stays, the user is told', () async {
       harness = Harness()
-        ..seen = stamp
-        ..gone = ((_) async => true)
+        ..gone = true
         ..edit('two\n');
       final pipeline = harness.pipeline;
 
       await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
       expect(harness.writes, isEmpty);
+      expect(harness.created, isEmpty);
       expect(pipeline.dirty, isTrue, reason: 'the text is still owed');
       expect(pipeline.failure.value?.error, isA<NoteGoneException>());
     });
@@ -668,8 +713,7 @@ void main() {
     test('is not tried again by the clock', () {
       fakeAsync((async) {
         harness = Harness()
-          ..seen = stamp
-          ..gone = ((_) async => true)
+          ..gone = true
           ..edit('two\n');
         async
           ..elapse(const Duration(minutes: 1))
@@ -681,8 +725,7 @@ void main() {
 
     test('is created again when the user asks to save it again', () async {
       harness = Harness()
-        ..seen = stamp
-        ..gone = ((_) async => true)
+        ..gone = true
         ..edit('two\n');
       final pipeline = harness.pipeline;
       await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
@@ -691,30 +734,58 @@ void main() {
       await pumpEventQueue();
 
       expect(harness.writes.single.text, 'two\n');
+      expect(harness.created, [harness.path]);
       expect(pipeline.dirty, isFalse);
       expect(pipeline.failure.value, isNull);
     });
 
-    test('a note the editor never saw on disk is created', () async {
-      // No stamp: nothing was loaded from or written to the file, so there is
-      // nothing that could have been taken away.
-      harness = Harness()
-        ..gone = ((_) async => true)
+    test(
+      'is created once: the save after it is the one of the editor again',
+      () async {
+        harness = Harness()
+          ..gone = true
+          ..edit('two\n');
+        final pipeline = harness.pipeline;
+        await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
+        pipeline.retry();
+        await pumpEventQueue();
+
+        harness.edit('three\n');
+        await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
+      },
+    );
+
+    test('a streamed save refuses too, and is created by the retry', () async {
+      harness = Harness(streaming: true)
+        ..gone = true
         ..edit('two\n');
-      await harness.pipeline.save();
+      final pipeline = harness.pipeline;
+      await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
+      expect(harness.writes, isEmpty);
+
+      pipeline.retry();
+      await pumpEventQueue();
       expect(harness.writes.single.text, 'two\n');
     });
 
-    test('a streamed save checks too', () async {
+    test(
+      'a note leaving the editor is written, whatever became of it',
+      () async {
+        harness = Harness()
+          ..gone = true
+          ..edit('two\n');
+        await harness.pipeline.saveOutgoing(harness.path);
+        expect(harness.writes.single.text, 'two\n');
+        expect(harness.created, [harness.path]);
+      },
+    );
+
+    test('a closed editor leaves its text on disk too', () async {
       harness = Harness(streaming: true)
-        ..seen = stamp
-        ..gone = ((_) async => true)
+        ..gone = true
         ..edit('two\n');
-      await expectLater(
-        harness.pipeline.save(),
-        throwsA(isA<NoteGoneException>()),
-      );
-      expect(harness.writes, isEmpty);
+      await harness.pipeline.close();
+      expect(harness.writes.single.text, 'two\n');
     });
   });
 
