@@ -47,6 +47,29 @@ final class _HeadNote extends _FakeNote implements UnsavedNoteHead {
   String textHead(int maxChars) => 'abcdef'.substring(0, maxChars);
 }
 
+/// A note whose writes can be dropped for a delete, with a save that can be
+/// held open.
+final class _DiscardNote extends _FakeNote implements UnsavedNoteDiscard {
+  new(super.path) : super(unsaved: true);
+
+  int discards = 0;
+  int restores = 0;
+  Completer<void>? running;
+
+  @override
+  Future<void> discard() async {
+    discards++;
+    unsaved = false;
+    await running?.future;
+  }
+
+  @override
+  void restore() {
+    restores++;
+    unsaved = true;
+  }
+}
+
 void main() {
   test('hasUnsaved and unsavedPaths follow the tracked notes', () {
     final tracker = UnsavedTracker();
@@ -223,6 +246,74 @@ void main() {
         unawaited(tracker.saveAll());
         async.flushMicrotasks();
         expect(writes, isEmpty);
+      });
+    });
+  });
+
+  group('a delete drops the pending writes under it (#1321)', () {
+    test('the note, a folder above it, and nothing else', () async {
+      final tracker = UnsavedTracker();
+      final inside = _DiscardNote('/lib/Docs/a.md');
+      final same = _DiscardNote('/lib/Docs');
+      final beside = _DiscardNote('/lib/Docs2/b.md');
+      final other = _DiscardNote('/lib/c.md');
+      [inside, same, beside, other].forEach(tracker.register);
+
+      await tracker.discardUnder('/lib/Docs');
+
+      expect([inside.discards, same.discards], [1, 1]);
+      expect([beside.discards, other.discards], [0, 0]);
+      expect(tracker.unsavedPaths, ['/lib/Docs2/b.md', '/lib/c.md']);
+    });
+
+    test('completes once the write already running has ended', () async {
+      final tracker = UnsavedTracker();
+      final note = _DiscardNote('/lib/a.md')..running = Completer<void>();
+      tracker.register(note);
+      var done = false;
+      unawaited(tracker.discardUnder('/lib/a.md').then((_) => done = true));
+      await pumpEventQueue();
+      expect(done, isFalse);
+      note.running!.complete();
+      await pumpEventQueue();
+      expect(done, isTrue);
+    });
+
+    test('a failed delete gives the writes back', () async {
+      final tracker = UnsavedTracker();
+      final note = _DiscardNote('/lib/Docs/a.md');
+      tracker.register(note);
+      await tracker.discardUnder('/lib/Docs');
+      tracker.restoreUnder('/lib/Docs');
+      expect(note.restores, 1);
+      expect(tracker.hasUnsaved, isTrue);
+    });
+
+    test('a write held for a note switched away from is dropped too', () {
+      fakeAsync((async) {
+        final tracker = UnsavedTracker();
+        var failing = true;
+        final writes = <String>[];
+        unawaited(
+          tracker
+              .hold('/lib/Docs/a.md', () => 'held', () async {
+                if (failing) throw StateError('disk full');
+                writes.add('held');
+              })
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        expect(tracker.hasUnsaved, isTrue);
+
+        unawaited(tracker.discardUnder('/lib/Docs'));
+        async.flushMicrotasks();
+        failing = false;
+        async
+          ..elapse(const Duration(minutes: 1))
+          ..flushMicrotasks();
+
+        expect(writes, isEmpty, reason: 'no retry after the delete');
+        expect(tracker.hasUnsaved, isFalse);
       });
     });
   });

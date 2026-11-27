@@ -11,6 +11,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/ui/note_gone.dart';
 
 /// Saves [content] as the note at absolute [path]; [editSession] is the
 /// editor session the save belongs to (one opening of the note). Answers what
@@ -72,6 +73,7 @@ final class NoteSavePipeline {
     required this.onSaved,
     required this.onSettled,
     this.diskStamp,
+    this.fileGone,
     this.onExternalKept,
     this.hold,
     this.retryDelays = const [
@@ -127,6 +129,12 @@ final class NoteSavePipeline {
   /// written by somebody else, and the writer keeps that version first.
   final DiskStamp? Function()? diskStamp;
 
+  /// Whether the file at a path is gone, asked of the disk (#1321). A save of
+  /// the note on screen that finds the file it loaded gone does not write: it
+  /// fails with [NoteGoneException] and the text stays in the editor. Null
+  /// where nothing can say (a test, a note outside a library).
+  final Future<bool> Function(String path)? Function()? fileGone;
+
   /// A save of the note on screen found another program's version of the file
   /// and kept it in the note's history before overwriting it (#1055).
   final void Function(String path)? onExternalKept;
@@ -161,8 +169,39 @@ final class NoteSavePipeline {
   int get lastSavedRevision => _lastSavedRevision;
   int _lastSavedRevision = 0;
 
-  /// Whether the editor holds edits the disk does not.
-  bool get dirty => _revision != _lastSavedRevision;
+  /// Whether the editor holds edits the disk does not. Never while the note
+  /// is being deleted ([discard]): its text goes with the file.
+  bool get dirty => !_discarded && _revision != _lastSavedRevision;
+
+  /// Whether the note's pending writes were dropped for a delete.
+  bool get discarded => _discarded;
+  bool _discarded = false;
+
+  /// Whether the next save may create the note's file again: the user asked
+  /// for it after a save found the file gone ([retry]).
+  bool _recreate = false;
+
+  /// The note is about to be deleted (#1321): its pending saves are dropped
+  /// — the text goes to the trash with the file — and none is made from here
+  /// on, since a save after the delete would write the note back. Completes
+  /// when the save already running has ended.
+  Future<void> discard() {
+    _discarded = true;
+    _cancelTimers();
+    _pending = false;
+    final running = _activeSave;
+    return running == null
+        ? Future<void>.value()
+        : running.then<void>((_) {}, onError: (_) {});
+  }
+
+  /// The delete did not happen: the note is the editor's again, and its
+  /// edits are saved.
+  void undiscard() {
+    if (!_discarded) return;
+    _discarded = false;
+    if (dirty) saveInBackground();
+  }
 
   /// Whether a save is in flight.
   bool get saving => _saving;
@@ -238,7 +277,9 @@ final class NoteSavePipeline {
     _failures++;
     failure.value = SaveFailure(error, _failures);
     _retryTimer?.cancel();
-    if (_failures <= retryDelays.length) {
+    // A note that is gone does not come back by trying again: the user is
+    // told and decides ([retry]).
+    if (error is! NoteGoneException && _failures <= retryDelays.length) {
       _retryTimer = Timer(retryDelays[_failures - 1], saveInBackground);
     }
   }
@@ -248,6 +289,14 @@ final class NoteSavePipeline {
   /// it does not escape as an uncaught async error.
   void saveInBackground() {
     unawaited(save().then<void>((_) {}, onError: (Object _) {}));
+  }
+
+  /// The user asks for the save again — the status row's retry. When the
+  /// failure was a note gone from disk, this is the one save that creates
+  /// its file again (#1321).
+  void retry() {
+    if (failure.value?.error is NoteGoneException) _recreate = true;
+    saveInBackground();
   }
 
   /// Starts a new editor session, and returns its id.
@@ -303,6 +352,7 @@ final class NoteSavePipeline {
     // notePath may be a picture. Only a save with its own path (the
     // outgoing note's) may write then (#156).
     if (path == null && !ready()) return Future<void>.value();
+    if (path == null && _discarded) return Future<void>.value();
     final revision = _revision;
     if (revision == _lastSavedRevision) {
       return Future<void>.value(); // nothing new on disk
@@ -466,6 +516,7 @@ final class NoteSavePipeline {
       'session $session)',
     );
     try {
+      await _checkGone(target, expected);
       final saved = await _write(target, joined, session, expected);
       _saved(target, revision, saved);
       _log.info(
@@ -479,6 +530,17 @@ final class NoteSavePipeline {
     } finally {
       _finishSave();
     }
+  }
+
+  /// Fails with [NoteGoneException] when the note the editor loaded — it has
+  /// [expected], the file as it last saw it — is no longer on disk, unless the
+  /// user asked for it to be created again ([retry]).
+  Future<void> _checkGone(String target, DiskStamp? expected) async {
+    final recreate = _recreate;
+    _recreate = false;
+    final gone = fileGone?.call();
+    if (recreate || expected == null || gone == null) return;
+    if (await gone(target)) throw NoteGoneException(target);
   }
 
   /// Saves with the note handed over in slices, off the join.
@@ -504,6 +566,7 @@ final class NoteSavePipeline {
       '${stream.slices} slices, session $session)',
     );
     try {
+      await _checkGone(target, expected);
       final saved = await saveNoteStream()!(
         target,
         (index) => _nextSlice(stream, index),

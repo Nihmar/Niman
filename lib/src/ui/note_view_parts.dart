@@ -37,6 +37,7 @@ import 'package:niman/src/ui/note_disk.dart';
 import 'package:niman/src/ui/note_edit_commands.dart';
 import 'package:niman/src/ui/note_find_keys.dart';
 import 'package:niman/src/ui/note_frontmatter_panel.dart';
+import 'package:niman/src/ui/note_gone.dart';
 import 'package:niman/src/ui/note_inserts.dart';
 import 'package:niman/src/ui/note_link_actions.dart';
 import 'package:niman/src/ui/note_links.dart';
@@ -416,6 +417,9 @@ final class NoteViewParts {
     saveForClose: saves.saveForClose,
     bufferText: () => text.text,
     bufferHead: text.head,
+    discardWrites: () => saves.discard(),
+    restoreWrites: () => saves.undiscard(),
+    discarded: () => saves.discarded,
   );
 
   /// How the note reaches the disk: its revisions, the debounce after an
@@ -439,6 +443,7 @@ final class NoteViewParts {
     },
     hold: view.services.unsavedTracker?.hold,
     diskStamp: () => disk.stamp,
+    fileGone: () => view.services.fileGone,
     onExternalKept: (_) {
       if (!mounted()) return;
       ScaffoldMessenger.maybeOf(context())
@@ -453,8 +458,16 @@ final class NoteViewParts {
     final failure = saves.failure.value;
     update(() {});
     if (failure == null || failure.attempts != 1) return;
-    ScaffoldMessenger.maybeOf(context())
-        ?.showSnackBar(SnackBar(content: Text(AppStrings.noteSaveFailedSnack)));
+    // A note gone from disk is not a disk that would not take its text: the
+    // text is kept and the way back is said (#1321).
+    final gone = failure.error is NoteGoneException;
+    ScaffoldMessenger.maybeOf(context())?.showSnackBar(
+      SnackBar(
+        content: Text(
+          gone ? AppStrings.noteGoneSnack : AppStrings.noteSaveFailedSnack,
+        ),
+      ),
+    );
   }
 
   /// The library's features, or every one on with no library.
@@ -646,8 +659,10 @@ final class NoteViewParts {
   String get status {
     if (session.error != null) return AppStrings.noteStatusError;
     if (session.loading) return AppStrings.noteStatusLoading;
-    if (saves.failure.value != null && !saves.saving) {
-      return AppStrings.noteStatusSaveFailed;
+    if (saves.failure.value case final failure? when !saves.saving) {
+      return failure.error is NoteGoneException
+          ? AppStrings.noteStatusGone
+          : AppStrings.noteStatusSaveFailed;
     }
     if (saves.saving) return AppStrings.noteStatusSaving;
     if (saves.dirty) return AppStrings.noteStatusUnsaved;

@@ -712,6 +712,16 @@ final class CzechStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Poznámku se nepodařilo uložit. Niman to zkusí znovu.';
   @override
+  String get noteStatusGone => 'Není na disku · uložit znovu';
+  @override
+  String get noteGoneSnack =>
+      'Tato poznámka už na disku není. Její text zůstává zde – '
+      'klepnutím na stav ji uložíte znovu.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Poznámku „$name“ se nepodařilo uložit. Její text zůstává v '
+      'paměti.';
+  @override
   String get noteChangedOnDisk =>
       'Jiný program tuto poznámku změnil. Ta verze je uložena v historii.';
   @override

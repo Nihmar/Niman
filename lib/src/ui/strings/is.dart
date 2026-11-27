@@ -710,6 +710,15 @@ final class IcelandicStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Ekki tókst að vista minnispunktinn. Niman reynir aftur.';
   @override
+  String get noteStatusGone => 'Ekki á disknum · vista aftur';
+  @override
+  String get noteGoneSnack =>
+      'Þessi minnismiði er ekki lengur á disknum. Textinn er '
+      'varðveittur hér – ýttu á stöðuna til að vista hann aftur.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Ekki tókst að vista „$name“. Textinn er varðveittur í minni.';
+  @override
   String get noteChangedOnDisk =>
       'Annað forrit breytti þessum minnispunkti. Sú útgáfa er geymd í '
       'ferlinum.';

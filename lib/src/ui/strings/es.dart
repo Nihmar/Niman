@@ -719,6 +719,15 @@ final class SpanishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'No se pudo guardar la nota. Niman lo intentará de nuevo.';
   @override
+  String get noteStatusGone => 'No está en el disco · guardar de nuevo';
+  @override
+  String get noteGoneSnack =>
+      'Esta nota ya no está en el disco. Su texto se conserva aquí: '
+      'toca el estado para guardarla de nuevo.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'No se pudo guardar «$name». Su texto se conserva en memoria.';
+  @override
   String get noteChangedOnDisk =>
       'Otro programa cambió esta nota. Esa versión se guardó en el historial.';
   @override

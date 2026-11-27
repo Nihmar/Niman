@@ -716,6 +716,16 @@ final class SlovenianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Zapiska ni bilo mogoče shraniti. Niman bo poskusil znova.';
   @override
+  String get noteStatusGone => 'Ni na disku · shrani znova';
+  @override
+  String get noteGoneSnack =>
+      'Te zapiske ni več na disku. Njeno besedilo je ohranjeno tukaj – '
+      'tapnite stanje, da jo znova shranite.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Zapiske »$name« ni bilo mogoče shraniti. Njeno besedilo je '
+      'ohranjeno v pomnilniku.';
+  @override
   String get noteChangedOnDisk =>
       'Drug program je spremenil ta zapisek. Ta različica je shranjena v '
       'zgodovini.';

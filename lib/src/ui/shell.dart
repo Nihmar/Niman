@@ -666,6 +666,7 @@ final class _LibraryShellState extends ConsumerState<LibraryShell>
     controller: widget.controller,
     guard: _guard,
     saveOpen: () => widget.unsavedTracker.saveAll(),
+    unsaved: widget.unsavedTracker,
     creates: _createFlow,
     templates: _templateFlow,
     selectedPath: () => _selection.path,

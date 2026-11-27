@@ -13,7 +13,7 @@ import 'package:niman/src/ui/unsaved_notes.dart';
 /// the text: it stays registered as unsaved, with its text, until a retry
 /// lands — the outgoing note's text is never dropped for a disk that was full
 /// for a moment.
-final class DetachedSave implements UnsavedNote {
+final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
   /// Owes the disk [text] for the note at [path], written by [write]; [text]
   /// is the note as the editor held it. [onWritten] hears of the write that
   /// landed, after which the save is no longer owed.
@@ -76,6 +76,21 @@ final class DetachedSave implements UnsavedNote {
 
   /// Whether [supersede] was called.
   bool get superseded => _superseded;
+
+  @override
+  Future<void> discard() {
+    supersede();
+    final running = _running;
+    return running == null
+        ? Future<void>.value()
+        : running.then<void>((_) {}, onError: (_) {});
+  }
+
+  @override
+  void restore() {
+    // A held write the delete dropped is not written again: the editor that
+    // gets the note back reads the disk, which is what the delete left.
+  }
 
   @override
   String get text => textOf();

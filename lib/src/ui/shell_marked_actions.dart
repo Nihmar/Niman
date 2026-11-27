@@ -193,7 +193,7 @@ final class ShellMarkedActions {
     final gone = <String>[];
     await rows.guard(() async {
       for (final path in treeOutermost(paths)) {
-        await ops.delete(path);
+        await rows.deleteOpen(ops, path);
         rows.onDeleted(path);
         gone.add(path);
       }

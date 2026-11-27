@@ -706,6 +706,15 @@ final class TurkishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Bu not kaydedilemedi. Niman yeniden deneyecek.';
   @override
+  String get noteStatusGone => 'Diskte yok · yeniden kaydet';
+  @override
+  String get noteGoneSnack =>
+      'Bu not artık diskte yok. Metni burada saklanıyor — yeniden '
+      'kaydetmek için duruma dokunun.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      '"$name" kaydedilemedi. Metni bellekte saklanıyor.';
+  @override
   String get noteChangedOnDisk =>
       'Başka bir program bu notu değiştirdi. O sürüm geçmişte saklandı.';
   @override

@@ -860,7 +860,7 @@ final class _NoteViewState extends State<NoteView>
                 statusText: _parts.status,
                 onStatusTap: _parts.saves.failure.value == null
                     ? null
-                    : _parts.saves.saveInBackground,
+                    : _parts.saves.retry,
                 statusActions: widget.statusActions,
                 related: widget.onShowRelated == null
                     ? null

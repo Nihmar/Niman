@@ -719,6 +719,15 @@ final class BulgarianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Бележката не можа да бъде запазена. Niman ще опита отново.';
   @override
+  String get noteStatusGone => 'Липсва на диска · запази отново';
+  @override
+  String get noteGoneSnack =>
+      'Тази бележка вече не е на диска. Текстът ѝ се пази тук — '
+      'докоснете състоянието, за да я запазите отново.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Не може да се запази „$name“. Текстът ѝ се пази в паметта.';
+  @override
   String get noteChangedOnDisk =>
       'Друга програма е променила тази бележка. Онази версия е запазена в '
       'историята.';

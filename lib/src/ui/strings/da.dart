@@ -711,6 +711,15 @@ final class DanishStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Noten kunne ikke gemmes. Niman prøver igen.';
   @override
+  String get noteStatusGone => 'Ikke på disken · gem igen';
+  @override
+  String get noteGoneSnack =>
+      'Denne note findes ikke længere på disken. Teksten er bevaret her '
+      '– tryk på status for at gemme den igen.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Kunne ikke gemme "$name". Teksten er bevaret i hukommelsen.';
+  @override
   String get noteChangedOnDisk =>
       'Et andet program har ændret noten. Den version er gemt i historikken.';
   @override

@@ -707,6 +707,16 @@ final class EstonianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Märget ei õnnestunud salvestada. Niman proovib uuesti.';
   @override
+  String get noteStatusGone => 'Pole kettal · salvesta uuesti';
+  @override
+  String get noteGoneSnack =>
+      'Seda märget pole enam kettal. Selle tekst säilib siin – '
+      'puudutage olekut, et see uuesti salvestada.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Märget „$name“ ei õnnestunud salvestada. Selle tekst säilib '
+      'mälus.';
+  @override
   String get noteChangedOnDisk =>
       'Teine programm muutis seda märget. See versioon on ajaloos alles.';
   @override

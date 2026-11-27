@@ -712,6 +712,15 @@ final class UkrainianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Нотатку не вдалося зберегти. Niman спробує ще раз.';
   @override
+  String get noteStatusGone => 'Немає на диску · зберегти знову';
+  @override
+  String get noteGoneSnack =>
+      'Цієї нотатки більше немає на диску. Її текст збережено тут — '
+      'торкніться статусу, щоб зберегти її знову.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Не вдалося зберегти «$name». Її текст збережено в пам’яті.';
+  @override
   String get noteChangedOnDisk =>
       'Інша програма змінила цю нотатку. Ту версію збережено в історії.';
   @override

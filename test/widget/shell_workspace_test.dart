@@ -137,6 +137,55 @@ void main() {
     expect(controller.workspace.tabs, isEmpty);
   });
 
+  // #1321: the open editor's debounce would write a deleted note back.
+  testWidgets('a delete drops the pending saves of the note', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    final open = _DiscardNote('/fake/library/alpha.md');
+    unsaved.register(open);
+
+    await rowMenu(tester, 'alpha.md', 'delete');
+
+    expect(open.discards, 1);
+    expect(open.restores, 0);
+  });
+
+  testWidgets('a delete of a folder drops those of the notes in it', (
+    tester,
+  ) async {
+    await pumpShell(tester);
+    await controller.createFolder(parentPath: '', name: 'Docs');
+    await controller.createNote(parentPath: 'Docs', name: 'alpha');
+    await controller.createNote(parentPath: '', name: 'beta');
+    await settle(tester);
+    final inside = _DiscardNote('/fake/library/Docs/alpha.md');
+    final outside = _DiscardNote('/fake/library/beta.md');
+    unsaved
+      ..register(inside)
+      ..register(outside);
+
+    await rowMenu(tester, 'Docs', 'delete');
+
+    expect(inside.discards, 1);
+    expect(outside.discards, 0);
+  });
+
+  testWidgets('a delete that fails gives the saves back', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+    controller.failDeletes.add('alpha.md');
+    final open = _DiscardNote('/fake/library/alpha.md');
+    unsaved.register(open);
+
+    await rowMenu(tester, 'alpha.md', 'delete');
+
+    expect(open.discards, 1);
+    expect(open.restores, 1);
+    expect(open.unsaved, isTrue, reason: 'the edits were never dropped');
+  });
+
   testWidgets('what was left open comes back as tabs', (tester) async {
     // The notes are in the tree, so the store's tabs come back as they are.
     await controller.saveNote('kept.md', '');
@@ -175,5 +224,37 @@ final class _DirtyNote implements UnsavedNote {
   Future<void> save() async {
     if (fails) throw const FileSystemException('disk full');
     saves++;
+  }
+}
+
+/// An open note that can drop its pending writes for a delete.
+final class _DiscardNote implements UnsavedNote, UnsavedNoteDiscard {
+  new(this.path);
+
+  @override
+  final String path;
+
+  int discards = 0;
+  int restores = 0;
+
+  @override
+  bool unsaved = true;
+
+  @override
+  String get text => '';
+
+  @override
+  Future<void> save() async => unsaved = false;
+
+  @override
+  Future<void> discard() async {
+    discards++;
+    unsaved = false;
+  }
+
+  @override
+  void restore() {
+    restores++;
+    unsaved = true;
   }
 }

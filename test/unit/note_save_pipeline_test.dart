@@ -12,6 +12,7 @@ import 'package:niman/src/library/note_write_stream.dart';
 import 'package:niman/src/markdown/note_framing.dart';
 import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+import 'package:niman/src/ui/note_gone.dart';
 import 'package:niman/src/ui/note_save_pipeline.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:path/path.dart' as p;
@@ -40,6 +41,7 @@ final class Harness {
       onSettled: () => settled++,
       hold: tracker?.hold,
       diskStamp: () => seen,
+      fileGone: () => gone,
     );
   }
 
@@ -69,6 +71,9 @@ final class Harness {
 
   /// What the editor last saw of the file: handed to every write.
   DiskStamp? seen;
+
+  /// Whether the file is gone from the disk, when the test says so (#1321).
+  Future<bool> Function(String path)? gone;
 
   /// What the writers answer with: the file the write left.
   DiskStamp? leaves;
@@ -588,6 +593,128 @@ void main() {
       await done;
       expect(tracker.hasUnsaved, isFalse);
       expect(harness.writes.single.text, 'two\n');
+    });
+  });
+
+  group('a note deleted with edits pending (#1321)', () {
+    test('writes nothing while it is being deleted', () async {
+      harness = Harness()..edit('two\n');
+      final pipeline = harness.pipeline;
+      await pipeline.discard();
+      expect(pipeline.dirty, isFalse, reason: 'the text goes with the file');
+
+      // The reader types on, and the editor closes, during the delete.
+      harness.edit('three\n');
+      await pipeline.save();
+      await pipeline.saveOutgoing(harness.path);
+      await pipeline.close();
+      await pumpEventQueue();
+      expect(harness.writes, isEmpty);
+    });
+
+    test('does not write when the debounce fires after the delete', () {
+      fakeAsync((async) {
+        harness = Harness()..edit('two\n');
+        unawaited(harness.pipeline.discard());
+        async
+          ..elapse(const Duration(seconds: 30))
+          ..flushMicrotasks();
+        expect(harness.writes, isEmpty);
+      });
+    });
+
+    test('gives the edits back when the delete fails', () async {
+      harness = Harness()..edit('two\n');
+      final pipeline = harness.pipeline;
+      await pipeline.discard();
+      pipeline.undiscard();
+      await pumpEventQueue();
+      expect(harness.writes.single.text, 'two\n');
+      expect(pipeline.dirty, isFalse);
+    });
+
+    test('waits for the save in flight before the delete goes on', () async {
+      harness = Harness()
+        ..hold = true
+        ..edit('two\n');
+      final pipeline = harness.pipeline;
+      unawaited(pipeline.save());
+      await pumpEventQueue();
+      var ended = false;
+      unawaited(pipeline.discard().then((_) => ended = true));
+      await pumpEventQueue();
+      expect(ended, isFalse);
+      await harness.release();
+      expect(ended, isTrue);
+    });
+  });
+
+  group('a note gone from the disk (#1321)', () {
+    final stamp = DiskStamp(size: 4, modified: DateTime(2026));
+
+    test('is not written back: the text stays, the user is told', () async {
+      harness = Harness()
+        ..seen = stamp
+        ..gone = ((_) async => true)
+        ..edit('two\n');
+      final pipeline = harness.pipeline;
+
+      await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
+      expect(harness.writes, isEmpty);
+      expect(pipeline.dirty, isTrue, reason: 'the text is still owed');
+      expect(pipeline.failure.value?.error, isA<NoteGoneException>());
+    });
+
+    test('is not tried again by the clock', () {
+      fakeAsync((async) {
+        harness = Harness()
+          ..seen = stamp
+          ..gone = ((_) async => true)
+          ..edit('two\n');
+        async
+          ..elapse(const Duration(minutes: 1))
+          ..flushMicrotasks();
+        expect(harness.writes, isEmpty);
+        expect(harness.pipeline.failure.value?.attempts, 1);
+      });
+    });
+
+    test('is created again when the user asks to save it again', () async {
+      harness = Harness()
+        ..seen = stamp
+        ..gone = ((_) async => true)
+        ..edit('two\n');
+      final pipeline = harness.pipeline;
+      await expectLater(pipeline.save(), throwsA(isA<NoteGoneException>()));
+
+      pipeline.retry();
+      await pumpEventQueue();
+
+      expect(harness.writes.single.text, 'two\n');
+      expect(pipeline.dirty, isFalse);
+      expect(pipeline.failure.value, isNull);
+    });
+
+    test('a note the editor never saw on disk is created', () async {
+      // No stamp: nothing was loaded from or written to the file, so there is
+      // nothing that could have been taken away.
+      harness = Harness()
+        ..gone = ((_) async => true)
+        ..edit('two\n');
+      await harness.pipeline.save();
+      expect(harness.writes.single.text, 'two\n');
+    });
+
+    test('a streamed save checks too', () async {
+      harness = Harness(streaming: true)
+        ..seen = stamp
+        ..gone = ((_) async => true)
+        ..edit('two\n');
+      await expectLater(
+        harness.pipeline.save(),
+        throwsA(isA<NoteGoneException>()),
+      );
+      expect(harness.writes, isEmpty);
     });
   });
 

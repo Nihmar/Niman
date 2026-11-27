@@ -37,6 +37,20 @@ abstract interface class UnsavedNoteHead {
   String textHead(int maxChars);
 }
 
+/// An [UnsavedNote] whose pending writes can be dropped because the note is
+/// being deleted (#1321): its text goes to the trash with the file, and a
+/// write that came after the delete would only bring the note back.
+abstract interface class UnsavedNoteDiscard {
+  /// Stops writing: no save is made from here on, and the note reads as
+  /// saved. Completes when a write already running has ended — the delete
+  /// must come after it, not race it.
+  Future<void> discard();
+
+  /// The delete did not happen: the note holds what it held, writes again,
+  /// and a note with edits is saved.
+  void restore();
+}
+
 /// The app-level view of which open notes hold unsaved edits (T-PP-11).
 ///
 /// The source of truth is each [NoteView]'s revision state; the tracker
@@ -165,6 +179,33 @@ final class UnsavedTracker extends ChangeNotifier {
     if (text != null) _publish();
     return text;
   }
+
+  /// Drops the pending writes of every note at [path] or under it (an open
+  /// editor, a write held for a note switched away from), before [path] is
+  /// deleted (#1321). Completes when the writes already running have ended.
+  /// A failed delete calls [restoreUnder].
+  Future<void> discardUnder(String path) async {
+    final ended = <Future<void>>[
+      for (final note in _notes.toList())
+        if (note is UnsavedNoteDiscard && _isAt(note, path))
+          (note as UnsavedNoteDiscard).discard(),
+    ];
+    _publish();
+    await Future.wait(ended);
+  }
+
+  /// The delete of [path] failed: what [discardUnder] dropped is owed again.
+  void restoreUnder(String path) {
+    for (final note in _notes.toList()) {
+      if (note is UnsavedNoteDiscard && _isAt(note, path)) {
+        (note as UnsavedNoteDiscard).restore();
+      }
+    }
+    _publish();
+  }
+
+  static bool _isAt(UnsavedNote note, String path) =>
+      p.equals(note.path, path) || p.isWithin(path, note.path);
 
   /// Tracks [note]; it reads its dirty state live until [unregister].
   /// Registering the same note twice is a no-op.

@@ -316,6 +316,7 @@ final class ShellNotePanes {
     spellCheck: spellCheck,
     saveNote: noteSaverFor(controller),
     saveNoteStream: noteStreamSaverFor(controller),
+    fileGone: noteGoneCheckFor(controller),
     createMissingNote: missingNoteCreatorFor(controller),
   );
 

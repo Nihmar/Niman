@@ -719,6 +719,16 @@ final class MacedonianStrings extends Strings {
   String get noteSaveFailedSnack =>
       'Белешката не можеше да се зачува. Niman ќе се обиде повторно.';
   @override
+  String get noteStatusGone => 'Не е на дискот · зачувај повторно';
+  @override
+  String get noteGoneSnack =>
+      'Оваа белешка веќе не е на дискот. Нејзиниот текст е зачуван овде '
+      '— допрете го статусот за да ја зачувате повторно.';
+  @override
+  String noteHeldSaveFailed(String name) =>
+      'Не успеа зачувувањето на „$name“. Нејзиниот текст е зачуван во '
+      'меморијата.';
+  @override
   String get noteChangedOnDisk =>
       'Друга програма ја промени оваа белешка. Таа верзија е зачувана во '
       'историјата.';

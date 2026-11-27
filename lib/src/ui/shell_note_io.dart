@@ -3,6 +3,8 @@
 /// note a dead link creates — each null while no library is ready.
 library;
 
+import 'dart:io';
+
 import 'package:niman/src/core/files.dart';
 import 'package:niman/src/library/note_save_result.dart';
 import 'package:niman/src/library/note_writer.dart';
@@ -58,6 +60,21 @@ NoteStreamSaver? noteStreamSaverFor(LibrarySession controller) {
       references: references,
       expected: expected,
     );
+  };
+}
+
+/// Asks the disk whether the note at an absolute path is gone (#1321): what
+/// the editor's save checks before it writes a note it loaded, so a note
+/// deleted or moved away is not written back. Null while no library is
+/// ready, and for a note outside the library root.
+Future<bool> Function(String path)? noteGoneCheckFor(
+  LibrarySession controller,
+) {
+  final root = controller.root;
+  if (root == null) return null;
+  return (path) async {
+    if (!p.isWithin(root, path)) return false;
+    return (await FileStat.stat(path)).type == FileSystemEntityType.notFound;
   };
 }
 
