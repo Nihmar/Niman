@@ -20,6 +20,7 @@ library;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/editor/highlighting.dart';
+import 'package:niman/src/markdown/line_syntax.dart';
 import 'package:yaml/yaml.dart';
 
 /// One note's parsed frontmatter block.
@@ -113,29 +114,30 @@ Frontmatter? parseFrontmatter(String text) {
 /// first few is a cost per keystroke that grows with the note. The scan
 /// reads only as far as the closing fence.
 ({String text, int startLine, int endLine})? frontmatterBlock(String text) {
-  var lineStart = 0;
-  var line = 0;
-  while (lineStart <= text.length) {
-    final newline = text.indexOf('\n', lineStart);
-    final lineEnd = newline < 0 ? text.length : newline;
-    final trimmed = text.substring(lineStart, lineEnd).trim();
-    if (line == 0) {
-      // Only a leading `---` opens a block; anything else is body.
-      if (trimmed != '---') return null;
-    } else if (trimmed == '---' || trimmed == '...') {
-      // The block's YAML is everything between the fences.
-      return (
-        text: text.substring(text.indexOf('\n') + 1, lineStart).trimRight(),
-        startLine: 0,
-        endLine: line,
-      );
+  // The lines are cut as the decision asks for them: as far as the closer,
+  // and no further.
+  final starts = <int>[0];
+  String? lineAt(int line) {
+    while (starts.length <= line && starts.last >= 0) {
+      final newline = text.indexOf('\n', starts.last);
+      starts.add(newline < 0 ? -1 : newline + 1);
+      if (newline < 0) break;
     }
-    if (newline < 0) break;
-    lineStart = newline + 1;
-    line++;
+    if (line >= starts.length || starts[line] < 0) return null;
+    final from = starts[line];
+    final newline = text.indexOf('\n', from);
+    return text.substring(from, newline < 0 ? text.length : newline);
   }
-  // The block never closed: not frontmatter, just a rule and some text.
-  return null;
+
+  // An unclosed block is not frontmatter, just a rule and some text.
+  final end = LineSyntax.frontmatterEnd(lineAt);
+  if (end < 0) return null;
+  // The block's YAML is everything between the fences.
+  return (
+    text: text.substring(starts[1], starts[end]).trimRight(),
+    startLine: 0,
+    endLine: end,
+  );
 }
 
 /// Parses the YAML [source] of a frontmatter block (without the `---`

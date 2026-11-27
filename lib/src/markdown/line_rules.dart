@@ -14,6 +14,8 @@
 /// below measures from the note's margin.
 library;
 
+import 'dart:math' as math;
+
 import 'package:niman/src/editor/math_rule.dart';
 import 'package:niman/src/markdown/block.dart';
 import 'package:niman/src/markdown/container_walk.dart';
@@ -37,6 +39,7 @@ final class LineRules {
     this._leftOver = const <int>[],
     this._lazy = const <bool>[],
     this.appSyntax = true,
+    this.isNote = true,
   });
 
   /// Which lines are lazy in the content around them — a quote's line
@@ -52,6 +55,10 @@ final class LineRules {
   /// display math. Always in the app; off for the specifications'
   /// examples, which know neither.
   final bool appSyntax;
+
+  /// Whether the lines are a note's own, and not a container's content read
+  /// again: only the note's first line can open the frontmatter.
+  final bool isNote;
 
   /// The text being scanned.
   final SourceBuffer buffer;
@@ -192,6 +199,9 @@ final class LineRules {
         (indent < 4 || continuing) &&
         TableLineSyntax.heads(text, next) &&
         _stays(line + 1, base, walk.footnote);
+    // What the line read of the lines after it to decide whether it opens
+    // the frontmatter, for the block it starts ([Block.reach]).
+    var openerReach = 0;
     LineRead made(
       BlockKind kind, {
       List<OpenItem>? items,
@@ -221,7 +231,7 @@ final class LineRules {
       divRole: divRole,
       definition: definition,
       definitionRead: definitionRead,
-      reach: reach,
+      reach: reach > 0 ? reach : openerReach,
       definitionsOnly: definitionsOnly,
       // A paragraph's line keeps what its paragraph was tried for.
       tableTried: openParagraph && tried,
@@ -289,11 +299,30 @@ final class LineRules {
       }
       return made(BlockKind.blank);
     }
+    // The note's own first line opens the frontmatter, when a closer
+    // follows within the window ([LineSyntax.frontmatterEnd]); a container's
+    // content has no frontmatter, its first line is no more the note's
+    // than its others. Whatever it looked at is its reach: an edit on one of
+    // those lines may decide it the other way.
     if (appSyntax &&
+        isNote &&
         line == 0 &&
         base.isEmpty &&
         LineSyntax.opensFrontmatter(line, text)) {
-      return made(BlockKind.frontmatter, frontmatter: true);
+      final end = LineSyntax.frontmatterEnd(
+        (at) => at < buffer.lineCount ? lineText(at) : null,
+      );
+      final looked = end < 0
+          ? math.min(buffer.lineCount, LineSyntax.frontmatterWindow)
+          : end + 1;
+      if (looked > farthestReach) farthestReach = looked;
+      if (end >= 0) {
+        openerReach = looked;
+        return made(BlockKind.frontmatter, frontmatter: true);
+      }
+      // Not frontmatter, and what the line is goes on as for any: its
+      // block carries what was looked at.
+      openerReach = looked;
     }
     final opened = LineSyntax.fenceOpen(text);
     if (opened != null) return made(BlockKind.fencedCode, fence: opened);

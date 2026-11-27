@@ -147,6 +147,12 @@ aliases: [My alias]
 ---
 ```
 
+The block opens on the note's first line, which is exactly `---`, and closes
+at the next line that is `---` or `...`, within its first 1 024 lines. A
+note that starts with `---` and has no such line is not frontmatter: the
+`---` is a horizontal rule and the rest is the note, drawn and exported. A
+`---` at the start of a quote, a list item or a callout is a rule too.
+
 Any key is stored and filterable (`key = value` in search). Keys the app
 acts on: `title`, `tags`, `date`, `pinned`, `aliases`, `type` (`list`
 shows the checklist, `shopping-list` the same with a quantity per item,

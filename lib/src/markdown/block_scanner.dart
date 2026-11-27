@@ -56,6 +56,7 @@ final class BlockScanner {
     this._leftOver = const <int>[],
     this._lazy = const <bool>[],
     this.appSyntax = true,
+    this.isNote = true,
   }) : _blocks = BlockList() {
     _rebuild(
       start: 0,
@@ -81,9 +82,13 @@ final class BlockScanner {
       _leftOver = scanned._leftOver,
       _lazy = scanned._lazy,
       appSyntax = scanned.appSyntax,
+      isNote = scanned.isNote,
       _blocks = BlockList.sharing((scanned..settle())._blocks) {
     _entering.addAll(scanned._entering);
     _states.addAll(scanned._states);
+    // How far back an edit may change what a line is: the lines the scan
+    // read are the rebound's own, and so is what they looked at.
+    _rules.farthestReach = scanned._rules.farthestReach;
     _lineCount = scanned._lineCount;
   }
 
@@ -119,6 +124,10 @@ final class BlockScanner {
   /// Whether the app's own block syntax is read (`LineRules.appSyntax`).
   final bool appSyntax;
 
+  /// Whether the lines are a note's own: a container's content read again
+  /// is not, and has no frontmatter (`LineRules.isNote`).
+  final bool isNote;
+
   /// What the scan makes of each line, read against [_entering].
   late final LineRules _rules = LineRules(
     buffer,
@@ -126,6 +135,7 @@ final class BlockScanner {
     leftOver: _leftOver,
     lazy: _lazy,
     appSyntax: appSyntax,
+    isNote: isNote,
   );
 
   /// The blocks the scan makes of those lines.
