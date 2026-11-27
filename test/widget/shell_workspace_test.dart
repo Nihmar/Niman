@@ -1,6 +1,7 @@
 // Issue #23, PR 1: the shell keeps the workspace current — the note it
 // shows, and the library changing under it — and keeps it on this device,
 // with nothing on screen changed yet.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -184,6 +185,31 @@ void main() {
     expect(open.discards, 1);
     expect(open.restores, 1);
     expect(open.unsaved, isTrue, reason: 'the edits were never dropped');
+  });
+
+  // #1363: a write held for a note no longer on screen has nobody to say
+  // that the disk would not take it.
+  testWidgets('a failed held write is said, with the name', (tester) async {
+    await pumpShell(tester);
+    await controller.createNote(parentPath: '', name: 'alpha');
+    await settle(tester);
+
+    unawaited(
+      unsaved
+          .hold(
+            '/fake/library/alpha.md',
+            () => 'text',
+            () async => throw const FileSystemException('disk full'),
+          )
+          .then((_) {}, onError: (_) {}),
+    );
+    await settle(tester);
+
+    expect(find.textContaining('alpha'), findsWidgets);
+    expect(find.textContaining('Could not save "alpha"'), findsOne);
+    expect(unsaved.hasUnsaved, isTrue);
+    // The editor that opens the note takes the text, and the retry goes.
+    expect(unsaved.takeOver('/fake/library/alpha.md'), 'text');
   });
 
   testWidgets('what was left open comes back as tabs', (tester) async {

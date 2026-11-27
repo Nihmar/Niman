@@ -18,8 +18,10 @@ import 'package:niman/src/ui/shell_outside_routes.dart';
 import 'package:niman/src/ui/shell_personal_dictionary.dart';
 import 'package:niman/src/ui/shell_selection.dart';
 import 'package:niman/src/ui/shell_workspace.dart';
+import 'package:niman/src/ui/strings.dart';
 import 'package:niman/src/ui/unsaved_notes.dart';
 import 'package:niman/src/ui/window_controller.dart';
+import 'package:path/path.dart' as p;
 
 /// What the shell does with what reaches it from outside while it is up
 /// (#1256): a notification tapped, a recognition finished, the library's
@@ -151,6 +153,19 @@ final class ShellInboundRoutes {
     // another program): every open note whose buffer is clean adopts the
     // change, the tabs behind the one on screen included (#1055).
     _inbound.listen(controller.externalChanges, unsaved.notifyDiskChanged);
+    // A note switched away from or closed whose write the disk would not take
+    // (#1363): said as the failed save of the note on screen is, with its
+    // name — it is no longer there to say it itself.
+    _inbound.listen(unsaved.heldWriteFailures, (path) {
+      if (!mounted()) return;
+      ScaffoldMessenger.maybeOf(context())?.showSnackBar(
+        SnackBar(
+          content: Text(
+            AppStrings.noteHeldSaveFailed(p.basenameWithoutExtension(path)),
+          ),
+        ),
+      );
+    });
     // Paths a sync just changed on disk: the open note among them is
     // re-read (its buffer was saved before the sync started).
     _inbound.listen(controller.sync?.localChanges, (paths) {

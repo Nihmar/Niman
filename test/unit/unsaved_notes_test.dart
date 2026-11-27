@@ -317,4 +317,44 @@ void main() {
       });
     });
   });
+
+  group('a held write that fails says so (#1363)', () {
+    test('once per run of failures, naming the note', () {
+      fakeAsync((async) {
+        final tracker = UnsavedTracker();
+        final told = <String>[];
+        tracker.heldWriteFailures.listen(told.add);
+        var failing = true;
+        unawaited(
+          tracker
+              .hold('/lib/a.md', () => 'held', () async {
+                if (failing) throw StateError('disk full');
+              })
+              .then((_) {}, onError: (_) {}),
+        );
+        async.flushMicrotasks();
+        expect(told, ['/lib/a.md']);
+        expect(tracker.hasUnsaved, isTrue, reason: 'the note is unsaved');
+
+        // The retries fail too, and are not announced again.
+        async
+          ..elapse(const Duration(seconds: 30))
+          ..flushMicrotasks();
+        expect(told, ['/lib/a.md']);
+
+        failing = false;
+        unawaited(tracker.saveAll());
+        async.flushMicrotasks();
+        expect(tracker.hasUnsaved, isFalse);
+      });
+    });
+
+    test('a write that lands says nothing', () async {
+      final tracker = UnsavedTracker();
+      final told = <String>[];
+      tracker.heldWriteFailures.listen(told.add);
+      await tracker.hold('/lib/a.md', () => 'held', () async {});
+      expect(told, isEmpty);
+    });
+  });
 }

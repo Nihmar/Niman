@@ -22,6 +22,7 @@ final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
     required this.textOf,
     required this.write,
     this.onWritten,
+    this.onFailed,
     this.retryDelays = defaultRetryDelays,
   });
 
@@ -39,6 +40,11 @@ final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
 
   /// Called once the write has landed.
   final void Function(DetachedSave save)? onWritten;
+
+  /// Called when the write fails for the first time since it last landed
+  /// (#1363): what the editor says of a save of the note on screen that
+  /// failed, said for the note that is no longer on screen.
+  final void Function(DetachedSave save)? onFailed;
 
   /// The waits between a failed write and its automatic retries.
   final List<Duration> retryDelays;
@@ -115,6 +121,7 @@ final class DetachedSave implements UnsavedNote, UnsavedNoteDiscard {
       onError: (Object error, StackTrace stack) {
         _failures++;
         _log.warning('outgoing save failed: $path ($error)');
+        if (_failures == 1 && !_superseded) onFailed?.call(this);
         if (!_superseded && _failures <= retryDelays.length) {
           _retry = Timer(retryDelays[_failures - 1], () {
             if (unsaved && _running == null) unawaited(_quiet(_attempt()));

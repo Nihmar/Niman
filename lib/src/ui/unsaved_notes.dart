@@ -74,8 +74,18 @@ final class UnsavedTracker extends ChangeNotifier {
   /// disk — or, with none, that any open note's may have.
   void notifyDiskChanged(Set<String> paths) => _diskChanges.add(paths);
 
+  final StreamController<String> _heldFailures =
+      StreamController<String>.broadcast(sync: true);
+
+  /// The note at each path whose held write failed (#1363): a note switched
+  /// away from or closed whose text the disk would not take. Said once per
+  /// run of failures, as the editor says it of the note on screen; the text
+  /// is kept and retried, and the note reads as unsaved until it lands.
+  Stream<String> get heldWriteFailures => _heldFailures.stream;
+
   @override
   void dispose() {
+    unawaited(_heldFailures.close());
     unawaited(_diskChanges.close());
     super.dispose();
   }
@@ -153,6 +163,7 @@ final class UnsavedTracker extends ChangeNotifier {
       textOf: text,
       write: write,
       onWritten: unregister,
+      onFailed: (save) => _heldFailures.add(save.path),
     );
     register(save);
     return save.start();

@@ -435,7 +435,9 @@ Nothing is thrown away meanwhile. If the note is switched away from or its tab
 is closed while the write is still running or has failed, its text is kept by
 the app: the note stays marked as unsaved, the write is retried, and quitting
 waits for it (or asks, if it still cannot be written) instead of leaving with
-the last edits lost. If you open that note again meanwhile, it opens with
+the last edits lost. A write that fails for a note that is no longer on screen
+is said as it is for the one that is: a message names the note (*Could not save
+"name"*), once for the run of failures. If you open that note again meanwhile, it opens with
 those edits in it, as unsaved changes of its own — not with the older text the
 disk still has — and the held write is dropped, so nothing old is ever written
 over what you type next.
