@@ -316,27 +316,24 @@ final class SourceContextMenu extends ChangeNotifier {
                 },
         ),
       // By touch, where there is no key to undo with: after the clipboard's,
-      // in the overflow, greyed rather than left out so nothing moves.
-      if (touch) ...[
+      // at the end of the overflow, which is the side the row grows from, so
+      // nothing moves under a thumb when one comes.
+      if (touch && _history().canUndo)
         ContextMenuButtonItem(
           label: AppStrings.shortcutUndo,
-          onPressed: _history().canUndo
-              ? () {
-                  dismiss();
-                  _undo();
-                }
-              : null,
+          onPressed: () {
+            dismiss();
+            _undo();
+          },
         ),
+      if (touch && _history().canRedo)
         ContextMenuButtonItem(
           label: AppStrings.shortcutRedo,
-          onPressed: _history().canRedo
-              ? () {
-                  dismiss();
-                  _redo();
-                }
-              : null,
+          onPressed: () {
+            dismiss();
+            _redo();
+          },
         ),
-      ],
     ];
   }
 

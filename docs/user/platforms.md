@@ -42,7 +42,7 @@ the two agree.
 Undo and redo ([editing](editing.md#undo-and-redo)) are on every platform
 and not only keys: they are the first two buttons of the editor's toolbar —
 greyed when there is nothing to undo or redo — and, on a phone, also in the
-overflow of the toolbar over a selection (#1336). A phone or a tablet with no
+overflow of the toolbar over a selection once there is something to undo (#1336). A phone or a tablet with no
 keyboard has them there and nowhere else.
 
 ## Android

@@ -408,7 +408,8 @@ one `Ctrl/⌘+Z`, not one character per press.
 Undo and redo are the first two buttons of the editor's toolbar on every
 platform — the only way to undo on a phone or a tablet with no keyboard — and
 are greyed, in their place, when there is nothing to undo or redo. On a phone
-they are also in the overflow of the toolbar over a selection. They are not
+they are also at the end of the overflow of the toolbar over a selection, once
+there is something to undo or redo. They are not
 among the buttons Settings → Editor can hide or reorder. Undo puts the
 selection back as it was before the step — the word a bold was applied to is
 selected again, and the caret goes back where a forward Delete began — and redo
