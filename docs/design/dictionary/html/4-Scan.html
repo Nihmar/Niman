@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Significato — una riga di una scansione</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;display:flex;gap:32px;padding:24px;background:#ECEDEF;font-family:Inter,system-ui,sans-serif;color:#1F1F1F;align-items:flex-start}
+.phone{width:390px;height:844px;box-sizing:border-box;display:flex;flex-direction:column;background:#FFFFFF;overflow:hidden;position:relative;border-radius:28px;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+header{height:56px;flex-shrink:0;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #E3E4E6;font-size:17px;font-weight:600}
+.scan{margin:20px 16px 0;height:520px;background:#F4F0E6;border-radius:4px;box-shadow:inset 0 0 0 1px #E2DccB;padding:28px 22px;box-sizing:border-box;font-family:Georgia,serif;font-size:15px;line-height:1.75;color:#3A3328;filter:contrast(.95)}
+.scan p{margin:0 0 10px;text-align:justify}
+.line{background:rgba(26,95,180,.18);outline:1px solid rgba(26,95,180,.5);border-radius:2px}
+.menu{position:absolute;left:40px;top:300px;width:250px;padding:6px 0;background:#FFFFFF;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.06)}
+.mi{display:flex;align-items:center;height:46px;padding:0 16px;font-size:15px}
+.mi.first{font-weight:600;color:#123F78}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:400px;background:#FFFFFF;border-radius:20px 20px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.16);display:flex;flex-direction:column}
+.grab{width:36px;height:4px;border-radius:2px;background:#C4C6CA;margin:10px auto 6px}
+.words{display:flex;flex-wrap:wrap;gap:6px;padding:6px 20px 12px;border-bottom:1px solid #E3E4E6}
+.w{font-family:Literata,Georgia,serif;font-size:15px;padding:5px 10px;border-radius:16px;border:1px solid #D5D7DA;color:#3C4043}
+.w.on{background:#E4ECF8;border-color:#1A5FB4;color:#123F78;font-weight:600}
+.body{padding:12px 20px;font-size:15px;line-height:1.5}
+.word{font-family:Literata,Georgia,serif;font-size:22px;font-weight:600}
+.pos{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5F6368;margin:8px 0 4px}
+.cap{font-size:13px;color:#5F6368;max-width:390px;line-height:1.5}
+</style>
+</head>
+<body>
+<div>
+<div class="phone">
+  <header>Manuale del fonditore.pdf</header>
+  <div class="scan">
+    <p>Il metallo, versato nella forma ancora calda, deve scorrere senza intoppi in ogni cavità.</p>
+    <p><span class="line">La staffa si chiude con cura, e la colata comincia</span> solo quando il crogiolo ha raggiunto il colore del giallo paglierino.</p>
+    <p>Un raffreddamento troppo rapido produce cricche…</p>
+  </div>
+  <div class="menu" role="menu">
+    <div class="mi first">Significato</div>
+    <div class="mi">Annota</div>
+    <div class="mi">Copia il testo</div>
+    <div class="mi">Copia il link a questa pagina</div>
+  </div>
+</div>
+<p class="cap"><b>G — A scan's line.</b> A recognized line picked on the page opens the line's menu, as today (#596), with <i>Significato</i> first. The recognition keeps a box per line, not per word, so the line is what is picked.</p>
+</div>
+
+<div>
+<div class="phone">
+  <header>Manuale del fonditore.pdf</header>
+  <div class="scan">
+    <p>Il metallo, versato nella forma ancora calda, deve scorrere senza intoppi in ogni cavità.</p>
+    <p><span class="line">La staffa si chiude con cura, e la colata comincia</span> solo quando…</p>
+  </div>
+  <section class="sheet" aria-label="Significato">
+    <div class="grab"></div>
+    <div class="words">
+      <span class="w">La</span><span class="w on">staffa</span><span class="w">si</span><span class="w">chiude</span><span class="w">con</span><span class="w">cura</span><span class="w">e</span><span class="w">la</span><span class="w">colata</span><span class="w">comincia</span>
+    </div>
+    <div class="body">
+      <div class="word">staffa</div>
+      <div class="pos">sostantivo femminile</div>
+      <ol style="margin:0;padding-left:20px">
+        <li>Anello di ferro appeso alla sella, dove il cavaliere appoggia il piede.</li>
+        <li>(metallurgia) Telaio che contiene la terra della forma da fusione.</li>
+      </ol>
+    </div>
+  </section>
+</div>
+<p class="cap"><b>H — The line's words, as chips.</b> The panel opens with the line's words above the meaning; the one under the tap is chosen, estimated from where the tap fell along the line, and any other is a tap away. On the desktop the same chips head the panel. The sidecar's format does not change.</p>
+</div>
+</body>
+</html>

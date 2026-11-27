@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Significato — telefono, libro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Literata:opsz,wght@7..72,400;7..72,600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;display:flex;gap:32px;padding:24px;background:#ECEDEF;font-family:Inter,system-ui,sans-serif}
+.phone{width:390px;height:844px;box-sizing:border-box;display:flex;flex-direction:column;background:#FFFFFF;color:#1F1F1F;overflow:hidden;position:relative;border-radius:28px;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+.ic{width:40px;height:40px;border:0;background:transparent;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#3C4043;padding:0}
+header{height:56px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 4px;border-bottom:1px solid #E3E4E6}
+.title{flex:1;min-width:0;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{flex:1;min-height:0;overflow:hidden;padding:24px 24px 0;font-family:Literata,Georgia,serif;font-size:18px;line-height:1.62;color:#24262A}
+main p{margin:0 0 14px}
+.sel{background:#BFD3F2;border-radius:2px}
+.bar{position:absolute;left:24px;top:262px;display:flex;background:#FFFFFF;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.06);font-size:14px;overflow:hidden}
+.bar span{padding:11px 13px;white-space:nowrap}
+.bar .first{font-weight:600;color:#123F78}
+.cap{font-size:13px;color:#5F6368;max-width:390px;line-height:1.5}
+.sheet{position:absolute;left:0;right:0;bottom:0;height:470px;background:#FFFFFF;border-radius:20px 20px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.16);display:flex;flex-direction:column}
+.grab{width:36px;height:4px;border-radius:2px;background:#C4C6CA;margin:10px auto 6px}
+.head{display:flex;align-items:flex-start;gap:8px;padding:4px 20px 10px;border-bottom:1px solid #E3E4E6}
+.word{font-family:Literata,Georgia,serif;font-size:24px;font-weight:600}
+.from{font-size:13px;color:#5F6368;margin-top:2px}
+.lang{margin-left:auto;margin-top:4px;font-size:13px;padding:5px 10px;border-radius:16px;border:1px solid #C9CBCF;color:#3C4043;white-space:nowrap}
+.body{flex:1;overflow:hidden;padding:12px 20px;font-size:15px;line-height:1.5}
+.pos{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5F6368;margin:6px 0 4px}
+ol{margin:0 0 8px;padding-left:20px}
+li{margin-bottom:6px}
+.ex{color:#5F6368;font-style:italic}
+.foot{display:flex;align-items:center;gap:4px;padding:6px 8px 10px 20px;border-top:1px solid #E3E4E6}
+.src{flex:1;font-size:12px;color:#5F6368}
+</style>
+</head>
+<body>
+<div>
+<div class="phone">
+  <header>
+    <button class="ic" aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="title">Le avventure di Pinocchio</div>
+  </header>
+  <main>
+    <p>No, ragazzi, avete sbagliato. C’era una volta un pezzo di legno.</p>
+    <p>Non era un legno di lusso, ma un semplice pezzo da catasta, di quelli che d’inverno si mettono nelle stufe e nei <span class="sel">caminetti</span> per accendere il fuoco e per riscaldare le stanze.</p>
+    <p>Non so come andasse, ma il fatto gli è che un bel giorno questo pezzo di legno capitò nella bottega di un vecchio falegname…</p>
+  </main>
+  <div class="bar" role="menu" aria-label="Selezione">
+    <span class="first">Significato</span><span>Leggi da qui</span><span>Evidenzia</span><span>Copia</span><span>⋮</span>
+  </div>
+</div>
+<p class="cap"><b>A — The selection.</b> A word selected with a long-press offers <i>Significato</i> (Look up) first, where a phone's bar keeps it in sight; <i>Read aloud from here</i> moves to second. It is offered for every selection, not only a single word, so the bar never changes shape under the thumb. Annotate and Link to this place follow in the overflow, and on Android the apps that take a selection (Translate, an installed dictionary) stay after Copy, as Flutter offers them today.</p>
+</div>
+
+<div>
+<div class="phone">
+  <header>
+    <button class="ic" aria-label="Indietro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="title">Le avventure di Pinocchio</div>
+  </header>
+  <main>
+    <p>No, ragazzi, avete sbagliato. C’era una volta un pezzo di legno.</p>
+    <p>Non era un legno di lusso, ma un semplice pezzo da catasta, di quelli che d’inverno si mettono nelle stufe e nei <span class="sel">caminetti</span> per accendere il fuoco…</p>
+  </main>
+  <section class="sheet" aria-label="Significato">
+    <div class="grab"></div>
+    <div class="head">
+      <div>
+        <div class="word">caminetto</div>
+        <div class="from">da «caminetti», plurale</div>
+      </div>
+      <span class="lang">Italiano ▾</span>
+    </div>
+    <div class="body">
+      <div class="pos">sostantivo maschile</div>
+      <ol>
+        <li>Piccolo camino a muro, per scaldare una stanza.<br><span class="ex">accendere il caminetto</span></li>
+        <li>(estens.) La cornice di pietra o marmo che lo circonda.</li>
+      </ol>
+      <div class="pos">voci vicine</div>
+      <div style="color:#1A5FB4">camino · caminiera · caminetto elettrico</div>
+    </div>
+    <div class="foot">
+      <span class="src">Wikizionario · CC BY-SA 4.0</span>
+      <button class="ic" aria-label="Copia la definizione"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 8h11v12H8zM5 16V4h11"/></svg></button>
+      <button class="ic" aria-label="Annota con la definizione"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M4 12h7M4 17h5M14 19l1-3.5 5-5 2.5 2.5-5 5z"/></svg></button>
+    </div>
+  </section>
+</div>
+<p class="cap"><b>B — The meaning, in a sheet.</b> Half the height, dragged higher to read more. The headword is the lemma (<i>caminetto</i>), with the form read that led to it. The language is the book's (<code>dc:language</code>); the chip changes it, since an Italian book quotes English. The nearby entries look themselves up. At the foot, the pack and its licence, and two actions: copy the definition, and annotate the passage with it (the annotation sheet opens with the definition written in).</p>
+</div>
+</body>
+</html>
