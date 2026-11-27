@@ -97,7 +97,13 @@ Moving and selecting in the source editor, on Windows and Linux:
 - `Ctrl+←` / `Ctrl+→` — jump a word; at the head of a line `Ctrl+←` goes to
   the end of the line above, and at the end of a line `Ctrl+→` to the head
   of the line below (past its indentation and any list marker)
-- `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word
+- `Ctrl+Shift+←` / `Ctrl+Shift+→` — select a word. A word is a run of
+  letters, digits and underscores, and a letter keeps what is written on it:
+  `é` typed as a letter and an accent, a Thai or Devanagari syllable, a
+  letter outside the Basic Multilingual Plane are all part of their word,
+  in the keys, in a double click and in a long press; a character with
+  many marks on it (or a long joined emoji sequence) is one step, however
+  long
 - `Home` / `End` — start and end of the line, `Shift` to select; `Home` stops
   first where the text starts, past the indentation and any list marker,
   task box, quote mark or heading hashes, and a second press goes to the

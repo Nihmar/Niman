@@ -14,10 +14,12 @@
 // with the anchor held: the caret is one model, not two.
 // `characters` comes with Flutter (`package:flutter/widgets.dart` re-exports
 // it), so a grapheme cluster is available without a dependency of our own.
-import 'package:flutter/widgets.dart';
+import 'package:niman/src/markdown/edit/grapheme_steps.dart';
 import 'package:niman/src/markdown/edit/line_prefix.dart';
 import 'package:niman/src/markdown/edit/selection_model.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
+
+export 'package:niman/src/markdown/edit/grapheme_steps.dart' show isWordChar;
 
 /// One press of a movement key.
 enum CaretMotion {
@@ -51,19 +53,6 @@ enum CaretMotion {
   documentEnd,
 }
 
-/// Whether [unit] is part of a word: a letter, a digit, or an underscore.
-///
-/// The rule editors share, and the one a writer expects: `snake_case_name`
-/// moves
-/// as one word, `due parole` as two, and punctuation belongs to neither side.
-/// The bracket pairs read it too, for the characters that only sometimes
-/// pair (#718).
-bool isWordChar(String unit) => _wordPattern.hasMatch(unit);
-
-/// Compiled once: a keystroke-rate caller compiling it per character was the
-/// most expensive part of a word motion.
-final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
-
 /// The range of the word [offset] is in, as `(start, end)`.
 ///
 /// What a double click selects, and the same word rule the word motions use: a
@@ -90,46 +79,23 @@ final RegExp _wordPattern = RegExp(r'^[\p{L}\p{N}_]$', unicode: true);
 /// clusters rather than code units. The offset need not be on a boundary: a
 /// click or a long press in the middle of a surrogate pair sits on half an
 /// emoji, and answering with that half is a range the selection, the clipboard
-/// and the platform `TextSelection` cannot use (#376).
+/// and the platform `TextSelection` cannot use (#376). A cluster is a word
+/// character by its first code point, so a letter with an accent after it, a
+/// Thai syllable or a letter outside the BMP is part of its word (#1346).
 (int, int) _expand(String text, int at, {required int fallback}) {
   if (at < 0 || at >= text.length) return (fallback, fallback + 1);
-  final (unitStart, unitEnd) = _clusterAt(text, at);
-  final unit = text.substring(unitStart, unitEnd);
-  if (!isWordChar(unit)) return (unitStart, unitEnd);
-  var start = unitStart;
-  var end = unitEnd;
-  while (start > 0 &&
-      isWordChar(String.fromCharCode(text.codeUnitAt(start - 1)))) {
-    start--;
+  final steps = GraphemeSteps.ofString(text);
+  // The cluster holding code unit [at]: from the boundary before the unit
+  // after it, to the boundary that follows.
+  final unitStart = steps.previous(at + 1);
+  final unitEnd = steps.next(unitStart);
+  if (!isWordChar(text.substring(unitStart, unitEnd))) {
+    return (unitStart, unitEnd);
   }
-  while (end < text.length &&
-      isWordChar(String.fromCharCode(text.codeUnitAt(end)))) {
-    end++;
-  }
-  // A run that stopped inside a cluster — the accent after its letter, half a
-  // pair — takes that cluster whole rather than cutting it, so both ends of
-  // the range stand on a boundary.
-  return (_clusterAt(text, start).$1, _clusterAt(text, end - 1).$2);
-}
-
-/// The grapheme cluster of [text] that holds code unit [at], as
-/// `(start, end)`.
-///
-/// The string twin of [_lastUnit] and [_firstUnit], with the one difference a
-/// click needs: [at] need not stand on a cluster boundary. An offset in the
-/// middle of a surrogate pair is answered with the pair, because that is the
-/// whole of what it sits on.
-(int, int) _clusterAt(String text, int at) {
-  final from = at - _window < 0 ? 0 : at - _window;
-  final to = at + _window > text.length ? text.length : at + _window;
-  var start = from;
-  for (final unit in text.substring(from, to).characters) {
-    final end = start + unit.length;
-    if (at < end) return (start, end);
-    start = end;
-  }
-  // The window always reaches past [at], so the loop has answered by here.
-  return (text.length, text.length);
+  return (
+    steps.runBackward(unitStart, word: true),
+    steps.runForward(unitEnd, word: true),
+  );
 }
 
 /// The run of non-whitespace the caret [offset] is in, as `(start, end)`.
@@ -217,13 +183,13 @@ SelectionModel moveCaret(
 /// One grapheme cluster left of [at].
 int _characterLeft(SourceBuffer buffer, int at) {
   if (at <= 0) return 0;
-  return at - _lastUnit(buffer, at).length;
+  return GraphemeSteps.ofBuffer(buffer).previous(at);
 }
 
 /// One grapheme cluster right of [at].
 int _characterRight(SourceBuffer buffer, int at) {
   if (at >= buffer.length) return buffer.length;
-  return at + _firstUnit(buffer, at).length;
+  return GraphemeSteps.ofBuffer(buffer).next(at);
 }
 
 /// The start of the word before [at], or the end of the line above when [at]
@@ -244,14 +210,8 @@ int _wordLeft(SourceBuffer buffer, int at, int Function(int line) body) {
     final above = line - 1;
     return buffer.offsetOfLine(above) + buffer.lineLengthAt(above);
   }
-  var index = at;
-  while (index > 0 && !isWordChar(_lastUnit(buffer, index))) {
-    index -= _unitLengthBefore(buffer, index);
-  }
-  while (index > 0 && isWordChar(_lastUnit(buffer, index))) {
-    index -= _unitLengthBefore(buffer, index);
-  }
-  return index;
+  final steps = GraphemeSteps.ofBuffer(buffer);
+  return steps.runBackward(steps.runBackward(at, word: false), word: true);
 }
 
 /// The start of the word after [at], or the head of the line below when [at]
@@ -270,14 +230,8 @@ int _wordRight(SourceBuffer buffer, int at, int Function(int line) body) {
   if (line + 1 < buffer.lineCount && at >= _lineEnd(buffer, at)) {
     return body(line + 1);
   }
-  var index = at;
-  while (index < buffer.length && !isWordChar(_firstUnit(buffer, index))) {
-    index += _unitLengthAt(buffer, index);
-  }
-  while (index < buffer.length && isWordChar(_firstUnit(buffer, index))) {
-    index += _unitLengthAt(buffer, index);
-  }
-  return index;
+  final steps = GraphemeSteps.ofBuffer(buffer);
+  return steps.runForward(steps.runForward(at, word: false), word: true);
 }
 
 /// The end of the line the caret is on, before its terminator.
@@ -301,32 +255,3 @@ int _textStart(SourceBuffer buffer, int at, int Function(int line) body) {
   final start = body(line);
   return at > head && at <= start ? head : start;
 }
-
-/// How far either side of the caret a grapheme cluster is looked for.
-///
-/// A cluster is a handful of code units — an emoji with its modifiers, a
-/// letter with its accents, a `\r\n` — so a window this wide always holds the
-/// whole of the one next to the caret, and of the one [wordRangeAt] expands a
-/// click's offset to. What it replaces copied the note from its start to the
-/// caret (or from the caret to its end) on every press, and several times per
-/// character of a word motion.
-const int _window = 64;
-
-/// The grapheme cluster ending at [at].
-String _lastUnit(SourceBuffer buffer, int at) {
-  final from = at - _window < 0 ? 0 : at - _window;
-  return buffer.substring(from, at).characters.last;
-}
-
-/// The grapheme cluster starting at [at].
-String _firstUnit(SourceBuffer buffer, int at) {
-  final to = at + _window > buffer.length ? buffer.length : at + _window;
-  return buffer.substring(at, to).characters.first;
-}
-
-/// How many code units the grapheme cluster ending at [at] takes.
-int _unitLengthBefore(SourceBuffer buffer, int at) =>
-    _lastUnit(buffer, at).length;
-
-/// How many code units the grapheme cluster starting at [at] takes.
-int _unitLengthAt(SourceBuffer buffer, int at) => _firstUnit(buffer, at).length;
