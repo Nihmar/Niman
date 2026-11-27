@@ -27,6 +27,7 @@ library;
 
 import 'dart:collection';
 import 'dart:isolate';
+import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:niman/src/core/memory_reclaim.dart';
@@ -45,6 +46,7 @@ import 'package:niman/src/markdown/note_references.dart';
 import 'package:niman/src/markdown/quote_marks.dart';
 import 'package:niman/src/markdown/read_block.dart';
 import 'package:niman/src/markdown/read_parser.dart';
+import 'package:niman/src/markdown/scope_entry.dart';
 import 'package:niman/src/markdown/source_buffer.dart';
 import 'package:niman/src/markdown/source_edit.dart';
 
@@ -65,7 +67,9 @@ final class SourceStyler implements Reclaimable {
     );
     _definers.addAll(holdings.lines);
     _opensBody.addAll(holdings.running);
-    _scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
+    _readEntries(0, _definers);
+    _definitionLinesRescanned = 0;
+    _scope = DocumentScope.of(buffer, buffer.revision, _entries);
     MemoryReclaim.track(this);
   }
 
@@ -75,9 +79,14 @@ final class SourceStyler implements Reclaimable {
     this._scope,
     List<int> definers,
     List<bool> opensBody,
+    List<ScopeEntry> entries,
   ) {
     _definers.addAll(definers);
     _opensBody.addAll(opensBody);
+    for (final entry in entries) {
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+    }
+    _entries.addAll(entries);
     MemoryReclaim.track(this);
   }
 
@@ -93,31 +102,41 @@ final class SourceStyler implements Reclaimable {
   /// than the whole note's worth of reading.
   static Future<SourceStyler> inBackground(SourceBuffer buffer) async {
     final revision = buffer.revision;
-    final (scanner, scope, definers, opensBody, references) = await Isolate.run(
-      () {
-        final holdings = _holdingsOf(
-          buffer,
-          0,
-          buffer.lineCount,
-          runningBody: false,
-        );
-        final scanner = BlockScanner(buffer);
-        final scope = DocumentScope.ofLines(buffer, revision, holdings.lines);
-        return (
-          scanner,
-          scope,
-          holdings.lines,
-          holdings.running,
-          NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
-        );
-      },
-    );
+    final (
+      scanner,
+      scope,
+      definers,
+      opensBody,
+      entries,
+      references,
+    ) = await Isolate.run(() {
+      final holdings = _holdingsOf(
+        buffer,
+        0,
+        buffer.lineCount,
+        runningBody: false,
+      );
+      final scanner = BlockScanner(buffer);
+      final entries = [
+        for (final line in holdings.lines) DocumentScope.entryAt(buffer, line),
+      ];
+      final scope = DocumentScope.of(buffer, revision, entries);
+      return (
+        scanner,
+        scope,
+        holdings.lines,
+        holdings.running,
+        entries,
+        NoteReferenceCache.readAll(scanner.index.blocks, buffer, scope),
+      );
+    });
     final styler = SourceStyler._adopt(
       buffer,
       BlockScanner.rebound(scanner, buffer),
       scope.on(buffer, revision),
       definers,
       opensBody,
+      entries,
     ).._revision = revision;
     styler._references.adopt(references);
     // The record of what the edits do to the list starts at the list read.
@@ -217,6 +236,28 @@ final class SourceStyler implements Reclaimable {
   /// to. What the next line's own membership is read from, in O(log n).
   final List<bool> _opensBody = <bool>[];
 
+  /// What each line of [_definers] adds to the note's definitions, read once:
+  /// an edit reads the lines it changed again, and the scope is combined
+  /// from these, not from the lines (#1372).
+  final List<ScopeEntry> _entries = <ScopeEntry>[];
+
+  /// The most lines after its own any entry looked at: how far above an edit
+  /// an entry may be that the edit changes.
+  int _farthestEntry = 0;
+
+  /// Reads the entries of [lines] and puts them at [at] of [_entries] in
+  /// place of [count] of what was there. The reads are counted.
+  void _readEntries(int at, List<int> lines, {int count = 0}) {
+    final fresh = [
+      for (final line in lines) DocumentScope.entryAt(buffer, line),
+    ];
+    _definitionLinesRescanned += fresh.length;
+    for (final entry in fresh) {
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+    }
+    _entries.replaceRange(at, at + count, fresh);
+  }
+
   /// How many definition lines the edits have read again here, for the test
   /// that proves a keystroke in indented code rescans none (#496).
   int get definitionLinesRescanned => _definitionLinesRescanned;
@@ -297,8 +338,7 @@ final class SourceStyler implements Reclaimable {
     _scanner.edited(edit);
     _byStart.clear();
     if (_touchesDefinitions(edit)) {
-      _definitionLinesRescanned += _definers.length;
-      final scope = DocumentScope.ofLines(buffer, buffer.revision, _definers);
+      final scope = DocumentScope.of(buffer, buffer.revision, _entries);
       if (!_sameDefinitions(scope, _scope)) {
         _parses.clear();
         if (_references.kept) {
@@ -656,7 +696,24 @@ final class SourceStyler implements Reclaimable {
     }
     _definers.replaceRange(low, keepFrom, holdings.lines);
     _opensBody.replaceRange(low, keepFrom, holdings.running);
-    return touched;
+    _readEntries(low, holdings.lines, count: keepFrom - low);
+    // The lines above the edit that read the ones it changed — a definition's
+    // destination and title, a footnote's body — read again too.
+    var above = false;
+    for (
+      var at = _lowerBound(_definers, first - _farthestEntry);
+      at < low;
+      at++
+    ) {
+      if (_definers[at] + _entries[at].span < first) continue;
+      final entry = DocumentScope.entryAt(buffer, _definers[at]);
+      _definitionLinesRescanned++;
+      if (entry.sameAs(_entries[at])) continue;
+      _entries[at] = entry;
+      _farthestEntry = math.max(_farthestEntry, entry.span);
+      above = true;
+    }
+    return touched || above;
   }
 
   static bool _sameDefinitions(DocumentScope a, DocumentScope b) {
