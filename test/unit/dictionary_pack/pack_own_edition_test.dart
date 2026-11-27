@@ -28,6 +28,7 @@ void main() {
     String name, {
     required bool withEnglish,
     bool dictzip = true,
+    bool keepFolders = true,
   }) => buildPacks(
     BuildOptions(
       outDir: Directory(p.join(dir.path, name)),
@@ -39,6 +40,7 @@ void main() {
           : null,
       ownEditions: {'it': File(p.join(_fixtures, 'it-sample.jsonl'))},
       dictzip: dictzip,
+      keepFolders: keepFolders,
       memoryBytes: 1 << 10,
     ),
     (_) {},
@@ -168,5 +170,21 @@ void main() {
       expect(it.html('amo'), contains('Gancio da pesca.'));
       expect(alone.fileSizes.containsKey('dict.dz'), isFalse);
     });
+  });
+
+  test('archives only: the pack folder goes once it is archived', () async {
+    await build('archived', withEnglish: false, keepFolders: false);
+    expect(
+      Directory(p.join(dir.path, 'archived', 'niman-it')).existsSync(),
+      isFalse,
+    );
+    expect(
+      File(p.join(dir.path, 'archived', 'niman-it.tar')).existsSync(),
+      isTrue,
+    );
+    expect(
+      File(p.join(dir.path, 'archived', 'niman-it.report.json')).existsSync(),
+      isTrue,
+    );
   });
 }

@@ -20,7 +20,8 @@
 // Other flags: `--work <dir>` for the spill files (default `<out>/work`),
 // `--memory <MB>` for what the sorts may hold (default 1024), `--date
 // YYYY-MM-DD` for the `.ifo` (default today), `--examples <n>` per sense
-// (default 2), `--no-dictzip` to leave `.dict` plain.
+// (default 2), `--no-dictzip` to leave `.dict` plain, `--archives-only` to
+// delete each pack's folder once it is archived.
 // ignore_for_file: avoid_print
 
 import 'dart:io';
@@ -56,7 +57,7 @@ const String _usage = '''
 dart run tool/dictionary_pack.dart --out <dir> [--english <jsonl[.gz]>]
     [--edition <code>=<jsonl[.gz]> ...] [--languages <code,code,...>]
     [--work <dir>] [--memory <MB>] [--date <YYYY-MM-DD>] [--examples <n>]
-    [--no-dictzip]''';
+    [--no-dictzip] [--archives-only]''';
 
 const Set<String> _valueFlags = {
   'out',
@@ -76,7 +77,7 @@ Map<String, List<String>> _parse(List<String> args) {
     if (!arg.startsWith('--')) throw FormatException('Unexpected "$arg".');
     final equals = arg.indexOf('=');
     final name = equals < 0 ? arg.substring(2) : arg.substring(2, equals);
-    if (name == 'help' || name == 'no-dictzip') {
+    if (name == 'help' || name == 'no-dictzip' || name == 'archives-only') {
       flags[name] = [];
     } else if (_valueFlags.contains(name)) {
       final String value;
@@ -142,5 +143,6 @@ BuildOptions _options(Map<String, List<String>> flags) {
     memoryBytes: memory << 20,
     dictzip: !flags.containsKey('no-dictzip'),
     maxExamples: examples,
+    keepFolders: !flags.containsKey('archives-only'),
   );
 }

@@ -39,6 +39,7 @@ final class BuildOptions {
     this.memoryBytes = 1 << 30,
     this.dictzip = true,
     this.maxExamples = 2,
+    this.keepFolders = true,
   });
 
   /// Where the packs, archives and reports go.
@@ -68,6 +69,10 @@ final class BuildOptions {
 
   /// The examples a sense keeps.
   final int maxExamples;
+
+  /// Whether each pack's folder stays beside its archive: a runner short of
+  /// disk keeps the archives, which are what is published, and no more.
+  final bool keepFolders;
 }
 
 /// Builds every pack of [options]; [log] hears of the progress.
@@ -232,6 +237,7 @@ PackReport _write(
   final archive = File(p.join(options.outDir.path, '${language.id}.tar'));
   writePackTar(packDir, language.id, archive);
   report.fileSizes['tar'] = archive.lengthSync();
+  if (!options.keepFolders) packDir.deleteSync(recursive: true);
   File(p.join(options.outDir.path, '${language.id}.report.json'))
       .writeAsStringSync(
         '${const JsonEncoder.withIndent('  ').convert(report.toJson())}\n',
