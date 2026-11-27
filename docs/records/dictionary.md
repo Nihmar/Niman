@@ -540,6 +540,73 @@ reports give each own edition's `coverage` against the English edition,
 `senseRatio` and `sensesPerHeadword`. The first real run sets both, and
 this record is updated with them.
 
+## Settings → Dictionaries — as built (#1382, 2026-11-27)
+
+**The catalog.**
+- `lib/src/dictionary/dictionary_catalog.dart` is the generator's own
+  output. It holds an empty list, with the tag `none`, until the first
+  `dictionary-pack-N`.
+- `tool/dictionary_catalog.dart --empty` writes that empty form. Without
+  the flag, an empty folder is refused. The first real run overwrites the
+  file.
+- Everything reads the catalog through `dictionaryCatalogProvider`, so a
+  test overrides it with a fake one.
+- With the catalog empty, the area says in one line that dictionaries are
+  not available yet.
+
+**The providers:**
+- `dictionaryDirectoryProvider`: `<support>/dictionary`;
+- `dictionaryServiceProvider`: the one `DictionaryService`, disposed with
+  the app;
+- `dictionaryInstallationProvider`: long-lived, as the OCR's is. A
+  download keeps running when the page closes.
+
+**Installing a pack.**
+- `DictionaryPack` is the `Downloadable` for a pack's `.tar`, checked by
+  its size and SHA-256.
+- `TarUnpacker` is a strict ustar reader that streams the archive and
+  holds none of it. It requires flat names, valid checksums and the end
+  marker.
+- `DictionaryDisk` does the file work on isolates:
+  - the pack is unpacked into a hidden `.<id>.unpacking` folder, its four
+    files are checked, then the folder is renamed and the `.tar` deleted;
+  - a removal first renames the pack to `.<id>.removing`, so a file
+    Windows holds open leaves the pack whole;
+  - leftovers are swept at the start;
+  - a `.tar` that downloaded whole is finished on the next load.
+- Then `forget` and `prepare` build the index, with its progress on the
+  pack's row.
+
+**The area.**
+- It is registered as a core area, with no `LibraryFeature`, and the
+  settings search finds it.
+- The rows reuse the OCR's `DownloadTile`, so deleting is the outline
+  delete icon with a confirmation, not a *Remove* button.
+- A pack being downloaded keeps its place among the installed ones.
+- Each language is named in its own language (`AppStrings.languageName`).
+  The Serbo-Croatian pack is *Srpskohrvatski*, and its row lists
+  Hrvatski, Српски and Bosanski.
+- **The search** matches the native name, the English name and the code,
+  as the OCR's does. The app has no table of language names in the UI's
+  language, so *tedesco* does not find *Deutsch*.
+- **Strings:** 21, in all 37 locales. The translations are machine-made,
+  not checked by native readers.
+
+**A pack whose index cannot be built says so.**
+- `DictionaryService.prepare` returns a `DictionaryPrepareResult`
+  (*ready*, *no pack* or *failed*, with the reason) instead of swallowing
+  the failure.
+- The installation keeps that failure per pack, and the pack's row shows
+  it with *Retry* and delete.
+- At load, every usable pack without an index is prepared, so a failure
+  shows again after a restart.
+- A pack that cannot be opened gives a clean *unavailable* look-up
+  instead of an unhandled error.
+
+**Startup.** The installation is read the first time something needs it.
+The panel (#1383) reads it early, so a pack downloaded in an earlier
+session is finished before the first look-up.
+
 ## The surfaces
 
 - **`ui/dictionary_lookup_flow.dart`**: from a selection (text, language,
