@@ -193,6 +193,10 @@ void main() {
                 'tags': ['romanization'],
               },
               {
+                'form': 'cas',
+                'tags': ['error-unknown-tag'],
+              },
+              {
                 'form': 'a b',
                 'tags': ['first-person', 'present tense'],
               },

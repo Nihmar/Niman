@@ -256,7 +256,13 @@ final class EntryParser {
       if (form.length > 120 || form.contains('\t')) continue;
       if (_isPlaceholder(form)) continue;
       final tags = [..._tokens(item['tags']), ..._tokens(item['raw_tags'])];
-      if (tags.any(_bookkeepingTags.contains)) continue;
+      // `error-unknown-tag` and its kin mark a form the extractor could not
+      // read.
+      if (tags.any(
+        (t) => _bookkeepingTags.contains(t) || t.startsWith('error-'),
+      )) {
+        continue;
+      }
       if (tags.contains('romanization') && !keepRomanization) continue;
       forms.add(SourceForm(form, tags));
     }
