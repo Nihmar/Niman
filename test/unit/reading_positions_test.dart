@@ -272,6 +272,100 @@ void main() {
       expect(await positions.read('x.pdf'), const PdfLocation(page: 4));
     });
 
+    group('the language chosen for a PDF (#1383)', () {
+      test('is none until one is chosen', () async {
+        expect(await positions.language('papers/a.pdf'), isNull);
+        await positions.write('papers/a.pdf', const PdfLocation(page: 2));
+        expect(await positions.language('papers/a.pdf'), isNull);
+      });
+
+      test('is kept for the file, and read back', () async {
+        await positions.setLanguage('papers/a.pdf', 'fr');
+        expect(await positions.language('papers/a.pdf'), 'fr');
+        expect(await positions.language('papers/b.pdf'), isNull);
+        await positions.setLanguage('papers/a.pdf', 'de');
+        expect(await positions.language('papers/a.pdf'), 'de');
+      });
+
+      test('is no place: a PDF never moved reads as left nowhere', () async {
+        await positions.setLanguage('papers/a.pdf', 'fr');
+        expect(await positions.read('papers/a.pdf'), isNull);
+        final entry =
+            (jsonDecode(kept().readAsStringSync())
+                    as Map<String, Object?>)['papers/a.pdf']!
+                as Map<String, Object?>;
+        // Choosing a language is not reading: no time that could outdate
+        // the place another device wrote.
+        expect(entry.containsKey(ReadingPositions.atKey), isFalse);
+      });
+
+      test('leaves the place and its time alone', () async {
+        final at = DateTime.utc(2026, 11, 20, 10);
+        await positions.write(
+          'papers/a.pdf',
+          const PdfLocation(page: 5),
+          at: at,
+        );
+        await positions.setLanguage('papers/a.pdf', 'it');
+        expect(
+          await positions.read('papers/a.pdf'),
+          const PdfLocation(page: 5),
+        );
+        final entry =
+            (jsonDecode(kept().readAsStringSync())
+                    as Map<String, Object?>)['papers/a.pdf']!
+                as Map<String, Object?>;
+        expect(entry[ReadingPositions.atKey], at.toIso8601String());
+      });
+
+      test('survives the reader moving on', () async {
+        await positions.setLanguage('papers/a.pdf', 'it');
+        await positions.write('papers/a.pdf', const PdfLocation(page: 9));
+        await positions.write('papers/a.pdf', const PdfLocation(page: 10));
+        expect(await positions.language('papers/a.pdf'), 'it');
+        expect(
+          await positions.read('papers/a.pdf'),
+          const PdfLocation(page: 10),
+        );
+      });
+
+      test(
+        'follows the file when it is moved, and goes when it does',
+        () async {
+          await positions.setLanguage('papers/a.pdf', 'it');
+          await positions.moved('papers/a.pdf', 'archive/a.pdf');
+          expect(await positions.language('papers/a.pdf'), isNull);
+          expect(await positions.language('archive/a.pdf'), 'it');
+          await positions.removed({'archive/a.pdf'});
+          expect(await positions.language('archive/a.pdf'), isNull);
+        },
+      );
+
+      test('an older file, with entries that have none, still reads', () async {
+        kept()
+          ..parent.createSync(recursive: true)
+          ..writeAsStringSync(
+            jsonEncode({
+              'a.pdf': {
+                'page': 3,
+                'fraction': 0.5,
+                'at': '2026-09-25T10:00:00Z',
+              },
+            }),
+          );
+        expect(
+          await positions.read('a.pdf'),
+          const PdfLocation(page: 3, fraction: 0.5),
+        );
+        expect(await positions.language('a.pdf'), isNull);
+        await positions.setLanguage('a.pdf', 'en');
+        expect(
+          await positions.read('a.pdf'),
+          const PdfLocation(page: 3, fraction: 0.5),
+        );
+      });
+    });
+
     test('key a file by its path in the library, none outside it', () {
       expect(
         positions.keyOf(p.join(root.path, 'books', 'Dune.epub')),

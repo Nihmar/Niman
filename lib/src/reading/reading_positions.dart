@@ -17,6 +17,13 @@
 /// (#367), on the deletion rather than on the next write: a write does not
 /// stat the library, so a position the sync brought for a book whose file
 /// has not arrived yet is not mistaken for a deleted one (#492).
+///
+/// An entry may also hold the `language` a PDF is looked up in, chosen in
+/// the look-up panel (docs/records/dictionary.md, decision 10): a PDF says
+/// none itself. It lives with the file's place because it is the file's,
+/// follows it when it is moved or deleted, and syncs with it. A position
+/// written later keeps it, and an entry holding only a language (a PDF
+/// never moved) reads as no place.
 library;
 
 import 'package:niman/src/core/files.dart';
@@ -38,6 +45,9 @@ final class ReadingPositions {
   /// The key an entry's time is kept under, beside its location's fields.
   static const String atKey = 'at';
 
+  /// The key a file's look-up language is kept under, in its entry.
+  static const String languageKey = 'language';
+
   LibraryStateFile get _state => LibraryStateFile(root, filePath);
 
   /// The library-relative key of [path], an absolute path; null when it
@@ -58,9 +68,37 @@ final class ReadingPositions {
       atKey: (at ?? DateTime.now()).toUtc().toIso8601String(),
     };
     return _state.update((entries) {
-      entries[path] = entry;
+      // The language chosen for the file is not a place: it stays.
+      final language = _languageOf(entries[path]);
+      entries[path] = {...entry, languageKey: ?language};
       return true;
     });
+  }
+
+  /// The language the file at [path], library-relative, is looked up in,
+  /// as it was chosen; null when none was.
+  Future<String?> language(String path) async =>
+      _languageOf((await _state.read([path]))[path]);
+
+  /// Records that the file at [path], library-relative, is looked up in
+  /// [language]. The place and its time are left as they are: choosing a
+  /// language is not reading, and must not outdate the place another
+  /// device wrote.
+  Future<void> setLanguage(String path, String language) {
+    return _state.update((entries) {
+      final entry = entries[path];
+      if (_languageOf(entry) == language) return false;
+      entries[path] = {
+        if (entry is Map) ...entry.cast<String, Object?>(),
+        languageKey: language,
+      };
+      return true;
+    });
+  }
+
+  static String? _languageOf(Object? entry) {
+    final language = entry is Map ? entry[languageKey] : null;
+    return language is String && language.isNotEmpty ? language : null;
   }
 
   /// Carries the entries of [from] to [to], both library-relative: a file

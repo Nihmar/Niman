@@ -191,6 +191,80 @@ void main() {
       expect(parsed(merged), {'new.pdf': entry});
     });
 
+    group("a PDF's look-up language (#1383)", () {
+      Map<String, Object?> chosen(int? page, String? at, String? language) => {
+        'page': ?page,
+        'at': ?at,
+        'language': ?language,
+      };
+
+      test('chosen on one side, a page turned on the other: both land', () {
+        final merged = mergeReadingJson(
+          base: json({'a.pdf': chosen(3, '2026-09-24T10:00:00Z', null)}),
+          local: json({'a.pdf': chosen(3, '2026-09-24T10:00:00Z', 'fr')}),
+          remote: json({'a.pdf': chosen(9, '2026-09-25T11:00:00Z', null)}),
+        );
+        expect(
+          parsed(merged)['a.pdf'],
+          chosen(9, '2026-09-25T11:00:00Z', 'fr'),
+        );
+      });
+
+      test('a language alone, against a place read elsewhere, keeps both', () {
+        final merged = mergeReadingJson(
+          base: json({}),
+          local: json({'a.pdf': chosen(null, null, 'it')}),
+          remote: json({'a.pdf': chosen(7, '2026-09-25T09:00:00Z', null)}),
+        );
+        expect(
+          parsed(merged)['a.pdf'],
+          chosen(7, '2026-09-25T09:00:00Z', 'it'),
+        );
+        final other = mergeReadingJson(
+          base: json({}),
+          local: json({'a.pdf': chosen(7, '2026-09-25T09:00:00Z', null)}),
+          remote: json({'a.pdf': chosen(null, null, 'it')}),
+        );
+        expect(parsed(other)['a.pdf'], chosen(7, '2026-09-25T09:00:00Z', 'it'));
+      });
+
+      test("chosen on one side only, it is that side's", () {
+        final merged = mergeReadingJson(
+          base: json({'a.pdf': chosen(3, '2026-09-24T10:00:00Z', 'en')}),
+          local: json({'a.pdf': chosen(3, '2026-09-24T10:00:00Z', 'en')}),
+          remote: json({'a.pdf': chosen(3, '2026-09-24T10:00:00Z', 'de')}),
+        );
+        expect(
+          parsed(merged)['a.pdf'],
+          chosen(3, '2026-09-24T10:00:00Z', 'de'),
+        );
+      });
+
+      test("chosen differently on both, the later reading's stays", () {
+        final merged = mergeReadingJson(
+          base: json({'a.pdf': chosen(1, '2026-09-24T10:00:00Z', null)}),
+          local: json({'a.pdf': chosen(3, '2026-09-25T10:00:00Z', 'fr')}),
+          remote: json({'a.pdf': chosen(9, '2026-09-25T11:00:00Z', 'de')}),
+        );
+        expect(
+          parsed(merged)['a.pdf'],
+          chosen(9, '2026-09-25T11:00:00Z', 'de'),
+        );
+      });
+
+      test('a book with none is as it was', () {
+        final merged = mergeReadingJson(
+          base: json({}),
+          local: json({'a.pdf': chosen(3, '2026-09-25T10:00:00Z', null)}),
+          remote: json({'b.pdf': chosen(7, '2026-09-25T09:00:00Z', null)}),
+        );
+        expect(parsed(merged), {
+          'a.pdf': chosen(3, '2026-09-25T10:00:00Z', null),
+          'b.pdf': chosen(7, '2026-09-25T09:00:00Z', null),
+        });
+      });
+    });
+
     test('a side that is not JSON cannot be merged', () {
       expect(
         mergeReadingJson(base: null, local: '{', remote: json({})),

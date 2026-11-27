@@ -50,6 +50,12 @@ String? mergeSettingsJson({
 /// times, not the whole file's — the file is written for every book
 /// read, so its date says nothing of any one of them.
 ///
+/// A PDF's look-up `language` (the dictionary's, chosen in its panel) is
+/// not a place and has no time of its own, so it does not follow the later
+/// reading: the entry that wins keeps its own, and takes the other side's
+/// when it has none. A language chosen on one device and a page turned on
+/// the other both land.
+///
 /// Returns null when a side does not parse as a JSON object.
 String? mergeReadingJson({
   required String? base,
@@ -69,9 +75,28 @@ String? mergeReadingJson({
       base: b,
       localNewer: !_readAt(r[key]).isAfter(_readAt(l[key])),
     );
-    if (pick.present) merged[key] = pick.value;
+    if (pick.present) {
+      merged[key] = _withLanguage(pick.value, [l[key], r[key]]);
+    }
   }
   return _encode(merged);
+}
+
+/// [entry] with the `language` the first of [others] that has one holds,
+/// when it has none itself.
+Object? _withLanguage(Object? entry, List<Object?> others) {
+  if (entry is! Map || _languageOf(entry) != null) return entry;
+  for (final other in others) {
+    if (_languageOf(other) case final language?) {
+      return {...entry, 'language': language};
+    }
+  }
+  return entry;
+}
+
+String? _languageOf(Object? entry) {
+  final language = entry is Map ? entry['language'] : null;
+  return language is String && language.isNotEmpty ? language : null;
 }
 
 /// When a reading entry was written; the epoch for one that does not say.
