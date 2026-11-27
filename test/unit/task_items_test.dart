@@ -56,7 +56,9 @@ void main() {
     test('a plain list item, a box without words and a paragraph are not', () {
       expect(itemsIn('- plain\n'), isEmpty);
       expect(itemsIn('- [ ] \n').single.movable, isFalse);
-      expect(itemsIn('- [ ]\n'), isEmpty);
+      // The box at the end of the line is an empty task, like the one with a
+      // space after it (#1342).
+      expect(itemsIn('- [ ]\n').single.movable, isFalse);
       expect(itemsIn('[ ] not in a list\n'), isEmpty);
       expect(itemsIn('- [y] not a box\n'), isEmpty);
       expect(itemsIn('- [x]glued\n'), isEmpty);

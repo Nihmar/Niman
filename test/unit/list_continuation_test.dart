@@ -61,10 +61,10 @@ void main() {
     });
 
     test('a dash rule is not an item to carry on', () {
-      // '---' reads as a marker plus content under a line-local rule, so
-      // this is what the tokenizer check in the controller is for; here
-      // it is only recorded that the text is not swallowed.
-      expect(listItemHead('- --')?.content, '--');
+      // A rule written with spaces is no marker plus content (#1341); a line
+      // that only starts with dashes still is an item.
+      expect(listItemHead('- --'), isNull);
+      expect(listItemHead('- --a')?.content, '--a');
     });
   });
 }
